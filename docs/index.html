@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ORCS</title>
+    <style>
+      html, body, #app { height: 100%; margin: 0; background: #0b0d10; color: #ddd; }
+      canvas { image-rendering: pixelated; }
+      .hint { position: absolute; left: 8px; bottom: 8px; font: 12px sans-serif; opacity: 0.7; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div class="hint">Tipp: Drücke E für nächsten Cycle</div>
+    <script src="https://unpkg.com/phaser@3.80.1/dist/phaser.js"></script>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
