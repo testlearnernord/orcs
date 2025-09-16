@@ -1,4 +1,4 @@
-# ORCS — Top-Down Rogue-Lite mit Offiziers System
+# ORCS — Top-Down Rogue-Lite mit Nemesis-ähnlichem System
 
 Minimaler Startpunkt: Phaser + TypeScript + Vite, plus Simulationskern (Offiziere, Warcalls, Zyklen).
 Ziel: prozedurale Offiziersgesellschaft, Spieler ist nur ein weiterer Offizier. Keine Sonderbehandlung.
