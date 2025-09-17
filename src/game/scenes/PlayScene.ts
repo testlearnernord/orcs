@@ -1,5 +1,7 @@
-import Phaser from "phaser";
+import { getPhaser } from "@game/phaserRuntime";
 import { World } from "@sim/world";
+
+const Phaser = getPhaser();
 
 export default class PlayScene extends Phaser.Scene {
   private world!: World;

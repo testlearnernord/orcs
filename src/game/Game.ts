@@ -1,6 +1,8 @@
-import Phaser from "phaser";
+import { getPhaser } from "@game/phaserRuntime";
 import BootScene from "@game/scenes/BootScene";
 import PlayScene from "@game/scenes/PlayScene";
+
+const Phaser = getPhaser();
 
 export default class Game extends Phaser.Game {
   constructor(container: HTMLElement) {
