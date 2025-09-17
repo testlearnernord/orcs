@@ -6,6 +6,7 @@ import {
   createAdaptiveGridConfig
 } from "@game/ui/layout";
 
+=======
 
 import { computeOfficerPositions, DEFAULT_OFFICER_GRID } from "@game/ui/layout";
 

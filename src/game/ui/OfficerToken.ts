@@ -107,6 +107,7 @@ export class OfficerToken {
 
     this.container.on("pointerover", () => {
       this.container.setDepth(2);
+      this.scene.input.setDefaultCursor("pointer");
 
       this.scene.input.setDefaultCursor("pointer");
 

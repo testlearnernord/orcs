@@ -18,6 +18,8 @@
       body,
       #app {
         height: 100%;
+        width: 100%;
+=======
 
         width: 100%;
 
@@ -37,12 +39,14 @@
       body {
         position: relative;
         font-family: sans-serif;
+=======
 
         overflow: hidden;
       }
 
       canvas {
         display: block;
+=======
 
 
 
@@ -99,6 +103,9 @@
     <div id="bundle-error" class="boot-warning" hidden>
       <p class="warning-title">Bundle konnte nicht geladen werden.</p>
       <p>
+        Prüfe die Browser-Konsole und ob die ausgelieferten Bundles (z. B.
+        Dateien unter <code>assets/</code>) erreichbar sind.
+=======
 
         Prüfe die Browser-Konsole und ob die ausgelieferten Bundles (z. B.
         Dateien unter <code>assets/</code>) erreichbar sind.
@@ -129,6 +136,7 @@
         }
 
         entry.addEventListener("error", function () {
+=======
 
 
         entry.addEventListener("error", function () {
@@ -140,6 +148,10 @@
           if (element) {
             element.hidden = false;
           }
+        });
+      })();
+    </script>
+=======
 
         });
       })();
