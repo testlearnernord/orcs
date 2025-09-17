@@ -1,11 +1,14 @@
 import { getPhaser } from "@game/phaserRuntime";
+
 import { OfficerToken } from "@game/ui/OfficerToken";
 import { collectHighlightIds } from "@game/ui/highlights";
 import { computeOfficerPositions } from "@game/ui/layout";
 import type { CycleSummary, CycleTrigger, Officer, Warcall } from "@sim/types";
+
 import { World } from "@sim/world";
 
 const Phaser = getPhaser();
+
 
 const TRIGGER_LABELS: Record<CycleTrigger, string> = {
   WARCALL_COMPLETED: "Warcall abgeschlossen",
@@ -18,6 +21,7 @@ function shortLabel(name: string): string {
   const trimmed = name.split(" ")[0] ?? name;
   return trimmed.length > 10 ? `${trimmed.slice(0, 9)}…` : trimmed;
 }
+
 
 export default class PlayScene extends Phaser.Scene {
   private world!: World;
@@ -35,6 +39,7 @@ export default class PlayScene extends Phaser.Scene {
 
   create() {
     this.world = new World({ seed: Date.now() });
+
 
     const boardBg = this.add.rectangle(320, 270, 620, 500, 0x101720, 0.92);
     boardBg.setStrokeStyle(2, 0x27323f, 0.85);
@@ -106,6 +111,13 @@ export default class PlayScene extends Phaser.Scene {
       fontFamily: "monospace",
       fontSize: "12px",
       color: "#9da3ae"
+
+    this.input.keyboard!.on("keydown-E", () => {
+      const summary = this.world.runCycle();
+      this.info.setText(`Cycle ${summary.cycle} | Feed: ${summary.feed.length} | Resolved: ${summary.resolved.length}`);
+      console.table(summary.feed.slice(-5));
+
+
     });
 
     this.refreshScene();
@@ -121,6 +133,7 @@ export default class PlayScene extends Phaser.Scene {
 
   update(_t: number, _d: number) {}
 
+n
   private advanceCycle(): void {
     const summary = this.world.runCycle();
     this.refreshScene(summary);
@@ -272,4 +285,5 @@ export default class PlayScene extends Phaser.Scene {
     const label = shortLabel(officer.name);
     return officer.rank === "König" ? `👑 ${label}` : label;
   }
+
 }
