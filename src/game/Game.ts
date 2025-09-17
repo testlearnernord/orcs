@@ -11,7 +11,7 @@ export default class Game extends Phaser.Game {
       height: 540,
       backgroundColor: "#0b0d10",
       pixelArt: true,
-      physics: { default: "arcade", arcade: { gravity: { y: 0 } } },
+      physics: { default: "arcade", arcade: { gravity: { x: 0, y: 0 } } },
       scene: [BootScene, PlayScene]
     };
     super(config);
