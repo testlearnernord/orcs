@@ -1,4 +1,6 @@
-import Phaser from "phaser";
+import { getPhaser } from "@game/phaserRuntime";
+
+const Phaser = getPhaser();
 
 export default class BootScene extends Phaser.Scene {
   constructor() {
