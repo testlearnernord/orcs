@@ -18,6 +18,9 @@
       body,
       #app {
         height: 100%;
+
+        width: 100%;
+
         margin: 0;
         background: #0f0f10;
         color: #ddd;
@@ -26,9 +29,17 @@
       body {
         position: relative;
         font-family: sans-serif;
+
+        overflow: hidden;
       }
 
       canvas {
+        display: block;
+
+      }
+
+      canvas {
+
         image-rendering: pixelated;
       }
 
@@ -78,6 +89,12 @@
       <p class="warning-title">Bundle konnte nicht geladen werden.</p>
       <p>
 
+        Prüfe die Browser-Konsole und ob <code>index.js</code>,
+        <code>../index.js</code> bzw. die Varianten unter
+        <code>assets/</code> erreichbar sind.
+
+
+
       </p>
     </div>
     <script type="module" src="./main.ts"></script>
@@ -101,6 +118,8 @@
 
         var isLocal = /^(localhost|127\.|\[::1\])/.test(location.hostname);
 
+
+
         var fallbacks = [];
 
         if (!isLocal) {
@@ -118,7 +137,9 @@
           }
         }
 
+
         var fallbacks = isLocal ? [] : ["./assets/index.js"];
+
 
 
         entry.addEventListener("error", function () {
@@ -143,6 +164,7 @@
       })();
     </script>
 
+
       html, body, #app { height: 100%; margin: 0; background: #0f0f10; }
       canvas { image-rendering: pixelated; }
     </style>
@@ -151,6 +173,7 @@
   <body>
     <div id="app"></div>
     <script type="module" src="./main.ts"></script>
+
 
 
 

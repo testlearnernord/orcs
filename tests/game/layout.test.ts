@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
+
+import {
+  computeOfficerPositions,
+  DEFAULT_OFFICER_GRID,
+  createAdaptiveGridConfig
+} from "@game/ui/layout";
+=======
 import { computeOfficerPositions, DEFAULT_OFFICER_GRID } from "@game/ui/layout";
+
 
 describe("computeOfficerPositions", () => {
   it("places officers row by row", () => {
@@ -18,4 +26,25 @@ describe("computeOfficerPositions", () => {
     expect(positions[2]).toEqual({ x: 110, y: 20 });
     expect(positions[3]).toEqual({ x: 10, y: 60 });
   });
+
+
+  it("adapts columns for wider boards", () => {
+    const config = createAdaptiveGridConfig({ x: 40, y: 80, width: 820, height: 520 }, 20);
+    expect(config.columns).toBeGreaterThanOrEqual(5);
+    const lastColumnX = config.originX + (config.columns - 1) * config.cellWidth;
+    expect(lastColumnX).toBeLessThanOrEqual(40 + 820);
+  });
+
+  it("reduces columns when the board is narrow", () => {
+    const config = createAdaptiveGridConfig({ x: 40, y: 80, width: 420, height: 520 }, 20);
+    expect(config.columns).toBeLessThanOrEqual(4);
+    expect(config.originX).toBeGreaterThanOrEqual(40);
+  });
+
+  it("falls back to the default grid when the area collapses", () => {
+    const config = createAdaptiveGridConfig({ x: 0, y: 0, width: 0, height: 0 }, 20);
+    expect(config).toEqual(DEFAULT_OFFICER_GRID);
+  });
+=======
+
 });

@@ -9,10 +9,16 @@ export default class Game extends Phaser.Game {
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
       parent: container,
-      width: 960,
-      height: 540,
       backgroundColor: "#0b0d10",
+      width: window.innerWidth,
+      height: window.innerHeight,
       pixelArt: true,
+
+      scale: {
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+      },
+
       physics: { default: "arcade", arcade: { gravity: { x: 0, y: 0 } } },
       scene: [BootScene, PlayScene]
     };

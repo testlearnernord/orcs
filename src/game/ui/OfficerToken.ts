@@ -60,11 +60,23 @@ export class OfficerToken {
     this.currentOfficer = options.officer;
 
     this.container = this.scene.add.container(options.x, options.y);
+
+    this.container.setSize(110, 110);
+    this.container.setDepth(1);
+
+    const hitArea = new Phaser.Geom.Circle(0, 0, 48);
+    this.container.setInteractive({
+      hitArea,
+      hitAreaCallback: Phaser.Geom.Circle.Contains,
+      useHandCursor: true
+    });
+
     this.container.setSize(96, 96);
     this.container.setDepth(1);
 
     const hitArea = new Phaser.Geom.Circle(0, 0, 36);
     this.container.setInteractive(hitArea, Phaser.Geom.Circle.Contains);
+
 
     this.circle = this.scene.add.circle(0, 0, 30, 0xffffff, 1);
     this.circle.setStrokeStyle(2, 0x0d1b2a, 0.6);
@@ -93,10 +105,17 @@ export class OfficerToken {
 
     this.container.on("pointerover", () => {
       this.container.setDepth(2);
+
+      this.scene.input.setDefaultCursor("pointer");
+
+
       if (this.hover) this.hover(this.currentOfficer);
     });
     this.container.on("pointerout", () => {
       this.container.setDepth(1);
+
+      this.scene.input.setDefaultCursor("default");
+
       if (this.blur) this.blur();
     });
 

@@ -2,13 +2,19 @@ import { getPhaser } from "@game/phaserRuntime";
 
 import { OfficerToken } from "@game/ui/OfficerToken";
 import { collectHighlightIds } from "@game/ui/highlights";
+import { computeOfficerPositions, createAdaptiveGridConfig, type BoardArea } from "@game/ui/layout";
+import type { CycleSummary, CycleTrigger, Officer, Warcall } from "@sim/types";
+
+
+import { OfficerToken } from "@game/ui/OfficerToken";
+import { collectHighlightIds } from "@game/ui/highlights";
 import { computeOfficerPositions } from "@game/ui/layout";
 import type { CycleSummary, CycleTrigger, Officer, Warcall } from "@sim/types";
+
 
 import { World } from "@sim/world";
 
 const Phaser = getPhaser();
-
 
 const TRIGGER_LABELS: Record<CycleTrigger, string> = {
   WARCALL_COMPLETED: "Warcall abgeschlossen",
@@ -28,10 +34,26 @@ export default class PlayScene extends Phaser.Scene {
   private officerTokens = new Map<string, OfficerToken>();
   private cycleText!: Phaser.GameObjects.Text;
   private triggerText!: Phaser.GameObjects.Text;
+
+  private feedLabel!: Phaser.GameObjects.Text;
+  private feedText!: Phaser.GameObjects.Text;
+  private warcallLabel!: Phaser.GameObjects.Text;
+  private warcallsText!: Phaser.GameObjects.Text;
+  private detailLabel!: Phaser.GameObjects.Text;
+  private detailText!: Phaser.GameObjects.Text;
+  private controlsText!: Phaser.GameObjects.Text;
+  private boardBg!: Phaser.GameObjects.Rectangle;
+  private sidebarBg!: Phaser.GameObjects.Rectangle;
+  private connections!: Phaser.GameObjects.Graphics;
+  private boardArea: BoardArea = { x: 120, y: 120, width: 620, height: 500 };
+  private sidebarArea: BoardArea = { x: 660, y: 36, width: 280, height: 520 };
+  private sidebarPadding = 24;
+
   private feedText!: Phaser.GameObjects.Text;
   private warcallsText!: Phaser.GameObjects.Text;
   private detailText!: Phaser.GameObjects.Text;
   private connections!: Phaser.GameObjects.Graphics;
+
 
   constructor() {
     super("Play");
@@ -39,6 +61,84 @@ export default class PlayScene extends Phaser.Scene {
 
   create() {
     this.world = new World({ seed: Date.now() });
+
+
+    this.boardBg = this.add.rectangle(0, 0, 10, 10, 0x101720, 0.92).setOrigin(0, 0);
+    this.boardBg.setStrokeStyle(2, 0x27323f, 0.85);
+
+    this.sidebarBg = this.add.rectangle(0, 0, 10, 10, 0x0d141a, 0.92).setOrigin(0, 0);
+    this.sidebarBg.setStrokeStyle(1, 0x1f2833, 0.6);
+
+    this.connections = this.add.graphics();
+    this.connections.setDepth(0.5);
+
+    this.cycleText = this.add.text(0, 0, "", {
+      fontFamily: "monospace",
+      fontSize: "22px",
+      color: "#f1f2f6"
+    });
+
+    this.triggerText = this.add.text(0, 0, "", {
+      fontFamily: "monospace",
+      fontSize: "14px",
+      color: "#cbd0d6"
+    });
+
+    this.feedLabel = this.add.text(0, 0, "Welt-Feed", {
+      fontFamily: "monospace",
+      fontSize: "16px",
+      color: "#f1f2f6"
+    });
+
+    this.feedText = this.add
+      .text(0, 0, "", {
+        fontFamily: "monospace",
+        fontSize: "12px",
+        color: "#d1d9e6",
+        lineSpacing: 6
+      })
+      .setWordWrapWidth(240);
+
+    this.warcallLabel = this.add.text(0, 0, "Aktive Warcalls", {
+      fontFamily: "monospace",
+      fontSize: "16px",
+      color: "#f1f2f6"
+    });
+
+    this.warcallsText = this.add
+      .text(0, 0, "", {
+        fontFamily: "monospace",
+        fontSize: "12px",
+        color: "#d1d9e6",
+        lineSpacing: 6
+      })
+      .setWordWrapWidth(240);
+
+    this.detailLabel = this.add.text(0, 0, "Details", {
+      fontFamily: "monospace",
+      fontSize: "16px",
+      color: "#f1f2f6"
+    });
+
+    this.detailText = this.add
+      .text(0, 0, "Fahre mit der Maus über ein Porträt oder tippe es an.", {
+        fontFamily: "monospace",
+        fontSize: "12px",
+        color: "#d1d9e6",
+        lineSpacing: 4
+      })
+      .setWordWrapWidth(240);
+
+    this.controlsText = this.add.text(0, 0, "E: Cycle simulieren   R: Welt neu generieren", {
+      fontFamily: "monospace",
+      fontSize: "12px",
+      color: "#9da3ae"
+    });
+
+    this.scale.on(Phaser.Scale.Events.RESIZE, this.configureLayout, this);
+
+    this.configureLayout();
+
 
 
     const boardBg = this.add.rectangle(320, 270, 620, 500, 0x101720, 0.92);
@@ -120,6 +220,7 @@ export default class PlayScene extends Phaser.Scene {
 
     });
 
+
     this.refreshScene();
 
     this.input.keyboard!.on("keydown-E", () => this.advanceCycle());
@@ -128,12 +229,17 @@ export default class PlayScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.officerTokens.forEach(token => token.destroy());
       this.officerTokens.clear();
+
+      this.scale.off(Phaser.Scale.Events.RESIZE, this.configureLayout, this);
+
     });
   }
 
   update(_t: number, _d: number) {}
 
+
 n
+
   private advanceCycle(): void {
     const summary = this.world.runCycle();
     this.refreshScene(summary);
@@ -156,6 +262,9 @@ n
     this.refreshFeed(summary);
     this.refreshWarcalls(summary);
     this.drawConnections(summary);
+
+    this.updateSidebarFlow();
+
   }
 
   private formatTrigger(trigger: CycleTrigger): string {
@@ -163,6 +272,10 @@ n
   }
 
   private syncOfficerTokens(highlightIds: Set<string>, summary?: CycleSummary): void {
+    const total = this.world.state.officers.length;
+    const config = createAdaptiveGridConfig(this.boardArea, total);
+    const positions = computeOfficerPositions(total, config);
+
     const positions = computeOfficerPositions(this.world.state.officers.length);
     const seen = new Set<string>();
     const immediate = !summary;
@@ -199,6 +312,7 @@ n
 
   private refreshFeed(summary?: CycleSummary): void {
     const newIds = new Set(summary?.feed.map(entry => entry.id) ?? []);
+    const latest = this.world.state.feed.slice(-6);
     const latest = this.world.state.feed.slice(-7);
     if (latest.length === 0) {
       this.feedText.setText("Keine Meldungen – starte einen Warcall!");
@@ -256,6 +370,110 @@ n
       summary.resolved.forEach(resolution => draw(resolution.warcall, 0xef476f, 0.55, 3));
     }
   }
+
+  private configureLayout(): void {
+    const width = Math.max(this.scale.gameSize.width, 1);
+    const height = Math.max(this.scale.gameSize.height, 1);
+    const padding = Math.max(24, Math.round(Math.min(width, height) * 0.04));
+
+    this.cycleText.setPosition(padding, padding);
+    this.triggerText.setPosition(padding, padding + 28);
+
+    this.controlsText.setPosition(padding, height - padding - this.controlsText.height);
+
+    const availableWidth = Math.max(width - padding * 3, 0);
+    let boardWidth = Math.min(Math.max(availableWidth * 0.64, 0), availableWidth);
+    let sidebarWidth = availableWidth - boardWidth;
+    if (availableWidth > 0) {
+      const minSidebar = Math.min(Math.max(220, availableWidth * 0.28), availableWidth);
+      if (sidebarWidth < minSidebar) {
+        sidebarWidth = minSidebar;
+        boardWidth = availableWidth - sidebarWidth;
+      }
+      const minBoard = Math.min(Math.max(320, availableWidth * 0.55), availableWidth);
+      if (boardWidth < minBoard) {
+        boardWidth = minBoard;
+        sidebarWidth = availableWidth - boardWidth;
+      }
+    }
+
+    const boardTop = padding + 72;
+    const controlsTop = this.controlsText.y;
+    const boardBottom = Math.max(boardTop + 220, controlsTop - 16);
+    let boardHeight = Math.max(320, boardBottom - boardTop);
+    if (boardHeight > boardBottom - boardTop) {
+      boardHeight = boardBottom - boardTop;
+    }
+    const boardX = padding;
+    const boardY = Math.max(boardTop, boardBottom - boardHeight);
+
+    this.boardBg.setPosition(boardX, boardY);
+    this.boardBg.setDisplaySize(boardWidth, boardHeight);
+
+    const sidebarX = boardX + boardWidth + padding;
+    const sidebarHeight = Math.max(200, height - padding * 2);
+    this.sidebarBg.setPosition(sidebarX, padding);
+    this.sidebarBg.setDisplaySize(sidebarWidth, sidebarHeight);
+
+    this.boardArea = { x: boardX, y: boardY, width: boardWidth, height: boardHeight };
+    this.sidebarArea = { x: sidebarX, y: padding, width: sidebarWidth, height: sidebarHeight };
+    this.sidebarPadding = Math.max(20, Math.round(sidebarWidth * 0.08));
+
+    this.reflowOfficerPositions();
+    this.drawConnections();
+    this.updateSidebarFlow();
+  }
+
+  private reflowOfficerPositions(): void {
+    if (!this.world || this.officerTokens.size === 0) {
+      return;
+    }
+    const total = this.world.state.officers.length;
+    const config = createAdaptiveGridConfig(this.boardArea, total);
+    const positions = computeOfficerPositions(total, config);
+    this.world.state.officers.forEach((officer, index) => {
+      const token = this.officerTokens.get(officer.id);
+      if (token) {
+        token.setPosition(positions[index].x, positions[index].y, { immediate: true });
+      }
+    });
+  }
+
+  private updateSidebarFlow(): void {
+    if (this.sidebarArea.width <= 0 || this.sidebarArea.height <= 0) {
+      return;
+    }
+    const labelX = this.sidebarArea.x + this.sidebarPadding;
+    const top = this.sidebarArea.y + this.sidebarPadding;
+    const wrapWidth = Math.max(160, this.sidebarArea.width - this.sidebarPadding * 2);
+
+    this.feedLabel.setPosition(labelX, top);
+    this.feedText.setPosition(labelX, this.feedLabel.y + this.feedLabel.height + 6);
+    this.feedText.setWordWrapWidth(wrapWidth);
+
+    const feedBounds = this.feedText.getBounds();
+    let nextY = feedBounds.bottom + 24;
+
+    this.warcallLabel.setPosition(labelX, nextY);
+    this.warcallsText.setPosition(labelX, this.warcallLabel.y + this.warcallLabel.height + 6);
+    this.warcallsText.setWordWrapWidth(wrapWidth);
+
+    const warcallBounds = this.warcallsText.getBounds();
+    nextY = warcallBounds.bottom + 24;
+
+    const detailMaxBottom = this.sidebarArea.y + this.sidebarArea.height - this.sidebarPadding;
+    if (nextY + this.detailLabel.height + 6 > detailMaxBottom) {
+      nextY = Math.max(top, detailMaxBottom - (this.detailLabel.height + 6));
+    }
+
+    this.detailLabel.setPosition(labelX, nextY);
+    const detailTextY = this.detailLabel.y + this.detailLabel.height + 6;
+    this.detailText.setPosition(labelX, detailTextY);
+    const detailHeight = Math.max(0, detailMaxBottom - detailTextY);
+    this.detailText.setWordWrapWidth(wrapWidth);
+    this.detailText.setFixedSize(wrapWidth, detailHeight);
+  }
+
 
   private showOfficerDetails(officer: Officer): void {
     const traits = officer.traits.length > 0 ? officer.traits.join(", ") : "Keine bekannten Traits";
