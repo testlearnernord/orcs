@@ -7,18 +7,7 @@ export default defineConfig({
   root: "src",
   publicDir: false,
   server: { open: true },
-  build: {
-    sourcemap: false,
-    outDir: "../docs",
-    emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        entryFileNames: "assets/index.js",
-        chunkFileNames: "assets/[name].js",
-        assetFileNames: "assets/[name][extname]"
-      }
-    }
-  },
+
   resolve: {
     alias: {
       "@game": fileURLToPath(new URL("./src/game", import.meta.url)),
