@@ -23,6 +23,7 @@ const FOCUS_COLORS = {
 const BASE_WIDTH = 128;
 const BASE_HEIGHT = 140;
 
+=======
 function shortName(name: string): string {
   const parts = name.split(" ");
   const first = parts[0] ?? name;
@@ -31,6 +32,7 @@ function shortName(name: string): string {
 
 export type OfficerTokenFocus = keyof typeof FOCUS_COLORS;
 
+=======
 export interface OfficerTokenOptions {
   scene: Phaser.Scene;
   x: number;
@@ -38,6 +40,7 @@ export interface OfficerTokenOptions {
   officer: Officer;
   portraitKey: string;
   scale?: number;
+=======
   highlight?: boolean;
   onHover?: (officer: Officer) => void;
   onBlur?: () => void;
@@ -47,6 +50,7 @@ export interface OfficerTokenUpdateOptions {
   highlight?: boolean;
   focus?: OfficerTokenFocus | null;
   scale?: number;
+=======
 }
 
 export interface OfficerTokenMoveOptions {
@@ -58,6 +62,8 @@ export interface OfficerTokenMoveOptions {
  *
  * @example
  * const token = new OfficerToken({ scene, x: 100, y: 120, officer, portraitKey: "officer-portrait-0" });
+=======
+ * const token = new OfficerToken({ scene, x: 100, y: 120, officer });
  * token.update(officer, { highlight: true });
  */
 export class OfficerToken {
@@ -68,6 +74,8 @@ export class OfficerToken {
   private readonly frame: Phaser.GameObjects.Arc;
   private readonly portrait: Phaser.GameObjects.Image;
   private readonly labelBg: Phaser.GameObjects.Rectangle;
+=======
+  private readonly circle: Phaser.GameObjects.Arc;
   private readonly nameText: Phaser.GameObjects.Text;
   private readonly detailText: Phaser.GameObjects.Text;
   private readonly hover?: (officer: Officer) => void;
@@ -76,6 +84,7 @@ export class OfficerToken {
   private currentScale = 1;
   private pulseTween?: Phaser.Tweens.Tween;
   private currentFocus: OfficerTokenFocus | null = null;
+=======
 
   constructor(options: OfficerTokenOptions) {
     this.scene = options.scene;
@@ -88,6 +97,12 @@ export class OfficerToken {
     this.container.setDepth(1);
 
     const hitArea = new Phaser.Geom.Circle(0, 0, 58);
+=======
+
+    this.container.setSize(110, 110);
+    this.container.setDepth(1);
+
+    const hitArea = new Phaser.Geom.Circle(0, 0, 48);
     this.container.setInteractive({
       hitArea,
       hitAreaCallback: Phaser.Geom.Circle.Contains,
@@ -111,6 +126,21 @@ export class OfficerToken {
 
     this.nameText = this.scene.add
       .text(0, 52, shortName(options.officer.name), {
+=======
+
+    this.container.setSize(96, 96);
+    this.container.setDepth(1);
+
+    const hitArea = new Phaser.Geom.Circle(0, 0, 36);
+    this.container.setInteractive(hitArea, Phaser.Geom.Circle.Contains);
+
+
+
+    this.circle = this.scene.add.circle(0, 0, 30, 0xffffff, 1);
+    this.circle.setStrokeStyle(2, 0x0d1b2a, 0.6);
+
+    this.nameText = this.scene.add
+      .text(0, -6, shortName(options.officer.name), {
         fontFamily: "monospace",
         fontSize: "12px",
         color: "#f7f9fc",
@@ -121,6 +151,12 @@ export class OfficerToken {
 
     this.detailText = this.scene.add
       .text(0, 68, "", {
+=======
+      .setOrigin(0.5, 0.5)
+      .setWordWrapWidth(90);
+
+    this.detailText = this.scene.add
+      .text(0, 24, "", {
         fontFamily: "monospace",
         fontSize: "10px",
         color: "#a9b7c6",
@@ -130,10 +166,26 @@ export class OfficerToken {
       .setWordWrapWidth(84);
 
     this.container.add([this.visuals, this.labelBg, this.nameText, this.detailText]);
+=======
+      .setOrigin(0.5, 0.5)
+      .setWordWrapWidth(90);
+
+    this.container.add([this.circle, this.nameText, this.detailText]);
 
     this.container.on("pointerover", () => {
       this.container.setDepth(2);
       this.scene.input.setDefaultCursor("pointer");
+=======
+
+      this.scene.input.setDefaultCursor("pointer");
+
+      this.scene.input.setDefaultCursor("pointer");
+
+
+      this.scene.input.setDefaultCursor("pointer");
+
+
+
       if (this.hover) this.hover(this.currentOfficer);
     });
     this.container.on("pointerout", () => {
@@ -208,6 +260,18 @@ export class OfficerToken {
       this.focusRing.setStrokeStyle(0, 0xffffff, 0);
       this.focusRing.setVisible(false);
     }
+=======
+
+      this.scene.input.setDefaultCursor("default");
+
+
+      this.scene.input.setDefaultCursor("default");
+
+
+      if (this.blur) this.blur();
+    });
+
+    this.update(options.officer, { highlight: options.highlight });
   }
 
   /**
@@ -221,6 +285,7 @@ export class OfficerToken {
     if (options.scale !== undefined) {
       this.applyScale(options.scale);
     }
+=======
     this.nameText.setText(shortName(officer.name));
     this.detailText.setText(`${officer.rank} • Lv ${officer.level}`);
 
@@ -234,6 +299,33 @@ export class OfficerToken {
 
     this.applyHighlight(alive, options.highlight);
     this.applyFocus(alive, options.focus ?? this.currentFocus);
+=======
+    const baseColor = alive ? RANK_COLORS[officer.rank] : 0x2f3437;
+    this.circle.setFillStyle(baseColor, alive ? 1 : 0.35);
+    this.container.setAlpha(alive ? 1 : 0.45);
+
+    this.scene.tweens.killTweensOf(this.container);
+
+    let strokeColor = alive ? 0x0d1b2a : 0x2b1d1f;
+    let strokeAlpha = alive ? 0.6 : 0.9;
+    let strokeWidth = 2;
+
+    if (options.highlight && alive) {
+      strokeColor = 0xf6bd60;
+      strokeAlpha = 0.95;
+      strokeWidth = 3;
+      this.scene.tweens.add({
+        targets: this.container,
+        duration: 240,
+        scale: 1.1,
+        yoyo: true,
+        ease: Phaser.Math.Easing.Sine.InOut
+      });
+    } else {
+      this.container.setScale(1);
+    }
+
+    this.circle.setStrokeStyle(strokeWidth, strokeColor, strokeAlpha);
   }
 
   /**
@@ -272,6 +364,7 @@ export class OfficerToken {
   }
 
   /**
+=======
    * Liefert die aktuelle Bildschirmposition.
    *
    * @example
@@ -289,6 +382,7 @@ export class OfficerToken {
    */
   destroy(): void {
     this.stopPulse();
+=======
     this.container.destroy(true);
   }
 }

@@ -1,6 +1,7 @@
 import type Phaser from "phaser";
 
 /**
+
  * Rechteckiger Bereich innerhalb dessen die Offiziers-Token platziert
  * werden sollen.
  */
@@ -12,6 +13,7 @@ export interface BoardArea {
 }
 
 /**
+
  * Konfiguriert das Grid, in dem die Offiziers-Token auf dem Schlachtfeld
  * angezeigt werden.
  */
@@ -33,6 +35,7 @@ export const DEFAULT_OFFICER_GRID: OfficerGridConfig = Object.freeze({
   originX: 120,
   originY: 120
 });
+
 
 function clamp(value: number, min: number, max: number): number {
   let lower = min;
@@ -90,6 +93,7 @@ export function createAdaptiveGridConfig(
 
   return { columns, cellWidth, cellHeight, originX, originY };
 }
+
 
 /**
  * Berechnet die Positionen für Offiziers-Token in einem Grid.
