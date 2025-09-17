@@ -5,8 +5,9 @@ import {
   DEFAULT_OFFICER_GRID,
   createAdaptiveGridConfig
 } from "@game/ui/layout";
-=======
+
 import { computeOfficerPositions, DEFAULT_OFFICER_GRID } from "@game/ui/layout";
+
 
 
 describe("computeOfficerPositions", () => {
@@ -45,6 +46,5 @@ describe("computeOfficerPositions", () => {
     const config = createAdaptiveGridConfig({ x: 0, y: 0, width: 0, height: 0 }, 20);
     expect(config).toEqual(DEFAULT_OFFICER_GRID);
   });
-=======
 
 });

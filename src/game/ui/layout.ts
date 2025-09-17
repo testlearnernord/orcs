@@ -14,7 +14,6 @@ export interface BoardArea {
 
 /**
 
-
  * Konfiguriert das Grid, in dem die Offiziers-Token auf dem Schlachtfeld
  * angezeigt werden.
  */
@@ -94,7 +93,6 @@ export function createAdaptiveGridConfig(
 
   return { columns, cellWidth, cellHeight, originX, originY };
 }
-
 
 
 /**

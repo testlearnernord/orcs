@@ -6,10 +6,12 @@ import { computeOfficerPositions, createAdaptiveGridConfig, type BoardArea } fro
 import type { CycleSummary, CycleTrigger, Officer, Warcall } from "@sim/types";
 
 
+
 import { OfficerToken } from "@game/ui/OfficerToken";
 import { collectHighlightIds } from "@game/ui/highlights";
 import { computeOfficerPositions } from "@game/ui/layout";
 import type { CycleSummary, CycleTrigger, Officer, Warcall } from "@sim/types";
+
 
 
 import { World } from "@sim/world";
@@ -49,10 +51,12 @@ export default class PlayScene extends Phaser.Scene {
   private sidebarArea: BoardArea = { x: 660, y: 36, width: 280, height: 520 };
   private sidebarPadding = 24;
 
+
   private feedText!: Phaser.GameObjects.Text;
   private warcallsText!: Phaser.GameObjects.Text;
   private detailText!: Phaser.GameObjects.Text;
   private connections!: Phaser.GameObjects.Graphics;
+
 
 
   constructor() {
@@ -61,6 +65,83 @@ export default class PlayScene extends Phaser.Scene {
 
   create() {
     this.world = new World({ seed: Date.now() });
+
+
+    this.boardBg = this.add.rectangle(0, 0, 10, 10, 0x101720, 0.92).setOrigin(0, 0);
+    this.boardBg.setStrokeStyle(2, 0x27323f, 0.85);
+
+    this.sidebarBg = this.add.rectangle(0, 0, 10, 10, 0x0d141a, 0.92).setOrigin(0, 0);
+    this.sidebarBg.setStrokeStyle(1, 0x1f2833, 0.6);
+
+    this.connections = this.add.graphics();
+    this.connections.setDepth(0.5);
+
+    this.cycleText = this.add.text(0, 0, "", {
+      fontFamily: "monospace",
+      fontSize: "22px",
+      color: "#f1f2f6"
+    });
+
+    this.triggerText = this.add.text(0, 0, "", {
+      fontFamily: "monospace",
+      fontSize: "14px",
+      color: "#cbd0d6"
+    });
+
+    this.feedLabel = this.add.text(0, 0, "Welt-Feed", {
+      fontFamily: "monospace",
+      fontSize: "16px",
+      color: "#f1f2f6"
+    });
+
+    this.feedText = this.add
+      .text(0, 0, "", {
+        fontFamily: "monospace",
+        fontSize: "12px",
+        color: "#d1d9e6",
+        lineSpacing: 6
+      })
+      .setWordWrapWidth(240);
+
+    this.warcallLabel = this.add.text(0, 0, "Aktive Warcalls", {
+      fontFamily: "monospace",
+      fontSize: "16px",
+      color: "#f1f2f6"
+    });
+
+    this.warcallsText = this.add
+      .text(0, 0, "", {
+        fontFamily: "monospace",
+        fontSize: "12px",
+        color: "#d1d9e6",
+        lineSpacing: 6
+      })
+      .setWordWrapWidth(240);
+
+    this.detailLabel = this.add.text(0, 0, "Details", {
+      fontFamily: "monospace",
+      fontSize: "16px",
+      color: "#f1f2f6"
+    });
+
+    this.detailText = this.add
+      .text(0, 0, "Fahre mit der Maus über ein Porträt oder tippe es an.", {
+        fontFamily: "monospace",
+        fontSize: "12px",
+        color: "#d1d9e6",
+        lineSpacing: 4
+      })
+      .setWordWrapWidth(240);
+
+    this.controlsText = this.add.text(0, 0, "E: Cycle simulieren   R: Welt neu generieren", {
+      fontFamily: "monospace",
+      fontSize: "12px",
+      color: "#9da3ae"
+    });
+
+    this.scale.on(Phaser.Scale.Events.RESIZE, this.configureLayout, this);
+
+    this.configureLayout();
 
 
     this.boardBg = this.add.rectangle(0, 0, 10, 10, 0x101720, 0.92).setOrigin(0, 0);
@@ -229,6 +310,7 @@ export default class PlayScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.officerTokens.forEach(token => token.destroy());
       this.officerTokens.clear();
+      this.scale.off(Phaser.Scale.Events.RESIZE, this.configureLayout, this);
 
       this.scale.off(Phaser.Scale.Events.RESIZE, this.configureLayout, this);
 
@@ -238,7 +320,9 @@ export default class PlayScene extends Phaser.Scene {
   update(_t: number, _d: number) {}
 
 
+
 n
+
 
   private advanceCycle(): void {
     const summary = this.world.runCycle();
@@ -265,6 +349,10 @@ n
 
     this.updateSidebarFlow();
 
+
+    this.updateSidebarFlow();
+
+
   }
 
   private formatTrigger(trigger: CycleTrigger): string {
@@ -276,7 +364,9 @@ n
     const config = createAdaptiveGridConfig(this.boardArea, total);
     const positions = computeOfficerPositions(total, config);
 
+
     const positions = computeOfficerPositions(this.world.state.officers.length);
+
     const seen = new Set<string>();
     const immediate = !summary;
 
@@ -313,7 +403,9 @@ n
   private refreshFeed(summary?: CycleSummary): void {
     const newIds = new Set(summary?.feed.map(entry => entry.id) ?? []);
     const latest = this.world.state.feed.slice(-6);
+
     const latest = this.world.state.feed.slice(-7);
+
     if (latest.length === 0) {
       this.feedText.setText("Keine Meldungen – starte einen Warcall!");
       return;

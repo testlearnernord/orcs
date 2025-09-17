@@ -71,11 +71,13 @@ export class OfficerToken {
       useHandCursor: true
     });
 
+
     this.container.setSize(96, 96);
     this.container.setDepth(1);
 
     const hitArea = new Phaser.Geom.Circle(0, 0, 36);
     this.container.setInteractive(hitArea, Phaser.Geom.Circle.Contains);
+
 
 
     this.circle = this.scene.add.circle(0, 0, 30, 0xffffff, 1);
@@ -109,12 +111,20 @@ export class OfficerToken {
       this.scene.input.setDefaultCursor("pointer");
 
 
+      this.scene.input.setDefaultCursor("pointer");
+
+
+
       if (this.hover) this.hover(this.currentOfficer);
     });
     this.container.on("pointerout", () => {
       this.container.setDepth(1);
 
       this.scene.input.setDefaultCursor("default");
+
+
+      this.scene.input.setDefaultCursor("default");
+
 
       if (this.blur) this.blur();
     });

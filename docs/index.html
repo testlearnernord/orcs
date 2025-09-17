@@ -34,9 +34,11 @@
       canvas {
         display: block;
 
+
       }
 
       canvas {
+
 
         image-rendering: pixelated;
       }
@@ -79,6 +81,7 @@
         document.head.appendChild(fallback);
       }
     </script>
+    <script type="module" crossorigin src="./assets/index-g4NHlP-b.js"></script>
     <script type="module" crossorigin src="./index.js"></script>
   </head>
   <body>
@@ -87,6 +90,8 @@
     <div id="bundle-error" class="boot-warning" hidden>
       <p class="warning-title">Bundle konnte nicht geladen werden.</p>
       <p>
+        Prüfe die Browser-Konsole und ob die ausgelieferten Bundles (z. B.
+        Dateien unter <code>assets/</code>) erreichbar sind.
 
 
 
@@ -103,11 +108,15 @@
           return;
         }
 
+        entry.addEventListener("error", function () {
         var showError = function () {
           var element = document.getElementById("bundle-error");
           if (element) {
             element.hidden = false;
           }
+        });
+      })();
+    </script>
         };
 
         var isLocal = /^(localhost|127\.|\[::1\])/.test(location.hostname);

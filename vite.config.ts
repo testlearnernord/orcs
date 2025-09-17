@@ -12,6 +12,10 @@ export default defineConfig({
   build: {
     sourcemap: false,
     outDir: "../docs",
+
+    emptyOutDir: true
+  },
+
     emptyOutDir: true,
     rollupOptions: {
       output: {
@@ -23,6 +27,7 @@ export default defineConfig({
       }
     }
   },
+
 
   resolve: {
     alias: {
