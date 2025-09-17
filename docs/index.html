@@ -13,11 +13,12 @@
       href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Crect%20width=%2264%22%20height=%2264%22%20fill=%22%230f0f10%22/%3E%3Cpath%20d=%22M12%2048%20L32%2016%20L52%2048%20Z%22%20fill=%22%23c0392b%22/%3E%3C/svg%3E"
     />
     <style>
+
       html,
       body,
       #app {
         height: 100%;
-        width: 100%;
+
         margin: 0;
         background: #0f0f10;
         color: #ddd;
@@ -26,11 +27,17 @@
       body {
         position: relative;
         font-family: sans-serif;
+
         overflow: hidden;
       }
 
       canvas {
         display: block;
+
+      }
+
+      canvas {
+
         image-rendering: pixelated;
       }
 
@@ -80,9 +87,9 @@
     <div id="bundle-error" class="boot-warning" hidden>
       <p class="warning-title">Bundle konnte nicht geladen werden.</p>
       <p>
-        Prüfe die Browser-Konsole und ob <code>index.js</code>,
-        <code>../index.js</code> bzw. die Varianten unter
-        <code>assets/</code> erreichbar sind.
+
+
+
       </p>
     </div>
     <script>
@@ -104,6 +111,7 @@
         };
 
         var isLocal = /^(localhost|127\.|\[::1\])/.test(location.hostname);
+
         var fallbacks = [];
 
         if (!isLocal) {
@@ -120,6 +128,11 @@
             fallbacks.push("../assets/index.js");
           }
         }
+
+
+        var fallbacks = isLocal ? [] : ["./assets/index.js"];
+
+
 
         entry.addEventListener("error", function () {
           if (fallbacks.length === 0) {
@@ -142,5 +155,19 @@
         });
       })();
     </script>
+
+
+      html, body, #app { height: 100%; margin: 0; background: #0f0f10; }
+      canvas { image-rendering: pixelated; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+
+  </head>
+  <body>
+    <div id="app"></div>
+
+
+
+
   </body>
 </html>
