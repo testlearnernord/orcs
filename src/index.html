@@ -14,9 +14,6 @@
     />
     <style>
 
-=======
-
-
       html,
       body,
       #app {
@@ -80,8 +77,7 @@
     <div id="bundle-error" class="boot-warning" hidden>
       <p class="warning-title">Bundle konnte nicht geladen werden.</p>
       <p>
-        Prüfe die Browser-Konsole und ob <code>index.js</code> bzw.
-        <code>assets/index.js</code> erreichbar ist.
+
       </p>
     </div>
     <script type="module" src="./main.ts"></script>
@@ -104,7 +100,26 @@
         };
 
         var isLocal = /^(localhost|127\.|\[::1\])/.test(location.hostname);
+
+        var fallbacks = [];
+
+        if (!isLocal) {
+          var path = location.pathname || "";
+          var hasDocsSegment = /\/(docs)(\/|$)/.test(path);
+
+          if (hasDocsSegment) {
+            fallbacks.push("../index.js");
+          }
+
+          fallbacks.push("./assets/index.js");
+
+          if (hasDocsSegment) {
+            fallbacks.push("../assets/index.js");
+          }
+        }
+
         var fallbacks = isLocal ? [] : ["./assets/index.js"];
+
 
         entry.addEventListener("error", function () {
           if (fallbacks.length === 0) {
@@ -128,8 +143,6 @@
       })();
     </script>
 
-=======
-=======
       html, body, #app { height: 100%; margin: 0; background: #0f0f10; }
       canvas { image-rendering: pixelated; }
     </style>
@@ -138,6 +151,7 @@
   <body>
     <div id="app"></div>
     <script type="module" src="./main.ts"></script>
+
 
 
   </body>
