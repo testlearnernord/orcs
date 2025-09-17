@@ -110,6 +110,8 @@ export class OfficerToken {
 
       this.scene.input.setDefaultCursor("pointer");
 
+      this.scene.input.setDefaultCursor("pointer");
+
 
       this.scene.input.setDefaultCursor("pointer");
 
@@ -119,6 +121,7 @@ export class OfficerToken {
     });
     this.container.on("pointerout", () => {
       this.container.setDepth(1);
+      this.scene.input.setDefaultCursor("default");
 
       this.scene.input.setDefaultCursor("default");
 

@@ -16,6 +16,10 @@ export default defineConfig({
     emptyOutDir: true
   },
 
+
+    emptyOutDir: true
+  },
+
     emptyOutDir: true,
     rollupOptions: {
       output: {
@@ -27,6 +31,7 @@ export default defineConfig({
       }
     }
   },
+
 
 
   resolve: {
