@@ -10,16 +10,14 @@
     <link
       rel="icon"
       type="image/svg+xml"
-      href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Crect%20width=%2264%22%20height=%2264%22%20fill=%22%230f0f10%22/%3E%3Cpath%20d=%22M12%2048%20L32%2016%20L52%2048%20Z%22%20fill=%22%23c0392b%22/%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20fill='%230f0f10'/%3E%3Cpath%20d='M12%2048%20L32%2016%20L52%2048%20Z'%20fill='%23c0392b'/%3E%3C/svg%3E"
     />
     <style>
-
       html,
       body,
       #app {
         height: 100%;
         width: 100%;
-
         margin: 0;
         background: #0f0f10;
         color: #ddd;
@@ -27,52 +25,14 @@
 
       body {
         position: relative;
-        font-family: sans-serif;
-
+        font-family: "Fira Sans", "Roboto", system-ui, sans-serif;
         overflow: hidden;
       }
 
       canvas {
         display: block;
-=======
-
-
-
-
-      }
-
-      canvas {
-
-
-
-
-        image-rendering: pixelated;
-      }
-
-      .hint {
-        position: absolute;
-        left: 8px;
-        bottom: 8px;
-        font-size: 12px;
-        opacity: 0.72;
-      }
-
-      .boot-warning {
-        position: absolute;
-        right: 12px;
-        bottom: 12px;
-        max-width: 280px;
-        padding: 12px;
-        border-radius: 6px;
-        background: rgba(30, 8, 8, 0.85);
-        border: 1px solid rgba(255, 128, 128, 0.4);
-        box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
-        font-size: 13px;
-        line-height: 1.4;
-      }
-
-      [hidden] {
-        display: none !important;
+        width: 100%;
+        height: 100%;
       }
     </style>
     <script
@@ -87,113 +47,9 @@
         document.head.appendChild(fallback);
       }
     </script>
-    <script type="module" crossorigin src="./assets/index-TYMg3tzF.js"></script>
-=======
-    <script type="module" crossorigin src="./assets/index-CqMB9j9M.js"></script>
-
-    <script type="module" crossorigin src="./assets/index-g4NHlP-b.js"></script>
-
     <script type="module" crossorigin src="./index.js"></script>
-
   </head>
   <body>
     <div id="app"></div>
-    <div class="hint">Tipp: Drücke E für nächsten Cycle</div>
-    <div id="bundle-error" class="boot-warning" hidden>
-      <p class="warning-title">Bundle konnte nicht geladen werden.</p>
-      <p>
-        Prüfe die Browser-Konsole und ob die ausgelieferten Bundles (z. B.
-        Dateien unter <code>assets/</code>) erreichbar sind.
-=======
-
-      </p>
-    </div>
-    <script>
-      (function () {
-        var entry = document.querySelector("script[type=\"module\"][src]");
-        if (!entry) {
-          var missing = document.getElementById("bundle-error");
-          if (missing) {
-            missing.hidden = false;
-          }
-          return;
-        }
-
-        entry.addEventListener("error", function () {
-=======
-
-
-        var showError = function () {
-
-          var element = document.getElementById("bundle-error");
-          if (element) {
-            element.hidden = false;
-          }
-        });
-      })();
-    </script>
-=======
-
-        };
-
-        var isLocal = /^(localhost|127\.|\[::1\])/.test(location.hostname);
-
-        var fallbacks = [];
-
-        if (!isLocal) {
-          var path = location.pathname || "";
-          var hasDocsSegment = /\/(docs)(\/|$)/.test(path);
-
-          if (hasDocsSegment) {
-            fallbacks.push("../index.js");
-          }
-
-          fallbacks.push("./assets/index.js");
-
-          if (hasDocsSegment) {
-            fallbacks.push("../assets/index.js");
-          }
-        }
-
-
-        var fallbacks = isLocal ? [] : ["./assets/index.js"];
-
-
-
-        entry.addEventListener("error", function () {
-          if (fallbacks.length === 0) {
-            showError();
-            return;
-          }
-
-          var next = fallbacks.shift();
-          if (!next) {
-            showError();
-            return;
-          }
-
-          var script = document.createElement("script");
-          script.type = "module";
-          script.crossOrigin = "anonymous";
-          script.src = next;
-          script.addEventListener("error", showError);
-          document.head.appendChild(script);
-        });
-      })();
-    </script>
-
-
-      html, body, #app { height: 100%; margin: 0; background: #0f0f10; }
-      canvas { image-rendering: pixelated; }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
-
-  </head>
-  <body>
-    <div id="app"></div>
-
-
-
-
   </body>
 </html>
