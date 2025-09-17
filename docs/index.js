@@ -1,4 +1,6 @@
 // Auto-generiert: Stabiler Einstiegspunkt für GitHub Pages.
+import "./assets/index-TYMg3tzF.js";
+=======
 import "./assets/index-CqMB9j9M.js";
 =======
 

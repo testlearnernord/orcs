@@ -1,9 +1,28 @@
 import { getPhaser } from "@game/phaserRuntime";
+import { OfficerToken, type OfficerTokenFocus } from "@game/ui/OfficerToken";
+import { describeOfficerActivity } from "@game/ui/activity";
+import { collectHighlightIds } from "@game/ui/highlights";
+import {
+  computeOfficerPositions,
+  createAdaptiveGridConfig,
+  type BoardArea,
+  type OfficerGridConfig
+} from "@game/ui/layout";
+import { ensurePortraitTextures, portraitIndexForId } from "@game/ui/portraits";
+import { WARCALL_TYPE_GOALS, WARCALL_TYPE_ICONS, WARCALL_TYPE_LABELS, resolveParticipantRole } from "@game/ui/warcallUi";
+import { estimateWarcallSuccess } from "@sim/insights";
+import type { CycleSummary, CycleTrigger, Officer, Warcall } from "@sim/types";
+=======
 
 import { World } from "@sim/world";
 
 const Phaser = getPhaser();
 
+const TOKEN_BASE_WIDTH = 128;
+const TOKEN_BASE_HEIGHT = 140;
+const MIN_TOKEN_SCALE = 0.65;
+
+=======
 const TRIGGER_LABELS: Record<CycleTrigger, string> = {
   WARCALL_COMPLETED: "Warcall abgeschlossen",
   FREE_ROAM_TIMEOUT: "Freies Spiel (Timeout)",
@@ -16,12 +35,14 @@ function shortLabel(name: string): string {
   return trimmed.length > 10 ? `${trimmed.slice(0, 9)}…` : trimmed;
 }
 
+=======
 
 export default class PlayScene extends Phaser.Scene {
   private world!: World;
   private officerTokens = new Map<string, OfficerToken>();
   private cycleText!: Phaser.GameObjects.Text;
   private triggerText!: Phaser.GameObjects.Text;
+=======
 
   private feedLabel!: Phaser.GameObjects.Text;
   private feedText!: Phaser.GameObjects.Text;
@@ -41,6 +62,11 @@ export default class PlayScene extends Phaser.Scene {
   private cemeteryScrim!: Phaser.GameObjects.Rectangle;
   private cemeteryOverlayBg!: Phaser.GameObjects.Rectangle;
   private cemeteryOverlayTitle!: Phaser.GameObjects.Text;
+  private cemeteryListContainer!: Phaser.GameObjects.Container;
+  private cemeteryOverlayList!: Phaser.GameObjects.Text;
+  private cemeteryListMaskShape!: Phaser.GameObjects.Graphics;
+  private cemeteryMask!: Phaser.Display.Masks.GeometryMask;
+  private cemeteryScrollArea!: Phaser.GameObjects.Rectangle;
   private cemeteryOverlayList!: Phaser.GameObjects.Text;
   private cemeteryOverlayClose!: Phaser.GameObjects.Text;
   private warcallIconBar!: Phaser.GameObjects.Container;
@@ -54,6 +80,20 @@ export default class PlayScene extends Phaser.Scene {
   private sidebarArea: BoardArea = { x: 660, y: 36, width: 280, height: 520 };
   private sidebarPadding = 24;
   private highlightIds: Set<string> = new Set();
+  private focusedWarcallId: string | null = null;
+  private focusRoles: Map<string, OfficerTokenFocus> = new Map();
+  private detailMode: "DEFAULT" | "OFFICER" | "WARCALL" = "DEFAULT";
+  private lastSummary?: CycleSummary;
+  private readonly defaultDetailMessage = "Fahre mit der Maus über ein Porträt oder tippe es an.";
+  private portraitKeys: string[] = [];
+  private officerPortraitMap = new Map<string, string>();
+  private cemeteryScroll = 0;
+  private cemeteryListX = 0;
+  private cemeteryListY = 0;
+  private cemeteryViewportHeight = 0;
+  private cemeteryListWidth = 0;
+  private cemeteryContentHeight = 0;
+=======
   private focusHighlightIds: Set<string> = new Set();
   private focusedWarcallId: string | null = null;
   private detailMode: "DEFAULT" | "OFFICER" | "WARCALL" = "DEFAULT";
@@ -80,6 +120,9 @@ export default class PlayScene extends Phaser.Scene {
 
   create() {
     this.world = new World({ seed: Date.now() });
+    this.portraitKeys = ensurePortraitTextures(this);
+    this.officerPortraitMap.clear();
+=======
 
     this.boardBg = this.add.rectangle(0, 0, 10, 10, 0x101720, 0.92).setOrigin(0, 0);
     this.boardBg.setStrokeStyle(2, 0x27323f, 0.85);
@@ -105,6 +148,65 @@ export default class PlayScene extends Phaser.Scene {
       fontSize: "14px",
       color: "#cbd0d6"
     });
+
+    this.feedLabel = this.add.text(0, 0, "Welt-Feed", {
+      fontFamily: "monospace",
+      fontSize: "16px",
+      color: "#f1f2f6"
+    });
+
+    this.feedText = this.add
+      .text(0, 0, "", {
+        fontFamily: "monospace",
+        fontSize: "12px",
+        color: "#d1d9e6",
+        lineSpacing: 6
+      })
+      .setWordWrapWidth(240);
+
+    this.warcallLabel = this.add.text(0, 0, "Aktive Warcalls", {
+      fontFamily: "monospace",
+      fontSize: "16px",
+      color: "#f1f2f6"
+    });
+
+    this.warcallsText = this.add
+      .text(0, 0, "", {
+        fontFamily: "monospace",
+        fontSize: "12px",
+        color: "#d1d9e6",
+        lineSpacing: 6
+      })
+      .setWordWrapWidth(240);
+
+    this.detailLabel = this.add.text(0, 0, "Details", {
+      fontFamily: "monospace",
+      fontSize: "16px",
+      color: "#f1f2f6"
+    });
+
+    this.detailText = this.add
+      .text(0, 0, this.defaultDetailMessage, {
+        fontFamily: "monospace",
+        fontSize: "12px",
+        color: "#d1d9e6",
+        lineSpacing: 4
+      })
+      .setWordWrapWidth(240);
+
+    this.controlsText = this.add.text(0, 0, "E: Cycle simulieren   R: Welt neu generieren", {
+      fontFamily: "monospace",
+      fontSize: "12px",
+      color: "#9da3ae"
+    });
+
+    this.initializeWarcallIconBar();
+    this.initializeCemeteryUI();
+
+    this.scale.on(Phaser.Scale.Events.RESIZE, this.configureLayout, this);
+
+    this.configureLayout();
+=======
 
     this.feedLabel = this.add.text(0, 0, "Welt-Feed", {
       fontFamily: "monospace",
@@ -494,6 +596,7 @@ export default class PlayScene extends Phaser.Scene {
       this.scale.off(Phaser.Scale.Events.RESIZE, this.configureLayout, this);
       this.boardBg.off("pointerdown");
 =======
+=======
       this.scale.off(Phaser.Scale.Events.RESIZE, this.configureLayout, this);
 
       this.scale.off(Phaser.Scale.Events.RESIZE, this.configureLayout, this);
@@ -504,6 +607,7 @@ export default class PlayScene extends Phaser.Scene {
 
   update(_t: number, _d: number) {}
 
+=======
 =======
 
 
@@ -523,6 +627,14 @@ n
     this.warcallIcons.forEach(icon => icon.destroy(true));
     this.warcallIcons.clear();
     this.warcallIconMeta.clear();
+    this.focusRoles.clear();
+    this.focusedWarcallId = null;
+    this.showDefaultDetails();
+    this.hideCemeteryOverlay();
+    this.officerPortraitMap.clear();
+    this.portraitKeys = ensurePortraitTextures(this);
+    this.cemeteryScroll = 0;
+=======
     this.focusHighlightIds.clear();
     this.focusedWarcallId = null;
     this.showDefaultDetails();
@@ -535,6 +647,7 @@ n
     this.lastSummary = summary;
     this.highlightIds = collectHighlightIds(summary);
     this.validateWarcallFocus();
+=======
     const highlightIds = collectHighlightIds(summary);
     this.cycleText.setText(`Cycle ${this.world.state.cycle}`);
     const trigger = summary ? this.formatTrigger(summary.trigger) : "Start der Kampagne";
@@ -547,6 +660,7 @@ n
     this.syncWarcallIcons(summary);
     this.updateCemeteryUI();
     this.updateSidebarFlow();
+=======
     this.syncOfficerTokens(highlightIds, summary);
     this.refreshFeed(summary);
     this.refreshWarcalls(summary);
@@ -570,16 +684,24 @@ n
 
   private syncOfficerTokens(summary?: CycleSummary): void {
     const highlightIds = new Set(this.highlightIds);
+=======
     this.focusHighlightIds.forEach(id => highlightIds.add(id));
 
     const alive = this.world.state.officers.filter(officer => officer.status === "ALIVE");
     const total = alive.length;
     const config = createAdaptiveGridConfig(this.boardArea, total);
     const positions = computeOfficerPositions(total, config);
+    const scale = this.computeTokenScale(config);
+=======
     const seen = new Set<string>();
     const immediate = !summary;
 
     alive.forEach((officer, index) => {
+      const position = positions[index];
+      const highlight = highlightIds.has(officer.id);
+      const focus = this.focusRoles.get(officer.id) ?? null;
+      const portraitKey = this.getPortraitKey(officer);
+=======
   private syncOfficerTokens(highlightIds: Set<string>, summary?: CycleSummary): void {
     const total = this.world.state.officers.length;
     const config = createAdaptiveGridConfig(this.boardArea, total);
@@ -602,6 +724,9 @@ n
           x: position.x,
           y: position.y,
           officer,
+          portraitKey,
+          scale,
+=======
           highlight,
           onHover: hovered => this.showOfficerDetails(hovered),
           onBlur: () => this.clearOfficerDetails()
@@ -609,6 +734,9 @@ n
         this.officerTokens.set(officer.id, token);
       } else {
         token.setPosition(position.x, position.y, { immediate });
+      }
+      token.update(officer, { highlight, focus, scale });
+=======
         token.update(officer, { highlight });
       }
       seen.add(officer.id);
@@ -625,6 +753,7 @@ n
   private refreshFeed(summary?: CycleSummary): void {
     const newIds = new Set(summary?.feed.map(entry => entry.id) ?? []);
     const latest = this.world.state.feed.slice(-6);
+=======
 
 
 
@@ -669,6 +798,7 @@ n
       `   Erfolg: ${chance}% für ${this.getOfficerShortName(warcall.initiator)}\n` +
       `   ${roster}`
     );
+=======
     const marker = highlight ? "»" : "•";
     const roster = [warcall.initiator, ...warcall.participants]
       .map(id => this.getOfficerShortName(id))
@@ -790,6 +920,26 @@ n
     this.cemeteryOverlayBg.setDisplaySize(overlayWidth, overlayHeight);
     this.cemeteryOverlayBg.setPosition(width / 2, height / 2);
     this.cemeteryOverlayTitle.setPosition(width / 2, height / 2 - overlayHeight / 2 + 24);
+    const listX = width / 2 - overlayWidth / 2 + 24;
+    const listY = this.cemeteryOverlayTitle.y + this.cemeteryOverlayTitle.height + 16;
+    const listWidth = overlayWidth - 48;
+    const listHeight = Math.max(140, overlayHeight - 128);
+    this.cemeteryListX = listX;
+    this.cemeteryListY = listY;
+    this.cemeteryListWidth = listWidth;
+    this.cemeteryViewportHeight = listHeight;
+    this.cemeteryOverlayList.setWordWrapWidth(listWidth);
+    this.cemeteryListContainer.setPosition(listX, listY - this.cemeteryScroll);
+    this.cemeteryListMaskShape.setPosition(listX, listY);
+    this.cemeteryListMaskShape.clear();
+    this.cemeteryListMaskShape.fillStyle(0xffffff, 1);
+    this.cemeteryListMaskShape.fillRect(0, 0, listWidth, listHeight);
+    this.cemeteryScrollArea.setPosition(listX, listY);
+    this.cemeteryScrollArea.setSize(listWidth, listHeight);
+    this.cemeteryScrollArea.displayWidth = listWidth;
+    this.cemeteryScrollArea.displayHeight = listHeight;
+    this.refreshCemeteryScrollBounds();
+=======
     this.cemeteryOverlayList.setPosition(
       width / 2 - overlayWidth / 2 + 24,
       this.cemeteryOverlayTitle.y + this.cemeteryOverlayTitle.height + 12
@@ -802,6 +952,7 @@ n
     this.drawConnections();
     this.updateSidebarFlow();
     this.layoutWarcallIcons();
+=======
     this.boardArea = { x: boardX, y: boardY, width: boardWidth, height: boardHeight };
     this.sidebarArea = { x: sidebarX, y: padding, width: sidebarWidth, height: sidebarHeight };
     this.sidebarPadding = Math.max(20, Math.round(sidebarWidth * 0.08));
@@ -819,6 +970,13 @@ n
     const total = alive.length;
     const config = createAdaptiveGridConfig(this.boardArea, total);
     const positions = computeOfficerPositions(total, config);
+    const scale = this.computeTokenScale(config);
+    alive.forEach((officer, index) => {
+      const token = this.officerTokens.get(officer.id);
+      if (token) {
+        token.setPosition(positions[index].x, positions[index].y, { immediate: true });
+        token.setScale(scale);
+=======
     alive.forEach((officer, index) => {
 
     const total = this.world.state.officers.length;
@@ -922,6 +1080,44 @@ n
     return ids.map(id => this.getOfficerShortName(id)).join(", ");
   }
 
+  private getPortraitKey(officer: Officer): string {
+    if (this.portraitKeys.length === 0) {
+      this.portraitKeys = ensurePortraitTextures(this);
+    }
+    let key = this.officerPortraitMap.get(officer.id);
+    if (key) {
+      return key;
+    }
+    const baseIndex = portraitIndexForId(officer.id) % this.portraitKeys.length;
+    const used = new Set<number>();
+    this.officerPortraitMap.forEach(existingKey => {
+      const index = this.portraitKeys.indexOf(existingKey);
+      if (index >= 0) {
+        used.add(index);
+      }
+    });
+    let index = baseIndex;
+    let attempts = 0;
+    while (attempts < this.portraitKeys.length && used.has(index)) {
+      index = (index + 7) % this.portraitKeys.length;
+      attempts += 1;
+    }
+    key = this.portraitKeys[index] ?? this.portraitKeys[baseIndex] ?? this.portraitKeys[0];
+    if (!key) {
+      key = `officer-portrait-${index % this.portraitKeys.length}`;
+    }
+    this.officerPortraitMap.set(officer.id, key);
+    return key;
+  }
+
+  private computeTokenScale(config: OfficerGridConfig): number {
+    const scaleX = config.cellWidth / TOKEN_BASE_WIDTH;
+    const scaleY = config.cellHeight / TOKEN_BASE_HEIGHT;
+    const scale = Math.min(1, scaleX, scaleY);
+    return Math.max(MIN_TOKEN_SCALE, Math.min(1.15, scale));
+  }
+
+=======
   private computeWarcallSuccess(warcall: Warcall): number {
     const value = estimateWarcallSuccess(this.world.state, warcall);
     if (!Number.isFinite(value)) return 0;
@@ -993,10 +1189,32 @@ n
       .text(0, 0, "Friedhof", { fontFamily: "monospace", fontSize: "18px", color: "#f1f2f6" })
       .setOrigin(0.5, 0);
 
+    this.cemeteryListContainer = this.add.container(0, 0);
+=======
     this.cemeteryOverlayList = this.add
       .text(0, 0, "", { fontFamily: "monospace", fontSize: "12px", color: "#d1d9e6", lineSpacing: 6 })
       .setOrigin(0, 0);
     this.cemeteryOverlayList.setWordWrapWidth(320);
+    this.cemeteryListContainer.add(this.cemeteryOverlayList);
+
+    this.cemeteryListMaskShape = this.add.graphics({ x: 0, y: 0 });
+    this.cemeteryListMaskShape.setVisible(false);
+    this.cemeteryMask = new Phaser.Display.Masks.GeometryMask(this, this.cemeteryListMaskShape);
+    this.cemeteryListContainer.setMask(this.cemeteryMask);
+
+    this.cemeteryScrollArea = this.add.rectangle(0, 0, 320, 260, 0xffffff, 0).setOrigin(0, 0);
+    this.cemeteryScrollArea.setInteractive({ useHandCursor: true });
+    this.cemeteryScrollArea.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      pointer.event?.stopPropagation();
+    });
+    this.cemeteryScrollArea.on(
+      "wheel",
+      (_pointer: Phaser.Input.Pointer, _dx: number, dy: number, _dz: number, event: WheelEvent) => {
+        event.stopPropagation();
+        this.adjustCemeteryScroll(dy);
+      }
+    );
+=======
 
     this.cemeteryOverlayClose = this.add
       .text(0, 0, "Schließen", { fontFamily: "monospace", fontSize: "12px", color: "#9da3ae" })
@@ -1008,6 +1226,10 @@ n
       this.cemeteryScrim,
       this.cemeteryOverlayBg,
       this.cemeteryOverlayTitle,
+      this.cemeteryListMaskShape,
+      this.cemeteryScrollArea,
+      this.cemeteryListContainer,
+=======
       this.cemeteryOverlayList,
       this.cemeteryOverlayClose
     ]);
@@ -1023,6 +1245,13 @@ n
   }
 
   private updateCemeteryOverlayList(fallen: Officer[]): void {
+    const wrapWidth = this.cemeteryListWidth > 0 ? this.cemeteryListWidth : 320;
+    this.cemeteryOverlayList.setWordWrapWidth(wrapWidth);
+    if (fallen.length === 0) {
+      this.cemeteryOverlayList.setText("Noch keine Gefallenen.");
+      this.cemeteryContentHeight = this.cemeteryOverlayList.height;
+      this.refreshCemeteryScrollBounds();
+=======
     if (fallen.length === 0) {
       this.cemeteryOverlayList.setText("Noch keine Gefallenen.");
       return;
@@ -1032,10 +1261,43 @@ n
       return `• ${officer.name} (${officer.rank}, Lv ${officer.level}) – ${status}`;
     });
     this.cemeteryOverlayList.setText(lines.join("\n\n"));
+    this.cemeteryContentHeight = this.cemeteryOverlayList.height;
+    this.refreshCemeteryScrollBounds();
+  }
+
+  private adjustCemeteryScroll(deltaY: number): void {
+    if (!this.cemeteryListContainer) {
+      return;
+    }
+    const viewport = Math.max(0, this.cemeteryViewportHeight);
+    const maxScroll = Math.max(0, this.cemeteryContentHeight - viewport);
+    if (maxScroll <= 0) {
+      this.cemeteryScroll = 0;
+      this.refreshCemeteryScrollBounds();
+      return;
+    }
+    const step = Math.max(24, Math.round(viewport * 0.2));
+    const direction = deltaY > 0 ? 1 : -1;
+    this.cemeteryScroll = Phaser.Math.Clamp(this.cemeteryScroll + direction * step, 0, maxScroll);
+    this.cemeteryListContainer.setPosition(this.cemeteryListX, this.cemeteryListY - this.cemeteryScroll);
+  }
+
+  private refreshCemeteryScrollBounds(): void {
+    if (!this.cemeteryListContainer) {
+      return;
+    }
+    const viewport = Math.max(0, this.cemeteryViewportHeight);
+    const maxScroll = Math.max(0, this.cemeteryContentHeight - viewport);
+    this.cemeteryScroll = Phaser.Math.Clamp(this.cemeteryScroll, 0, maxScroll);
+    this.cemeteryListContainer.setPosition(this.cemeteryListX, this.cemeteryListY - this.cemeteryScroll);
+=======
   }
 
   private showCemeteryOverlay(): void {
     this.updateCemeteryOverlayList(this.world.state.officers.filter(officer => officer.status !== "ALIVE"));
+    this.cemeteryScroll = 0;
+    this.refreshCemeteryScrollBounds();
+=======
     this.cemeteryOverlay.setVisible(true);
   }
 
@@ -1110,6 +1372,8 @@ n
     container.add([bg, icon, label, chance]);
     container.setDataEnabled();
     container.setData({ hover: false, highlight: false, selected: false, warcallId: warcall.id });
+    container.setInteractive(new Phaser.Geom.Rectangle(-34, -34, 68, 68), Phaser.Geom.Rectangle.Contains);
+=======
     container.setInteractive(new Phaser.Geom.Circle(0, 0, 36), Phaser.Geom.Circle.Contains);
     container.on("pointerover", () => {
       container.setData("hover", true);
@@ -1175,6 +1439,25 @@ n
 
   private focusWarcall(warcall: Warcall): void {
     this.focusedWarcallId = warcall.id;
+    this.focusRoles.clear();
+    const initiator = this.getOfficerById(warcall.initiator);
+    const participants = this.collectParticipantIds(warcall);
+    participants.forEach(id => {
+      const officer = this.getOfficerById(id);
+      const roleLabel = officer
+        ? resolveParticipantRole(warcall, officer, initiator)
+        : id === warcall.initiator
+          ? "Ausrufer"
+          : "Supporter";
+      const focusRole = this.determineFocusRole(roleLabel, id === warcall.initiator);
+      this.focusRoles.set(id, focusRole);
+    });
+    warcall.hiddenRoles.forEach(role => {
+      if (!this.focusRoles.has(role.who)) {
+        this.focusRoles.set(role.who, this.mapHiddenRole(role.role));
+      }
+    });
+=======
     this.focusHighlightIds = new Set<string>();
     this.collectParticipantIds(warcall).forEach(id => this.focusHighlightIds.add(id));
     warcall.hiddenRoles.forEach(role => this.focusHighlightIds.add(role.who));
@@ -1188,6 +1471,8 @@ n
       return;
     }
     this.focusedWarcallId = null;
+    this.focusRoles.clear();
+=======
     this.focusHighlightIds.clear();
     if (this.detailMode === "WARCALL") {
       this.showDefaultDetails();
@@ -1256,6 +1541,8 @@ n
     );
     if (!stillActive) {
       this.focusedWarcallId = null;
+      this.focusRoles.clear();
+=======
       this.focusHighlightIds.clear();
       if (this.detailMode === "WARCALL") {
         this.showDefaultDetails();
@@ -1268,6 +1555,37 @@ n
       ? warcall.participants
       : [warcall.initiator, ...warcall.participants];
     return Array.from(new Set(ids));
+  }
+
+  private determineFocusRole(roleLabel: string, isInitiator: boolean): OfficerTokenFocus {
+    if (isInitiator) {
+      return "leader";
+    }
+    const normalized = roleLabel.toLowerCase();
+    if (normalized.includes("assassin") || normalized.includes("assassine")) {
+      return "hidden";
+    }
+    if (normalized.includes("verdeckt") || normalized.includes("rival")) {
+      return "rival";
+    }
+    if (normalized.includes("verbünd") || normalized.includes("loyal")) {
+      return "ally";
+    }
+    return "support";
+  }
+
+  private mapHiddenRole(role: string): OfficerTokenFocus {
+    switch (role.toUpperCase()) {
+      case "ASSASSIN":
+        return "hidden";
+      case "TRAITOR":
+        return "rival";
+      case "LOYALIST":
+        return "ally";
+      default:
+        return "support";
+    }
+=======
 =======
     const traits = officer.traits.length > 0 ? officer.traits.join(", ") : "Keine bekannten Traits";
     const bloodOath = officer.relationships.bloodOathWith
@@ -1296,5 +1614,6 @@ n
     const label = shortLabel(officer.name);
     return officer.rank === "König" ? `👑 ${label}` : label;
   }
+=======
 
 }

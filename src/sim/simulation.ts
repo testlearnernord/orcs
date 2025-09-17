@@ -6,6 +6,7 @@ import { computeOfficerPower, totalGroupPower } from "./power";
 function sumPower(members: Officer[], rng: RNG): number {
   const base = totalGroupPower(members);
 =======
+=======
 import { TRAIT_COMBAT_MODIFIERS, TRAIT_SYNERGY_BONUS } from "./constants";
 import { OfficerManager } from "./officerManager";
 import { RNG } from "./rng";

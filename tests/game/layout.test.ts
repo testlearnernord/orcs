@@ -7,6 +7,7 @@ import {
 } from "@game/ui/layout";
 
 =======
+=======
 
 import { computeOfficerPositions, DEFAULT_OFFICER_GRID } from "@game/ui/layout";
 
@@ -28,6 +29,7 @@ describe("computeOfficerPositions", () => {
     expect(positions[3]).toEqual({ x: 10, y: 60 });
   });
 
+=======
 
   it("adapts columns for wider boards", () => {
     const config = createAdaptiveGridConfig({ x: 40, y: 80, width: 820, height: 520 }, 20);
@@ -46,5 +48,6 @@ describe("computeOfficerPositions", () => {
     const config = createAdaptiveGridConfig({ x: 0, y: 0, width: 0, height: 0 }, 20);
     expect(config).toEqual(DEFAULT_OFFICER_GRID);
   });
+=======
 
 });
