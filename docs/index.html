@@ -2,18 +2,24 @@
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    />
     <title>ORCS</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Crect%20width=%2264%22%20height=%2264%22%20fill=%22%230f0f10%22/%3E%3Cpath%20d=%22M12%2048%20L32%2016%20L52%2048%20Z%22%20fill=%22%23c0392b%22/%3E%3C/svg%3E"
+    />
     <style>
-      html, body, #app { height: 100%; margin: 0; background: #0b0d10; color: #ddd; }
+      html, body, #app { height: 100%; margin: 0; background: #0f0f10; }
       canvas { image-rendering: pixelated; }
-      .hint { position: absolute; left: 8px; bottom: 8px; font: 12px sans-serif; opacity: 0.7; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <script type="module" crossorigin src="./index.js"></script>
   </head>
   <body>
     <div id="app"></div>
-    <div class="hint">Tipp: Drücke E für nächsten Cycle</div>
-    <script src="https://unpkg.com/phaser@3.80.1/dist/phaser.js"></script>
-    <script type="module" src="./main.js"></script>
   </body>
 </html>
