@@ -5,6 +5,39 @@ import { computeOfficerPower, totalGroupPower } from "./power";
 
 function sumPower(members: Officer[], rng: RNG): number {
   const base = totalGroupPower(members);
+=======
+import { TRAIT_COMBAT_MODIFIERS, TRAIT_SYNERGY_BONUS } from "./constants";
+import { OfficerManager } from "./officerManager";
+import { RNG } from "./rng";
+import { Officer, TimelineEntry, Warcall, WarcallResolution, WorldState } from "./types";
+
+function computeOfficerPower(officer: Officer, allies: Officer[]): number {
+  let power = 10 + officer.level * 4 + officer.gearScore + officer.merit * 0.15;
+  for (const trait of officer.traits) {
+    const modifier = TRAIT_COMBAT_MODIFIERS[trait] ?? 1;
+    power *= modifier;
+    const synergy = TRAIT_SYNERGY_BONUS[trait] ?? 0;
+    if (synergy > 0) {
+      const shared = allies.filter(ally => ally.traits.includes(trait)).length;
+      power *= 1 + shared * synergy;
+    }
+  }
+  if (officer.relationships.bloodOathWith && allies.some(a => a.id === officer.relationships.bloodOathWith)) {
+    power *= 1.15;
+  }
+  const friendCount = allies.filter(a => officer.relationships.friends.includes(a.id)).length;
+  power *= 1 + friendCount * 0.05;
+  if (officer.relationships.rivals.some(id => allies.some(a => a.id === id))) {
+    power *= 0.9;
+  }
+  power *= 0.95 + officer.personality.aggression * 0.1;
+  power *= 0.9 + officer.personality.loyalty * 0.1;
+  return power;
+}
+
+function sumPower(members: Officer[], rng: RNG): number {
+  const allies = members;
+  const base = members.reduce((acc, o) => acc + computeOfficerPower(o, allies), 0);
   const randomFactor = 0.9 + rng.next() * 0.2;
   return base * randomFactor;
 }
