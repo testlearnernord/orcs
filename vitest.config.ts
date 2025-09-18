@@ -16,7 +16,7 @@ export default defineConfig({
       '@sim': resolve(__dirname, './src/sim'),
       '@ui': resolve(__dirname, './src/ui'),
       '@state': resolve(__dirname, './src/state'),
-      '@assets': resolve(__dirname, './src/assets')
+      '@assets': resolve(__dirname, './assets')
     }
   }
 });

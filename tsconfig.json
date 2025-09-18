@@ -14,8 +14,8 @@
       "@sim/*": ["src/sim/*"],
       "@ui/*": ["src/ui/*"],
       "@state/*": ["src/state/*"],
-      "@assets/*": ["src/assets/*"]
+      "@assets/*": ["assets/*"]
     }
   },
-  "include": ["src", "scripts", "vite.config.ts", "vitest.config.ts"]
+  "include": ["src", "scripts", "assets", "vite.config.ts", "vitest.config.ts"]
 }
