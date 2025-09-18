@@ -1,174 +1,214 @@
-import { LOCATIONS, WARCALL_ACTIVE_MAX, WARCALL_ACTIVE_MIN } from "./constants";
-import { Officer, Warcall, WarcallResolution, WarcallSource, WarcallType, WorldState } from "./types";
-import { RNG } from "./rng";
-import { OfficerManager } from "./officerManager";
-import { resolveWarcallCombat } from "./simulation";
+import { TRAIT_COMBAT_WEIGHTS } from '@sim/constants';
+import { createWarcallEntry } from '@sim/feed';
+import { addMemory } from '@sim/officerFactory';
+import { relationshipModifier } from '@sim/relationships';
+import { RNG } from '@sim/rng';
+import type {
+  Officer,
+  OrcId,
+  WarcallBreakdown,
+  WarcallPlan,
+  WarcallResolution,
+  WorldState
+} from '@sim/types';
 
-function createWarcallId(state: WorldState, rng: RNG): string {
-  return `wc_${state.cycle}_${state.warcalls.length}_${Math.round(rng.next() * 1e6)}`;
+const LOCATIONS = [
+  'Schädelhügel',
+  'Schlackengrube',
+  'Pilzwald',
+  'Aschepass',
+  'Knochenarena',
+  'Teersümpfe'
+];
+
+function logistic(x: number): number {
+  return 1 / (1 + Math.exp(-x));
 }
 
-function chooseSource(rng: RNG): WarcallSource {
-  const value = rng.next();
-  if (value < 0.5) return "AGENDA";
-  if (value < 0.8) return "RANDOM";
-  return "PLAYER";
-}
-
-function weightedTypeFromAgenda(initiator: Officer): WarcallType {
-  if (initiator.personality.aggression > 0.7) return "OVERFALL";
-  if (initiator.personality.opportunism > 0.6) return "ASSASSINATION";
-  if (initiator.rank === "König") return "PURGE";
-  return "FEAST";
-}
-
-function randomType(rng: RNG): WarcallType {
-  return rng.pick(["HUNT", "MONSTER_HUNT", "FEAST", "OVERFALL"]);
-}
-
-function pickParticipants(rng: RNG, state: WorldState, initiator: Officer, max: number, includePlayer: boolean): Officer[] {
-  const pool = state.officers.filter(o => o.status === "ALIVE" && o.id !== initiator.id);
-  const sorted = rng.shuffle(pool);
-  if (sorted.length === 0) return [initiator];
-  const limit = Math.max(1, Math.min(max, sorted.length));
-  const count = rng.int(1, limit);
-  const participants = sorted.slice(0, count);
-  if (includePlayer) {
-    const player = state.officers.find(o => o.id === state.playerId && o.status === "ALIVE");
-    if (player && !participants.some(o => o.id === player.id) && player.id !== initiator.id) {
-      participants[participants.length - 1] = player;
-    }
+function ensureParticipants(
+  state: WorldState,
+  warcall: WarcallPlan
+): Officer[] {
+  const participants: Officer[] = [];
+  for (const id of warcall.participants) {
+    const officer = state.officers.find((candidate) => candidate.id === id);
+    if (officer) participants.push(officer);
   }
-  return [initiator, ...participants];
+  return participants;
 }
 
-function buildHiddenRoles(rng: RNG, warcallType: WarcallType, participants: Officer[]): Warcall["hiddenRoles"] {
-  if (warcallType === "ASSASSINATION") {
-    const assassin = rng.pick(participants);
-    return [{ who: assassin.id, role: "ASSASSIN" }];
+export function calculateBreakdown(
+  rng: RNG,
+  warcall: WarcallPlan,
+  participants: Officer[],
+  kingStatus: WorldState['kingStatus']
+): WarcallBreakdown {
+  let base = 0.5 - warcall.baseDifficulty;
+  if (kingStatus === 'UNGEFESTIGT') {
+    base -= 0.2;
   }
-  if (warcallType === "PURGE") {
-    return participants.slice(1).map(o => ({ who: o.id, role: rng.chance(0.5) ? "LOYALIST" : "TRAITOR" }));
-  }
-  return [];
-}
-
-function baseRewards(type: WarcallType): { xp: number; merit: number; titles: string[] } {
-  switch (type) {
-    case "FEAST": return { xp: 10, merit: 8, titles: [] };
-    case "OVERFALL": return { xp: 30, merit: 20, titles: [] };
-    case "ASSASSINATION": return { xp: 35, merit: 28, titles: [] };
-    case "HUNT": return { xp: 18, merit: 14, titles: [] };
-    case "MONSTER_HUNT": return { xp: 45, merit: 30, titles: ["Bestienjäger"] };
-    case "PURGE": return { xp: 50, merit: 35, titles: [] };
-  }
-}
-
-function agendaWarcall(rng: RNG, state: WorldState, initiator: Officer): Warcall {
-  const type = weightedTypeFromAgenda(initiator);
-  const participants = pickParticipants(rng, state, initiator, type === "PURGE" ? 5 : 3, false);
+  const traitScore = participants.reduce((sum, officer) => {
+    const officerBonus = officer.traits.reduce(
+      (acc, trait) => acc + (TRAIT_COMBAT_WEIGHTS[trait] ?? 0),
+      0
+    );
+    return sum + officerBonus;
+  }, 0);
+  const relationshipScore = participants.reduce(
+    (sum, officer) => sum + relationshipModifier(officer, participants),
+    0
+  );
+  const normalizedTrait = traitScore / Math.max(participants.length, 1);
+  const normalizedRel = relationshipScore / Math.max(participants.length, 1);
+  const random = rng.fork(`warcall:${warcall.id}`).next() - 0.5;
+  const logisticInput = base + normalizedTrait + normalizedRel + random;
   return {
-    id: createWarcallId(state, rng),
-    type,
-    source: "AGENDA",
+    base,
+    traits: normalizedTrait,
+    relationships: normalizedRel,
+    random,
+    logistic: logisticInput
+  };
+}
+
+function determineCasualties(
+  rng: RNG,
+  participants: Officer[],
+  success: boolean,
+  kingStatus: WorldState['kingStatus']
+): OrcId[] {
+  if (participants.length === 0) return [];
+  if (success) return [];
+  if (kingStatus === 'UNGEFESTIGT' && participants.length > 1) {
+    const shuffled = rng.shuffle(participants);
+    return shuffled.slice(0, 2).map((officer) => officer.id);
+  }
+  const unlucky = rng.pick(participants);
+  return [unlucky.id];
+}
+
+function applyMerit(
+  officer: Officer,
+  success: boolean,
+  kingStatus: WorldState['kingStatus']
+): Officer {
+  let delta = success ? 20 : Math.max(-10, -officer.merit * 0.1);
+  if (success && kingStatus === 'UNGEFESTIGT') {
+    delta /= 2;
+  }
+  return { ...officer, merit: Math.max(0, officer.merit + delta) };
+}
+
+export function resolveWarcall(
+  state: WorldState,
+  rng: RNG,
+  warcall: WarcallPlan
+): WarcallResolution {
+  const participants = ensureParticipants(state, warcall);
+  const breakdown = calculateBreakdown(
+    rng,
+    warcall,
+    participants,
+    state.kingStatus
+  );
+  const chance = logistic(breakdown.logistic);
+  const success = rng.fork(`resolve:${warcall.id}`).next() <= chance;
+  warcall.breakdown = breakdown;
+
+  const casualties = determineCasualties(
+    rng.fork(`casualties:${warcall.id}`),
+    participants,
+    success,
+    state.kingStatus
+  );
+  const feedEntry = createWarcallEntry(
+    rng,
+    state.cycle,
+    warcall,
+    success,
+    breakdown
+  );
+
+  for (const officer of participants) {
+    const updated = addMemory(applyMerit(officer, success, state.kingStatus), {
+      cycle: state.cycle,
+      category: 'WARCALL',
+      summary: `${success ? 'Triumph' : 'Schmach'} bei ${warcall.location}`,
+      details: `Chance ${(chance * 100).toFixed(1)}%`
+    });
+    state.officers = state.officers.map((candidate) =>
+      candidate.id === updated.id ? updated : candidate
+    );
+  }
+
+  return {
+    warcall,
+    success,
+    casualties,
+    feed: [feedEntry]
+  };
+}
+
+function pickParticipants(
+  rng: RNG,
+  officers: Officer[],
+  amount: number
+): Officer[] {
+  const pool = officers.filter(
+    (officer) => officer.status === 'ALIVE' && officer.rank !== 'König'
+  );
+  const selected: Officer[] = [];
+  const shuffled = rng.shuffle(pool);
+  for (let i = 0; i < Math.min(amount, shuffled.length); i += 1) {
+    selected.push(shuffled[i]);
+  }
+  return selected;
+}
+
+export function planWarcall(
+  state: WorldState,
+  rng: RNG,
+  cycle: number
+): WarcallPlan | undefined {
+  const participants = pickParticipants(rng, state.officers, 3);
+  if (participants.length === 0) return undefined;
+  const initiator = rng.pick(participants);
+  return {
+    id: `warcall_${cycle}_${rng.int(100, 999999)}`,
+    cycleAnnounced: cycle,
+    resolveOn: cycle + 1,
     initiator: initiator.id,
-    participants: participants.map(o => o.id),
-    hiddenRoles: buildHiddenRoles(rng, type, participants),
+    participants: participants.map((officer) => officer.id),
     location: rng.pick(LOCATIONS),
-    startCycle: state.cycle,
-    deadlineCycle: state.cycle + 1,
-    rewards: baseRewards(type),
-    state: "ANNOUNCED"
+    baseDifficulty: rng.next()
   };
 }
 
-function randomWarcall(rng: RNG, state: WorldState): Warcall {
-  const alive = state.officers.filter(o => o.status === "ALIVE");
-  const initiator = rng.pick(alive);
-  const type = randomType(rng);
-  const participants = pickParticipants(rng, state, initiator, 3, false);
-  return {
-    id: createWarcallId(state, rng),
-    type,
-    source: "RANDOM",
-    initiator: initiator.id,
-    participants: participants.map(o => o.id),
-    hiddenRoles: buildHiddenRoles(rng, type, participants),
-    location: rng.pick(LOCATIONS),
-    startCycle: state.cycle,
-    deadlineCycle: state.cycle + 1,
-    rewards: baseRewards(type),
-    state: "ANNOUNCED"
-  };
-}
-
-function playerWarcall(rng: RNG, state: WorldState): Warcall | null {
-  const player = state.officers.find(o => o.id === state.playerId && o.status === "ALIVE");
-  if (!player) return null;
-  const type: WarcallType = player.rank === "Grunzer" ? "HUNT" : "OVERFALL";
-  const participants = pickParticipants(rng, state, player, 2, true);
-  return {
-    id: createWarcallId(state, rng),
-    type,
-    source: "PLAYER",
-    initiator: player.id,
-    participants: participants.map(o => o.id),
-    hiddenRoles: buildHiddenRoles(rng, type, participants),
-    location: rng.pick(LOCATIONS),
-    startCycle: state.cycle,
-    deadlineCycle: state.cycle + 1,
-    rewards: baseRewards(type),
-    state: "ANNOUNCED"
-  };
-}
-
-/**
- * Plant neue Warcalls, damit 2-4 gleichzeitig aktiv sind.
- *
- * @example
- * const calls = planWarcalls(rng, state);
- */
-export function planWarcalls(rng: RNG, state: WorldState): Warcall[] {
-  const active = state.warcalls.filter(w => w.state !== "RESOLVED");
-  const target = rng.int(WARCALL_ACTIVE_MIN, WARCALL_ACTIVE_MAX);
-  const needed = Math.max(0, target - active.length);
-  const created: Warcall[] = [];
-  for (let i = 0; i < needed; i++) {
-    const source = chooseSource(rng);
-    const alive = state.officers.filter(o => o.status === "ALIVE");
-    if (alive.length < 2) break;
-    let warcall: Warcall | null = null;
-    if (source === "AGENDA") {
-      const weighted = [...alive].sort((a, b) => b.personality.ambition - a.personality.ambition);
-      warcall = agendaWarcall(rng, state, weighted[0]);
-    } else if (source === "RANDOM") {
-      warcall = randomWarcall(rng, state);
-    } else {
-      warcall = playerWarcall(rng, state);
-    }
-    if (warcall) {
-      created.push(warcall);
-      state.warcalls.push(warcall);
-    }
-  }
-  return created;
-}
-
-/**
- * Simuliert alle Warcalls, deren Deadline erreicht wurde.
- *
- * @example
- * const result = resolveDueWarcalls(rng, state, manager);
- */
-export function resolveDueWarcalls(rng: RNG, state: WorldState, manager: OfficerManager): WarcallResolution[] {
-  const resolutions: WarcallResolution[] = [];
-  for (const warcall of state.warcalls) {
-    if (warcall.state === "RESOLVED") continue;
-    if (state.cycle < warcall.deadlineCycle) continue;
-    warcall.state = "IN_PROGRESS";
-    const resolution = resolveWarcallCombat(rng, warcall, state, manager);
-    warcall.state = "RESOLVED";
-    resolutions.push(resolution);
-  }
+export function resolveDueWarcalls(
+  state: WorldState,
+  rng: RNG
+): WarcallResolution[] {
+  const due = state.warcalls.filter(
+    (warcall) => warcall.resolveOn <= state.cycle
+  );
+  const remaining = state.warcalls.filter(
+    (warcall) => warcall.resolveOn > state.cycle
+  );
+  const resolutions = due.map((warcall) => resolveWarcall(state, rng, warcall));
+  state.warcalls = remaining;
   return resolutions;
+}
+
+export function enqueuePlannedWarcalls(
+  state: WorldState,
+  planned: WarcallPlan[]
+): void {
+  state.warcalls = [...state.warcalls, ...planned];
+}
+
+export function warcallTooltip(resolution: WarcallResolution): string {
+  const breakdown = resolution.warcall.breakdown;
+  if (!breakdown) return 'Keine Daten';
+  const chance = logistic(breakdown.logistic) * 100;
+  return `Chance ${chance.toFixed(1)}%\nBasis: ${breakdown.base.toFixed(2)}\nTraits: ${breakdown.traits.toFixed(2)}\nBeziehungen: ${breakdown.relationships.toFixed(2)}\nZufall: ${breakdown.random.toFixed(2)}`;
 }

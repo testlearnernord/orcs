@@ -1,146 +1,120 @@
-/**
- * Gemeinsame Typdefinitionen für die gesamte Simulation. Die Typescript-Typen
- * bilden die Pitch-Spezifikation ab und halten die Module locker gekoppelt.
- */
-
 export type OrcId = string;
 
 export type Trait =
-  | "Berserker"
-  | "Taktiker"
-  | "Feigling"
-  | "UnsterblichGeruecht"
-  | "Tierbaendiger"
-  | "Diplomat"
-  | "Schleicher"
-  | "GraueEminenz";
+  | 'Feigling'
+  | 'Berserker'
+  | 'Hinterhältig'
+  | 'Trinkfest'
+  | 'Tierjäger'
+  | 'Intrigant';
 
-export type Rank =
-  | "Grunzer"
-  | "Späher"
-  | "Captain"
-  | "Anführer"
-  | "Herausforderer"
-  | "König";
-
-export type OfficerStatus = "ALIVE" | "DEAD" | "MISSING";
+export type Rank = 'König' | 'Spieler' | 'Captain' | 'Späher' | 'Grunzer';
 
 export interface Personality {
-  aggression: number;
-  loyalty: number;
-  opportunism: number;
-  ambition: number;
+  gier: number;
+  tapferkeit: number;
+  loyalitaet: number;
+  stolz: number;
 }
 
-export interface RelationshipNetwork {
-  friends: OrcId[];
-  rivals: OrcId[];
-  bloodOathWith?: OrcId;
-  loyalToKing: boolean;
+export type OfficerStatus = 'ALIVE' | 'DEAD';
+
+export type RelationshipType = 'ALLY' | 'RIVAL' | 'BLOOD_OATH' | 'FRIEND';
+
+export interface Relationship {
+  with: OrcId;
+  type: RelationshipType;
+  sinceCycle: number;
+  expiresAtCycle?: number;
 }
 
 export interface Memory {
   cycle: number;
-  type: "BETRAYAL" | "ALLY_SLAIN" | "PROMOTION" | "DEMOTION" | "WARCALL";
-  by?: OrcId;
-  notes?: string;
+  summary: string;
+  category:
+    | 'DEATH'
+    | 'SPAWN'
+    | 'PROMOTION'
+    | 'WARCALL'
+    | 'BLOOD_OATH'
+    | 'RELATIONSHIP';
+  details?: string;
 }
 
 export interface Officer {
   id: OrcId;
   name: string;
-  clan: string;
-  titles: string[];
-  level: number;
   rank: Rank;
+  level: number;
   merit: number;
-  combatStyle: string[];
   traits: Trait[];
-  equipment: { weapon: string; armor: string; trinket?: string };
-  gearScore: number;
-  status: OfficerStatus;
   personality: Personality;
-  relationships: RelationshipNetwork;
-  memories: Memory[];
-  territory: string[];
-  lastBloodOathCycle?: number;
-}
-
-export type WarcallType =
-  | "FEAST"
-  | "OVERFALL"
-  | "ASSASSINATION"
-  | "HUNT"
-  | "MONSTER_HUNT"
-  | "PURGE";
-
-export type WarcallSource = "AGENDA" | "RANDOM" | "PLAYER";
-export type WarcallState = "ANNOUNCED" | "IN_PROGRESS" | "RESOLVED";
-
-export interface HiddenRole {
-  who: OrcId;
-  role: "ASSASSIN" | "TRAITOR" | "LOYALIST";
-}
-
-export interface Warcall {
-  id: string;
-  type: WarcallType;
-  source: WarcallSource;
-  initiator: OrcId;
-  participants: OrcId[];
-  hiddenRoles: HiddenRole[];
-  location: string;
-  startCycle: number;
-  deadlineCycle: number;
-  rewards: { xp: number; merit: number; titles: string[] };
-  state: WarcallState;
-}
-
-export interface WarcallCasualty {
-  officerId: OrcId;
+  relationships: Relationship[];
+  portraitSeed: string;
   status: OfficerStatus;
-  reason: "BATTLE" | "BLOOD_OATH";
+  cycleJoined: number;
+  cycleDied?: number;
+  memories: Memory[];
 }
 
-export interface WarcallResolution {
-  warcall: Warcall;
-  victorious: OrcId[];
-  defeated: OrcId[];
-  betrayals: OrcId[];
-  casualties: WarcallCasualty[];
-  feedEntries: TimelineEntry[];
-}
-
-export interface HierarchyChange {
-  officerId: OrcId;
-  from: Rank;
-  to: Rank;
-}
-
-export type CycleTrigger = "WARCALL_COMPLETED" | "FREE_ROAM_TIMEOUT" | "OFFICER_DEATH" | "DEBUG";
-
-export interface TimelineEntry {
+export interface FeedEntry {
   id: string;
   cycle: number;
   text: string;
-  tags: string[];
+  tone:
+    | 'DEATH'
+    | 'SPAWN'
+    | 'PROMOTION'
+    | 'WARCALL'
+    | 'RELATIONSHIP'
+    | 'GENERAL';
+  priority: number;
 }
 
-export interface WorldState {
-  cycle: number;
-  officers: Officer[];
-  warcalls: Warcall[];
-  kingId: OrcId;
-  playerId: OrcId;
-  feed: TimelineEntry[];
+export interface WarcallBreakdown {
+  base: number;
+  traits: number;
+  relationships: number;
+  random: number;
+  logistic: number;
+}
+
+export interface WarcallPlan {
+  id: string;
+  cycleAnnounced: number;
+  resolveOn: number;
+  initiator: OrcId;
+  participants: OrcId[];
+  location: string;
+  baseDifficulty: number;
+  breakdown?: WarcallBreakdown;
+}
+
+export interface WarcallResolution {
+  warcall: WarcallPlan;
+  success: boolean;
+  casualties: OrcId[];
+  feed: FeedEntry[];
 }
 
 export interface CycleSummary {
   cycle: number;
-  trigger: CycleTrigger;
-  newWarcalls: Warcall[];
-  resolved: WarcallResolution[];
-  hierarchyChanges: HierarchyChange[];
-  replacements: Officer[];
-  feed: TimelineEntry[];
+  warcallsResolved: WarcallResolution[];
+  warcallsPlanned: WarcallPlan[];
+  deaths: OrcId[];
+  spawns: Officer[];
+  promotions: { officerId: OrcId; from: Rank; to: Rank }[];
+  feed: FeedEntry[];
+}
+
+export interface WorldState {
+  seed: string;
+  cycle: number;
+  officers: Officer[];
+  graveyard: Officer[];
+  warcalls: WarcallPlan[];
+  kingId: OrcId;
+  kingStatus: 'UNGEFESTIGT' | 'GEFESTIGT';
+  kingStatusExpires: number;
+  feed: FeedEntry[];
 }

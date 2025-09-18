@@ -1,0 +1,592 @@
+:root {
+  color-scheme: dark;
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  --bg-surface: radial-gradient(circle at top left, #1f2937 0%, #0f172a 55%);
+  --panel-bg: rgba(15, 23, 42, 0.82);
+  --panel-border: rgba(51, 65, 85, 0.85);
+  --text-subtle: #cbd5f5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-surface);
+  color: #f8fafc;
+}
+
+#app,
+.nemesis-app {
+  min-height: 100vh;
+}
+
+.nemesis-app {
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(4px);
+}
+
+.nemesis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.25rem 1.75rem;
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(71, 85, 105, 0.6);
+  box-shadow:
+    inset 0 -1px 0 rgba(148, 163, 184, 0.08),
+    0 12px 24px rgba(15, 23, 42, 0.45);
+}
+
+.nemesis-title {
+  margin: 0;
+  font-size: 1.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nemesis-status {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.95rem;
+  color: var(--text-subtle);
+}
+
+.nemesis-status__item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.nemesis-status__value {
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+.king-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.25);
+  border: 1px solid rgba(34, 197, 94, 0.45);
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.king-badge--unstable {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.55);
+  color: #fecaca;
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.05);
+  }
+}
+
+.graveyard-toggle {
+  padding: 0.45rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(71, 85, 105, 0.6);
+  background: rgba(30, 41, 59, 0.9);
+  color: #f8fafc;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.2s ease;
+}
+
+.graveyard-toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(148, 163, 184, 0.65);
+}
+
+.nemesis-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(320px, 1fr);
+  flex: 1;
+  min-height: 0;
+}
+
+.nemesis-ranks {
+  padding: 1.75rem;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  overflow-y: auto;
+}
+
+.rank-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  padding: 1.1rem;
+  box-shadow: 0 16px 40px rgba(2, 6, 23, 0.45);
+}
+
+.rank-section h2 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #38bdf8;
+}
+
+.officer-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.officer-card {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  background: rgba(30, 41, 59, 0.88);
+  border: 1px solid rgba(71, 85, 105, 0.75);
+  border-radius: 14px;
+  padding: 0.9rem;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 12px 28px rgba(2, 6, 23, 0.55);
+}
+
+.officer-card--king {
+  border-color: rgba(250, 204, 21, 0.7);
+  box-shadow: 0 0 25px rgba(250, 204, 21, 0.35);
+}
+
+.officer-card--dead {
+  opacity: 0.7;
+}
+
+.officer-card__portrait {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  min-width: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.officer-card__portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.officer-card__status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: rgba(248, 113, 113, 0.9);
+  text-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+  pointer-events: none;
+}
+
+.officer-card__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.officer-card__info h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+}
+
+.officer-card__meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(203, 213, 225, 0.85);
+}
+
+.officer-card__traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.trait-badge {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.18);
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #bfdbfe;
+}
+
+.officer-card__personality {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.personality-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.7rem;
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.personality-meter__label {
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.personality-meter__bar {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.35);
+  overflow: hidden;
+}
+
+.personality-meter__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22d3ee 0%, #0ea5e9 100%);
+}
+
+.officer-card__relations {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+}
+
+.relation {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.7);
+  border-left: 4px solid transparent;
+}
+
+.relation__label {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+}
+
+.relation--ally {
+  border-left-color: #22c55e;
+  color: #bbf7d0;
+}
+
+.relation--rival {
+  border-left-color: #f97316;
+  color: #fed7aa;
+}
+
+.relation--blood-oath {
+  border-left-color: #facc15;
+  color: #fef3c7;
+}
+
+.relation--friend {
+  border-left-color: #94a3b8;
+  color: #e2e8f0;
+}
+
+.relation__target {
+  font-weight: 600;
+}
+
+.officer-card__memories {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  color: rgba(226, 232, 240, 0.82);
+  max-height: 5rem;
+  overflow: hidden;
+}
+
+.nemesis-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding: 1.75rem 1.5rem;
+  background: rgba(8, 15, 32, 0.9);
+  border-left: 1px solid rgba(51, 65, 85, 0.65);
+}
+
+.feed-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.feed-section h2 {
+  margin: 0;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #38bdf8;
+}
+
+.feed-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.3rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 48vh;
+  overflow-y: auto;
+}
+
+.feed-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.7rem 0.85rem;
+  background: rgba(30, 41, 59, 0.85);
+  border-radius: 12px;
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.feed-item__cycle {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.feed-item__text {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.feed-item--death {
+  border-color: rgba(248, 113, 113, 0.6);
+}
+
+.feed-item--spawn {
+  border-color: rgba(34, 197, 94, 0.55);
+}
+
+.feed-item--promotion {
+  border-color: rgba(129, 140, 248, 0.55);
+}
+
+.feed-item--warcall {
+  border-color: rgba(244, 114, 182, 0.55);
+}
+
+.feed-item--relationship {
+  border-color: rgba(59, 130, 246, 0.55);
+}
+
+.feed-item--general {
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+.warcall-tooltip {
+  padding: 0.9rem 1rem;
+  background: rgba(30, 41, 59, 0.92);
+  border-radius: 12px;
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  color: #e0f2fe;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.warcall-tooltip--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hotkey-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.hotkey-section h3 {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.85rem;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.hotkey-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hotkey-button {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(71, 85, 105, 0.6);
+  background: rgba(30, 41, 59, 0.9);
+  color: #f8fafc;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.2s ease;
+}
+
+.hotkey-button:hover:not(:disabled) {
+  transform: translateX(2px);
+  border-color: rgba(96, 165, 250, 0.55);
+}
+
+.hotkey-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.graveyard-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  z-index: 900;
+}
+
+.graveyard-overlay.is-visible {
+  display: flex;
+}
+
+.graveyard-panel {
+  width: min(520px, 90vw);
+  max-height: 70vh;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(71, 85, 105, 0.8);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 48px rgba(2, 6, 23, 0.65);
+}
+
+.graveyard-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.75);
+}
+
+.graveyard-panel__header h3 {
+  margin: 0;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+}
+
+.graveyard-panel__close {
+  border: 1px solid rgba(71, 85, 105, 0.65);
+  background: rgba(30, 41, 59, 0.9);
+  color: #f8fafc;
+  border-radius: 10px;
+  padding: 0.4rem 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.graveyard-list {
+  list-style: none;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow-y: auto;
+}
+
+.graveyard-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(51, 65, 85, 0.65);
+  font-size: 0.85rem;
+  color: #f1f5f9;
+}
+
+.graveyard-entry__cycle {
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.graveyard-entry__name {
+  font-weight: 600;
+}
+
+@media (max-width: 1040px) {
+  .nemesis-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .nemesis-sidebar {
+    border-left: none;
+    border-top: 1px solid rgba(51, 65, 85, 0.65);
+  }
+}

@@ -4,12 +4,18 @@
     "lib": ["ES2022", "DOM"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "outDir": "dist",
     "baseUrl": ".",
-    "paths": { "@sim/*": ["src/sim/*"], "@game/*": ["src/game/*"] }
+    "paths": {
+      "@sim/*": ["src/sim/*"],
+      "@ui/*": ["src/ui/*"],
+      "@state/*": ["src/state/*"],
+      "@assets/*": ["src/assets/*"]
+    }
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src", "scripts", "vite.config.ts", "vitest.config.ts"]
 }

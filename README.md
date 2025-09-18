@@ -4,6 +4,7 @@ Minimaler Startpunkt: Phaser + TypeScript + Vite, plus Simulationskern (Offizier
 Ziel: prozedurale Offiziersgesellschaft, Spieler ist nur ein weiterer Offizier. Keine Sonderbehandlung.
 
 ## Quickstart
+
 ```bash
 pnpm i   # oder: npm i / yarn
 pnpm dev # startet http://localhost:5173
