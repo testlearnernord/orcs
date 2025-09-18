@@ -5,6 +5,14 @@ import { GraveyardPanel } from './components/graveyard';
 import { HotkeyBar } from './components/hotkeys';
 import { OfficerToken } from './components/officerToken';
 import { TooltipBreakdown } from './components/tooltip';
+=======
+import type { GameStore } from '@state/store';
+import type { Officer, WarcallResolution } from '@sim/types';
+import { FeedView } from '@ui/components/feed';
+import { GraveyardPanel } from '@ui/components/graveyard';
+import { HotkeyBar } from '@ui/components/hotkeys';
+import { OfficerToken } from '@ui/components/officerToken';
+import { TooltipBreakdown } from '@ui/components/tooltip';
 
 export class NemesisUI {
   private root: HTMLElement | null = null;
