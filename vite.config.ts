@@ -3,6 +3,8 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(({ command }) => ({
   base: command === 'serve' ? '/' : '/orcs/',
+export default defineConfig({
+  base: '/orcs/',
   build: {
     outDir: 'docs',
     emptyOutDir: true,
