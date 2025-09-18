@@ -1,4 +1,19 @@
-import Game from "@game/Game";
+import { GameStore } from '@state/store';
+import { NemesisUI } from '@ui/root';
+import '@ui/styles.css';
 
-const game = new Game(document.getElementById("app") as HTMLElement);
-export default game;
+const store = new GameStore('nemesis-seed');
+const ui = new NemesisUI(store);
+
+export function advanceCycle(): void {
+  store.tick();
+}
+
+// expose for manual debugging when running the client
+if (typeof window !== 'undefined') {
+  (window as any).nemesis = {
+    store,
+    ui,
+    advanceCycle
+  };
+}
