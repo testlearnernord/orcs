@@ -1,3 +1,6 @@
-if (typeof window === 'undefined') {
-  // Guard to avoid DOM-specific side effects when bundling in non-browser contexts.
-}
+window.addEventListener('error', (e) =>
+  console.error('window.error:', (e as any).error || e.message)
+);
+window.addEventListener('unhandledrejection', (e) =>
+  console.error('unhandled:', (e as any).reason)
+);

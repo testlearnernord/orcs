@@ -1,3 +1,21 @@
+## [0.7.0] - 2025-09-18
+
+### Fixed
+
+- Whitescreen & 404 durch fehlerhafte Vite-Config und falschen Entry
+- Merge-Konflikte bereinigt, CI wieder grün
+- Fix GitHub Pages: serve docs build, remove dev index from deployment
+
+### Changed
+
+- Geklärte Projektstruktur (sim/ui/state/bootstrap)
+- Statisches Pages-Setup (base:'/orcs/', outDir:'docs')
+- DOM-Mounting mit minimaler UI (ranks + feed)
+
+### Removed
+
+- Handgeschriebene docs/index.html, veraltete Helpers, Duplikate
+
 ## [0.6.1] - 2025-09-18
 
 ### Fixed

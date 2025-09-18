@@ -55,8 +55,7 @@ export class NemesisUI {
           <section class="ranks" id="ranks"></section>
           <aside class="feed" id="feed"></aside>
         </main>
-      </div>
-    `;
+      </div>`;
     this.feedEl = root.querySelector('#feed');
     this.ranksEl = root.querySelector('#ranks');
 
@@ -105,11 +104,8 @@ export class NemesisUI {
         (rank) => `
       <div class="rank-group">
         <h3>${rank}</h3>
-        <div class="row">
-          ${groups[rank].map((o) => `<div class="token" title="${o.name} (Lv ${o.level})">${o.name}</div>`).join('')}
-        </div>
-      </div>
-    `
+        <div class="row">${groups[rank].map((o) => `<div class="token" title="${o.name} (Lv ${o.level})">${o.name}</div>`).join('')}</div>
+      </div>`
       )
       .join('');
   }

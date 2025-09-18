@@ -7,8 +7,8 @@ import { RNG } from '../src/sim/rng';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const PARTS_DIR = join(__dirname, '../src/assets/orc/parts');
-const OUTPUT_DIR = join(__dirname, '../src/assets/orc/generated');
+const PARTS_DIR = join(__dirname, '../assets/orc/parts');
+const OUTPUT_DIR = join(__dirname, '../assets/orc/generated');
 const OUTPUT_JSON = join(OUTPUT_DIR, 'orc_catalog.json');
 const SIZE = 64;
 const COUNT = 80;
