@@ -1,14 +1,10 @@
-import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
+import { defineConfig } from 'vite';
 
-export default defineConfig({
-  base: './',
-  root: 'src',
-  publicDir: false,
-  server: { open: true },
+export default defineConfig(({ command }) => ({
+  base: command === 'serve' ? '/' : '/orcs/',
   build: {
-    sourcemap: false,
-    outDir: '../docs',
+    outDir: 'docs',
     emptyOutDir: true,
     rollupOptions: {
       output: {
@@ -26,4 +22,4 @@ export default defineConfig({
       '@assets': fileURLToPath(new URL('./src/assets', import.meta.url))
     }
   }
-});
+}));

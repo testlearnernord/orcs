@@ -1,44 +1,8 @@
-import { existsSync, readdirSync, writeFileSync } from 'node:fs';
+// scripts/postbuild.mjs
+import { writeFileSync } from 'node:fs';
 
-const assetsDir = new URL('../docs/assets/', import.meta.url);
-const stubPath = new URL('../docs/index.js', import.meta.url);
+const redirect =
+  '<!doctype html><meta http-equiv="refresh" content="0; url=./docs/">';
+writeFileSync('index.html', redirect, 'utf8');
 
-if (!existsSync(assetsDir)) {
-  console.log('Keine assets/-Mappe gefunden – verwende vorhandenes Bundle.');
-} else {
-  const files = readdirSync(assetsDir, { withFileTypes: true })
-    .filter((entry) => entry.isFile())
-    .map((entry) => entry.name)
-    .filter((name) => /^index-.*\.js$/i.test(name));
-
-  if (files.length === 0) {
-    if (existsSync(stubPath)) {
-      console.log('Kein Hash-Bundle gefunden, nutze docs/index.js direkt.');
-    } else {
-      throw new Error(
-        'Kein Vite-Bundle gefunden (docs/assets/index-*.js fehlt).'
-      );
-    }
-  } else {
-    files.sort();
-    const entryFile = files[files.length - 1];
-    const banner =
-      '// Auto-generiert: Stabiler Einstiegspunkt für GitHub Pages.\n';
-    const content = `${banner}import "./assets/${entryFile}";\n`;
-    writeFileSync(stubPath, content, 'utf8');
-    console.log(`Schreibe docs/index.js -> assets/${entryFile}`);
-  }
-    throw new Error(
-      'Kein Vite-Bundle gefunden (docs/assets/index-*.js fehlt).'
-    );
-  }
-
-  files.sort();
-  const entryFile = files[files.length - 1];
-  const stubPath = new URL('../docs/index.js', import.meta.url);
-  const banner =
-    '// Auto-generiert: Stabiler Einstiegspunkt für GitHub Pages.\n';
-  const content = `${banner}import "./assets/${entryFile}";\n`;
-  writeFileSync(stubPath, content, 'utf8');
-  console.log(`Schreibe docs/index.js -> assets/${entryFile}`);
-}
+console.log('Root redirect -> ./docs/ geschrieben.');

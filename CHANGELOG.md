@@ -1,3 +1,15 @@
+## [0.6.1] - 2025-09-18
+
+### Fixed
+
+- Bereinigte Merge-Konflikte in UI/Build-Dateien
+- Stabiler Pages-Build (base:'/orcs/', outDir:'docs')
+- Root-Redirect postbuild, Prettier grün
+
+### Changed
+
+- Vereinheitlichter DOM-Mount in NemesisUI und main.ts
+
 ## [1.0.0] - 2025-09-18
 
 ### Added
