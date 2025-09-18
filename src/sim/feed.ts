@@ -1,11 +1,11 @@
-import { FEED_PRIORITIES } from '@sim/constants';
-import { RNG } from '@sim/rng';
+import { FEED_PRIORITIES } from './constants';
+import { RNG } from './rng';
 import type {
   FeedEntry,
   Officer,
   WarcallBreakdown,
   WarcallPlan
-} from '@sim/types';
+} from './types';
 
 function entryId(rng: RNG, cycle: number, label: string): string {
   return `${label}_${cycle}_${Math.floor(rng.next() * 1_000_000)}`;

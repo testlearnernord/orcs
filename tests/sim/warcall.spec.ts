@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { calculateBreakdown, planWarcall } from '@sim/warcall';
-import { RNG } from '@sim/rng';
-import { createWorld } from '@sim/world';
+import { calculateBreakdown, planWarcall } from '../../src/sim/warcall';
+import { RNG } from '../../src/sim/rng';
+import { createWorld } from '../../src/sim/world';
 
 function collectParticipants(
   state: ReturnType<typeof createWorld>,

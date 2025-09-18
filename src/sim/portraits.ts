@@ -1,4 +1,4 @@
-import catalog from '@assets/orc/generated/orc_catalog.json';
+import catalog from '../assets/orc/generated/orc_catalog.json';
 
 interface CatalogEntry {
   seed: string;

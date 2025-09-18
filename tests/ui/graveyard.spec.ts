@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { GraveyardPanel } from '@ui/components/graveyard';
-import type { Officer } from '@sim/types';
+import { GraveyardPanel } from '../../src/ui/components/graveyard';
+import type { Officer } from '../../src/sim/types';
 
 function createOfficer(id: string, cycle: number): Officer {
   return {

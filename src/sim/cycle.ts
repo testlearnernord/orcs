@@ -2,20 +2,20 @@ import {
   KING_UNSTABLE_DURATION,
   PROMOTION_THRESHOLDS,
   RANK_QUOTAS
-} from '@sim/constants';
+} from './constants';
 import {
   createDeathEntry,
   createGeneralEntry,
   createPromotionEntry,
   createSpawnEntry
-} from '@sim/feed';
-import { addMemory, createOfficer } from '@sim/officerFactory';
+} from './feed';
+import { addMemory, createOfficer } from './officerFactory';
 import {
   expireBloodOaths,
   collectBloodOathVictims,
   seedSpawnRelationships
-} from '@sim/relationships';
-import { RNG } from '@sim/rng';
+} from './relationships';
+import { RNG } from './rng';
 import type {
   CycleSummary,
   FeedEntry,
@@ -23,12 +23,12 @@ import type {
   Rank,
   WarcallPlan,
   WorldState
-} from '@sim/types';
+} from './types';
 import {
   enqueuePlannedWarcalls,
   planWarcall,
   resolveDueWarcalls
-} from '@sim/warcall';
+} from './warcall';
 
 function countByRank(officers: Officer[]): Record<Rank, number> {
   const counts: Record<Rank, number> = {

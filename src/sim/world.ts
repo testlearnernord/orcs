@@ -1,8 +1,8 @@
-import { RANK_QUOTAS } from '@sim/constants';
-import { addMemory, createOfficer } from '@sim/officerFactory';
-import { seedSpawnRelationships } from '@sim/relationships';
-import { RNG } from '@sim/rng';
-import type { Officer, Rank, WorldState } from '@sim/types';
+import { RANK_QUOTAS } from './constants';
+import { addMemory, createOfficer } from './officerFactory';
+import { seedSpawnRelationships } from './relationships';
+import { RNG } from './rng';
+import type { Officer, Rank, WorldState } from './types';
 
 export function createWorld(
   seed: string,

@@ -1,8 +1,8 @@
-import { TRAIT_COMBAT_WEIGHTS } from '@sim/constants';
-import { createWarcallEntry } from '@sim/feed';
-import { addMemory } from '@sim/officerFactory';
-import { relationshipModifier } from '@sim/relationships';
-import { RNG } from '@sim/rng';
+import { TRAIT_COMBAT_WEIGHTS } from './constants';
+import { createWarcallEntry } from './feed';
+import { addMemory } from './officerFactory';
+import { relationshipModifier } from './relationships';
+import { RNG } from './rng';
 import type {
   Officer,
   OrcId,
@@ -10,7 +10,7 @@ import type {
   WarcallPlan,
   WarcallResolution,
   WorldState
-} from '@sim/types';
+} from './types';
 
 const LOCATIONS = [
   'Schädelhügel',

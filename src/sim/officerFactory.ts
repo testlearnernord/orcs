@@ -1,6 +1,6 @@
-import { getPortraitSeed } from '@sim/portraits';
-import { RNG } from '@sim/rng';
-import type { Memory, Officer, Personality, Rank, Trait } from '@sim/types';
+import { getPortraitSeed } from './portraits';
+import { RNG } from './rng';
+import type { Memory, Officer, Personality, Rank, Trait } from './types';
 
 const NAME_PREFIX = [
   'Bog',

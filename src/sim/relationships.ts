@@ -1,14 +1,14 @@
-import { BLOOD_OATH_DURATION, RELATIONSHIP_BONUS } from '@sim/constants';
-import { createRelationshipEntry } from '@sim/feed';
-import { addMemory } from '@sim/officerFactory';
+import { BLOOD_OATH_DURATION, RELATIONSHIP_BONUS } from './constants';
+import { createRelationshipEntry } from './feed';
+import { addMemory } from './officerFactory';
 import type {
   FeedEntry,
   Officer,
   Relationship,
   RelationshipType,
   WorldState
-} from '@sim/types';
-import { RNG } from '@sim/rng';
+} from './types';
+import { RNG } from './rng';
 
 function replaceRelationship(
   officer: Officer,

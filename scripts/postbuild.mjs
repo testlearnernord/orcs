@@ -1,44 +1,49 @@
-import { existsSync, readdirSync, writeFileSync } from 'node:fs';
+import { copyFileSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const assetsDir = new URL('../docs/assets/', import.meta.url);
-const stubPath = new URL('../docs/index.js', import.meta.url);
+const here = dirname(fileURLToPath(import.meta.url));
+const docsDir = join(here, '..', 'docs');
+const htmlPath = join(docsDir, 'index.html');
 
-if (!existsSync(assetsDir)) {
-  console.log('Keine assets/-Mappe gefunden – verwende vorhandenes Bundle.');
-} else {
-  const files = readdirSync(assetsDir, { withFileTypes: true })
-    .filter((entry) => entry.isFile())
-    .map((entry) => entry.name)
-    .filter((name) => /^index-.*\.js$/i.test(name));
+let html = readFileSync(htmlPath, 'utf8');
 
-  if (files.length === 0) {
-    if (existsSync(stubPath)) {
-      console.log('Kein Hash-Bundle gefunden, nutze docs/index.js direkt.');
-    } else {
-      throw new Error(
-        'Kein Vite-Bundle gefunden (docs/assets/index-*.js fehlt).'
-      );
-    }
-  } else {
-    files.sort();
-    const entryFile = files[files.length - 1];
-    const banner =
-      '// Auto-generiert: Stabiler Einstiegspunkt für GitHub Pages.\n';
-    const content = `${banner}import "./assets/${entryFile}";\n`;
-    writeFileSync(stubPath, content, 'utf8');
-    console.log(`Schreibe docs/index.js -> assets/${entryFile}`);
-  }
-    throw new Error(
-      'Kein Vite-Bundle gefunden (docs/assets/index-*.js fehlt).'
-    );
-  }
-
-  files.sort();
-  const entryFile = files[files.length - 1];
-  const stubPath = new URL('../docs/index.js', import.meta.url);
-  const banner =
-    '// Auto-generiert: Stabiler Einstiegspunkt für GitHub Pages.\n';
-  const content = `${banner}import "./assets/${entryFile}";\n`;
-  writeFileSync(stubPath, content, 'utf8');
-  console.log(`Schreibe docs/index.js -> assets/${entryFile}`);
+function promoteAsset(
+  htmlContent,
+  pattern,
+  replacement,
+  sourceFile,
+  targetFile
+) {
+  if (!sourceFile) return htmlContent;
+  const sourcePath = join(docsDir, 'assets', sourceFile);
+  const targetPath = join(docsDir, targetFile);
+  copyFileSync(sourcePath, targetPath);
+  return htmlContent.replace(pattern, replacement);
 }
+
+const scriptMatch = html.match(/src="\/orcs\/assets\/([^"']+\.js)"/);
+if (!scriptMatch) {
+  throw new Error('Bundle script not found in docs/index.html');
+}
+html = promoteAsset(
+  html,
+  /src="\/orcs\/assets\/[^"']+\.js"/,
+  'src="./index.js"',
+  scriptMatch[1],
+  'index.js'
+);
+
+const cssMatch = html.match(/href="\/orcs\/assets\/([^"']+\.css)"/);
+if (cssMatch) {
+  html = promoteAsset(
+    html,
+    /href="\/orcs\/assets\/[^"']+\.css"/,
+    'href="./index.css"',
+    cssMatch[1],
+    'index.css'
+  );
+}
+
+writeFileSync(htmlPath, html, 'utf8');
+console.log('docs/index.html rewritten to use relative index assets.');

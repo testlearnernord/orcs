@@ -1,6 +1,6 @@
-import type { Officer } from '@sim/types';
-import { Z_LAYERS } from '@ui/layers';
-import { UIContainer } from '@ui/primitives';
+import type { Officer } from '../../sim/types';
+import { Z_LAYERS } from '../layers';
+import { UIContainer } from '../primitives';
 
 const RANK_LAYER: Record<Officer['rank'], number> = {
   König: Z_LAYERS.HERRSCHAFT,

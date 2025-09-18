@@ -1,4 +1,4 @@
-import type { FeedEntry, Rank, Trait } from '@sim/types';
+import type { FeedEntry, Rank, Trait } from './types';
 
 export const TOTAL_ACTIVE_OFFICERS = 20;
 

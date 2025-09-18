@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { advanceCycle } from '@sim/cycle';
-import { BLOOD_OATH_DURATION } from '@sim/constants';
-import { formRelationship, collectBloodOathVictims } from '@sim/relationships';
-import { RNG } from '@sim/rng';
-import { createWorld } from '@sim/world';
+import { advanceCycle } from '../../src/sim/cycle';
+import { BLOOD_OATH_DURATION } from '../../src/sim/constants';
+import {
+  formRelationship,
+  collectBloodOathVictims
+} from '../../src/sim/relationships';
+import { RNG } from '../../src/sim/rng';
+import { createWorld } from '../../src/sim/world';
 
 describe('blood oath', () => {
   it('expires after ten cycles and converts the bond', () => {

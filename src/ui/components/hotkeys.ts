@@ -1,5 +1,5 @@
-import { Z_LAYERS } from '@ui/layers';
-import { UIContainer } from '@ui/primitives';
+import { Z_LAYERS } from '../layers';
+import { UIContainer } from '../primitives';
 
 export interface HotkeyButton {
   key: string;
@@ -15,22 +15,15 @@ const DEFAULT_HOTKEYS: HotkeyButton[] = [
 ];
 
 export class HotkeyBar extends UIContainer {
-  readonly buttons: HotkeyButton[];
-  onChanged?: () => void;
-=======
+  readonly buttons: HotkeyButton[] = DEFAULT_HOTKEYS.map((b) => ({ ...b }));
 
   constructor() {
     super({ x: 0, y: 0 });
-    this.buttons = DEFAULT_HOTKEYS.map((button) => ({ ...button }));
     this.setDepth(Z_LAYERS.FEED + 10).setScrollFactor(0);
   }
 
   toggle(key: string, visible: boolean): void {
-    const button = this.buttons.find((entry) => entry.key === key);
-    if (button) {
-      button.visible = visible;
-      this.onChanged?.();
-=======
-    }
+    const b = this.buttons.find((x) => x.key === key);
+    if (b) b.visible = visible;
   }
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { Officer } from '@sim/types';
-import { OfficerToken } from '@ui/components/officerToken';
+import type { Officer } from '../../src/sim/types';
+import { OfficerToken } from '../../src/ui/components/officerToken';
 
 const officer: Officer = {
   id: 'o1',

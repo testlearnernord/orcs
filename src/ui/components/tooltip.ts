@@ -1,7 +1,7 @@
-import type { WarcallResolution } from '@sim/types';
-import { warcallTooltip } from '@sim/warcall';
-import { Z_LAYERS } from '@ui/layers';
-import { UIContainer } from '@ui/primitives';
+import type { WarcallResolution } from '../../sim/types';
+import { warcallTooltip } from '../../sim/warcall';
+import { Z_LAYERS } from '../layers';
+import { UIContainer } from '../primitives';
 
 export class TooltipBreakdown extends UIContainer {
   text = '';

@@ -1,9 +1,9 @@
-import { advanceCycle } from '@sim/cycle';
-import { RNG } from '@sim/rng';
-import type { CycleSummary, WorldState } from '@sim/types';
-import { createWorld } from '@sim/world';
-import { EventBus } from '@state/eventBus';
-import type { GameEvents } from '@state/events';
+import { advanceCycle } from '../sim/cycle';
+import { RNG } from '../sim/rng';
+import type { CycleSummary, WorldState } from '../sim/types';
+import { createWorld } from '../sim/world';
+import { EventBus } from './eventBus';
+import type { GameEvents } from './events';
 
 export class GameStore {
   readonly events = new EventBus<GameEvents>();

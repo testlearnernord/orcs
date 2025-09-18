@@ -1,18 +1,19 @@
 {
   "name": "orcs",
-  "version": "1.0.0",
+  "version": "0.6.1",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build && node scripts/postbuild.mjs",
+    "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "postbuild": "node scripts/postbuild.mjs",
     "prepare": "husky install",
     "generate:orcs": "tsx scripts/generate-orcs.ts"
   },

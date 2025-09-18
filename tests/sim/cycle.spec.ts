@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { advanceCycle } from '@sim/cycle';
-import { createWorld } from '@sim/world';
-import { RNG } from '@sim/rng';
-import type { WarcallPlan } from '@sim/types';
+import { advanceCycle } from '../../src/sim/cycle';
+import { createWorld } from '../../src/sim/world';
+import { RNG } from '../../src/sim/rng';
+import type { WarcallPlan } from '../../src/sim/types';
 
 function buildWarcall(participants: string[], resolveOn: number): WarcallPlan {
   return {

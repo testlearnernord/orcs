@@ -1,6 +1,6 @@
-import type { FeedEntry } from '@sim/types';
-import { Z_LAYERS } from '@ui/layers';
-import { UIContainer } from '@ui/primitives';
+import type { FeedEntry } from '../../sim/types';
+import { Z_LAYERS } from '../layers';
+import { UIContainer } from '../primitives';
 
 export interface FeedLine {
   text: string;
