@@ -27,4 +27,5 @@ jobs:
             echo "docs/index.html must not reference the dev entry (src/main.ts)" >&2
             exit 1
           fi
+=======
       - run: npm run build

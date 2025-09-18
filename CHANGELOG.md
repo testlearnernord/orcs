@@ -5,6 +5,7 @@
 - Whitescreen & 404 durch fehlerhafte Vite-Config und falschen Entry
 - Merge-Konflikte bereinigt, CI wieder grün
 - Fix GitHub Pages: serve docs build, remove dev index from deployment
+=======
 
 ### Changed
 
