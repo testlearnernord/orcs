@@ -21,4 +21,11 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test
+      - name: ensure docs bundle is built output
+        run: |
+          if grep -E 'src="/?src/main\.ts"' docs/index.html; then
+            echo "docs/index.html must not reference the dev entry (src/main.ts)" >&2
+            exit 1
+          fi
+=======
       - run: npm run build
