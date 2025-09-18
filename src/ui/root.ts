@@ -8,6 +8,9 @@ import type {
   WorldState
 } from '@sim/types';
 import type { GameStore } from '@state/store';
+=======
+import type { GameStore } from '@state/store';
+import type { Officer, WarcallResolution } from '@sim/types';
 import { FeedView } from '@ui/components/feed';
 import { GraveyardPanel } from '@ui/components/graveyard';
 import { HotkeyBar } from '@ui/components/hotkeys';
@@ -50,6 +53,7 @@ function sanitizeClass(value: string): string {
     .replace(/[^a-z0-9]+/g, '-');
 }
 
+=======
 export class NemesisUI {
   readonly feed = new FeedView();
   readonly tooltip = new TooltipBreakdown();
@@ -88,6 +92,12 @@ export class NemesisUI {
       this.renderFullState(this.currentState);
       this.bindHotkeys();
     }
+=======
+  private readonly tokens = new Map<string, OfficerToken>();
+
+  constructor(private readonly store: GameStore) {
+    this.syncOfficers(store.getState().officers);
+    this.graveyard = new GraveyardPanel(store.getState().graveyard);
 
     store.events.on('feed:appended', (entries) => {
       this.feed.render(entries);
@@ -111,6 +121,11 @@ export class NemesisUI {
         this.renderOfficerSections();
         this.renderFeedHistory(state.feed);
       }
+=======
+    });
+
+    store.events.on('state:changed', (state) => {
+      this.syncOfficers(state.officers);
     });
 
     store.events.on('cycle:completed', (summary) => {
@@ -337,6 +352,7 @@ export class NemesisUI {
     }
   }
 
+=======
   private syncOfficers(officers: Officer[]): void {
     this.tokens.clear();
     officers.forEach((officer) => {
@@ -550,6 +566,7 @@ export class NemesisUI {
     }
   }
 
+=======
   getToken(id: string): OfficerToken | undefined {
     return this.tokens.get(id);
   }
@@ -568,6 +585,7 @@ export class NemesisUI {
         this.hideTooltip();
       }, 5000);
     }
+=======
   }
 
   hideTooltip(): void {
@@ -575,5 +593,6 @@ export class NemesisUI {
     if (!this.tooltipElement) return;
     this.tooltipElement.classList.remove('warcall-tooltip--visible');
     this.tooltipElement.setAttribute('aria-hidden', 'true');
+=======
   }
 }

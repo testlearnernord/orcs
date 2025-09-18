@@ -3,3 +3,1100 @@ Basis: ${A.base.toFixed(2)}
 Traits: ${A.traits.toFixed(2)}
 Beziehungen: ${A.relationships.toFixed(2)}
 Zufall: ${A.random.toFixed(2)}`:"Keine Daten"}function AA(t){const A={König:0,Spieler:0,Captain:0,Späher:0,Grunzer:0};return t.forEach(e=>{A[e.rank]+=1}),A}function vA(t,A){return t.map(e=>({...e,relationships:e.relationships.filter(i=>!A.has(i.with))}))}function VA(t,A,e){const i=[],n=[];if(A.size===0)return{feed:i,deadIds:n};t.officers=vA(t.officers,A);for(const c of A){const s=t.officers.find(a=>a.id===c);if(!s)continue;const r=h({...s,status:"DEAD",cycleDied:t.cycle},{cycle:t.cycle,category:"DEATH",summary:`Gefallen in Zyklus ${t.cycle}`});i.push(oA(e,t.cycle,r,"im Blutrausch")),n.push(r.id),t.graveyard=[{...r},...t.graveyard],t.officers=t.officers.filter(a=>a.id!==c)}return{feed:i,deadIds:n}}function HA(t,A,e){if(t.officers.find(r=>r.id===t.kingId)||t.officers.length===0)return;const c={...[...t.officers].sort((r,a)=>a.merit-r.merit)[0],rank:"König"};t.kingId=c.id,t.kingStatus="UNGEFESTIGT",t.kingStatusExpires=t.cycle+rA,t.officers=t.officers.map(r=>r.id===c.id?c:r),e.push(H(A,t.cycle,`${c.name} besteigt als UNGEFESTIGT den Thron.`));const s=h(c,{cycle:t.cycle,category:"PROMOTION",summary:"Zum König erhoben"});t.officers=t.officers.map(r=>r.id===s.id?s:r)}function WA(t,A,e){const i=[],n=[],c=AA(t.officers);return Object.keys(F).forEach(s=>{const r=F[s];for(;c[s]+n.filter(a=>a.rank===s).length<r;){let a=q(A,s,e);a=h(a,{cycle:e,category:"SPAWN",summary:"Neu in der Horde"}),t.officers.push(a),n.push(a),i.push(aA(A,e,a));const l=$(t,a,A);i.push(...l)}}),{spawns:n,feed:i}}function KA(t,A){const e=[],i=[],n=AA(t.officers),c=[...t.officers].sort((s,r)=>r.merit-s.merit);for(const s of c){const r=iA[s.rank];if(r.promoteAt!==void 0&&r.promoteTo&&s.merit>=r.promoteAt&&n[r.promoteTo]<F[r.promoteTo]){n[s.rank]-=1,n[r.promoteTo]+=1;const a=h({...s,rank:r.promoteTo},{cycle:t.cycle,category:"PROMOTION",summary:`Aufstieg zu ${r.promoteTo}`});t.officers=t.officers.map(l=>l.id===a.id?a:l),i.push({officerId:s.id,from:s.rank,to:r.promoteTo}),e.push(lA(A,t.cycle,a,r.promoteTo));continue}if(r.demoteBelow!==void 0&&r.demoteTo&&s.merit<r.demoteBelow){n[s.rank]-=1,n[r.demoteTo]+=1;const a=h({...s,rank:r.demoteTo},{cycle:t.cycle,category:"PROMOTION",summary:`Abstieg zu ${r.demoteTo}`});t.officers=t.officers.map(l=>l.id===a.id?a:l),i.push({officerId:s.id,from:s.rank,to:r.demoteTo}),e.push(H(A,t.cycle,`${a.name} wird zum ${r.demoteTo} zurückgestuft.`))}}return{promotions:i,feed:e}}function MA(t,A,e){t.kingStatus==="UNGEFESTIGT"&&t.cycle>=t.kingStatusExpires&&(t.kingStatus="GEFESTIGT",e.push(H(A,t.cycle,"Der König gilt wieder als GEFESTIGT.")))}function zA(t,A){const e=[],i=1+t.cycle%2;for(let n=0;n<i;n+=1){const c=TA(t,A,t.cycle);c&&e.push(c)}return GA(t,e),e}function YA(t){return[...t].sort((A,e)=>A.priority===e.priority?A.id.localeCompare(e.id):e.priority-A.priority)}function ZA(t,A){t.cycle+=1;const e=[];MA(t,A,e);const i=QA(t,t.cycle,A);e.push(...i);const n=xA(t,A);n.forEach(u=>{e.push(...u.feed)});const c=new Set;n.forEach(u=>u.casualties.forEach(B=>c.add(B))),XA(t,c,t.cycle).forEach(u=>c.add(u));const r=VA(t,c,A);e.push(...r.feed),HA(t,A,e);const{spawns:a,feed:l}=WA(t,A,t.cycle);e.push(...l);const E=zA(t,A),g=KA(t,A);e.push(...g.feed);const d=YA(e);return t.feed=[...t.feed,...d].slice(-120),{cycle:t.cycle,warcallsResolved:n,warcallsPlanned:E,deaths:r.deadIds,spawns:a,promotions:g.promotions,feed:d}}class T{constructor(A){o(this,"state");let e=0;const i=typeof A=="number"?A.toString():A;for(let n=0;n<i.length;n+=1)e=(e<<5)-e+i.charCodeAt(n),e|=0;this.state=e||1831565813}next(){let A=this.state;return A^=A<<13,A^=A>>>17,A^=A<<5,this.state=A,(A>>>0)/4294967296}int(A,e){return Math.floor(this.next()*(e-A+1))+A}pick(A){if(A.length===0)throw new Error("Cannot pick from empty array");return A[Math.floor(this.next()*A.length)]}shuffle(A){const e=[...A];for(let i=e.length-1;i>0;i-=1){const n=Math.floor(this.next()*(i+1));[e[i],e[n]]=[e[n],e[i]]}return e}chance(A){return this.next()<A}fork(A){return new T(`${A}:${this.state}`)}}function DA(t,A=new T(t)){const e={seed:t,cycle:0,officers:[],graveyard:[],warcalls:[],kingId:"",kingStatus:"GEFESTIGT",kingStatusExpires:0,feed:[]};Object.keys(F).forEach(n=>{const c=F[n];for(let s=0;s<c;s+=1){let r=q(A,n,e.cycle);r=h(r,{cycle:0,category:"SPAWN",summary:"Teil des Ausgangszugs"}),e.officers.push(r),$(e,r,A)}});const i=e.officers.find(n=>n.rank==="König");return i?e.kingId=i.id:e.officers.length>0&&(e.kingId=e.officers[0].id,e.officers[0]={...e.officers[0],rank:"König"}),e}class PA{constructor(){o(this,"listeners",new Map)}on(A,e){const i=this.listeners.get(A)??new Set;return i.add(e),this.listeners.set(A,i),()=>this.off(A,e)}off(A,e){const i=this.listeners.get(A);i&&(i.delete(e),i.size===0&&this.listeners.delete(A))}emit(A,e){const i=this.listeners.get(A);i&&i.forEach(n=>{n(e)})}}class qA{constructor(A){o(this,"events",new PA);o(this,"rng");o(this,"state");this.rng=new T(A),this.state=DA(A,this.rng)}getState(){return this.state}tick(){const A=ZA(this.state,this.rng);return this.events.emit("cycle:completed",A),A.feed.length>0&&this.events.emit("feed:appended",A.feed),this.events.emit("graveyard:changed",this.state.graveyard),this.events.emit("state:changed",this.state),A}}const S={MODAL:900,TOOLTIP:800,FEED:700,HERRSCHAFT:400,CAPTAINS:300,SPAEHER:200,GRUNZER:100};class jA{constructor(A,e,i){this.x=A,this.y=e,this.radius=i}contains(A){const e=A.x-this.x,i=A.y-this.y;return e*e+i*i<=this.radius*this.radius}}class L{constructor(A={x:0,y:0}){o(this,"children",[]);o(this,"depth",0);o(this,"scrollFactor",1);o(this,"hitArea");o(this,"visible",!0);this.position=A}add(A){this.children.push(A)}setDepth(A){return this.depth=A,this}setScrollFactor(A){return this.scrollFactor=A,this}setCircleHitArea(A){return this.hitArea=new jA(this.position.x,this.position.y,A),this}hitTest(A){return this.hitArea?this.hitArea.contains(A):!1}}function $A(t,A){const e=[];let i=t;for(;i.length>A;)e.push(i.slice(0,A)),i=i.slice(A);return i.length>0&&e.push(i),e}function _A(t,A){const e=t.split(/\s+/),i=[];let n="";for(const c of e){const s=c.length>A?$A(c,A):[c];for(const r of s){if(n.length===0){n=r;continue}(n+" "+r).length<=A?n=`${n} ${r}`:(i.push(n),n=r)}}return n.length>0&&i.push(n),i}class Ae extends L{constructor(e=420,i=18,n=6){super({x:0,y:0});o(this,"width");o(this,"lineHeight");o(this,"lineSpacing");o(this,"layout",[]);this.width=e,this.lineHeight=i,this.lineSpacing=n,this.setDepth(S.FEED)}render(e){const i=[],n=Math.max(10,Math.floor(this.width/8));let c=0;return e.forEach(s=>{const r=_A(s.text,n);r.forEach((a,l)=>{i.push({text:a,y:c}),l<r.length-1&&(c+=this.lineHeight+this.lineSpacing)}),c+=this.lineHeight+this.lineSpacing}),this.layout=i,i}getLines(){return this.layout}}class D extends L{constructor(e,i={}){super({x:0,y:0});o(this,"entries");o(this,"rowHeight");o(this,"viewHeight");o(this,"offset",0);o(this,"isOpen",!0);this.entries=e.map(n=>({id:n.id,name:n.name,cycle:n.cycleDied??0})),this.rowHeight=i.rowHeight??36,this.viewHeight=i.viewHeight??180,this.setDepth(S.MODAL)}get scrollOffset(){return this.offset}get maxScroll(){return Math.max(0,this.entries.length*this.rowHeight-this.viewHeight)}get viewportHeight(){return this.viewHeight}getEntries(){return[...this.entries]}scroll(e){this.offset=Math.min(this.maxScroll,Math.max(0,this.offset+e))}onWheel(e){this.scroll(e)}close(){this.isOpen=!1}open(){this.isOpen=!0}listVisible(){const e=Math.floor(this.offset/this.rowHeight),i=Math.ceil(this.viewHeight/this.rowHeight);return this.entries.slice(e,e+i)}}const ee=[{key:"E",label:"Cycle",scrollFactor:0,visible:!0},{key:"R",label:"Neu",scrollFactor:0,visible:!0},{key:"SPACE",label:"Skip",scrollFactor:0,visible:!0}];class te extends L{constructor(){super({x:0,y:0});o(this,"buttons");o(this,"onChanged");this.buttons=ee.map(e=>({...e})),this.setDepth(S.FEED+10).setScrollFactor(0)}toggle(e,i){var c;const n=this.buttons.find(s=>s.key===e);n&&(n.visible=i,(c=this.onChanged)==null||c.call(this))}}const ie={König:S.HERRSCHAFT,Spieler:S.HERRSCHAFT,Captain:S.CAPTAINS,Späher:S.SPAEHER,Grunzer:S.GRUNZER};class ne extends L{constructor(e,i=48){super({x:0,y:0});o(this,"officer");o(this,"badges");this.officer=e,this.badges=e.traits,this.setCircleHitArea(i),this.setDepth(ie[e.rank])}isPointInside(e,i){return this.hitTest({x:e,y:i})}}class ce extends L{constructor(){super({x:0,y:0});o(this,"text","");this.setDepth(S.TOOLTIP).setScrollFactor(0)}show(e){this.text=NA(e),this.visible=!0}hide(){this.visible=!1}}const se=["König","Spieler","Captain","Späher","Grunzer"],re={ALLY:"Allianz",RIVAL:"Rivale",BLOOD_OATH:"Blutpakt",FRIEND:"Freund"},ae={ALLY:"relation--ally",RIVAL:"relation--rival",BLOOD_OATH:"relation--blood-oath",FRIEND:"relation--friend"},oe={DEATH:"feed-item--death",SPAWN:"feed-item--spawn",PROMOTION:"feed-item--promotion",WARCALL:"feed-item--warcall",RELATIONSHIP:"feed-item--relationship",GENERAL:"feed-item--general"};function O(){return typeof document<"u"}function P(t){return t.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g,"-")}class le{constructor(A){o(this,"feed",new Ae);o(this,"tooltip",new ce);o(this,"hotkeys",new te);o(this,"graveyard",null);o(this,"tokens",new Map);o(this,"currentState",null);o(this,"cycleLabel",null);o(this,"kingNameLabel",null);o(this,"kingStatusBadge",null);o(this,"officerContainers",{König:null,Spieler:null,Captain:null,Späher:null,Grunzer:null});o(this,"feedElement",null);o(this,"tooltipElement",null);o(this,"hotkeyContainer",null);o(this,"hotkeyButtons",new Map);o(this,"graveyardOverlay",null);o(this,"graveyardList",null);o(this,"graveyardVisible",!1);o(this,"tooltipTimer",null);o(this,"handleKeyDown",A=>{const e=A.code==="Space"?"space":A.key.toLowerCase();if(e==="escape"&&this.graveyardVisible){A.preventDefault(),this.toggleGraveyard(!1);return}(e==="e"||e==="space"||e==="r")&&(A.preventDefault(),this.handleHotkey(e))});this.store=A,this.currentState=A.getState(),this.syncOfficers(this.currentState.officers),this.graveyard=new D(this.currentState.graveyard),this.hotkeys.onChanged=()=>this.renderHotkeys(),O()&&(this.mountDom(),this.renderFullState(this.currentState),this.bindHotkeys()),A.events.on("feed:appended",e=>{this.feed.render(e)}),A.events.on("graveyard:changed",e=>{this.graveyard=new D(e),this.graveyardVisible&&this.graveyard.open(),O()&&this.renderGraveyard()}),A.events.on("state:changed",e=>{this.currentState=e,this.syncOfficers(e.officers),O()&&(this.updateHeader(e),this.renderOfficerSections(),this.renderFeedHistory(e.feed))}),A.events.on("cycle:completed",e=>{const i=e.warcallsResolved.at(-1);i&&this.showWarcall(i)})}mountDom(){if(!O())return;const A=document.getElementById("app");if(!A)return;A.innerHTML="";const e=document.createElement("div");e.className="nemesis-app",A.appendChild(e);const i=document.createElement("header");i.className="nemesis-header";const n=document.createElement("h1");n.className="nemesis-title",n.textContent="Nemesis Hof",i.appendChild(n);const c=document.createElement("div");c.className="nemesis-status";const s=document.createElement("span");s.className="nemesis-status__item",s.textContent="Zyklus ";const r=document.createElement("strong");r.className="nemesis-status__value",s.appendChild(r),this.cycleLabel=r,c.appendChild(s);const a=document.createElement("span");a.className="nemesis-status__item",a.textContent="König: ";const l=document.createElement("strong");l.className="nemesis-status__value",a.appendChild(l),this.kingNameLabel=l,c.appendChild(a);const E=document.createElement("span");E.className="king-badge",c.appendChild(E),this.kingStatusBadge=E,i.appendChild(c);const g=document.createElement("button");g.type="button",g.className="graveyard-toggle",g.textContent="Friedhof",g.addEventListener("click",()=>this.toggleGraveyard()),i.appendChild(g),e.appendChild(i);const d=document.createElement("div");d.className="nemesis-layout",e.appendChild(d);const u=document.createElement("main");u.className="nemesis-ranks",d.appendChild(u),se.forEach(m=>{const f=document.createElement("section");f.className=`rank-section rank-section--${P(m)}`;const z=document.createElement("h2");z.textContent=m,f.appendChild(z);const V=document.createElement("div");V.className="officer-grid",f.appendChild(V),u.appendChild(f),this.officerContainers[m]=V});const B=document.createElement("aside");B.className="nemesis-sidebar",d.appendChild(B);const k=document.createElement("section");k.className="feed-section";const C=document.createElement("h2");C.textContent="Chronik",k.appendChild(C);const x=document.createElement("ul");x.className="feed-list",k.appendChild(x),B.appendChild(k),this.feedElement=x;const U=document.createElement("div");U.className="warcall-tooltip",U.setAttribute("aria-hidden","true"),B.appendChild(U),this.tooltipElement=U;const R=document.createElement("section");R.className="hotkey-section";const K=document.createElement("h3");K.textContent="Hotkeys",R.appendChild(K);const G=document.createElement("div");G.className="hotkey-buttons",R.appendChild(G),B.appendChild(R),this.hotkeyContainer=G,this.renderHotkeys();const y=document.createElement("div");y.className="graveyard-overlay",y.setAttribute("aria-hidden","true");const N=document.createElement("div");N.className="graveyard-panel";const v=document.createElement("div");v.className="graveyard-panel__header";const M=document.createElement("h3");M.textContent="Friedhof";const X=document.createElement("button");X.type="button",X.className="graveyard-panel__close",X.textContent="Schließen",X.addEventListener("click",()=>this.toggleGraveyard(!1)),v.append(M,X);const p=document.createElement("ul");p.className="graveyard-list",p.addEventListener("scroll",()=>{if(!this.graveyard)return;const f=p.scrollTop-this.graveyard.scrollOffset;f!==0&&this.graveyard.scroll(f)}),N.append(v,p),y.appendChild(N),y.addEventListener("click",m=>{m.target===y&&this.toggleGraveyard(!1)}),e.appendChild(y),this.graveyardOverlay=y,this.graveyardList=p}bindHotkeys(){typeof window>"u"||window.addEventListener("keydown",this.handleKeyDown)}handleHotkey(A){const e=A.toUpperCase();e==="E"||e==="SPACE"?this.store.tick():e==="R"&&typeof window<"u"&&window.location.reload()}renderHotkeys(){this.hotkeyContainer&&(this.hotkeyContainer.innerHTML="",this.hotkeyButtons.clear(),this.hotkeys.buttons.forEach(A=>{var i;const e=document.createElement("button");e.type="button",e.className="hotkey-button",e.dataset.key=A.key,e.textContent=`${A.key} — ${A.label}`,e.disabled=!A.visible,e.addEventListener("click",()=>this.handleHotkey(A.key)),(i=this.hotkeyContainer)==null||i.appendChild(e),this.hotkeyButtons.set(A.key,e)}))}renderFullState(A){this.updateHeader(A),this.renderOfficerSections(),this.renderFeedHistory(A.feed),this.renderGraveyard()}updateHeader(A){if(!this.cycleLabel||!this.kingStatusBadge||!this.kingNameLabel)return;this.cycleLabel.textContent=A.cycle.toString();const e=A.officers.find(i=>i.id===A.kingId)??A.graveyard.find(i=>i.id===A.kingId);this.kingNameLabel.textContent=e?e.name:"Unbekannt",this.kingStatusBadge.textContent=A.kingStatus,this.kingStatusBadge.dataset.state=A.kingStatus,A.kingStatus==="UNGEFESTIGT"?this.kingStatusBadge.classList.add("king-badge--unstable"):this.kingStatusBadge.classList.remove("king-badge--unstable")}syncOfficers(A){this.tokens.clear(),A.forEach(e=>{this.tokens.set(e.id,new ne(e))})}renderOfficerSections(){if(!this.currentState)return;const A=this.buildOfficerNameMap(),e={König:[],Spieler:[],Captain:[],Späher:[],Grunzer:[]};this.currentState.officers.forEach(i=>{e[i.rank].push(i)}),Object.keys(e).forEach(i=>{const n=this.officerContainers[i];n&&(n.innerHTML="",e[i].slice().sort((c,s)=>s.merit-c.merit).forEach(c=>{const s=this.buildOfficerCard(c,A);n.appendChild(s)}))})}buildOfficerCard(A,e){const i=document.createElement("article");i.className=`officer-card officer-card--${P(A.rank)}`,A.status==="DEAD"&&i.classList.add("officer-card--dead"),this.currentState&&A.id===this.currentState.kingId&&i.classList.add("officer-card--king");const n=document.createElement("div");n.className="officer-card__portrait";const c=document.createElement("img");if(c.src=CA(A.portraitSeed),c.alt=`${A.name} Portrait`,n.appendChild(c),A.status==="DEAD"){const d=document.createElement("span");d.className="officer-card__status",d.textContent="✖",n.appendChild(d)}i.appendChild(n);const s=document.createElement("div");s.className="officer-card__info";const r=document.createElement("h3");r.textContent=A.name,s.appendChild(r);const a=document.createElement("p");a.className="officer-card__meta",a.textContent=`Lvl ${A.level} • Ruhm ${A.merit}`,s.appendChild(a);const l=document.createElement("div");l.className="officer-card__traits",A.traits.forEach(d=>{const u=document.createElement("span");u.className="trait-badge",u.textContent=d,l.appendChild(u)}),s.appendChild(l);const E=document.createElement("div");if(E.className="officer-card__personality",["gier","tapferkeit","loyalitaet","stolz"].forEach(d=>{const u=document.createElement("div");u.className="personality-meter";const B=document.createElement("span");B.className="personality-meter__label",B.textContent=d.charAt(0).toUpperCase()+d.slice(1);const k=document.createElement("div");k.className="personality-meter__bar";const C=document.createElement("div");C.className="personality-meter__fill",C.style.width=`${Math.round(A.personality[d]*100)}%`,k.appendChild(C),u.append(B,k),E.appendChild(u)}),s.appendChild(E),A.relationships.length>0){const d=document.createElement("ul");d.className="officer-card__relations",A.relationships.forEach(u=>{const B=document.createElement("li");B.className=`relation ${ae[u.type]}`;const k=document.createElement("span");k.className="relation__label",k.textContent=re[u.type];const C=document.createElement("span");C.className="relation__target",C.textContent=e.get(u.with)??u.with,B.append(k,C),d.appendChild(B)}),s.appendChild(d)}if(A.memories.length>0){const d=document.createElement("ul");d.className="officer-card__memories",A.memories.slice(-4).reverse().forEach(u=>{const B=document.createElement("li");B.textContent=`Z${u.cycle}: ${u.summary}`,d.appendChild(B)}),s.appendChild(d)}return i.appendChild(s),i}buildOfficerNameMap(){const A=new Map;return this.currentState&&(this.currentState.officers.forEach(e=>{A.set(e.id,e.name)}),this.currentState.graveyard.forEach(e=>{A.set(e.id,e.name)})),A}renderFeedHistory(A){this.feed.render(A),this.feedElement&&(this.feedElement.innerHTML="",A.forEach(e=>{var s;const i=document.createElement("li");i.className=`feed-item ${oe[e.tone]}`;const n=document.createElement("span");n.className="feed-item__cycle",n.textContent=`Z${e.cycle}`;const c=document.createElement("span");c.className="feed-item__text",c.textContent=e.text,i.append(n,c),(s=this.feedElement)==null||s.appendChild(i)}),this.feedElement.scrollTop=this.feedElement.scrollHeight)}renderGraveyard(){!this.graveyardList||!this.graveyard||(this.graveyardList.innerHTML="",this.graveyardList.style.maxHeight=`${this.graveyard.viewportHeight}px`,this.graveyard.getEntries().forEach(A=>{var c;const e=document.createElement("li");e.className="graveyard-entry";const i=document.createElement("span");i.className="graveyard-entry__cycle",i.textContent=`Z${A.cycle}`;const n=document.createElement("span");n.className="graveyard-entry__name",n.textContent=A.name,e.append(i,n),(c=this.graveyardList)==null||c.appendChild(e)}),this.graveyardVisible&&(this.graveyardList.scrollTop=this.graveyard.scrollOffset))}toggleGraveyard(A){if(!this.graveyardOverlay||!this.graveyard)return;const e=A??!this.graveyardOverlay.classList.contains("is-visible");this.graveyardVisible=e,e?(this.graveyard.open(),this.graveyardOverlay.classList.add("is-visible"),this.graveyardOverlay.setAttribute("aria-hidden","false"),this.renderGraveyard()):(this.graveyard.close(),this.graveyardOverlay.classList.remove("is-visible"),this.graveyardOverlay.setAttribute("aria-hidden","true"))}getToken(A){return this.tokens.get(A)}showWarcall(A){this.tooltip.show(A),this.tooltipElement&&(this.tooltipElement.textContent=this.tooltip.text,this.tooltipElement.classList.add("warcall-tooltip--visible"),this.tooltipElement.setAttribute("aria-hidden","false"),typeof window<"u"&&(this.tooltipTimer&&window.clearTimeout(this.tooltipTimer),this.tooltipTimer=window.setTimeout(()=>{this.hideTooltip()},5e3)))}hideTooltip(){this.tooltip.hide(),this.tooltipElement&&(this.tooltipElement.classList.remove("warcall-tooltip--visible"),this.tooltipElement.setAttribute("aria-hidden","true"))}}const W=new qA("nemesis-seed"),de=new le(W);function ue(){W.tick()}typeof window<"u"&&(window.nemesis={store:W,ui:de,advanceCycle:ue});
+var B = Object.defineProperty;
+var C = (i, e, t) =>
+  e in i
+    ? B(i, e, { enumerable: !0, configurable: !0, writable: !0, value: t })
+    : (i[e] = t);
+var a = (i, e, t) => C(i, typeof e != 'symbol' ? e + '' : e, t);
+(function () {
+  const e = document.createElement('link').relList;
+  if (e && e.supports && e.supports('modulepreload')) return;
+  for (const o of document.querySelectorAll('link[rel="modulepreload"]')) n(o);
+  new MutationObserver((o) => {
+    for (const r of o)
+      if (r.type === 'childList')
+        for (const c of r.addedNodes)
+          c.tagName === 'LINK' && c.rel === 'modulepreload' && n(c);
+  }).observe(document, { childList: !0, subtree: !0 });
+  function t(o) {
+    const r = {};
+    return (
+      o.integrity && (r.integrity = o.integrity),
+      o.referrerPolicy && (r.referrerPolicy = o.referrerPolicy),
+      o.crossOrigin === 'use-credentials'
+        ? (r.credentials = 'include')
+        : o.crossOrigin === 'anonymous'
+          ? (r.credentials = 'omit')
+          : (r.credentials = 'same-origin'),
+      r
+    );
+  }
+  function n(o) {
+    if (o.ep) return;
+    o.ep = !0;
+    const r = t(o);
+    fetch(o.href, r);
+  }
+})();
+const A = { König: 1, Spieler: 1, Captain: 4, Späher: 4, Grunzer: 10 },
+  M = {
+    König: {},
+    Spieler: { demoteBelow: 120, demoteTo: 'Captain' },
+    Captain: {
+      promoteAt: 150,
+      promoteTo: 'Spieler',
+      demoteBelow: 40,
+      demoteTo: 'Späher'
+    },
+    Späher: {
+      promoteAt: 90,
+      promoteTo: 'Captain',
+      demoteBelow: 20,
+      demoteTo: 'Grunzer'
+    },
+    Grunzer: { promoteAt: 50, promoteTo: 'Späher' }
+  },
+  G = {
+    Feigling: -0.4,
+    Berserker: 0.45,
+    Hinterhältig: 0.3,
+    Trinkfest: 0.15,
+    Tierjäger: 0.2,
+    Intrigant: 0.25
+  },
+  z = { ALLY: 0.35, FRIEND: 0.2, RIVAL: -0.45, BLOOD_OATH: 0.5 },
+  _ = 10,
+  K = 5,
+  y = {
+    DEATH: 100,
+    SPAWN: 80,
+    PROMOTION: 70,
+    WARCALL: 60,
+    RELATIONSHIP: 50,
+    GENERAL: 10
+  };
+function T(i, e, t) {
+  return `${t}_${e}_${Math.floor(i.next() * 1e6)}`;
+}
+function E(i) {
+  return [
+    `Basis ${i.base.toFixed(2)}`,
+    `Traits ${i.traits.toFixed(2)}`,
+    `Beziehungen ${i.relationships.toFixed(2)}`,
+    `Zufall ${i.random.toFixed(2)}`
+  ].join(', ');
+}
+function W(i, e, t) {
+  const n = [
+      `${t.name} kippt beim Festmahl den Krug – Allianz besiegelt?`,
+      `${t.name} streift den Schlackennebel ab und schließt sich der Horde an.`,
+      `Im Schatten des Pilzwaldes hebt ${t.name} den Blutkrug – Willkommen in den Reihen.`,
+      `${t.name} brüllt durch den Hof und verlangt nach Ruhm.`,
+      `Zwischen Knochenfeuern schwört ${t.name} dem Kriegstrupp Treue.`
+    ],
+    o = i.pick(n);
+  return {
+    id: T(i, e, 'spawn'),
+    cycle: e,
+    text: o,
+    tone: 'SPAWN',
+    priority: y.SPAWN
+  };
+}
+function U(i, e, t, n) {
+  const o = [
+      `${t.name} fällt ${n} – die Halle verstummt.`,
+      `${t.name} sinkt in den Schatten, ${n} hallt nach.`,
+      `Blutige Sippe: ${t.name} erliegt ${n}.`,
+      `${t.name} zerbirst unter ${n}.`,
+      `Ein dumpfer Schlag, ein letzter Blick – ${t.name} findet sein Ende (${n}).`
+    ],
+    r = i.pick(o);
+  return {
+    id: T(i, e, 'death'),
+    cycle: e,
+    text: r,
+    tone: 'DEATH',
+    priority: y.DEATH
+  };
+}
+function V(i, e, t, n) {
+  const o = [
+    `${t.name} lässt den Trophäenkranz klirren – Aufstieg zum ${n}.`,
+    `${t.name} erkämpft sich den Titel ${n} mitten im Jubel.`,
+    `Ein neues Banner für ${t.name}: ${n}!`
+  ];
+  return {
+    id: T(i, e, 'promotion'),
+    cycle: e,
+    text: i.pick(o),
+    tone: 'PROMOTION',
+    priority: y.PROMOTION
+  };
+}
+function Z(i, e, t, n, o) {
+  const r = [
+      `${t.initiator} führt die Meute bei ${t.location} zum Sieg. (${E(o)})`,
+      `Im Sturm auf ${t.location} triumphiert der Trupp. (${E(o)})`
+    ],
+    c = [
+      `${t.location} verschlingt die Krieger – Warcall scheitert. (${E(o)})`,
+      `Der Ruf nach Krieg verhallt in ${t.location}. (${E(o)})`
+    ],
+    s = n ? i.pick(r) : i.pick(c);
+  return {
+    id: T(i, e, 'warcall'),
+    cycle: e,
+    text: s,
+    tone: 'WARCALL',
+    priority: y.WARCALL
+  };
+}
+function j(i, e, t, n, o) {
+  const c = {
+    ALLY: ['schmiedet', 'besiegelt', 'formt'],
+    RIVAL: ['reizt', 'verhöhnt', 'verletzt'],
+    BLOOD_OATH: ['ritzt', 'bindet', 'verschlingt'],
+    FRIEND: ['lacht mit', 'rauft freundschaftlich mit', 'teilt den Humpen mit']
+  }[o].map((s) => `${t.name} ${s} ${n.name}.`);
+  return {
+    id: T(i, e, 'relation'),
+    cycle: e,
+    text: i.pick(c),
+    tone: 'RELATIONSHIP',
+    priority: y.RELATIONSHIP
+  };
+}
+function $(i, e, t) {
+  return {
+    id: T(i, e, 'general'),
+    cycle: e,
+    text: t,
+    tone: 'GENERAL',
+    priority: y.GENERAL
+  };
+}
+const Y = [
+    { seed: 'orc-001', file: 'orc-001.png' },
+    { seed: 'orc-002', file: 'orc-002.png' },
+    { seed: 'orc-003', file: 'orc-003.png' },
+    { seed: 'orc-004', file: 'orc-004.png' },
+    { seed: 'orc-005', file: 'orc-005.png' },
+    { seed: 'orc-006', file: 'orc-006.png' },
+    { seed: 'orc-007', file: 'orc-007.png' },
+    { seed: 'orc-008', file: 'orc-008.png' },
+    { seed: 'orc-009', file: 'orc-009.png' },
+    { seed: 'orc-010', file: 'orc-010.png' },
+    { seed: 'orc-011', file: 'orc-011.png' },
+    { seed: 'orc-012', file: 'orc-012.png' },
+    { seed: 'orc-013', file: 'orc-013.png' },
+    { seed: 'orc-014', file: 'orc-014.png' },
+    { seed: 'orc-015', file: 'orc-015.png' },
+    { seed: 'orc-016', file: 'orc-016.png' },
+    { seed: 'orc-017', file: 'orc-017.png' },
+    { seed: 'orc-018', file: 'orc-018.png' },
+    { seed: 'orc-019', file: 'orc-019.png' },
+    { seed: 'orc-020', file: 'orc-020.png' },
+    { seed: 'orc-021', file: 'orc-021.png' },
+    { seed: 'orc-022', file: 'orc-022.png' },
+    { seed: 'orc-023', file: 'orc-023.png' },
+    { seed: 'orc-024', file: 'orc-024.png' },
+    { seed: 'orc-025', file: 'orc-025.png' },
+    { seed: 'orc-026', file: 'orc-026.png' },
+    { seed: 'orc-027', file: 'orc-027.png' },
+    { seed: 'orc-028', file: 'orc-028.png' },
+    { seed: 'orc-029', file: 'orc-029.png' },
+    { seed: 'orc-030', file: 'orc-030.png' },
+    { seed: 'orc-031', file: 'orc-031.png' },
+    { seed: 'orc-032', file: 'orc-032.png' },
+    { seed: 'orc-033', file: 'orc-033.png' },
+    { seed: 'orc-034', file: 'orc-034.png' },
+    { seed: 'orc-035', file: 'orc-035.png' },
+    { seed: 'orc-036', file: 'orc-036.png' },
+    { seed: 'orc-037', file: 'orc-037.png' },
+    { seed: 'orc-038', file: 'orc-038.png' },
+    { seed: 'orc-039', file: 'orc-039.png' },
+    { seed: 'orc-040', file: 'orc-040.png' },
+    { seed: 'orc-041', file: 'orc-041.png' },
+    { seed: 'orc-042', file: 'orc-042.png' },
+    { seed: 'orc-043', file: 'orc-043.png' },
+    { seed: 'orc-044', file: 'orc-044.png' },
+    { seed: 'orc-045', file: 'orc-045.png' },
+    { seed: 'orc-046', file: 'orc-046.png' },
+    { seed: 'orc-047', file: 'orc-047.png' },
+    { seed: 'orc-048', file: 'orc-048.png' },
+    { seed: 'orc-049', file: 'orc-049.png' },
+    { seed: 'orc-050', file: 'orc-050.png' },
+    { seed: 'orc-051', file: 'orc-051.png' },
+    { seed: 'orc-052', file: 'orc-052.png' },
+    { seed: 'orc-053', file: 'orc-053.png' },
+    { seed: 'orc-054', file: 'orc-054.png' },
+    { seed: 'orc-055', file: 'orc-055.png' },
+    { seed: 'orc-056', file: 'orc-056.png' },
+    { seed: 'orc-057', file: 'orc-057.png' },
+    { seed: 'orc-058', file: 'orc-058.png' },
+    { seed: 'orc-059', file: 'orc-059.png' },
+    { seed: 'orc-060', file: 'orc-060.png' },
+    { seed: 'orc-061', file: 'orc-061.png' },
+    { seed: 'orc-062', file: 'orc-062.png' },
+    { seed: 'orc-063', file: 'orc-063.png' },
+    { seed: 'orc-064', file: 'orc-064.png' },
+    { seed: 'orc-065', file: 'orc-065.png' },
+    { seed: 'orc-066', file: 'orc-066.png' },
+    { seed: 'orc-067', file: 'orc-067.png' },
+    { seed: 'orc-068', file: 'orc-068.png' },
+    { seed: 'orc-069', file: 'orc-069.png' },
+    { seed: 'orc-070', file: 'orc-070.png' },
+    { seed: 'orc-071', file: 'orc-071.png' },
+    { seed: 'orc-072', file: 'orc-072.png' },
+    { seed: 'orc-073', file: 'orc-073.png' },
+    { seed: 'orc-074', file: 'orc-074.png' },
+    { seed: 'orc-075', file: 'orc-075.png' },
+    { seed: 'orc-076', file: 'orc-076.png' },
+    { seed: 'orc-077', file: 'orc-077.png' },
+    { seed: 'orc-078', file: 'orc-078.png' },
+    { seed: 'orc-079', file: 'orc-079.png' },
+    { seed: 'orc-080', file: 'orc-080.png' }
+  ],
+  x = Y;
+function q(i) {
+  let e = 0;
+  for (let t = 0; t < i.length; t += 1)
+    ((e = (e << 5) - e + i.charCodeAt(t)), (e |= 0));
+  return e >>> 0;
+}
+function J(i) {
+  if (x.length === 0) return 'default';
+  const e = q(i) % x.length;
+  return x[e].seed;
+}
+const Q = [
+    'Bog',
+    'Gor',
+    'Lug',
+    'Maz',
+    'Naz',
+    'Or',
+    'Ruk',
+    'Shag',
+    'Urz',
+    'Zog'
+  ],
+  X = ['dak', 'gash', 'muk', 'nak', 'rag', 'ruk', 'snak', 'thor', 'zug', 'zul'],
+  ee = { König: 220, Spieler: 160, Captain: 120, Späher: 80, Grunzer: 40 },
+  te = {
+    König: [12, 14],
+    Spieler: [10, 12],
+    Captain: [6, 10],
+    Späher: [4, 7],
+    Grunzer: [2, 5]
+  };
+function ie(i) {
+  return `${i.pick(Q)}${i.pick(X)}`;
+}
+function ne(i) {
+  const e = [
+      'Feigling',
+      'Berserker',
+      'Hinterhältig',
+      'Trinkfest',
+      'Tierjäger',
+      'Intrigant'
+    ],
+    t = i.chance(0.3) ? 2 : 1;
+  return i.shuffle(e).slice(0, t);
+}
+function oe(i) {
+  return {
+    gier: i.next(),
+    tapferkeit: i.next(),
+    loyalitaet: i.next(),
+    stolz: i.next()
+  };
+}
+function m(i, e, t = 16) {
+  const n = [...i.memories, e];
+  return (n.length > t && n.splice(0, n.length - t), { ...i, memories: n });
+}
+function v(i, e, t, n = {}) {
+  const [o, r] = te[e],
+    c = i.int(o, r),
+    s = Math.max(10, Math.round(ee[e] + i.int(-15, 15))),
+    l = n.id ?? `orc_${t}_${i.int(100, 999999)}`,
+    f = n.portraitSeed ?? J(l);
+  return {
+    id: l,
+    name: n.name ?? ie(i),
+    rank: e,
+    level: n.level ?? c,
+    merit: n.merit ?? s,
+    traits: n.traits ?? ne(i),
+    personality: n.personality ?? oe(i),
+    relationships: n.relationships ?? [],
+    portraitSeed: f,
+    status: n.status ?? 'ALIVE',
+    cycleJoined: n.cycleJoined ?? t,
+    cycleDied: n.cycleDied,
+    memories: n.memories ?? []
+  };
+}
+function R(i, e) {
+  const t = i.relationships.filter((n) => n.with !== e.with);
+  return { ...i, relationships: [...t, e] };
+}
+function O(i, e) {
+  return i.officers.find((t) => t.id === e);
+}
+function L(i, e) {
+  i.officers = i.officers.map((t) => (t.id === e.id ? e : t));
+}
+function F(i, e, t, n, o, r) {
+  if (e === t) return;
+  const c = O(i, e),
+    s = O(i, t);
+  if (!c || !s) return;
+  const l = n === 'BLOOD_OATH' ? o + _ : void 0,
+    f = { with: s.id, type: n, sinceCycle: o, expiresAtCycle: l },
+    h = { with: c.id, type: n, sinceCycle: o, expiresAtCycle: l };
+  let d = R(c, f),
+    u = R(s, h);
+  return (
+    (d = m(d, {
+      cycle: o,
+      category: n === 'BLOOD_OATH' ? 'BLOOD_OATH' : 'RELATIONSHIP',
+      summary: `${n} mit ${u.name}`
+    })),
+    (u = m(u, {
+      cycle: o,
+      category: n === 'BLOOD_OATH' ? 'BLOOD_OATH' : 'RELATIONSHIP',
+      summary: `${n} mit ${d.name}`
+    })),
+    L(i, d),
+    L(i, u),
+    j(r, o, d, u, n)
+  );
+}
+function N(i, e, t) {
+  const n = [],
+    o = i.officers.filter((c) => c.id !== e.id);
+  if (o.length === 0) return n;
+  const r = t.chance(0.4) ? 2 : 1;
+  for (let c = 0; c < r; c += 1) {
+    const s = t.pick(o),
+      l = t.next();
+    let f;
+    if (
+      (l < 0.05
+        ? (f = 'BLOOD_OATH')
+        : l < 0.2
+          ? (f = 'RIVAL')
+          : l < 0.5
+            ? (f = 'ALLY')
+            : l < 0.7 && (f = 'FRIEND'),
+      !f)
+    )
+      continue;
+    const h = F(i, e.id, s.id, f, i.cycle, t);
+    h && n.push(h);
+  }
+  return n;
+}
+function re(i, e, t) {
+  const n = [],
+    o = new Set();
+  for (const r of i.officers)
+    for (const c of r.relationships) {
+      if (
+        c.type !== 'BLOOD_OATH' ||
+        c.expiresAtCycle === void 0 ||
+        c.expiresAtCycle > e
+      )
+        continue;
+      const s = [r.id, c.with].sort().join(':');
+      if (o.has(s)) continue;
+      o.add(s);
+      const l = O(i, c.with);
+      if (!l) continue;
+      const f = (r.personality.loyalitaet + l.personality.loyalitaet) / 2,
+        h = (r.personality.stolz + l.personality.stolz) / 2,
+        d = (r.personality.gier + l.personality.gier) / 2;
+      let u = 'ALLY';
+      d > f && h > f && (u = 'RIVAL');
+      const p = F(i, r.id, l.id, u, e, t);
+      p && n.push(p);
+    }
+  return n;
+}
+function se(i, e, t) {
+  const n = new Set(),
+    o = [...e];
+  for (; o.length > 0; ) {
+    const r = o.pop();
+    if (!r) continue;
+    const c = O(i, r);
+    if (c)
+      for (const s of c.relationships)
+        s.type === 'BLOOD_OATH' &&
+          ((s.expiresAtCycle !== void 0 && s.expiresAtCycle <= t) ||
+            e.has(s.with) ||
+            n.has(s.with) ||
+            (n.add(s.with), o.push(s.with)));
+  }
+  return n;
+}
+function ce(i, e) {
+  let t = 0;
+  for (const n of i.relationships) {
+    if (!e.find((c) => c.id === n.with)) continue;
+    const r = z[n.type];
+    typeof r == 'number' && (t += r);
+  }
+  return t;
+}
+const le = [
+  'Schädelhügel',
+  'Schlackengrube',
+  'Pilzwald',
+  'Aschepass',
+  'Knochenarena',
+  'Teersümpfe'
+];
+function D(i) {
+  return 1 / (1 + Math.exp(-i));
+}
+function fe(i, e) {
+  const t = [];
+  for (const n of e.participants) {
+    const o = i.officers.find((r) => r.id === n);
+    o && t.push(o);
+  }
+  return t;
+}
+function ae(i, e, t, n) {
+  let o = 0.5 - e.baseDifficulty;
+  n === 'UNGEFESTIGT' && (o -= 0.2);
+  const r = t.reduce((d, u) => {
+      const p = u.traits.reduce((k, P) => k + (G[P] ?? 0), 0);
+      return d + p;
+    }, 0),
+    c = t.reduce((d, u) => d + ce(u, t), 0),
+    s = r / Math.max(t.length, 1),
+    l = c / Math.max(t.length, 1),
+    f = i.fork(`warcall:${e.id}`).next() - 0.5,
+    h = o + s + l + f;
+  return { base: o, traits: s, relationships: l, random: f, logistic: h };
+}
+function de(i, e, t, n) {
+  return e.length === 0
+    ? []
+    : t
+      ? []
+      : n === 'UNGEFESTIGT' && e.length > 1
+        ? i
+            .shuffle(e)
+            .slice(0, 2)
+            .map((c) => c.id)
+        : [i.pick(e).id];
+}
+function ue(i, e, t) {
+  let n = e ? 20 : Math.max(-10, -i.merit * 0.1);
+  return (
+    e && t === 'UNGEFESTIGT' && (n /= 2),
+    { ...i, merit: Math.max(0, i.merit + n) }
+  );
+}
+function he(i, e, t) {
+  const n = fe(i, t),
+    o = ae(e, t, n, i.kingStatus),
+    r = D(o.logistic),
+    c = e.fork(`resolve:${t.id}`).next() <= r;
+  t.breakdown = o;
+  const s = de(e.fork(`casualties:${t.id}`), n, c, i.kingStatus),
+    l = Z(e, i.cycle, t, c, o);
+  for (const f of n) {
+    const h = m(ue(f, c, i.kingStatus), {
+      cycle: i.cycle,
+      category: 'WARCALL',
+      summary: `${c ? 'Triumph' : 'Schmach'} bei ${t.location}`,
+      details: `Chance ${(r * 100).toFixed(1)}%`
+    });
+    i.officers = i.officers.map((d) => (d.id === h.id ? h : d));
+  }
+  return { warcall: t, success: c, casualties: s, feed: [l] };
+}
+function pe(i, e, t) {
+  const n = e.filter((c) => c.status === 'ALIVE' && c.rank !== 'König'),
+    o = [],
+    r = i.shuffle(n);
+  for (let c = 0; c < Math.min(t, r.length); c += 1) o.push(r[c]);
+  return o;
+}
+function ge(i, e, t) {
+  const n = pe(e, i.officers, 3);
+  if (n.length === 0) return;
+  const o = e.pick(n);
+  return {
+    id: `warcall_${t}_${e.int(100, 999999)}`,
+    cycleAnnounced: t,
+    resolveOn: t + 1,
+    initiator: o.id,
+    participants: n.map((r) => r.id),
+    location: e.pick(le),
+    baseDifficulty: e.next()
+  };
+}
+function me(i, e) {
+  const t = i.warcalls.filter((r) => r.resolveOn <= i.cycle),
+    n = i.warcalls.filter((r) => r.resolveOn > i.cycle),
+    o = t.map((r) => he(i, e, r));
+  return ((i.warcalls = n), o);
+}
+function ye(i, e) {
+  i.warcalls = [...i.warcalls, ...e];
+}
+function Te(i) {
+  const e = i.warcall.breakdown;
+  return e
+    ? `Chance ${(D(e.logistic) * 100).toFixed(1)}%
+Basis: ${e.base.toFixed(2)}
+Traits: ${e.traits.toFixed(2)}
+Beziehungen: ${e.relationships.toFixed(2)}
+Zufall: ${e.random.toFixed(2)}`
+    : 'Keine Daten';
+}
+function b(i) {
+  const e = { König: 0, Spieler: 0, Captain: 0, Späher: 0, Grunzer: 0 };
+  return (
+    i.forEach((t) => {
+      e[t.rank] += 1;
+    }),
+    e
+  );
+}
+function Ae(i, e) {
+  return i.map((t) => ({
+    ...t,
+    relationships: t.relationships.filter((n) => !e.has(n.with))
+  }));
+}
+function Se(i, e, t) {
+  const n = [],
+    o = [];
+  if (e.size === 0) return { feed: n, deadIds: o };
+  i.officers = Ae(i.officers, e);
+  for (const r of e) {
+    const c = i.officers.find((l) => l.id === r);
+    if (!c) continue;
+    const s = m(
+      { ...c, status: 'DEAD', cycleDied: i.cycle },
+      {
+        cycle: i.cycle,
+        category: 'DEATH',
+        summary: `Gefallen in Zyklus ${i.cycle}`
+      }
+    );
+    (n.push(U(t, i.cycle, s, 'im Blutrausch')),
+      o.push(s.id),
+      (i.graveyard = [{ ...s }, ...i.graveyard]),
+      (i.officers = i.officers.filter((l) => l.id !== r)));
+  }
+  return { feed: n, deadIds: o };
+}
+function Ee(i, e, t) {
+  if (i.officers.find((s) => s.id === i.kingId) || i.officers.length === 0)
+    return;
+  const r = {
+    ...[...i.officers].sort((s, l) => l.merit - s.merit)[0],
+    rank: 'König'
+  };
+  ((i.kingId = r.id),
+    (i.kingStatus = 'UNGEFESTIGT'),
+    (i.kingStatusExpires = i.cycle + K),
+    (i.officers = i.officers.map((s) => (s.id === r.id ? r : s))),
+    t.push($(e, i.cycle, `${r.name} besteigt als UNGEFESTIGT den Thron.`)));
+  const c = m(r, {
+    cycle: i.cycle,
+    category: 'PROMOTION',
+    summary: 'Zum König erhoben'
+  });
+  i.officers = i.officers.map((s) => (s.id === c.id ? c : s));
+}
+function Oe(i, e, t) {
+  const n = [],
+    o = [],
+    r = b(i.officers);
+  return (
+    Object.keys(A).forEach((c) => {
+      const s = A[c];
+      for (; r[c] + o.filter((l) => l.rank === c).length < s; ) {
+        let l = v(e, c, t);
+        ((l = m(l, {
+          cycle: t,
+          category: 'SPAWN',
+          summary: 'Neu in der Horde'
+        })),
+          i.officers.push(l),
+          o.push(l),
+          n.push(W(e, t, l)));
+        const f = N(i, l, e);
+        n.push(...f);
+      }
+    }),
+    { spawns: o, feed: n }
+  );
+}
+function we(i, e) {
+  const t = [],
+    n = [],
+    o = b(i.officers),
+    r = [...i.officers].sort((c, s) => s.merit - c.merit);
+  for (const c of r) {
+    const s = M[c.rank];
+    if (
+      s.promoteAt !== void 0 &&
+      s.promoteTo &&
+      c.merit >= s.promoteAt &&
+      o[s.promoteTo] < A[s.promoteTo]
+    ) {
+      ((o[c.rank] -= 1), (o[s.promoteTo] += 1));
+      const l = m(
+        { ...c, rank: s.promoteTo },
+        {
+          cycle: i.cycle,
+          category: 'PROMOTION',
+          summary: `Aufstieg zu ${s.promoteTo}`
+        }
+      );
+      ((i.officers = i.officers.map((f) => (f.id === l.id ? l : f))),
+        n.push({ officerId: c.id, from: c.rank, to: s.promoteTo }),
+        t.push(V(e, i.cycle, l, s.promoteTo)));
+      continue;
+    }
+    if (s.demoteBelow !== void 0 && s.demoteTo && c.merit < s.demoteBelow) {
+      ((o[c.rank] -= 1), (o[s.demoteTo] += 1));
+      const l = m(
+        { ...c, rank: s.demoteTo },
+        {
+          cycle: i.cycle,
+          category: 'PROMOTION',
+          summary: `Abstieg zu ${s.demoteTo}`
+        }
+      );
+      ((i.officers = i.officers.map((f) => (f.id === l.id ? l : f))),
+        n.push({ officerId: c.id, from: c.rank, to: s.demoteTo }),
+        t.push(
+          $(e, i.cycle, `${l.name} wird zum ${s.demoteTo} zurückgestuft.`)
+        ));
+    }
+  }
+  return { promotions: n, feed: t };
+}
+function ke(i, e, t) {
+  i.kingStatus === 'UNGEFESTIGT' &&
+    i.cycle >= i.kingStatusExpires &&
+    ((i.kingStatus = 'GEFESTIGT'),
+    t.push($(e, i.cycle, 'Der König gilt wieder als GEFESTIGT.')));
+}
+function xe(i, e) {
+  const t = [],
+    n = 1 + (i.cycle % 2);
+  for (let o = 0; o < n; o += 1) {
+    const r = ge(i, e, i.cycle);
+    r && t.push(r);
+  }
+  return (ye(i, t), t);
+}
+function $e(i) {
+  return [...i].sort((e, t) =>
+    e.priority === t.priority
+      ? e.id.localeCompare(t.id)
+      : t.priority - e.priority
+  );
+}
+function Ie(i, e) {
+  i.cycle += 1;
+  const t = [];
+  ke(i, e, t);
+  const n = re(i, i.cycle, e);
+  t.push(...n);
+  const o = me(i, e);
+  o.forEach((p) => {
+    t.push(...p.feed);
+  });
+  const r = new Set();
+  (o.forEach((p) => p.casualties.forEach((k) => r.add(k))),
+    se(i, r, i.cycle).forEach((p) => r.add(p)));
+  const s = Se(i, r, e);
+  (t.push(...s.feed), Ee(i, e, t));
+  const { spawns: l, feed: f } = Oe(i, e, i.cycle);
+  t.push(...f);
+  const h = xe(i, e),
+    d = we(i, e);
+  t.push(...d.feed);
+  const u = $e(t);
+  return (
+    (i.feed = [...i.feed, ...u].slice(-120)),
+    {
+      cycle: i.cycle,
+      warcallsResolved: o,
+      warcallsPlanned: h,
+      deaths: s.deadIds,
+      spawns: l,
+      promotions: d.promotions,
+      feed: u
+    }
+  );
+}
+class w {
+  constructor(e) {
+    a(this, 'state');
+    let t = 0;
+    const n = typeof e == 'number' ? e.toString() : e;
+    for (let o = 0; o < n.length; o += 1)
+      ((t = (t << 5) - t + n.charCodeAt(o)), (t |= 0));
+    this.state = t || 1831565813;
+  }
+  next() {
+    let e = this.state;
+    return (
+      (e ^= e << 13),
+      (e ^= e >>> 17),
+      (e ^= e << 5),
+      (this.state = e),
+      (e >>> 0) / 4294967296
+    );
+  }
+  int(e, t) {
+    return Math.floor(this.next() * (t - e + 1)) + e;
+  }
+  pick(e) {
+    if (e.length === 0) throw new Error('Cannot pick from empty array');
+    return e[Math.floor(this.next() * e.length)];
+  }
+  shuffle(e) {
+    const t = [...e];
+    for (let n = t.length - 1; n > 0; n -= 1) {
+      const o = Math.floor(this.next() * (n + 1));
+      [t[n], t[o]] = [t[o], t[n]];
+    }
+    return t;
+  }
+  chance(e) {
+    return this.next() < e;
+  }
+  fork(e) {
+    return new w(`${e}:${this.state}`);
+  }
+}
+function Re(i, e = new w(i)) {
+  const t = {
+    seed: i,
+    cycle: 0,
+    officers: [],
+    graveyard: [],
+    warcalls: [],
+    kingId: '',
+    kingStatus: 'GEFESTIGT',
+    kingStatusExpires: 0,
+    feed: []
+  };
+  Object.keys(A).forEach((o) => {
+    const r = A[o];
+    for (let c = 0; c < r; c += 1) {
+      let s = v(e, o, t.cycle);
+      ((s = m(s, {
+        cycle: 0,
+        category: 'SPAWN',
+        summary: 'Teil des Ausgangszugs'
+      })),
+        t.officers.push(s),
+        N(t, s, e));
+    }
+  });
+  const n = t.officers.find((o) => o.rank === 'König');
+  return (
+    n
+      ? (t.kingId = n.id)
+      : t.officers.length > 0 &&
+        ((t.kingId = t.officers[0].id),
+        (t.officers[0] = { ...t.officers[0], rank: 'König' })),
+    t
+  );
+}
+class Le {
+  constructor() {
+    a(this, 'listeners', new Map());
+  }
+  on(e, t) {
+    const n = this.listeners.get(e) ?? new Set();
+    return (n.add(t), this.listeners.set(e, n), () => this.off(e, t));
+  }
+  off(e, t) {
+    const n = this.listeners.get(e);
+    n && (n.delete(t), n.size === 0 && this.listeners.delete(e));
+  }
+  emit(e, t) {
+    const n = this.listeners.get(e);
+    n &&
+      n.forEach((o) => {
+        o(t);
+      });
+  }
+}
+class He {
+  constructor(e) {
+    a(this, 'events', new Le());
+    a(this, 'rng');
+    a(this, 'state');
+    ((this.rng = new w(e)), (this.state = Re(e, this.rng)));
+  }
+  getState() {
+    return this.state;
+  }
+  tick() {
+    const e = Ie(this.state, this.rng);
+    return (
+      this.events.emit('cycle:completed', e),
+      e.feed.length > 0 && this.events.emit('feed:appended', e.feed),
+      this.events.emit('graveyard:changed', this.state.graveyard),
+      this.events.emit('state:changed', this.state),
+      e
+    );
+  }
+}
+const g = {
+  MODAL: 900,
+  TOOLTIP: 800,
+  FEED: 700,
+  HERRSCHAFT: 400,
+  CAPTAINS: 300,
+  SPAEHER: 200,
+  GRUNZER: 100
+};
+class ve {
+  constructor(e, t, n) {
+    ((this.x = e), (this.y = t), (this.radius = n));
+  }
+  contains(e) {
+    const t = e.x - this.x,
+      n = e.y - this.y;
+    return t * t + n * n <= this.radius * this.radius;
+  }
+}
+class S {
+  constructor(e = { x: 0, y: 0 }) {
+    a(this, 'children', []);
+    a(this, 'depth', 0);
+    a(this, 'scrollFactor', 1);
+    a(this, 'hitArea');
+    a(this, 'visible', !0);
+    this.position = e;
+  }
+  add(e) {
+    this.children.push(e);
+  }
+  setDepth(e) {
+    return ((this.depth = e), this);
+  }
+  setScrollFactor(e) {
+    return ((this.scrollFactor = e), this);
+  }
+  setCircleHitArea(e) {
+    return ((this.hitArea = new ve(this.position.x, this.position.y, e)), this);
+  }
+  hitTest(e) {
+    return this.hitArea ? this.hitArea.contains(e) : !1;
+  }
+}
+function Fe(i, e) {
+  const t = [];
+  let n = i;
+  for (; n.length > e; ) (t.push(n.slice(0, e)), (n = n.slice(e)));
+  return (n.length > 0 && t.push(n), t);
+}
+function Ne(i, e) {
+  const t = i.split(/\s+/),
+    n = [];
+  let o = '';
+  for (const r of t) {
+    const c = r.length > e ? Fe(r, e) : [r];
+    for (const s of c) {
+      if (o.length === 0) {
+        o = s;
+        continue;
+      }
+      (o + ' ' + s).length <= e ? (o = `${o} ${s}`) : (n.push(o), (o = s));
+    }
+  }
+  return (o.length > 0 && n.push(o), n);
+}
+class De extends S {
+  constructor(t = 420, n = 18, o = 6) {
+    super({ x: 0, y: 0 });
+    a(this, 'width');
+    a(this, 'lineHeight');
+    a(this, 'lineSpacing');
+    a(this, 'layout', []);
+    ((this.width = t),
+      (this.lineHeight = n),
+      (this.lineSpacing = o),
+      this.setDepth(g.FEED));
+  }
+  render(t) {
+    const n = [],
+      o = Math.max(10, Math.floor(this.width / 8));
+    let r = 0;
+    return (
+      t.forEach((c) => {
+        const s = Ne(c.text, o);
+        (s.forEach((l, f) => {
+          (n.push({ text: l, y: r }),
+            f < s.length - 1 && (r += this.lineHeight + this.lineSpacing));
+        }),
+          (r += this.lineHeight + this.lineSpacing));
+      }),
+      (this.layout = n),
+      n
+    );
+  }
+  getLines() {
+    return this.layout;
+  }
+}
+class H extends S {
+  constructor(t, n = {}) {
+    super({ x: 0, y: 0 });
+    a(this, 'entries');
+    a(this, 'rowHeight');
+    a(this, 'viewHeight');
+    a(this, 'offset', 0);
+    a(this, 'isOpen', !0);
+    ((this.entries = t.map((o) => ({
+      id: o.id,
+      name: o.name,
+      cycle: o.cycleDied ?? 0
+    }))),
+      (this.rowHeight = n.rowHeight ?? 36),
+      (this.viewHeight = n.viewHeight ?? 180),
+      this.setDepth(g.MODAL));
+  }
+  get scrollOffset() {
+    return this.offset;
+  }
+  get maxScroll() {
+    return Math.max(0, this.entries.length * this.rowHeight - this.viewHeight);
+  }
+  scroll(t) {
+    this.offset = Math.min(this.maxScroll, Math.max(0, this.offset + t));
+  }
+  onWheel(t) {
+    this.scroll(t);
+  }
+  close() {
+    this.isOpen = !1;
+  }
+  listVisible() {
+    const t = Math.floor(this.offset / this.rowHeight),
+      n = Math.ceil(this.viewHeight / this.rowHeight);
+    return this.entries.slice(t, t + n);
+  }
+}
+const be = [
+  { key: 'E', label: 'Cycle', scrollFactor: 0, visible: !0 },
+  { key: 'R', label: 'Neu', scrollFactor: 0, visible: !0 },
+  { key: 'SPACE', label: 'Skip', scrollFactor: 0, visible: !0 }
+];
+class Pe extends S {
+  constructor() {
+    super({ x: 0, y: 0 });
+    a(this, 'buttons');
+    ((this.buttons = be.map((t) => ({ ...t }))),
+      this.setDepth(g.FEED + 10).setScrollFactor(0));
+  }
+  toggle(t, n) {
+    const o = this.buttons.find((r) => r.key === t);
+    o && (o.visible = n);
+  }
+}
+const Be = {
+  König: g.HERRSCHAFT,
+  Spieler: g.HERRSCHAFT,
+  Captain: g.CAPTAINS,
+  Späher: g.SPAEHER,
+  Grunzer: g.GRUNZER
+};
+class Ce extends S {
+  constructor(t, n = 48) {
+    super({ x: 0, y: 0 });
+    a(this, 'officer');
+    a(this, 'badges');
+    ((this.officer = t),
+      (this.badges = t.traits),
+      this.setCircleHitArea(n),
+      this.setDepth(Be[t.rank]));
+  }
+  isPointInside(t, n) {
+    return this.hitTest({ x: t, y: n });
+  }
+}
+class Me extends S {
+  constructor() {
+    super({ x: 0, y: 0 });
+    a(this, 'text', '');
+    this.setDepth(g.TOOLTIP).setScrollFactor(0);
+  }
+  show(t) {
+    ((this.text = Te(t)), (this.visible = !0));
+  }
+  hide() {
+    this.visible = !1;
+  }
+}
+class Ge {
+  constructor(e) {
+    a(this, 'feed', new De());
+    a(this, 'tooltip', new Me());
+    a(this, 'hotkeys', new Pe());
+    a(this, 'graveyard', null);
+    a(this, 'tokens', new Map());
+    ((this.store = e),
+      this.syncOfficers(e.getState().officers),
+      (this.graveyard = new H(e.getState().graveyard)),
+      e.events.on('feed:appended', (t) => {
+        this.feed.render(t);
+      }),
+      e.events.on('graveyard:changed', (t) => {
+        this.graveyard = new H(t);
+      }),
+      e.events.on('state:changed', (t) => {
+        this.syncOfficers(t.officers);
+      }),
+      e.events.on('cycle:completed', (t) => {
+        const n = t.warcallsResolved.at(-1);
+        n && this.showWarcall(n);
+      }));
+  }
+  syncOfficers(e) {
+    (this.tokens.clear(),
+      e.forEach((t) => {
+        this.tokens.set(t.id, new Ce(t));
+      }));
+  }
+  getToken(e) {
+    return this.tokens.get(e);
+  }
+  showWarcall(e) {
+    this.tooltip.show(e);
+  }
+  hideTooltip() {
+    this.tooltip.hide();
+  }
+}
+const I = new He('nemesis-seed'),
+  ze = new Ge(I);
+function _e() {
+  I.tick();
+}
+typeof window < 'u' &&
+  (window.nemesis = { store: I, ui: ze, advanceCycle: _e });

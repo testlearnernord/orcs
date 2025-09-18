@@ -46,6 +46,7 @@ export class GraveyardPanel extends UIContainer {
     return [...this.entries];
   }
 
+=======
   scroll(delta: number): void {
     this.offset = Math.min(this.maxScroll, Math.max(0, this.offset + delta));
   }
@@ -62,6 +63,7 @@ export class GraveyardPanel extends UIContainer {
     this.isOpen = true;
   }
 
+=======
   listVisible(): GraveyardEntry[] {
     const start = Math.floor(this.offset / this.rowHeight);
     const visibleCount = Math.ceil(this.viewHeight / this.rowHeight);

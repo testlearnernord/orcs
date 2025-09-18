@@ -17,6 +17,7 @@ const DEFAULT_HOTKEYS: HotkeyButton[] = [
 export class HotkeyBar extends UIContainer {
   readonly buttons: HotkeyButton[];
   onChanged?: () => void;
+=======
 
   constructor() {
     super({ x: 0, y: 0 });
@@ -29,6 +30,7 @@ export class HotkeyBar extends UIContainer {
     if (button) {
       button.visible = visible;
       this.onChanged?.();
+=======
     }
   }
 }
