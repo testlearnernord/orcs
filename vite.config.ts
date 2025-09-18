@@ -10,6 +10,15 @@ export default defineConfig({
     sourcemap: false,
     outDir: '../docs',
     emptyOutDir: true
+=======
+    emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        entryFileNames: 'index.js',
+        chunkFileNames: 'chunks/[name].js',
+        assetFileNames: 'assets/[name][extname]'
+      }
+    }
   },
   resolve: {
     alias: {
