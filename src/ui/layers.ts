@@ -1,0 +1,9 @@
+export const Z_LAYERS = {
+  MODAL: 900,
+  TOOLTIP: 800,
+  FEED: 700,
+  HERRSCHAFT: 400,
+  CAPTAINS: 300,
+  SPAEHER: 200,
+  GRUNZER: 100
+} as const;
