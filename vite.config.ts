@@ -1,6 +1,8 @@
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 
+export default defineConfig(({ command }) => ({
+  base: command === 'serve' ? '/' : '/orcs/',
 export default defineConfig({
   base: '/orcs/',
   build: {
@@ -22,4 +24,4 @@ export default defineConfig({
       '@assets': fileURLToPath(new URL('./src/assets', import.meta.url))
     }
   }
-});
+}));
