@@ -11,7 +11,6 @@ export default defineConfig({
       '@assets': '/assets'
     }
   },
-=======
   plugins: [tsconfigPaths()],
   build: { outDir: 'docs', emptyOutDir: true }
 });
