@@ -15,8 +15,10 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - name: conflict markers
+        run: rg -n "<<<<<<<|=======|>>>>>>>" -g '!node_modules' && exit 1 || true
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm test
+      - run: npm run test
       - run: npm run build
