@@ -1,5 +1,6 @@
 import type { GameStore } from '@state/store';
 import type { Officer, WarcallResolution } from '@sim/types';
+import { getPortraitAsset } from '@sim/portraits';
 import { FeedView } from '@ui/components/feed';
 import { GraveyardPanel } from '@ui/components/graveyard';
 import { HotkeyBar } from '@ui/components/hotkeys';
@@ -97,15 +98,45 @@ export class NemesisUI {
       Grunzer: []
     };
     officers.forEach((o) => groups[o.rank].push(o));
+
+    const renderBars = (o: Officer) => {
+      const p = o.personality;
+      const row = (label: string, v: number) =>
+        `<span>${label}</span><div class="bar"><i style="width:${Math.round(v * 100)}%"></i></div>`;
+      return `<div class="bars">
+      ${row('GIER', p.gier)}
+      ${row('TAPFERKEIT', p.tapferkeit)}
+      ${row('LOYALITÄT', p.loyalitaet)}
+      ${row('STOLZ', p.stolz)}
+    </div>`;
+    };
+
+    const renderCard = (o: Officer) => {
+      const img = getPortraitAsset(o.portraitSeed);
+      const badges = o.traits
+        .map((t) => `<span class="badge">${t}</span>`)
+        .join('');
+      return `<article class="card" title="${o.name} (Lv ${o.level})">
+      <div class="portrait">${img ? `<img alt="${o.name}" src="${img}">` : ''}</div>
+      <div class="meta">
+        <div class="title">${o.name} <small>Lv ${o.level} • ${o.rank}</small></div>
+        <div class="badges">${badges}</div>
+        ${renderBars(o)}
+      </div>
+    </article>`;
+    };
+
     this.ranksEl.innerHTML = (
       ['König', 'Spieler', 'Captain', 'Späher', 'Grunzer'] as const
     )
       .map(
         (rank) => `
-      <div class="rank-group">
-        <h3>${rank}</h3>
-        <div class="row">${groups[rank].map((o) => `<div class="token" title="${o.name} (Lv ${o.level})">${o.name}</div>`).join('')}</div>
-      </div>`
+    <div class="rank-group">
+      <h3>${rank}</h3>
+      <div class="grid">
+        ${groups[rank].map(renderCard).join('')}
+      </div>
+    </div>`
       )
       .join('');
   }
@@ -114,7 +145,7 @@ export class NemesisUI {
     if (!this.feedEl) return;
     const lines = this.feed.getLines();
     this.feedEl.innerHTML = lines
-      .map((l) => `<div class="feed-line">${l.text}</div>`)
+      .map((l) => `<div class="feed-item">${l.text}</div>`)
       .join('');
   }
 

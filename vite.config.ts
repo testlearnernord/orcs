@@ -1,16 +1,15 @@
 import { defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import { resolve } from 'node:path';
 
 export default defineConfig({
   base: '/orcs/',
   resolve: {
     alias: {
-      '@sim': '/src/sim',
-      '@ui': '/src/ui',
-      '@state': '/src/state',
-      '@assets': '/assets'
+      '@sim': resolve(__dirname, 'src/sim'),
+      '@ui': resolve(__dirname, 'src/ui'),
+      '@state': resolve(__dirname, 'src/state'),
+      '@assets': resolve(__dirname, 'assets')
     }
   },
-  plugins: [tsconfigPaths()],
   build: { outDir: 'docs', emptyOutDir: true }
 });
