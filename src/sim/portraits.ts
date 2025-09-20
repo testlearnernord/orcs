@@ -4,8 +4,27 @@ interface CatalogEntry {
   seed: string;
   data: string;
 }
-const CATALOG: CatalogEntry[] = catalog as CatalogEntry[];
+
+function isCatalogEntry(value: unknown): value is CatalogEntry {
+  if (typeof value !== 'object' || value === null) return false;
+  const entry = value as Partial<CatalogEntry>;
+  return typeof entry.seed === 'string' && typeof entry.data === 'string';
+}
+
+const RAW_CATALOG: unknown = catalog;
+const CATALOG: readonly CatalogEntry[] = Array.isArray(RAW_CATALOG)
+  ? RAW_CATALOG.filter(isCatalogEntry)
+  : [];
 const DATA_PREFIX = 'data:image/png;base64,';
+const FALLBACK_ENTRY = CATALOG[0];
+
+function findCatalogEntry(seed: string): CatalogEntry | undefined {
+  return CATALOG.find((entry) => entry.seed === seed);
+}
+
+function toDataUrl(entry: CatalogEntry | undefined): string {
+  return entry ? `${DATA_PREFIX}${entry.data}` : '';
+}
 
 export function getPortraitSeed(id: string): string {
   if (CATALOG.length === 0) return 'default';
@@ -14,11 +33,17 @@ export function getPortraitSeed(id: string): string {
     hash = (hash << 5) - hash + id.charCodeAt(i);
     hash |= 0;
   }
-  return CATALOG[(hash >>> 0) % CATALOG.length].seed;
+  const index = (hash >>> 0) % CATALOG.length;
+  return CATALOG[index]?.seed ?? FALLBACK_ENTRY?.seed ?? 'default';
+}
+
+export function getLegacyPortraitUrl(seed: string): string {
+  if (CATALOG.length === 0) return '';
+  const entry = findCatalogEntry(seed) ?? FALLBACK_ENTRY;
+  return toDataUrl(entry);
 }
 
 export function getPortraitAsset(seed: string): string {
   if (CATALOG.length === 0) return '';
-  const match = CATALOG.find((e) => e.seed === seed) ?? CATALOG[0];
-  return `${DATA_PREFIX}${match.data}`;
+  return getLegacyPortraitUrl(seed);
 }

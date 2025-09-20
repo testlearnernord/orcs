@@ -11,3 +11,7 @@ pnpm dev # startet http://localhost:5173
 ```
 
 Taste **E**: führt einen Simulations-Cycle aus und loggt Ereignisse in die Konsole.
+
+## CI & Format
+
+PRs müssen `npm run format:check` bestehen; bei lokalen Änderungen `npm run format:write` ausführen. Keine Builds/Assets committen.
