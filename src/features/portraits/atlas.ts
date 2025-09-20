@@ -27,8 +27,12 @@ function gcd(a: number, b: number): number {
 function sniffGrid(
   width: number,
   height: number
-): { cols: number; rows: number; tile: number } {
-  const preferred: Array<[number, number]> = [
+): {
+  cols: number;
+  rows: number;
+  tile: number;
+} {
+  const preferences: Array<[number, number]> = [
     [6, 4],
     [5, 5],
     [4, 6],
@@ -38,7 +42,7 @@ function sniffGrid(
     [4, 8]
   ];
 
-  for (const [cols, rows] of preferred) {
+  for (const [cols, rows] of preferences) {
     if (width % cols === 0 && height % rows === 0) {
       const tile = Math.min(width / cols, height / rows);
       if (tile >= 96 && tile <= 512) {
@@ -55,36 +59,38 @@ function sniffGrid(
   };
 }
 
-async function head(url: string): Promise<boolean> {
-  if (typeof fetch !== 'function') return false;
-  try {
-    const response = await fetch(url, { method: 'HEAD' });
-    return response.ok;
-  } catch {
-    return false;
-  }
+async function loadImage(url: string): Promise<HTMLImageElement> {
+  return await new Promise((resolve, reject) => {
+    if (typeof Image === 'undefined') {
+      reject(new Error('Image API unavailable'));
+      return;
+    }
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Failed to load atlas: ${url}`));
+    img.src = url;
+  });
 }
 
-async function loadAtlasesOnce(): Promise<AtlasBundle | null> {
+async function createBundle(): Promise<AtlasBundle | null> {
   const atlases: AtlasInfo[] = [];
 
   for (const file of ArtConfig.atlases) {
     const url = ArtConfig.base + file;
-    if (!(await head(url))) continue;
-    const img = new Image();
-    img.decoding = 'async';
-    img.src = url;
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve();
-      img.onerror = () => reject(new Error(`Failed to load atlas: ${url}`));
-    });
-
-    const { cols, rows, tile } = sniffGrid(img.naturalWidth, img.naturalHeight);
-    atlases.push({ url, cols, rows, tile, count: cols * rows });
+    try {
+      const img = await loadImage(url);
+      const { cols, rows, tile } = sniffGrid(
+        img.naturalWidth,
+        img.naturalHeight
+      );
+      atlases.push({ url, cols, rows, tile, count: cols * rows });
+    } catch {
+      // Datei existiert nicht → ignorieren
+    }
   }
 
   if (atlases.length === 0) return null;
-
   const totalTiles = atlases.reduce((total, atlas) => total + atlas.count, 0);
   return { atlases, totalTiles };
 }
@@ -93,12 +99,12 @@ let bundlePromise: Promise<AtlasBundle | null> | null = null;
 
 export async function loadAtlases(): Promise<AtlasBundle | null> {
   if (!bundlePromise) {
-    bundlePromise = loadAtlasesOnce().catch((error) => {
+    bundlePromise = createBundle().catch(() => {
       bundlePromise = null;
-      throw error;
+      return null;
     });
   }
-  return bundlePromise;
+  return await bundlePromise;
 }
 
 export function hashFNV1a(input: string): number {
@@ -130,8 +136,4 @@ export function resolveTile(
   }
   const atlas = bundle.atlases[bundle.atlases.length - 1];
   return { atlas, col: 0, row: 0 };
-}
-
-export function resetAtlasCache(): void {
-  bundlePromise = null;
 }
