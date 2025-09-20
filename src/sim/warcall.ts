@@ -21,6 +21,23 @@ const LOCATIONS = [
   'Teersümpfe'
 ];
 
+const WARCALL_KINDS: WarcallPlan['kind'][] = [
+  'Feast',
+  'Hunt',
+  'Ambush',
+  'Duel',
+  'Monsterjagd',
+  'Diplomatie'
+];
+
+const REWARD_HINTS = [
+  'Neue Waffenversorgung',
+  'Rufzuwachs',
+  'Sonderrechte im Hof',
+  'Seltene Trophäe',
+  'Strategischer Vorteil'
+];
+
 function logistic(x: number): number {
   return 1 / (1 + Math.exp(-x));
 }
@@ -173,6 +190,8 @@ export function planWarcall(
   const participants = pickParticipants(rng, state.officers, 3);
   if (participants.length === 0) return undefined;
   const initiator = rng.pick(participants);
+  const kind = rng.pick(WARCALL_KINDS);
+  const risk = Math.min(1, Math.max(0, rng.next()));
   return {
     id: `warcall_${cycle}_${rng.int(100, 999999)}`,
     cycleAnnounced: cycle,
@@ -180,7 +199,10 @@ export function planWarcall(
     initiator: initiator.id,
     participants: participants.map((officer) => officer.id),
     location: rng.pick(LOCATIONS),
-    baseDifficulty: rng.next()
+    baseDifficulty: rng.next(),
+    kind,
+    risk,
+    rewardHint: rng.pick(REWARD_HINTS)
   };
 }
 

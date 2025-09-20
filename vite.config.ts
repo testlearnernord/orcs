@@ -8,6 +8,7 @@ export default defineConfig({
       '@sim': resolve(__dirname, 'src/sim'),
       '@ui': resolve(__dirname, 'src/ui'),
       '@state': resolve(__dirname, 'src/state'),
+      '@core': resolve(__dirname, 'src/core'),
       '@assets': resolve(__dirname, 'assets')
     }
   },

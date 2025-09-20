@@ -94,12 +94,12 @@ export function createWarcallEntry(
   breakdown: WarcallBreakdown
 ): FeedEntry {
   const templatesSuccess = [
-    `${warcall.initiator} führt die Meute bei ${warcall.location} zum Sieg. (${formatBreakdown(breakdown)})`,
-    `Im Sturm auf ${warcall.location} triumphiert der Trupp. (${formatBreakdown(breakdown)})`
+    `${warcall.initiator} führt die Meute bei ${warcall.location} zum Sieg (${warcall.kind}). (${formatBreakdown(breakdown)})`,
+    `Im Sturm auf ${warcall.location} triumphiert der Trupp (${warcall.kind}). (${formatBreakdown(breakdown)})`
   ];
   const templatesFailure = [
-    `${warcall.location} verschlingt die Krieger – Warcall scheitert. (${formatBreakdown(breakdown)})`,
-    `Der Ruf nach Krieg verhallt in ${warcall.location}. (${formatBreakdown(breakdown)})`
+    `${warcall.location} verschlingt die Krieger – ${warcall.kind} scheitert. (${formatBreakdown(breakdown)})`,
+    `Der Ruf nach Krieg verhallt in ${warcall.location} (${warcall.kind}). (${formatBreakdown(breakdown)})`
   ];
   const text = success
     ? rng.pick(templatesSuccess)
