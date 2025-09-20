@@ -1,5 +1,6 @@
 import { getPortraitAsset } from '@sim/portraits';
 import type { Officer } from '@sim/types';
+import type { Status } from '@state/selectors/warcalls';
 import type {
   WarcallEntry,
   WarcallBucket
@@ -7,13 +8,14 @@ import type {
 
 export interface WarcallsDockOptions {
   onOpenDetails: (entry: WarcallEntry) => void;
+  onTabChange?: (status: Status) => void;
 }
 
 export class WarcallsDock {
   readonly element: HTMLElement;
-  private readonly tabs: HTMLButtonElement[] = [];
-  private readonly lists = new Map<number, HTMLElement>();
-  private activeIndex = 0;
+  private readonly tabs = new Map<Status, HTMLButtonElement>();
+  private readonly lists = new Map<Status, HTMLElement>();
+  private activeStatus: Status = 'active';
   private readonly options: WarcallsDockOptions;
 
   constructor(options: WarcallsDockOptions) {
@@ -33,20 +35,22 @@ export class WarcallsDock {
     const nav = this.element.querySelector<HTMLDivElement>('.warcalls-tabs');
     if (!nav) return;
     nav.innerHTML = '';
-    this.tabs.length = 0;
-    buckets.forEach((bucket, index) => {
+    this.tabs.clear();
+    buckets.forEach((bucket) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.setAttribute('role', 'tab');
       button.classList.add('warcalls-tab');
       button.textContent = `${bucket.label} (${bucket.entries.length})`;
-      if (index === this.activeIndex) button.classList.add('is-active');
+      button.dataset.status = bucket.status;
+      if (bucket.status === this.activeStatus)
+        button.classList.add('is-active');
       button.setAttribute(
         'aria-selected',
-        index === this.activeIndex ? 'true' : 'false'
+        bucket.status === this.activeStatus ? 'true' : 'false'
       );
-      button.addEventListener('click', () => this.activateTab(index));
-      this.tabs.push(button);
+      button.addEventListener('click', () => this.activateTab(bucket.status));
+      this.tabs.set(bucket.status, button);
       nav.appendChild(button);
     });
   }
@@ -56,10 +60,11 @@ export class WarcallsDock {
     if (!container) return;
     container.innerHTML = '';
     this.lists.clear();
-    buckets.forEach((bucket, index) => {
+    buckets.forEach((bucket) => {
       const list = document.createElement('div');
       list.className = 'warcall-list';
-      if (index !== this.activeIndex) list.hidden = true;
+      list.dataset.status = bucket.status;
+      if (bucket.status !== this.activeStatus) list.hidden = true;
       if (bucket.entries.length === 0) {
         list.innerHTML = '<p class="warcall-empty">Keine Einträge.</p>';
       } else {
@@ -68,7 +73,7 @@ export class WarcallsDock {
         });
       }
       container.appendChild(list);
-      this.lists.set(index, list);
+      this.lists.set(bucket.status, list);
     });
   }
 
@@ -76,7 +81,7 @@ export class WarcallsDock {
     const item = document.createElement('article');
     item.className = 'warcall-item';
     item.tabIndex = 0;
-    const phase = this.resolvePhase(entry);
+    const phase = this.resolvePhaseLabel(entry);
     const timeRemaining = Math.max(
       0,
       entry.plan.resolveOn - entry.currentCycle
@@ -117,35 +122,54 @@ export class WarcallsDock {
       .join('');
   }
 
-  private resolvePhase(entry: WarcallEntry): string {
+  private resolvePhaseLabel(entry: WarcallEntry): string {
     if (entry.resolution) {
       return entry.resolution.success
         ? 'Abgeschlossen: Triumph'
         : 'Abgeschlossen: Scheitern';
     }
-    const remaining = entry.plan.resolveOn - entry.currentCycle;
-    if (remaining > 1) return 'Vorbereitung';
-    if (remaining === 1) return 'Anreise';
-    return 'Ereignis';
+    switch (entry.phase) {
+      case 'prep':
+        return 'Vorbereitung';
+      case 'travel':
+        return 'Anreise';
+      case 'event':
+        return 'Ereignis';
+      case 'resolution':
+        return 'Auflösung';
+      default:
+        return entry.phase;
+    }
   }
 
-  activateTab(index: number): void {
-    this.activeIndex = index;
-    this.tabs.forEach((tab, idx) => {
-      if (!tab) return;
-      tab.classList.toggle('is-active', idx === index);
-      tab.setAttribute('aria-selected', idx === index ? 'true' : 'false');
+  private syncActiveStatus(emit: boolean): void {
+    this.tabs.forEach((tab, status) => {
+      const active = status === this.activeStatus;
+      tab.classList.toggle('is-active', active);
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
     });
-    this.lists.forEach((list, idx) => {
-      list.hidden = idx !== index;
+    this.lists.forEach((list, status) => {
+      list.hidden = status !== this.activeStatus;
     });
+    if (emit) {
+      this.options.onTabChange?.(this.activeStatus);
+    }
   }
 
-  update(buckets: WarcallBucket[]): void {
-    if (this.activeIndex >= buckets.length) {
-      this.activeIndex = 0;
+  activateTab(status: Status): void {
+    this.activeStatus = status;
+    this.syncActiveStatus(true);
+  }
+
+  update(buckets: WarcallBucket[], activeStatus?: Status): void {
+    if (activeStatus) {
+      this.activeStatus = activeStatus;
+    }
+    if (!buckets.some((bucket) => bucket.status === this.activeStatus)) {
+      this.activeStatus = buckets[0]?.status ?? this.activeStatus;
     }
     this.renderTabs(buckets);
     this.renderLists(buckets);
+    this.syncActiveStatus(false);
   }
 }

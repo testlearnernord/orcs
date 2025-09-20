@@ -5,6 +5,8 @@ import { enqueuePlannedWarcalls, planWarcall } from '@sim/warcall';
 import { createWorld } from '@sim/world';
 import { EventBus } from '@state/eventBus';
 import type { GameEvents } from '@state/events';
+import { computeDigest } from '@state/cycleDigest';
+import { snapshotWorld } from '@state/snapshot';
 
 export class GameStore {
   readonly events = new EventBus<GameEvents>();
@@ -21,6 +23,7 @@ export class GameStore {
   }
 
   tick(): CycleSummary {
+    const previous = snapshotWorld(this.state);
     const summary = advanceCycle(this.state, this.rng);
     this.events.emit('cycle:completed', summary);
     summary.warcallsResolved.forEach((resolution) =>
@@ -31,6 +34,11 @@ export class GameStore {
     }
     this.events.emit('graveyard:changed', this.state.graveyard);
     this.events.emit('state:changed', this.state);
+    const digest = computeDigest(previous, this.state, summary);
+    this.events.emit('cycle:digest', {
+      cycle: this.state.cycle,
+      highlights: digest
+    });
     summary.warcallsPlanned.forEach((plan) =>
       this.events.emit('warcall:planned', plan)
     );
