@@ -36,6 +36,7 @@ const PORTRAIT_SUFFIX = PORTRAIT_VERSION
 export const ArtConfig = {
   active: getInitialArt(),
   base: PORTRAIT_BASE,
+  base: new URL('assets/orcs/portraits/', import.meta.env.BASE_URL).toString(),
   atlases: ['set_a.webp', 'set_b.webp'] as const,
   version: PORTRAIT_VERSION
 } as const;
