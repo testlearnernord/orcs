@@ -432,11 +432,7 @@ button:disabled {
   aspect-ratio: 1;
   border-radius: 20px;
   overflow: hidden;
-  background: radial-gradient(
-    circle at 35% 25%,
-    rgba(255, 255, 255, 0.12),
-    transparent 60%
-  );
+  background: none;
   box-shadow:
     0 0 0 3px var(--ring-color),
     0 18px 38px var(--ring-shadow);

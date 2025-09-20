@@ -1,7 +1,7 @@
 import type { Officer } from '@sim/types';
 import type { OfficerTooltip } from '@ui/components/officerTooltip';
 import { measure, flip } from '@ui/utils/flip';
-import Portrait from '@ui/Portrait';
+import Avatar from '@ui/officer/Avatar';
 import { rankToRingColor } from '@ui/utils/rankColors';
 
 export interface OfficerCardLegacyOptions {
@@ -28,7 +28,7 @@ export class OfficerCardLegacy {
   private readonly statValues = new Map<StatKey, HTMLElement>();
   private readonly traitContainer: HTMLElement;
   private readonly subtitle: HTMLElement;
-  private readonly portrait: Portrait;
+  private readonly avatar: Avatar;
   private readonly badges: HTMLElement;
   private readonly meritBadge: HTMLElement;
   private readonly levelBadge: HTMLElement;
@@ -44,14 +44,14 @@ export class OfficerCardLegacy {
 
     const portraitWrapper = document.createElement('div');
     portraitWrapper.className = 'officer-card__portrait';
-    this.portrait = new Portrait({
+    this.avatar = new Avatar({
       officer,
       size: 96,
       ringColor: rankToRingColor(officer.rank),
       dead: officer.status === 'DEAD',
       className: 'officer-card__portrait-img'
     });
-    portraitWrapper.appendChild(this.portrait.element);
+    portraitWrapper.appendChild(this.avatar.element);
 
     const body = document.createElement('div');
     body.className = 'officer-card__body';
@@ -211,7 +211,7 @@ export class OfficerCardLegacy {
   update(officer: Officer): void {
     const previous = this.officer;
     this.officer = officer;
-    this.portrait.update({
+    this.avatar.update({
       officer,
       size: 96,
       ringColor: rankToRingColor(officer.rank),
