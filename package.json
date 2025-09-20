@@ -12,14 +12,20 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "lint": "eslint \"src/**/*.{ts,tsx}\""
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "guard:portraits": "node scripts/guards/no-legacy-orc-imports.mjs",
+    "ci": "npm run format:check && npm run lint && npm run typecheck && npm run guard:portraits && npm run build"
   },
   "dependencies": {
-    "phaser": "^3.80.1"
+    "phaser": "^3.80.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "^22.5.4",
     "@types/pngjs": "^6.0.5",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.57.0",

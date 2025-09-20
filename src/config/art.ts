@@ -15,11 +15,11 @@ export const ArtConfig = {
   atlases: ['set_a.webp', 'set_b.webp'] as const
 } as const;
 
-export function setArtMode(mode: ArtSet): void {
+export function setArtMode(mode: ArtSet) {
   try {
     localStorage.setItem('art.active', mode);
   } catch {
-    // ignore storage write errors (e.g. Safari private mode)
+    /* ignore */
   }
-  (ArtConfig as { active: ArtSet }).active = mode;
+  (ArtConfig as any).active = mode;
 }

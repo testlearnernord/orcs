@@ -4,7 +4,7 @@ import type {
   WarcallEntry,
   WarcallBucket
 } from '@ui/components/warcalls/types';
-import Avatar from '@ui/officer/Avatar';
+import { AvatarView } from '@ui/officer/Avatar';
 
 export interface WarcallsDockOptions {
   onOpenDetails: (entry: WarcallEntry) => void;
@@ -131,7 +131,7 @@ export class WarcallsDock {
       const avatar = document.createElement('span');
       avatar.className = 'warcall-avatar';
       avatar.title = officer.name;
-      const avatarView = new Avatar({
+      const avatarView = new AvatarView({
         officer,
         size: 32,
         dead: officer.status === 'DEAD',

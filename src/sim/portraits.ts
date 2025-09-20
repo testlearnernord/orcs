@@ -1,49 +1,37 @@
-import catalog from '@assets/orc/generated/orc_catalog.json';
-
-interface CatalogEntry {
-  seed: string;
-  data: string;
-}
-
-function isCatalogEntry(value: unknown): value is CatalogEntry {
-  if (typeof value !== 'object' || value === null) return false;
-  const entry = value as Partial<CatalogEntry>;
-  return typeof entry.seed === 'string' && typeof entry.data === 'string';
-}
-
-const RAW_CATALOG: unknown = catalog;
-const CATALOG: readonly CatalogEntry[] = Array.isArray(RAW_CATALOG)
-  ? RAW_CATALOG.filter(isCatalogEntry)
-  : [];
 const DATA_PREFIX = 'data:image/png;base64,';
-const FALLBACK_ENTRY = CATALOG[0];
 
-function findCatalogEntry(seed: string): CatalogEntry | undefined {
-  return CATALOG.find((entry) => entry.seed === seed);
+interface LegacyResolver {
+  (seed: string): string | undefined;
 }
 
-function toDataUrl(entry: CatalogEntry | undefined): string {
-  return entry ? `${DATA_PREFIX}${entry.data}` : '';
+declare global {
+  interface Window {
+    __LEGACY_ORC_PORTRAIT__?: LegacyResolver;
+  }
 }
 
 export function getPortraitSeed(id: string): string {
-  if (CATALOG.length === 0) return 'default';
+  if (!id) return 'default';
   let hash = 0;
   for (let i = 0; i < id.length; i += 1) {
     hash = (hash << 5) - hash + id.charCodeAt(i);
     hash |= 0;
   }
-  const index = (hash >>> 0) % CATALOG.length;
-  return CATALOG[index]?.seed ?? FALLBACK_ENTRY?.seed ?? 'default';
+  return `seed_${hash >>> 0}`;
 }
 
-export function getLegacyPortraitUrl(seed: string): string {
-  if (CATALOG.length === 0) return '';
-  const entry = findCatalogEntry(seed) ?? FALLBACK_ENTRY;
-  return toDataUrl(entry);
+export function getLegacyPortraitUrl(seed: string): string | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const resolver = (
+    window as Window & {
+      __LEGACY_ORC_PORTRAIT__?: LegacyResolver;
+    }
+  ).__LEGACY_ORC_PORTRAIT__;
+  const value = resolver?.(seed);
+  if (!value) return undefined;
+  return value.startsWith('data:') ? value : `${DATA_PREFIX}${value}`;
 }
 
 export function getPortraitAsset(seed: string): string {
-  if (CATALOG.length === 0) return '';
-  return getLegacyPortraitUrl(seed);
+  return getLegacyPortraitUrl(seed) ?? '';
 }
