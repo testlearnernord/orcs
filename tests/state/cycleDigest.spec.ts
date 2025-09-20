@@ -47,7 +47,13 @@ describe('computeDigest', () => {
       kingStatus: 'GEFESTIGT',
       kingStatusExpires: 0,
       feed: [],
-      playerId: 'p1'
+      playerId: 'p1',
+      crown: {
+        reignCycles: 0,
+        crownPressure: 0,
+        tributeRate: 0.1,
+        instability: 'stable'
+      }
     };
 
     const spawn = createOfficer({ id: 'o3', name: 'Nura', rank: 'Grunzer' });
@@ -78,7 +84,13 @@ describe('computeDigest', () => {
       kingStatus: 'GEFESTIGT',
       kingStatusExpires: 0,
       feed: [],
-      playerId: 'p1'
+      playerId: 'p1',
+      crown: {
+        reignCycles: 0,
+        crownPressure: 0,
+        tributeRate: 0.1,
+        instability: 'stable'
+      }
     };
 
     const summary: CycleSummary = {
@@ -110,12 +122,12 @@ describe('computeDigest', () => {
 
     const highlights = computeDigest(prev, next, summary);
     expect(highlights.length).toBeGreaterThanOrEqual(4);
-    expect(highlights[0].label).toContain('Gor');
-    expect(highlights[0].label).toContain('steigt');
+    expect(highlights[0].title).toContain('Gor');
+    expect(highlights[0].title).toContain('steigt');
     expect(highlights[0].score).toBeGreaterThanOrEqual(highlights[1].score);
-    const labels = highlights.map((entry) => entry.label);
-    expect(labels.some((label) => label.includes('Blutschwur'))).toBe(true);
-    expect(labels.some((label) => label.includes('verstärkt'))).toBe(true);
-    expect(labels.some((label) => label.includes('triumphiert'))).toBe(true);
+    const titles = highlights.map((entry) => entry.title);
+    expect(titles.some((title) => title.includes('Blutschwur'))).toBe(true);
+    expect(titles.some((title) => title.includes('verstärkt'))).toBe(true);
+    expect(titles.some((title) => title.includes('triumphiert'))).toBe(true);
   });
 });

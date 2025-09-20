@@ -49,7 +49,13 @@ describe('warcall selectors', () => {
       kingStatus: 'GEFESTIGT',
       kingStatusExpires: 0,
       feed: [],
-      playerId: null
+      playerId: null,
+      crown: {
+        reignCycles: 0,
+        crownPressure: 0,
+        tributeRate: 0.1,
+        instability: 'stable'
+      }
     };
 
     const pending = selectWarcallsByStatus(state, 'pending');

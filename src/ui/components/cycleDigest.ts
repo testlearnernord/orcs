@@ -73,8 +73,8 @@ export class CycleDigest {
         item.innerHTML = `
           <span class="cycle-digest__icon">${highlight.icon}</span>
           <div class="cycle-digest__body">
-            <strong>${highlight.label}</strong>
-            ${highlight.details ? `<span>${highlight.details}</span>` : ''}
+            <strong>${highlight.title}</strong>
+            ${highlight.text ? `<span>${highlight.text}</span>` : ''}
           </div>
         `;
         this.list.appendChild(item);
@@ -97,7 +97,7 @@ export class CycleDigest {
         <strong>Zyklus ${snapshot.cycle}</strong>
         <span>${snapshot.highlights
           .slice(0, 3)
-          .map((highlight) => highlight.label)
+          .map((highlight) => highlight.title)
           .join(' • ')}</span>
       `;
       this.historyList.appendChild(item);

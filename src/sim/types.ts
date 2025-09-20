@@ -85,7 +85,8 @@ export type WarcallKind =
   | 'Ambush'
   | 'Duel'
   | 'Monsterjagd'
-  | 'Diplomatie';
+  | 'Diplomatie'
+  | 'Thronschlacht';
 
 export type WarcallPhase = 'prep' | 'travel' | 'event' | 'resolution';
 
@@ -120,6 +121,13 @@ export interface CycleSummary {
   feed: FeedEntry[];
 }
 
+export interface CrownState {
+  reignCycles: number;
+  crownPressure: number;
+  tributeRate: number;
+  instability: 'stable' | 'shaky' | 'crisis';
+}
+
 export interface WorldState {
   seed: string;
   cycle: number;
@@ -131,4 +139,5 @@ export interface WorldState {
   kingStatusExpires: number;
   feed: FeedEntry[];
   playerId: OrcId | null;
+  crown: CrownState;
 }

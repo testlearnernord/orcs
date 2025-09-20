@@ -1,82 +1,122 @@
 import { describe, expect, it } from 'vitest';
 
-import { centerOf, rectRelativeTo } from '@ui/overlay/domCoords';
+import { rectToSvgPoints, sideAnchors } from '@ui/overlay/coords';
 
-describe('domCoords', () => {
-  it('computes rectangle relative to a given root element', () => {
-    const root = document.createElement('div');
-    Object.defineProperty(root, 'getBoundingClientRect', {
-      value: () => ({
-        left: 100,
-        top: 200,
-        right: 400,
-        bottom: 600,
-        width: 300,
-        height: 400,
-        x: 100,
-        y: 200
-      }),
-      configurable: true
+class MockMatrix {
+  constructor(
+    public readonly a: number,
+    public readonly b: number,
+    public readonly c: number,
+    public readonly d: number,
+    public readonly e: number,
+    public readonly f: number
+  ) {}
+
+  inverse(): MockMatrix {
+    const det = this.a * this.d - this.b * this.c;
+    const a = this.d / det;
+    const b = -this.b / det;
+    const c = -this.c / det;
+    const d = this.a / det;
+    const e = (this.c * this.f - this.d * this.e) / det;
+    const f = (this.b * this.e - this.a * this.f) / det;
+    return new MockMatrix(a, b, c, d, e, f);
+  }
+}
+
+class MockPoint {
+  x = 0;
+  y = 0;
+
+  matrixTransform(matrix: MockMatrix): { x: number; y: number } {
+    return {
+      x: matrix.a * this.x + matrix.c * this.y + matrix.e,
+      y: matrix.b * this.x + matrix.d * this.y + matrix.f
+    };
+  }
+}
+
+function createSvg(matrix: MockMatrix | null): SVGSVGElement {
+  return {
+    createSVGPoint: () => new MockPoint(),
+    getScreenCTM: () => matrix as unknown as DOMMatrix | null
+  } as unknown as SVGSVGElement;
+}
+
+function createElement(rect: {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+}): Element {
+  return {
+    getBoundingClientRect: () => rect
+  } as unknown as Element;
+}
+
+describe('overlay coords', () => {
+  it('maps DOM rects into svg space with scaling and translation', () => {
+    const svg = createSvg(new MockMatrix(2, 0, 0, 2, 100, 50));
+    const element = createElement({
+      left: 140,
+      top: 90,
+      right: 260,
+      bottom: 150,
+      width: 120,
+      height: 60
     });
 
-    const child = document.createElement('div');
-    Object.defineProperty(child, 'getBoundingClientRect', {
-      value: () => ({
-        left: 150,
-        top: 260,
-        right: 200,
-        bottom: 330,
-        width: 50,
-        height: 70,
-        x: 150,
-        y: 260
-      }),
-      configurable: true
-    });
-
-    const rect = rectRelativeTo(child, root);
-    expect(rect).toEqual({ x: 50, y: 60, w: 50, h: 70 });
+    const points = rectToSvgPoints(svg, element);
+    expect(points.tl.x).toBeCloseTo(20);
+    expect(points.tl.y).toBeCloseTo(20);
+    expect(points.br.x).toBeCloseTo(80);
+    expect(points.br.y).toBeCloseTo(50);
+    expect(points.center.x).toBeCloseTo((20 + 80) / 2);
+    expect(points.center.y).toBeCloseTo((20 + 50) / 2);
   });
 
-  it('falls back to the document element when no root is provided', () => {
-    const original = document.documentElement.getBoundingClientRect;
-    Object.defineProperty(document.documentElement, 'getBoundingClientRect', {
-      value: () => ({
-        left: 12,
-        top: 24,
-        right: 812,
-        bottom: 624,
-        width: 800,
-        height: 600,
-        x: 12,
-        y: 24
-      }),
-      configurable: true
+  it('falls back to screen space when no CTM is available', () => {
+    const svg = createSvg(null);
+    const element = createElement({
+      left: 40,
+      top: 60,
+      right: 100,
+      bottom: 120,
+      width: 60,
+      height: 60
     });
 
-    const node = document.createElement('div');
-    Object.defineProperty(node, 'getBoundingClientRect', {
-      value: () => ({
-        left: 112,
-        top: 224,
-        right: 152,
-        bottom: 264,
-        width: 40,
-        height: 40,
-        x: 112,
-        y: 224
-      }),
-      configurable: true
+    const points = rectToSvgPoints(svg, element);
+    expect(points.tl.x).toBe(40);
+    expect(points.tr.x).toBe(100);
+    expect(points.center.y).toBe(90);
+  });
+
+  it('selects side anchors based on relative positions', () => {
+    const svg = createSvg(new MockMatrix(1, 0, 0, 1, 0, 0));
+    const from = createElement({
+      left: 10,
+      top: 10,
+      right: 60,
+      bottom: 60,
+      width: 50,
+      height: 50
+    });
+    const to = createElement({
+      left: 120,
+      top: 20,
+      right: 170,
+      bottom: 80,
+      width: 50,
+      height: 60
     });
 
-    const rect = rectRelativeTo(node, null);
-    expect(rect).toEqual({ x: 100, y: 200, w: 40, h: 40 });
-    const center = centerOf(node, null);
-    expect(center).toEqual({ x: 120, y: 220 });
-
-    Object.defineProperty(document.documentElement, 'getBoundingClientRect', {
-      value: original,
-      configurable: true
-    });
+    const anchors = sideAnchors(svg, from, to);
+    expect(anchors.A.x).toBeCloseTo(60);
+    expect(anchors.A.y).toBeCloseTo(35);
+    expect(anchors.B.x).toBeCloseTo(120);
+    expect(anchors.B.y).toBeCloseTo(50);
   });
 });

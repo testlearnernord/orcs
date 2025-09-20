@@ -1,24 +1,13 @@
-export interface AnchorPoint {
-  x: number;
-  y: number;
-}
+import { sideAnchors, type SvgPoint } from '@ui/overlay/coords';
+
+export type AnchorPoint = SvgPoint;
 
 export function edgeAnchors(
-  a: DOMRect,
-  b: DOMRect,
-  root: DOMRect
-): {
-  A: AnchorPoint;
-  B: AnchorPoint;
-} {
-  const ax = a.right < b.left ? a.right : a.left;
-  const bx = a.right < b.left ? b.left : b.right;
-  const ay = a.top + a.height / 2;
-  const by = b.top + b.height / 2;
-  return {
-    A: { x: ax - root.left, y: ay - root.top },
-    B: { x: bx - root.left, y: by - root.top }
-  };
+  svg: SVGSVGElement,
+  from: Element,
+  to: Element
+): { A: AnchorPoint; B: AnchorPoint } {
+  return sideAnchors(svg, from, to);
 }
 
 export function bezierD(A: AnchorPoint, B: AnchorPoint): string {

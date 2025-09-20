@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { advanceCycle } from '@sim/cycle';
 import { BLOOD_OATH_DURATION } from '@sim/constants';
-import { formRelationship, collectBloodOathVictims } from '@sim/relationships';
+import {
+  expireBloodOaths,
+  formRelationship,
+  collectBloodOathVictims
+} from '@sim/relationships';
 import { RNG } from '@sim/rng';
 import { createWorld } from '@sim/world';
 
@@ -20,9 +23,8 @@ describe('blood oath', () => {
       rng
     );
 
-    for (let i = 0; i < BLOOD_OATH_DURATION; i += 1) {
-      advanceCycle(state, rng);
-    }
+    state.cycle += BLOOD_OATH_DURATION;
+    expireBloodOaths(state, state.cycle, rng);
 
     const updated = state.officers.find((officer) => officer.id === first.id);
     const relation = updated?.relationships.find(

@@ -2,57 +2,111 @@ import { describe, expect, it } from 'vitest';
 
 import { bezierD, edgeAnchors } from '@ui/overlay/anchors';
 
+class MockMatrix {
+  constructor(
+    public readonly a: number,
+    public readonly b: number,
+    public readonly c: number,
+    public readonly d: number,
+    public readonly e: number,
+    public readonly f: number
+  ) {}
+
+  inverse(): MockMatrix {
+    const det = this.a * this.d - this.b * this.c;
+    const a = this.d / det;
+    const b = -this.b / det;
+    const c = -this.c / det;
+    const d = this.a / det;
+    const e = (this.c * this.f - this.d * this.e) / det;
+    const f = (this.b * this.e - this.a * this.f) / det;
+    return new MockMatrix(a, b, c, d, e, f);
+  }
+}
+
+class MockPoint {
+  x = 0;
+  y = 0;
+
+  matrixTransform(matrix: MockMatrix): { x: number; y: number } {
+    return {
+      x: matrix.a * this.x + matrix.c * this.y + matrix.e,
+      y: matrix.b * this.x + matrix.d * this.y + matrix.f
+    };
+  }
+}
+
+function createSvg(matrix: MockMatrix): SVGSVGElement {
+  return {
+    createSVGPoint: () => new MockPoint(),
+    getScreenCTM: () => matrix as unknown as DOMMatrix
+  } as unknown as SVGSVGElement;
+}
+
+function createElement(rect: {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+}): Element {
+  return {
+    getBoundingClientRect: () => rect
+  } as unknown as Element;
+}
+
 describe('overlay anchors', () => {
-  const rect = (
-    left: number,
-    top: number,
-    width: number,
-    height: number
-  ): DOMRect =>
-    ({
-      left,
-      top,
-      right: left + width,
-      bottom: top + height,
-      width,
-      height,
-      x: left,
-      y: top,
-      toJSON() {
-        return {};
-      }
-    }) as DOMRect;
-
   it('anchors from the right edge when target is to the right', () => {
-    const a = rect(100, 200, 80, 60);
-    const b = rect(240, 210, 60, 60);
-    const root = rect(0, 0, 800, 600);
+    const svg = createSvg(new MockMatrix(1, 0, 0, 1, 0, 0));
+    const source = createElement({
+      left: 100,
+      top: 200,
+      right: 180,
+      bottom: 260,
+      width: 80,
+      height: 60
+    });
+    const target = createElement({
+      left: 240,
+      top: 210,
+      right: 300,
+      bottom: 270,
+      width: 60,
+      height: 60
+    });
 
-    const { A, B } = edgeAnchors(a, b, root);
-    expect(A).toEqual({
-      x: a.right - root.left,
-      y: a.top + a.height / 2 - root.top
-    });
-    expect(B).toEqual({
-      x: b.left - root.left,
-      y: b.top + b.height / 2 - root.top
-    });
+    const { A, B } = edgeAnchors(svg, source, target);
+    expect(A.x).toBeCloseTo(180);
+    expect(A.y).toBeCloseTo(230);
+    expect(B.x).toBeCloseTo(240);
+    expect(B.y).toBeCloseTo(240);
   });
 
   it('anchors from the left edge when target is to the left', () => {
-    const a = rect(300, 180, 70, 70);
-    const b = rect(180, 200, 60, 60);
-    const root = rect(50, 40, 900, 700);
+    const svg = createSvg(new MockMatrix(1, 0, 0, 1, 0, 0));
+    const source = createElement({
+      left: 320,
+      top: 180,
+      right: 390,
+      bottom: 250,
+      width: 70,
+      height: 70
+    });
+    const target = createElement({
+      left: 180,
+      top: 200,
+      right: 240,
+      bottom: 260,
+      width: 60,
+      height: 60
+    });
 
-    const { A, B } = edgeAnchors(a, b, root);
-    expect(A).toEqual({
-      x: a.left - root.left,
-      y: a.top + a.height / 2 - root.top
-    });
-    expect(B).toEqual({
-      x: b.right - root.left,
-      y: b.top + b.height / 2 - root.top
-    });
+    const { A, B } = edgeAnchors(svg, source, target);
+    expect(A.x).toBeCloseTo(320);
+    expect(A.y).toBeCloseTo(215);
+    expect(B.x).toBeCloseTo(240);
+    expect(B.y).toBeCloseTo(230);
   });
 
   it('produces a smooth bezier path between anchors', () => {
