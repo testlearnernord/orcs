@@ -1,7 +1,7 @@
 import type { Officer } from '@sim/types';
 import type { GameMode } from '@state/ui/mode';
 import type { WarcallEntry } from '@ui/components/warcalls/types';
-import Portrait from '@ui/Portrait';
+import Avatar from '@ui/officer/Avatar';
 
 const PHASES: { key: string; label: string }[] = [
   { key: 'prep', label: 'Vorbereitung' },
@@ -149,13 +149,13 @@ export class WarcallModal {
     list.innerHTML = '';
     entry.participants.forEach((officer) => {
       const article = document.createElement('article');
-      const portrait = new Portrait({
+      const avatarView = new Avatar({
         officer,
         size: 40,
         dead: officer.status === 'DEAD',
         className: 'warcall-participant__img'
       });
-      article.appendChild(portrait.element);
+      article.appendChild(avatarView.element);
       const meta = document.createElement('div');
       const name = document.createElement('strong');
       name.textContent = officer.name;

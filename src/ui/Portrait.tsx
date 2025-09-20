@@ -1,5 +1,4 @@
 import type { Officer } from '@sim/types';
-import { getLegacyPortraitUrl } from '@sim/portraits';
 import { ArtConfig } from '@/config/art';
 import {
   chooseTileIndex,
@@ -64,19 +63,17 @@ export default class Portrait {
   readonly element: HTMLDivElement;
   private props: ResolvedProps;
   private requestId = 0;
-  private fallbackImg: HTMLImageElement | null = null;
   private disposed = false;
   private baseClass?: string;
-  private isActive = false;
 
   constructor(props: PortraitProps) {
     this.element = document.createElement('div');
     this.element.setAttribute('aria-hidden', 'true');
-    this.element.style.backgroundColor = PLACEHOLDER_COLOR;
     this.element.style.backgroundRepeat = 'no-repeat';
     this.props = resolveProps(undefined, props);
     this.applyClassName(this.props.className);
     this.applyFrame(this.props);
+    this.applyPlaceholder();
     void this.render(this.props);
   }
 
@@ -90,18 +87,17 @@ export default class Portrait {
 
   destroy(): void {
     this.disposed = true;
-    this.clearFallback();
     this.element.replaceChildren();
   }
 
   private applyClassName(className?: string): void {
     this.baseClass = className;
-    this.updateClassList();
+    this.updateClassList(false);
   }
 
-  private updateClassList(): void {
+  private updateClassList(active: boolean): void {
     const classes = ['portrait'];
-    if (this.isActive) {
+    if (active) {
       classes.push('portrait--active');
     }
     if (this.baseClass) {
@@ -125,29 +121,25 @@ export default class Portrait {
 
   private async render(props: ResolvedProps): Promise<void> {
     if (ArtConfig.active !== 'realistic') {
-      this.showLegacy(props);
+      this.applyPlaceholder();
       return;
     }
 
     const requestId = ++this.requestId;
     const bundle = await ensureAtlasBundle();
-    if (this.disposed || requestId !== this.requestId) return;
-    if (!bundle || bundle.totalTiles === 0) {
-      this.showLegacy(props);
+    if (
+      this.disposed ||
+      requestId !== this.requestId ||
+      !bundle ||
+      bundle.totalTiles === 0
+    ) {
+      if (!this.disposed) {
+        this.applyPlaceholder();
+      }
       return;
     }
-    this.showAtlas(bundle, props);
-  }
 
-  private showLegacy(props: ResolvedProps): void {
-    this.isActive = false;
-    this.updateClassList();
-    const url = getLegacyPortraitUrl(props.officer.portraitSeed);
-    if (url) {
-      this.applyFallback(url);
-    } else {
-      this.applyPlaceholder();
-    }
+    this.showAtlas(bundle, props);
   }
 
   private showAtlas(bundle: AtlasBundle, props: ResolvedProps): void {
@@ -155,49 +147,20 @@ export default class Portrait {
     const seed = buildSeed(officer);
     const globalIndex = chooseTileIndex(seed, bundle.totalTiles);
     const { atlas, col, row } = resolveTile(bundle, globalIndex);
-    this.clearFallback();
-    this.isActive = true;
-    this.updateClassList();
+
+    this.element.style.backgroundColor = 'transparent';
     this.element.style.backgroundImage = `url("${atlas.url}")`;
     this.element.style.backgroundSize = `${atlas.cols * size}px ${atlas.rows * size}px`;
     this.element.style.backgroundPosition = `-${col * size}px -${row * size}px`;
-  }
-
-  private applyFallback(url: string): void {
-    if (!this.fallbackImg) {
-      const img = document.createElement('img');
-      img.alt = '';
-      img.loading = 'lazy';
-      img.decoding = 'async';
-      img.style.width = '100%';
-      img.style.height = '100%';
-      img.style.objectFit = 'cover';
-      img.style.display = 'block';
-      img.style.borderRadius = 'inherit';
-      this.element.appendChild(img);
-      this.fallbackImg = img;
-    }
-    this.element.style.backgroundImage = 'none';
-    this.element.style.backgroundSize = '';
-    this.element.style.backgroundPosition = '';
-    this.element.style.backgroundRepeat = 'no-repeat';
-    this.fallbackImg.src = url;
+    this.updateClassList(true);
   }
 
   private applyPlaceholder(): void {
-    this.clearFallback();
-    this.isActive = false;
-    this.updateClassList();
+    this.element.style.backgroundColor = PLACEHOLDER_COLOR;
     this.element.style.backgroundImage = 'none';
     this.element.style.backgroundSize = '';
     this.element.style.backgroundPosition = '';
-  }
-
-  private clearFallback(): void {
-    if (this.fallbackImg) {
-      this.fallbackImg.remove();
-      this.fallbackImg = null;
-    }
+    this.updateClassList(false);
   }
 }
 

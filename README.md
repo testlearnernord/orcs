@@ -19,3 +19,4 @@ PRs müssen `npm run format:check` (führt `prettier --check` aus) bestehen; bei
 ## Portrait-Atlanten
 
 Portrait-Atlanten werden automatisch erkannt, wenn unter `public/assets/orcs/portraits/` Dateien `set_a.webp`, `set_b.webp` liegen.
+Die UI rendert standardmäßig diese realistischen Portraits; der alte Generator greift nur, wenn `localStorage["art.active"] = "legacy"` gesetzt ist.

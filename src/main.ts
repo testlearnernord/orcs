@@ -1,4 +1,5 @@
 import './bootstrap/debugGuard';
+import '@ui/legacy/register';
 import { GameStore } from '@state/store';
 import { FLAGS } from '@state/flags';
 import { UIModeStore, type GameMode } from '@state/ui/mode';
