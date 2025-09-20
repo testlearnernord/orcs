@@ -1,12 +1,14 @@
-export type ArtSet = 'realistic' | 'legacy';
+export type ArtSet = 'realistic';
 
 function getInitialArt(): ArtSet {
+  if (typeof localStorage === 'undefined') return 'realistic';
   try {
     const raw = localStorage.getItem('art.active');
-    return raw === 'legacy' ? 'legacy' : 'realistic';
+    if (raw === 'legacy') localStorage.removeItem('art.active');
   } catch {
-    return 'realistic';
+    /* ignore */
   }
+  return 'realistic';
 }
 
 export const ArtConfig = {
