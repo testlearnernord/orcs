@@ -1,7 +1,7 @@
-import { getPortraitAsset } from '@sim/portraits';
 import type { Officer } from '@sim/types';
 import type { OfficerTooltip } from '@ui/components/officerTooltip';
 import { measure, flip } from '@ui/utils/flip';
+import Portrait from '@ui/Portrait';
 
 export interface OfficerCardLegacyOptions {
   tooltip: OfficerTooltip;
@@ -27,7 +27,7 @@ export class OfficerCardLegacy {
   private readonly statValues = new Map<StatKey, HTMLElement>();
   private readonly traitContainer: HTMLElement;
   private readonly subtitle: HTMLElement;
-  private readonly portrait: HTMLImageElement;
+  private readonly portrait: Portrait;
   private readonly badges: HTMLElement;
   private readonly meritBadge: HTMLElement;
   private readonly levelBadge: HTMLElement;
@@ -41,12 +41,11 @@ export class OfficerCardLegacy {
     this.element.tabIndex = 0;
     this.element.dataset.officerId = officer.id;
 
-    const portraitWrapper = document.createElement('div');
-    portraitWrapper.className = 'officer-card__portrait';
-    this.portrait = document.createElement('img');
-    this.portrait.alt = officer.name;
-    this.portrait.src = getPortraitAsset(officer.portraitSeed);
-    portraitWrapper.appendChild(this.portrait);
+    this.portrait = new Portrait(officer, {
+      size: 96,
+      className: 'officer-card__portrait',
+      dead: officer.status === 'DEAD'
+    });
 
     const body = document.createElement('div');
     body.className = 'officer-card__body';
@@ -105,7 +104,7 @@ export class OfficerCardLegacy {
     body.appendChild(statsGrid);
     body.appendChild(this.badges);
 
-    this.element.appendChild(portraitWrapper);
+    this.element.appendChild(this.portrait.element);
     this.element.appendChild(body);
 
     this.attachTooltipListeners();
@@ -206,8 +205,7 @@ export class OfficerCardLegacy {
   update(officer: Officer): void {
     const previous = this.officer;
     this.officer = officer;
-    this.portrait.src = getPortraitAsset(officer.portraitSeed);
-    this.portrait.alt = officer.name;
+    this.portrait.update(officer, { dead: officer.status === 'DEAD' });
     this.subtitle.textContent = `${officer.rank} • Merit ${Math.round(officer.merit)}`;
     this.levelBadge.textContent = `Level ${officer.level}`;
     this.meritBadge.textContent = `Zyklus ${officer.cycleJoined}`;

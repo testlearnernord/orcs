@@ -1,10 +1,10 @@
-import { getPortraitAsset } from '@sim/portraits';
 import type { Officer } from '@sim/types';
 import type { Status } from '@state/selectors/warcalls';
 import type {
   WarcallEntry,
   WarcallBucket
 } from '@ui/components/warcalls/types';
+import Portrait from '@ui/Portrait';
 
 export interface WarcallsDockOptions {
   onOpenDetails: (entry: WarcallEntry) => void;
@@ -95,7 +95,7 @@ export class WarcallsDock {
       <p class="warcall-risk">Risiko ${(entry.plan.risk * 100).toFixed(0)}% • ${
         entry.plan.rewardHint ?? 'Unbekannte Beute'
       }</p>
-      <div class="warcall-avatars">${this.renderParticipants(entry.participants)}</div>
+      <div class="warcall-avatars"></div>
       <footer>
         <span class="warcall-timer">Noch ${timeRemaining} Zyklen</span>
         <button type="button">Details</button>
@@ -110,16 +110,27 @@ export class WarcallsDock {
       }
     });
     item.addEventListener('click', () => this.options.onOpenDetails(entry));
+    const avatarHost = item.querySelector<HTMLDivElement>('.warcall-avatars');
+    if (avatarHost) {
+      this.renderParticipants(avatarHost, entry.participants);
+    }
     return item;
   }
 
-  private renderParticipants(participants: Officer[]): string {
-    return participants
-      .map((officer) => {
-        const src = getPortraitAsset(officer.portraitSeed);
-        return `<span class="warcall-avatar" title="${officer.name}"><img src="${src}" alt="${officer.name}"></span>`;
-      })
-      .join('');
+  private renderParticipants(container: HTMLElement, participants: Officer[]): void {
+    container.innerHTML = '';
+    participants.forEach((officer) => {
+      const avatar = new Portrait(officer, {
+        size: 32,
+        className: 'warcall-avatar',
+        dead: officer.status === 'DEAD'
+      });
+      avatar.element.title = officer.name;
+      avatar.element.setAttribute('role', 'img');
+      avatar.element.setAttribute('aria-label', officer.name);
+      avatar.element.setAttribute('aria-hidden', 'false');
+      container.appendChild(avatar.element);
+    });
   }
 
   private resolvePhaseLabel(entry: WarcallEntry): string {

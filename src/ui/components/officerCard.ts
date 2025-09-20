@@ -1,7 +1,7 @@
-import { getPortraitAsset } from '@sim/portraits';
 import type { Officer, RelationshipType } from '@sim/types';
 import type { OfficerTooltip } from '@ui/components/officerTooltip';
 import { measure, flip } from '@ui/utils/flip';
+import Portrait from '@ui/Portrait';
 
 export interface OfficerCardOptions {
   tooltip: OfficerTooltip;
@@ -54,7 +54,7 @@ export class OfficerCard {
   readonly element: HTMLElement;
   private readonly options: OfficerCardOptions;
   private officer: Officer;
-  private readonly portrait: HTMLImageElement;
+  private readonly portrait: Portrait;
   private readonly nameEl: HTMLHeadingElement;
   private readonly levelBadge: HTMLElement;
   private readonly rankBadge: HTMLElement;
@@ -74,13 +74,11 @@ export class OfficerCard {
     this.element.tabIndex = 0;
     this.element.dataset.officerId = officer.id;
 
-    const portraitWrapper = document.createElement('div');
-    portraitWrapper.className = 'officer-card__portrait';
-    this.portrait = document.createElement('img');
-    this.portrait.className = 'officer-card__portrait-img';
-    this.portrait.alt = officer.name;
-    this.portrait.src = getPortraitAsset(officer.portraitSeed);
-    portraitWrapper.appendChild(this.portrait);
+    this.portrait = new Portrait(officer, {
+      size: 96,
+      className: 'officer-card__portrait',
+      dead: officer.status === 'DEAD'
+    });
 
     const content = document.createElement('div');
     content.className = 'officer-card__content';
@@ -141,7 +139,7 @@ export class OfficerCard {
     this.footer.className = 'officer-card__footer';
     content.appendChild(this.footer);
 
-    this.element.append(portraitWrapper, content);
+    this.element.append(this.portrait.element, content);
     this.attachTooltipListeners();
     this.update(officer);
   }
@@ -268,8 +266,7 @@ export class OfficerCard {
     this.officer = officer;
     this.element.dataset.officerId = officer.id;
     this.setRank(officer.rank);
-    this.portrait.src = getPortraitAsset(officer.portraitSeed);
-    this.portrait.alt = officer.name;
+    this.portrait.update(officer, { dead: officer.status === 'DEAD' });
     this.updateMeta(officer);
     this.updateTraits(officer);
     this.updateRelationships(officer);

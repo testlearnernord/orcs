@@ -1,7 +1,7 @@
-import { getPortraitAsset } from '@sim/portraits';
 import type { Officer } from '@sim/types';
 import type { GameMode } from '@state/ui/mode';
 import type { WarcallEntry } from '@ui/components/warcalls/types';
+import Portrait from '@ui/Portrait';
 
 const PHASES: { key: string; label: string }[] = [
   { key: 'prep', label: 'Vorbereitung' },
@@ -74,20 +74,7 @@ export class WarcallModal {
       </section>
       <section class="warcall-participants">
         <h4>Teilnehmer</h4>
-        <div class="warcall-participants__list">
-          ${entry.participants
-            .map((officer) => {
-              const src = getPortraitAsset(officer.portraitSeed);
-              return `<article>
-                <img src="${src}" alt="${officer.name}">
-                <div>
-                  <strong>${officer.name}</strong>
-                  <span>${roleFor(officer, entry)}</span>
-                </div>
-              </article>`;
-            })
-            .join('')}
-        </div>
+        <div class="warcall-participants__list"></div>
       </section>
       <section class="warcall-log">
         <h4>Log</h4>
@@ -115,6 +102,12 @@ export class WarcallModal {
     join?.addEventListener('click', () => this.options.onJoin?.(entry));
     redirect?.addEventListener('click', () => this.options.onRedirect?.(entry));
     sabotage?.addEventListener('click', () => this.options.onSabotage?.(entry));
+    const participantList = container.querySelector<HTMLDivElement>(
+      '.warcall-participants__list'
+    );
+    if (participantList) {
+      this.renderParticipants(participantList, entry);
+    }
     const controls: (HTMLButtonElement | null)[] = [join, redirect, sabotage];
     const spectateDisabled = this.mode !== 'player';
     const resolved = Boolean(entry.resolution);
@@ -150,5 +143,31 @@ export class WarcallModal {
     if (this.current) {
       this.render(this.current);
     }
+  }
+
+  private renderParticipants(list: HTMLElement, entry: WarcallEntry): void {
+    list.innerHTML = '';
+    entry.participants.forEach((officer) => {
+      const article = document.createElement('article');
+      const avatar = new Portrait(officer, {
+        size: 40,
+        className: 'warcall-participant-avatar',
+        dead:
+          entry.resolution?.casualties.includes(officer.id) ??
+          officer.status === 'DEAD'
+      });
+      avatar.element.setAttribute('role', 'img');
+      avatar.element.setAttribute('aria-label', officer.name);
+      avatar.element.setAttribute('aria-hidden', 'false');
+      article.appendChild(avatar.element);
+      const info = document.createElement('div');
+      const name = document.createElement('strong');
+      name.textContent = officer.name;
+      const role = document.createElement('span');
+      role.textContent = roleFor(officer, entry);
+      info.append(name, role);
+      article.appendChild(info);
+      list.appendChild(article);
+    });
   }
 }
