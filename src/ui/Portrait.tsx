@@ -1,12 +1,12 @@
 import type { Officer } from '@sim/types';
 import { getLegacyPortraitUrl } from '@sim/portraits';
-import { ArtConfig } from '../config/art';
+import { ArtConfig } from '@/config/art';
 import {
   chooseTileIndex,
   loadAtlases,
   resolveTile,
   type AtlasBundle
-} from '../features/portraits/atlas';
+} from '@/features/portraits/atlas';
 
 export interface PortraitProps {
   officer: Officer;
@@ -66,6 +66,8 @@ export default class Portrait {
   private requestId = 0;
   private fallbackImg: HTMLImageElement | null = null;
   private disposed = false;
+  private baseClass?: string;
+  private isActive = false;
 
   constructor(props: PortraitProps) {
     this.element = document.createElement('div');
@@ -93,7 +95,19 @@ export default class Portrait {
   }
 
   private applyClassName(className?: string): void {
-    this.element.className = className ? `portrait ${className}` : 'portrait';
+    this.baseClass = className;
+    this.updateClassList();
+  }
+
+  private updateClassList(): void {
+    const classes = ['portrait'];
+    if (this.isActive) {
+      classes.push('portrait--active');
+    }
+    if (this.baseClass) {
+      classes.push(this.baseClass);
+    }
+    this.element.className = classes.join(' ');
   }
 
   private applyFrame(props: ResolvedProps): void {
@@ -126,6 +140,8 @@ export default class Portrait {
   }
 
   private showLegacy(props: ResolvedProps): void {
+    this.isActive = false;
+    this.updateClassList();
     const url = getLegacyPortraitUrl(props.officer.portraitSeed);
     if (url) {
       this.applyFallback(url);
@@ -140,6 +156,8 @@ export default class Portrait {
     const globalIndex = chooseTileIndex(seed, bundle.totalTiles);
     const { atlas, col, row } = resolveTile(bundle, globalIndex);
     this.clearFallback();
+    this.isActive = true;
+    this.updateClassList();
     this.element.style.backgroundImage = `url("${atlas.url}")`;
     this.element.style.backgroundSize = `${atlas.cols * size}px ${atlas.rows * size}px`;
     this.element.style.backgroundPosition = `-${col * size}px -${row * size}px`;
@@ -168,6 +186,8 @@ export default class Portrait {
 
   private applyPlaceholder(): void {
     this.clearFallback();
+    this.isActive = false;
+    this.updateClassList();
     this.element.style.backgroundImage = 'none';
     this.element.style.backgroundSize = '';
     this.element.style.backgroundPosition = '';

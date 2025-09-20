@@ -1,4 +1,4 @@
-import { ArtConfig } from '../../config/art';
+import { ArtConfig } from '@/config/art';
 
 export interface AtlasInfo {
   url: string;
@@ -136,4 +136,14 @@ export function resolveTile(
   }
   const atlas = bundle.atlases[bundle.atlases.length - 1];
   return { atlas, col: 0, row: 0 };
+}
+
+declare global {
+  interface Window {
+    __PORTRAITS__?: any;
+  }
+}
+
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  (window as Window & { __PORTRAITS__?: any }).__PORTRAITS__ = { loadAtlases };
 }
