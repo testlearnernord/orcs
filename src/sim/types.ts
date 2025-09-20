@@ -130,4 +130,5 @@ export interface WorldState {
   kingStatus: 'UNGEFESTIGT' | 'GEFESTIGT';
   kingStatusExpires: number;
   feed: FeedEntry[];
+  playerId: OrcId | null;
 }

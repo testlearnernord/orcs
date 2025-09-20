@@ -6,6 +6,7 @@ import type {
   WorldState
 } from '@sim/types';
 import type { GameStore } from '@state/store';
+import type { GameMode, UIModeState, UIModeStore } from '@state/ui/mode';
 import {
   selectWarcallsByStatus,
   statusOf,
@@ -37,6 +38,7 @@ import {
   initHotkeys,
   registerHotkey
 } from '@core/hotkeys';
+import { ModeGate } from '@ui/components/modeGate';
 
 const RANK_ORDER: Rank[] = ['König', 'Spieler', 'Captain', 'Späher', 'Grunzer'];
 const MAX_COMPLETED_WARCALLS = 8;
@@ -47,6 +49,8 @@ export class NemesisUI {
   private ranksEl: HTMLElement | null = null;
   private feedEl: HTMLElement | null = null;
   private warcallsHost: HTMLElement | null = null;
+  private modeIndicator: HTMLElement | null = null;
+  private warcallButton: HTMLButtonElement | null = null;
   private readonly cards = new Map<string, OfficerCard>();
   private readonly rankContainers = new Map<Rank, HTMLElement>();
   private readonly officerIndex = new Map<string, Officer>();
@@ -65,9 +69,15 @@ export class NemesisUI {
   private completedWarcalls: WarcallEntry[] = [];
   private warcallTab: WarcallStatus = 'active';
   private readonly hotkeyHints = new Set<string>();
+  private readonly modeGate: ModeGate;
+  private modeState: UIModeState;
 
-  constructor(private readonly store: GameStore) {
+  constructor(
+    private readonly store: GameStore,
+    private readonly modeStore: UIModeStore
+  ) {
     const state = store.getState();
+    this.modeState = modeStore.getState();
     this.syncOfficerIndex(state.officers);
     this.graveyard = new GraveyardPanel(state.graveyard);
 
@@ -97,6 +107,13 @@ export class NemesisUI {
       onRedirect: () => this.toast.show('Umlenkung wird protokolliert.'),
       onSabotage: () => this.toast.show('Sabotage ist noch in Arbeit.')
     });
+    this.warcallModal.setMode(this.modeState.mode);
+
+    this.modeGate = new ModeGate({
+      onConfirm: (mode) => this.handleModeConfirm(mode)
+    });
+    this.modeStore.on('mode:changed', (next) => this.handleModeChange(next));
+    this.syncModeUI();
 
     store.events.on('feed:appended', (entries) => {
       this.feed.render(entries);
@@ -132,6 +149,63 @@ export class NemesisUI {
     });
   }
 
+  private handleModeConfirm(mode: GameMode): void {
+    this.modeStore.setMode(mode);
+  }
+
+  private handleModeChange(state: UIModeState): void {
+    this.modeState = state;
+    this.syncModeUI();
+    this.updateModeUrl(state.mode);
+  }
+
+  private updateModeUrl(mode: GameMode): void {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    url.searchParams.set('mode', mode);
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    window.history.replaceState({}, '', next);
+  }
+
+  private syncModeUI(): void {
+    this.applyModeToControls();
+    this.syncModeIndicator();
+    this.syncModeAttributes();
+    this.warcallModal.setMode(this.modeState.mode);
+  }
+
+  private applyModeToControls(): void {
+    if (!this.warcallButton) return;
+    const disabled = this.modeState.mode !== 'player';
+    this.warcallButton.disabled = disabled;
+    if (disabled) {
+      this.warcallButton.setAttribute(
+        'title',
+        'Im Spectate-Mode nicht verfügbar.'
+      );
+    } else {
+      this.warcallButton.removeAttribute('title');
+    }
+  }
+
+  private syncModeIndicator(): void {
+    if (!this.modeIndicator) return;
+    const label =
+      this.modeState.mode === 'player'
+        ? 'Player-Modus (Beta)'
+        : 'Spectate-Modus';
+    this.modeIndicator.textContent = label;
+  }
+
+  private syncModeAttributes(): void {
+    if (this.root) {
+      this.root.dataset.mode = this.modeState.mode;
+    }
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.dataset.gameMode = this.modeState.mode;
+    }
+  }
+
   mount(root: HTMLElement): void {
     this.root = root;
     root.innerHTML = '';
@@ -140,6 +214,7 @@ export class NemesisUI {
     app.innerHTML = `
       <header class="hud">
         <div class="brand">NEMESIS HOF</div>
+        <div class="hud-mode" data-mode-indicator>Spectate-Modus</div>
         <div class="hud-controls">
           <button data-action="cycle">E — Cycle</button>
           <button data-action="reset">R — Neu</button>
@@ -159,9 +234,11 @@ export class NemesisUI {
     this.ranksEl = app.querySelector('#ranks');
     this.feedEl = app.querySelector('#feed');
     this.warcallsHost = app.querySelector('#warcalls');
+    this.modeIndicator = app.querySelector('[data-mode-indicator]');
 
     this.warcallsHost?.appendChild(this.warcallDock.element);
     this.registerUIEvents(app);
+    this.syncModeUI();
     this.renderOfficers(this.store.getState().officers);
     this.renderFeed();
     this.updateWarcalls(
@@ -173,29 +250,24 @@ export class NemesisUI {
     if (RELATIONS_OVERLAY_ENABLED && this.ranksEl) {
       this.relations = new RelationsOverlay({
         host: this.ranksEl,
-        getOfficerElement: (id) => this.cards.get(id)?.element
+        getOfficerElement: (id) => this.cards.get(id)?.element,
+        getOfficerData: (id) => this.officerIndex.get(id)
       });
-      this.lastEdges = buildRelationEdges(
-        this.store.getState().officers,
-        true,
-        this.store.getState().cycle
-      );
-      this.relations.setEdges(this.lastEdges);
+      const state = this.store.getState();
+      this.lastEdges = buildRelationEdges(state.officers, state.cycle);
+      this.relations.setEdges(this.lastEdges, state.cycle);
       this.resizeObserver = new ResizeObserver(() => {
-        if (!this.relations) return;
-        const state = this.store.getState();
-        this.lastEdges = buildRelationEdges(state.officers, true, state.cycle);
-        this.relations.setEdges(this.lastEdges);
+        this.relations?.refresh();
       });
       this.resizeObserver.observe(this.ranksEl);
       this.ranksEl.addEventListener('scroll', () => {
-        if (!this.relations) return;
-        this.relations.setEdges(this.lastEdges);
+        this.relations?.refresh();
       });
     }
 
     initHotkeys();
     this.registerHotkeys();
+    this.modeGate.open(this.modeState.mode);
   }
 
   private registerUIEvents(app: HTMLElement): void {
@@ -205,9 +277,10 @@ export class NemesisUI {
     app
       .querySelector<HTMLButtonElement>('button[data-action="reset"]')
       ?.addEventListener('click', () => this.reset());
-    app
-      .querySelector<HTMLButtonElement>('button[data-action="warcall"]')
-      ?.addEventListener('click', () => this.scheduleWarcall());
+    this.warcallButton = app.querySelector<HTMLButtonElement>(
+      'button[data-action="warcall"]'
+    );
+    this.warcallButton?.addEventListener('click', () => this.scheduleWarcall());
     app
       .querySelector<HTMLButtonElement>('button[data-action="help"]')
       ?.addEventListener('click', () => this.helpOverlay.toggle());
@@ -223,6 +296,26 @@ export class NemesisUI {
     registerHotkey('r', () => this.reset());
     registerHotkey('n', () => this.scheduleWarcall());
     registerHotkey('h', () => this.helpOverlay.toggle());
+    if (RELATIONS_OVERLAY_ENABLED) {
+      registerHotkey('f', () => {
+        if (!this.relations) return;
+        const next = !this.relations.isLensEnabled();
+        this.relations.setLensEnabled(next);
+        this.toast.show(
+          next ? 'Beziehungs-Lens aktiviert.' : 'Beziehungs-Lens deaktiviert.'
+        );
+      });
+      registerHotkey('l', () => {
+        if (!this.relations) return;
+        const next = !this.relations.isLegendVisible();
+        this.relations.setLegendVisible(next);
+        this.toast.show(
+          next
+            ? 'Relations-Legende eingeblendet.'
+            : 'Relations-Legende ausgeblendet.'
+        );
+      });
+    }
     bindOnce('?', () => {
       const registered = getRegisteredHotkeys()
         .map((entry) => entry.key.toUpperCase())
@@ -242,6 +335,10 @@ export class NemesisUI {
   }
 
   private scheduleWarcall(): void {
+    if (this.modeState.mode !== 'player') {
+      this.rememberHint('n-disabled', 'Im Spectate-Mode nicht verfügbar.');
+      return;
+    }
     this.store.scheduleWarcall();
     this.rememberHint('n', 'Neuer Warcall (Hotkey N).');
   }
@@ -332,8 +429,8 @@ export class NemesisUI {
 
     if (this.relations) {
       const state = this.store.getState();
-      this.lastEdges = buildRelationEdges(state.officers, true, state.cycle);
-      this.relations.setEdges(this.lastEdges);
+      this.lastEdges = buildRelationEdges(state.officers, state.cycle);
+      this.relations.setEdges(this.lastEdges, state.cycle);
     }
   }
 

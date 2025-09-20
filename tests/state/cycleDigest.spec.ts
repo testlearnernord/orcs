@@ -46,7 +46,8 @@ describe('computeDigest', () => {
       kingId: 'p1',
       kingStatus: 'GEFESTIGT',
       kingStatusExpires: 0,
-      feed: []
+      feed: [],
+      playerId: 'p1'
     };
 
     const spawn = createOfficer({ id: 'o3', name: 'Nura', rank: 'Grunzer' });
@@ -76,7 +77,8 @@ describe('computeDigest', () => {
       kingId: 'p1',
       kingStatus: 'GEFESTIGT',
       kingStatusExpires: 0,
-      feed: []
+      feed: [],
+      playerId: 'p1'
     };
 
     const summary: CycleSummary = {

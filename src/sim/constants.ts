@@ -4,10 +4,10 @@ export const TOTAL_ACTIVE_OFFICERS = 20;
 
 export const RANK_QUOTAS: Record<Rank, number> = {
   König: 1,
-  Spieler: 1,
+  Spieler: 0,
   Captain: 4,
   Späher: 4,
-  Grunzer: 10
+  Grunzer: 11
 };
 
 export const PROMOTION_THRESHOLDS: Record<

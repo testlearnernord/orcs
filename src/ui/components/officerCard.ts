@@ -1,5 +1,5 @@
 import { getPortraitAsset } from '@sim/portraits';
-import type { Officer } from '@sim/types';
+import type { Officer, RelationshipType } from '@sim/types';
 import type { OfficerTooltip } from '@ui/components/officerTooltip';
 import { measure, flip } from '@ui/utils/flip';
 
@@ -19,23 +19,56 @@ const STAT_LABEL: Record<StatKey, string> = {
   stolz: 'Stolz'
 };
 
+const RELATION_ORDER: RelationshipType[] = [
+  'ALLY',
+  'FRIEND',
+  'RIVAL',
+  'BLOOD_OATH'
+];
+
+const RELATION_LABEL: Record<RelationshipType, string> = {
+  ALLY: 'ALLY',
+  FRIEND: 'FRIEND',
+  RIVAL: 'RIVAL',
+  BLOOD_OATH: 'BLOODOATH'
+};
+
+const RELATION_CLASS: Record<RelationshipType, string> = {
+  ALLY: 'ally',
+  FRIEND: 'friend',
+  RIVAL: 'rival',
+  BLOOD_OATH: 'blood'
+};
+
+type RankSlug = 'king' | 'player' | 'captain' | 'scout' | 'grunt';
+
+const RANK_SLUG: Record<Officer['rank'], RankSlug> = {
+  König: 'king',
+  Spieler: 'player',
+  Captain: 'captain',
+  Späher: 'scout',
+  Grunzer: 'grunt'
+};
+
 export class OfficerCard {
   readonly element: HTMLElement;
   private readonly options: OfficerCardOptions;
   private officer: Officer;
+  private readonly portrait: HTMLImageElement;
+  private readonly nameEl: HTMLHeadingElement;
+  private readonly levelBadge: HTMLElement;
+  private readonly rankBadge: HTMLElement;
+  private readonly meritBadge: HTMLElement;
+  private readonly cycleBadge: HTMLElement;
+  private readonly traitContainer: HTMLElement;
+  private readonly footer: HTMLElement;
   private readonly statBars = new Map<StatKey, HTMLDivElement>();
   private readonly statValues = new Map<StatKey, HTMLElement>();
-  private readonly traitContainer: HTMLElement;
-  private readonly subtitle: HTMLElement;
-  private readonly portrait: HTMLImageElement;
-  private readonly badges: HTMLElement;
-  private readonly meritBadge: HTMLElement;
-  private readonly levelBadge: HTMLElement;
   private previousRect: DOMRect | null = null;
 
   constructor(officer: Officer, options: OfficerCardOptions) {
-    this.officer = officer;
     this.options = options;
+    this.officer = officer;
     this.element = document.createElement('article');
     this.element.className = 'officer-card';
     this.element.tabIndex = 0;
@@ -44,70 +77,71 @@ export class OfficerCard {
     const portraitWrapper = document.createElement('div');
     portraitWrapper.className = 'officer-card__portrait';
     this.portrait = document.createElement('img');
+    this.portrait.className = 'officer-card__portrait-img';
     this.portrait.alt = officer.name;
     this.portrait.src = getPortraitAsset(officer.portraitSeed);
     portraitWrapper.appendChild(this.portrait);
 
-    const body = document.createElement('div');
-    body.className = 'officer-card__body';
+    const content = document.createElement('div');
+    content.className = 'officer-card__content';
 
-    const header = document.createElement('div');
+    const header = document.createElement('header');
     header.className = 'officer-card__header';
-    const title = document.createElement('h3');
-    title.textContent = officer.name;
-    this.subtitle = document.createElement('p');
-    this.subtitle.className = 'officer-card__subtitle';
-    header.appendChild(title);
-    header.appendChild(this.subtitle);
 
-    const badgeRow = document.createElement('div');
-    badgeRow.className = 'officer-card__badge-row';
+    const titleRow = document.createElement('div');
+    titleRow.className = 'officer-card__title-row';
+    this.nameEl = document.createElement('h3');
+    this.nameEl.textContent = officer.name;
     this.levelBadge = document.createElement('span');
-    this.levelBadge.className = 'officer-card__badge';
+    this.levelBadge.className = 'officer-card__level';
+    titleRow.appendChild(this.nameEl);
+    titleRow.appendChild(this.levelBadge);
+
+    const metaRow = document.createElement('div');
+    metaRow.className = 'officer-card__meta';
+    this.rankBadge = document.createElement('span');
+    this.rankBadge.className = 'officer-card__role';
     this.meritBadge = document.createElement('span');
-    this.meritBadge.className =
+    this.meritBadge.className = 'officer-card__badge';
+    this.cycleBadge = document.createElement('span');
+    this.cycleBadge.className =
       'officer-card__badge officer-card__badge--muted';
-    badgeRow.appendChild(this.levelBadge);
-    badgeRow.appendChild(this.meritBadge);
+    metaRow.append(this.rankBadge, this.meritBadge, this.cycleBadge);
+
+    header.append(titleRow, metaRow);
+    content.appendChild(header);
 
     this.traitContainer = document.createElement('div');
     this.traitContainer.className = 'officer-card__traits';
+    content.appendChild(this.traitContainer);
 
-    const statsGrid = document.createElement('dl');
-    statsGrid.className = 'officer-card__stats';
+    const stats = document.createElement('div');
+    stats.className = 'officer-card__stats';
     STATS.forEach((key) => {
       const row = document.createElement('div');
-      const dt = document.createElement('dt');
-      dt.textContent = STAT_LABEL[key];
-      const dd = document.createElement('dd');
+      row.className = 'officer-card__stat';
+      const label = document.createElement('span');
+      label.className = 'officer-card__stat-label';
+      label.textContent = STAT_LABEL[key];
       const bar = document.createElement('div');
-      bar.className = 'officer-card__bar';
+      bar.className = 'officer-card__stat-bar';
       const fill = document.createElement('div');
-      fill.className = 'officer-card__bar-fill';
+      fill.className = 'officer-card__stat-fill';
       bar.appendChild(fill);
       const value = document.createElement('span');
       value.className = 'officer-card__stat-value';
-      dd.appendChild(bar);
-      dd.appendChild(value);
-      row.appendChild(dt);
-      row.appendChild(dd);
-      statsGrid.appendChild(row);
+      row.append(label, bar, value);
+      stats.appendChild(row);
       this.statBars.set(key, fill);
       this.statValues.set(key, value);
     });
+    content.appendChild(stats);
 
-    this.badges = document.createElement('div');
-    this.badges.className = 'officer-card__relationship-badges';
+    this.footer = document.createElement('footer');
+    this.footer.className = 'officer-card__footer';
+    content.appendChild(this.footer);
 
-    body.appendChild(header);
-    body.appendChild(badgeRow);
-    body.appendChild(this.traitContainer);
-    body.appendChild(statsGrid);
-    body.appendChild(this.badges);
-
-    this.element.appendChild(portraitWrapper);
-    this.element.appendChild(body);
-
+    this.element.append(portraitWrapper, content);
     this.attachTooltipListeners();
     this.update(officer);
   }
@@ -132,26 +166,40 @@ export class OfficerCard {
     });
   }
 
-  private updateBadges(officer: Officer): void {
+  private setRank(rank: Officer['rank']): void {
+    const slug = RANK_SLUG[rank];
+    this.element.dataset.rank = slug;
+    this.rankBadge.textContent = rank;
+  }
+
+  private updateMeta(officer: Officer): void {
+    this.nameEl.textContent = officer.name;
+    this.levelBadge.textContent = `Lv. ${officer.level}`;
+    this.meritBadge.textContent = `Merit ${Math.round(officer.merit)}`;
+    this.cycleBadge.textContent = `Zyklus ${officer.cycleJoined}`;
+  }
+
+  private updateTraits(officer: Officer): void {
     this.traitContainer.innerHTML = '';
     if (officer.traits.length === 0) {
-      const badge = document.createElement('span');
-      badge.className = 'officer-card__trait officer-card__trait--muted';
-      badge.textContent = 'Keine Merkmale';
-      this.traitContainer.appendChild(badge);
-    } else {
-      officer.traits.forEach((trait) => {
-        const badge = document.createElement('span');
-        badge.className = 'officer-card__trait';
-        badge.textContent = trait;
-        this.traitContainer.appendChild(badge);
-      });
+      const empty = document.createElement('span');
+      empty.className = 'officer-card__trait officer-card__trait--muted';
+      empty.textContent = 'Keine Merkmale';
+      this.traitContainer.appendChild(empty);
+      return;
     }
+    officer.traits.forEach((trait) => {
+      const chip = document.createElement('span');
+      chip.className = 'officer-card__trait';
+      chip.textContent = trait;
+      this.traitContainer.appendChild(chip);
+    });
   }
 
   private updateStats(officer: Officer, previous: Officer): void {
     STATS.forEach((key) => {
       const value = officer.personality[key];
+      const previousValue = previous.personality[key];
       const fill = this.statBars.get(key);
       const text = this.statValues.get(key);
       if (!fill || !text) return;
@@ -159,21 +207,21 @@ export class OfficerCard {
       if (!fill.style.width) {
         fill.style.width = percent;
       } else {
-        fill.style.setProperty('--target-width', percent);
         fill.classList.add('is-animating');
         requestAnimationFrame(() => {
           fill.style.width = percent;
-          fill.addEventListener(
-            'transitionend',
-            () => fill.classList.remove('is-animating'),
-            { once: true }
-          );
+          const handle = () => fill.classList.remove('is-animating');
+          fill.addEventListener('transitionend', handle, { once: true });
         });
       }
-      const previousValue = previous.personality[key];
       const delta = value - previousValue;
       text.textContent = value.toFixed(2);
-      text.dataset.delta = delta !== 0 ? delta.toFixed(2) : '';
+      text.dataset.delta =
+        delta !== 0
+          ? delta > 0
+            ? `+${delta.toFixed(2)}`
+            : delta.toFixed(2)
+          : '';
       text.classList.remove('is-up', 'is-down');
       if (delta > 0.01) {
         text.classList.add('is-up');
@@ -184,13 +232,25 @@ export class OfficerCard {
   }
 
   private updateRelationships(officer: Officer): void {
-    this.badges.innerHTML = '';
-    officer.relationships.slice(0, 4).forEach((relation) => {
-      const span = document.createElement('span');
-      span.className = `officer-card__rel officer-card__rel--${relation.type.toLowerCase()}`;
-      span.textContent = relation.type;
-      this.badges.appendChild(span);
+    const counts = new Map<RelationshipType, number>();
+    officer.relationships.forEach((relation) => {
+      counts.set(relation.type, (counts.get(relation.type) ?? 0) + 1);
     });
+    this.footer.innerHTML = '';
+    RELATION_ORDER.forEach((type) => {
+      const count = counts.get(type);
+      if (!count) return;
+      const pill = document.createElement('span');
+      pill.className = `officer-card__status officer-card__status--${RELATION_CLASS[type]}`;
+      pill.textContent = `${RELATION_LABEL[type]} · ${count}`;
+      this.footer.appendChild(pill);
+    });
+    if (this.footer.childElementCount === 0) {
+      const empty = document.createElement('span');
+      empty.className = 'officer-card__status officer-card__status--empty';
+      empty.textContent = 'Keine Bindungen';
+      this.footer.appendChild(empty);
+    }
   }
 
   captureBounds(): void {
@@ -206,13 +266,13 @@ export class OfficerCard {
   update(officer: Officer): void {
     const previous = this.officer;
     this.officer = officer;
+    this.element.dataset.officerId = officer.id;
+    this.setRank(officer.rank);
     this.portrait.src = getPortraitAsset(officer.portraitSeed);
     this.portrait.alt = officer.name;
-    this.subtitle.textContent = `${officer.rank} • Merit ${Math.round(officer.merit)}`;
-    this.levelBadge.textContent = `Level ${officer.level}`;
-    this.meritBadge.textContent = `Zyklus ${officer.cycleJoined}`;
-    this.updateBadges(officer);
-    this.updateStats(officer, previous);
+    this.updateMeta(officer);
+    this.updateTraits(officer);
     this.updateRelationships(officer);
+    this.updateStats(officer, previous);
   }
 }
