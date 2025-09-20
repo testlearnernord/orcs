@@ -1,5 +1,6 @@
 import { getPortraitAsset } from '@sim/portraits';
 import type { Officer } from '@sim/types';
+import type { GameMode } from '@state/ui/mode';
 import type { WarcallEntry } from '@ui/components/warcalls/types';
 
 const PHASES: { key: string; label: string }[] = [
@@ -26,6 +27,7 @@ export class WarcallModal {
   private readonly root: HTMLDivElement;
   private readonly options: WarcallModalOptions;
   private current: WarcallEntry | null = null;
+  private mode: GameMode = 'spectate';
 
   constructor(options: WarcallModalOptions = {}) {
     this.options = options;
@@ -52,6 +54,7 @@ export class WarcallModal {
       '.warcall-modal__content'
     );
     if (!container) return;
+    this.current = entry;
     const phase = entry.phase;
     container.innerHTML = `
       <header>
@@ -112,11 +115,21 @@ export class WarcallModal {
     join?.addEventListener('click', () => this.options.onJoin?.(entry));
     redirect?.addEventListener('click', () => this.options.onRedirect?.(entry));
     sabotage?.addEventListener('click', () => this.options.onSabotage?.(entry));
-    if (entry.resolution) {
-      join?.setAttribute('disabled', 'true');
-      redirect?.setAttribute('disabled', 'true');
-      sabotage?.setAttribute('disabled', 'true');
-    }
+    const controls: (HTMLButtonElement | null)[] = [join, redirect, sabotage];
+    const spectateDisabled = this.mode !== 'player';
+    const resolved = Boolean(entry.resolution);
+    controls.forEach((button) => {
+      if (!button) return;
+      const disabled = spectateDisabled || resolved;
+      button.disabled = disabled;
+      if (spectateDisabled) {
+        button.title = 'Im Spectate-Mode nicht verfügbar.';
+        button.classList.add('is-disabled');
+      } else {
+        button.classList.remove('is-disabled');
+        button.removeAttribute('title');
+      }
+    });
   }
 
   open(entry: WarcallEntry): void {
@@ -129,5 +142,13 @@ export class WarcallModal {
     this.root.classList.add('hidden');
     this.current = null;
     this.options.onClose?.();
+  }
+
+  setMode(mode: GameMode): void {
+    if (this.mode === mode) return;
+    this.mode = mode;
+    if (this.current) {
+      this.render(this.current);
+    }
   }
 }

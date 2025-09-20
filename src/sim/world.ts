@@ -17,7 +17,8 @@ export function createWorld(
     kingId: '',
     kingStatus: 'GEFESTIGT',
     kingStatusExpires: 0,
-    feed: []
+    feed: [],
+    playerId: null
   };
 
   (Object.keys(RANK_QUOTAS) as Rank[]).forEach((rank) => {
