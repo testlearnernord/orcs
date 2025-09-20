@@ -7,7 +7,7 @@ const __dirname = dirname(__filename);
 
 export default defineConfig({
   test: {
-    environment: 'node',
+    environment: 'jsdom',
     include: ['tests/**/*.spec.ts'],
     coverage: { reporter: ['text', 'html'], enabled: false }
   },
@@ -16,6 +16,7 @@ export default defineConfig({
       '@sim': resolve(__dirname, './src/sim'),
       '@ui': resolve(__dirname, './src/ui'),
       '@state': resolve(__dirname, './src/state'),
+      '@core': resolve(__dirname, './src/core'),
       '@assets': resolve(__dirname, './assets')
     }
   }

@@ -79,6 +79,16 @@ export interface WarcallBreakdown {
   logistic: number;
 }
 
+export type WarcallKind =
+  | 'Feast'
+  | 'Hunt'
+  | 'Ambush'
+  | 'Duel'
+  | 'Monsterjagd'
+  | 'Diplomatie';
+
+export type WarcallPhase = 'prep' | 'travel' | 'event' | 'resolution';
+
 export interface WarcallPlan {
   id: string;
   cycleAnnounced: number;
@@ -87,6 +97,9 @@ export interface WarcallPlan {
   participants: OrcId[];
   location: string;
   baseDifficulty: number;
+  kind: WarcallKind;
+  risk: number;
+  rewardHint?: string;
   breakdown?: WarcallBreakdown;
 }
 

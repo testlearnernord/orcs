@@ -1,4 +1,11 @@
-import type { CycleSummary, FeedEntry, Officer, WorldState } from '@sim/types';
+import type {
+  CycleSummary,
+  FeedEntry,
+  Officer,
+  WarcallPlan,
+  WarcallResolution,
+  WorldState
+} from '@sim/types';
 import type { EventMap } from '@state/eventBus';
 
 export interface GameEvents extends EventMap {
@@ -6,4 +13,6 @@ export interface GameEvents extends EventMap {
   'cycle:completed': CycleSummary;
   'feed:appended': FeedEntry[];
   'graveyard:changed': Officer[];
+  'warcall:planned': WarcallPlan;
+  'warcall:resolved': WarcallResolution;
 }
