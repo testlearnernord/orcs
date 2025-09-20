@@ -5,8 +5,8 @@ const ROOT = new URL('../../src', import.meta.url).pathname;
 const BAD = [
   'assets/orc/generated/orc_catalog.json',
   'assets/orc/parts/',
-  'orc_catalog.json',
-  '/orc/parts/'
+  '/orc/parts/',
+  'orc_catalog.json'
 ];
 
 function walk(dir) {
@@ -26,9 +26,7 @@ for (const file of files) {
 }
 
 if (offenders.length) {
-  console.error(
-    '❌ Legacy orc generator imports are forbidden:\n' + offenders.join('\n')
-  );
+  console.error('❌ Forbidden legacy orc imports:\n' + offenders.join('\n'));
   process.exit(1);
 } else {
   console.log('✅ No legacy orc imports found.');
