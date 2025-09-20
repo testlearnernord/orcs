@@ -1,5 +1,17 @@
-import type { Rank, Officer, WarcallPlan, WarcallResolution } from '@sim/types';
+import type {
+  Rank,
+  Officer,
+  WarcallPlan,
+  WarcallResolution,
+  WorldState
+} from '@sim/types';
 import type { GameStore } from '@state/store';
+import {
+  selectWarcallsByStatus,
+  statusOf,
+  type Status as WarcallStatus,
+  type WarcallWithPhase
+} from '@state/selectors/warcalls';
 import { FeedView } from '@ui/components/feed';
 import { GraveyardPanel } from '@ui/components/graveyard';
 import { OfficerCard } from '@ui/components/officerCard';
@@ -7,14 +19,18 @@ import { OfficerTooltip } from '@ui/components/officerTooltip';
 import {
   buildRelationEdges,
   RelationsOverlay
-} from '@ui/components/relationsOverlay';
-import type { RelationEdge } from '@ui/components/relationsOverlay';
+} from '@ui/overlay/RelationsOverlay';
+import type { RelationEdge } from '@ui/overlay/RelationsOverlay';
 import { WarcallsDock } from '@ui/components/warcalls/dock';
 import { WarcallModal } from '@ui/components/warcalls/modal';
-import type { WarcallEntry } from '@ui/components/warcalls/types';
+import type {
+  WarcallBucket,
+  WarcallEntry
+} from '@ui/components/warcalls/types';
 import { HelpOverlay } from '@ui/components/helpOverlay';
 import { Toast } from '@ui/components/toast';
 import { CycleSweep } from '@ui/components/cycleSweep';
+import { CycleDigest } from '@ui/components/cycleDigest';
 import {
   bindOnce,
   getRegisteredHotkeys,
@@ -45,7 +61,9 @@ export class NemesisUI {
   private readonly helpOverlay = new HelpOverlay();
   private readonly toast = new Toast();
   private readonly cycleSweep = new CycleSweep();
-  private readonly completedWarcalls: WarcallEntry[] = [];
+  private readonly cycleDigest = new CycleDigest();
+  private completedWarcalls: WarcallEntry[] = [];
+  private warcallTab: WarcallStatus = 'active';
   private readonly hotkeyHints = new Set<string>();
 
   constructor(private readonly store: GameStore) {
@@ -66,7 +84,10 @@ export class NemesisUI {
     });
 
     this.warcallDock = new WarcallsDock({
-      onOpenDetails: (entry) => this.openWarcall(entry)
+      onOpenDetails: (entry) => this.openWarcall(entry),
+      onTabChange: (status) => {
+        this.warcallTab = status;
+      }
     });
 
     this.warcallModal = new WarcallModal({
@@ -97,6 +118,9 @@ export class NemesisUI {
         this.feed.render(summary.feed);
         this.renderFeed();
       }
+    });
+    store.events.on('cycle:digest', ({ cycle, highlights }) => {
+      this.cycleDigest.show(cycle, highlights);
     });
     store.events.on('warcall:planned', () => {
       const state = this.store.getState();
@@ -228,6 +252,37 @@ export class NemesisUI {
     this.toast.show(message);
   }
 
+  private resolveWarcallParticipants(
+    ids: string[],
+    state: WorldState
+  ): Officer[] {
+    return ids
+      .map(
+        (id) =>
+          this.officerIndex.get(id) ??
+          state.graveyard.find((officer) => officer.id === id)
+      )
+      .filter((officer): officer is Officer => Boolean(officer));
+  }
+
+  private mapWarcallEntry(
+    warcall: WarcallWithPhase,
+    state: WorldState,
+    currentCycle: number
+  ): WarcallEntry {
+    const participants = this.resolveWarcallParticipants(
+      warcall.participants,
+      state
+    );
+    return {
+      plan: warcall,
+      participants,
+      currentCycle,
+      phase: warcall.phase,
+      status: statusOf(warcall)
+    };
+  }
+
   private syncOfficerIndex(officers: Officer[]): void {
     officers.forEach((officer) => this.officerIndex.set(officer.id, officer));
   }
@@ -307,51 +362,47 @@ export class NemesisUI {
 
   private updateWarcalls(plans: WarcallPlan[], currentCycle: number): void {
     const state = this.store.getState();
-    const mapEntry = (plan: WarcallPlan): WarcallEntry => ({
-      plan,
-      participants: plan.participants
-        .map(
-          (id) =>
-            this.officerIndex.get(id) ??
-            state.graveyard.find((o) => o.id === id)
-        )
-        .filter((o): o is Officer => Boolean(o)),
-      currentCycle
-    });
+    const viewState: WorldState = { ...state, warcalls: plans };
+    const activePlans = selectWarcallsByStatus(viewState, 'active');
+    const pendingPlans = selectWarcallsByStatus(viewState, 'pending');
 
-    const active: WarcallEntry[] = [];
-    const pending: WarcallEntry[] = [];
-    plans.forEach((plan) => {
-      const entry = mapEntry(plan);
-      const remaining = plan.resolveOn - currentCycle;
-      if (remaining > 1) pending.push(entry);
-      else active.push(entry);
-    });
+    const active = activePlans.map((plan) =>
+      this.mapWarcallEntry(plan, state, currentCycle)
+    );
+    const pending = pendingPlans.map((plan) =>
+      this.mapWarcallEntry(plan, state, currentCycle)
+    );
 
-    const buckets = [
-      { label: 'Aktiv', entries: active },
-      { label: 'Ausstehend', entries: pending },
-      { label: 'Abgeschlossen', entries: this.completedWarcalls }
+    const buckets: WarcallBucket[] = [
+      { label: 'Aktiv', status: 'active', entries: active },
+      { label: 'Ausstehend', status: 'pending', entries: pending },
+      {
+        label: 'Abgeschlossen',
+        status: 'done',
+        entries: this.completedWarcalls
+      }
     ];
-    this.warcallDock.update(buckets);
+    this.warcallDock.update(buckets, this.warcallTab);
   }
 
   private onWarcallResolved(resolution: WarcallResolution): void {
     const state = this.store.getState();
+    const participants = this.resolveWarcallParticipants(
+      resolution.warcall.participants,
+      state
+    );
     const entry: WarcallEntry = {
-      plan: resolution.warcall,
-      participants: resolution.warcall.participants
-        .map(
-          (id) =>
-            this.officerIndex.get(id) ??
-            state.graveyard.find((o) => o.id === id)
-        )
-        .filter((o): o is Officer => Boolean(o)),
+      plan: { ...resolution.warcall },
+      participants,
       currentCycle: state.cycle,
-      resolution
+      resolution,
+      phase: 'resolution',
+      status: 'done'
     };
-    this.completedWarcalls.unshift(entry);
-    this.completedWarcalls.splice(MAX_COMPLETED_WARCALLS);
+    this.completedWarcalls = [entry, ...this.completedWarcalls].slice(
+      0,
+      MAX_COMPLETED_WARCALLS
+    );
     this.updateWarcalls(state.warcalls, state.cycle);
   }
 

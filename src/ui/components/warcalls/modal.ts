@@ -9,14 +9,6 @@ const PHASES: { key: string; label: string }[] = [
   { key: 'resolution', label: 'Auflösung' }
 ];
 
-function determinePhase(entry: WarcallEntry): string {
-  if (entry.resolution) return 'resolution';
-  const remaining = entry.plan.resolveOn - entry.currentCycle;
-  if (remaining > 1) return 'prep';
-  if (remaining === 1) return 'travel';
-  return 'event';
-}
-
 function roleFor(officer: Officer, entry: WarcallEntry): string {
   if (officer.id === entry.plan.initiator) return 'Initiator';
   if (entry.resolution?.casualties.includes(officer.id)) return 'Gefallen';
@@ -60,7 +52,7 @@ export class WarcallModal {
       '.warcall-modal__content'
     );
     if (!container) return;
-    const phase = determinePhase(entry);
+    const phase = entry.phase;
     container.innerHTML = `
       <header>
         <h3>${entry.plan.kind}</h3>
