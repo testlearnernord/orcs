@@ -14,4 +14,8 @@ Taste **E**: führt einen Simulations-Cycle aus und loggt Ereignisse in die Kons
 
 ## CI & Format
 
-PRs müssen `npm run format:check` bestehen; bei lokalen Änderungen `npm run format:write` ausführen. Keine Builds/Assets committen.
+PRs müssen `npm run format:check` (führt `prettier --check` aus) bestehen; bei lokalen Änderungen `npm run format:write` ausführen. Keine Builds/Assets in PRs commiten.
+
+## Portrait-Atlanten
+
+Portrait-Atlanten werden automatisch erkannt, wenn unter `public/assets/orcs/portraits/` Dateien `set_a.webp`, `set_b.webp` liegen.

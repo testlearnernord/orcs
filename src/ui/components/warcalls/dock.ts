@@ -1,10 +1,10 @@
-import { getPortraitAsset } from '@sim/portraits';
 import type { Officer } from '@sim/types';
 import type { Status } from '@state/selectors/warcalls';
 import type {
   WarcallEntry,
   WarcallBucket
 } from '@ui/components/warcalls/types';
+import Portrait from '@ui/Portrait';
 
 export interface WarcallsDockOptions {
   onOpenDetails: (entry: WarcallEntry) => void;
@@ -91,7 +91,6 @@ export class WarcallsDock {
       entry.plan.resolveOn - entry.currentCycle
     );
     const rewardHint = entry.plan.rewardHint ?? 'Unbekannte Beute';
-    const participantsMarkup = this.renderParticipants(entry.participants);
     item.innerHTML = `
       <header>
         <span class="warcall-kind">${entry.plan.kind}</span>
@@ -99,12 +98,17 @@ export class WarcallsDock {
       </header>
       <p class="warcall-meta">${entry.plan.location} • Zyklus ${entry.plan.cycleAnnounced}</p>
       <p class="warcall-risk">Risiko ${(entry.plan.risk * 100).toFixed(0)}% • ${rewardHint}</p>
-      <div class="warcall-avatars">${participantsMarkup}</div>
+      <div class="warcall-avatars"></div>
       <footer>
         <span class="warcall-timer">Noch ${timeRemaining} Zyklen</span>
         <button type="button">Details</button>
       </footer>
     `;
+    const avatarContainer =
+      item.querySelector<HTMLDivElement>('.warcall-avatars');
+    if (avatarContainer) {
+      this.renderParticipants(avatarContainer, entry.participants);
+    }
     const button = item.querySelector<HTMLButtonElement>('button');
     const handleOpenDetails = () => this.options.onOpenDetails(entry);
     button?.addEventListener('click', handleOpenDetails);
@@ -118,13 +122,24 @@ export class WarcallsDock {
     return item;
   }
 
-  private renderParticipants(participants: readonly Officer[]): string {
-    return participants
-      .map((officer) => {
-        const src = getPortraitAsset(officer.portraitSeed);
-        return `<span class="warcall-avatar" title="${officer.name}"><img src="${src}" alt="${officer.name}"></span>`;
-      })
-      .join('');
+  private renderParticipants(
+    container: HTMLDivElement,
+    participants: readonly Officer[]
+  ): void {
+    container.innerHTML = '';
+    participants.forEach((officer) => {
+      const avatar = document.createElement('span');
+      avatar.className = 'warcall-avatar';
+      avatar.title = officer.name;
+      const portrait = new Portrait({
+        officer,
+        size: 32,
+        dead: officer.status === 'DEAD',
+        className: 'warcall-avatar__img'
+      });
+      avatar.appendChild(portrait.element);
+      container.appendChild(avatar);
+    });
   }
 
   private resolvePhaseLabel(entry: WarcallEntry): string {

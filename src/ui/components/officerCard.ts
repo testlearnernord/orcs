@@ -1,7 +1,8 @@
-import { getPortraitAsset } from '@sim/portraits';
 import type { Officer, RelationshipType } from '@sim/types';
 import type { OfficerTooltip } from '@ui/components/officerTooltip';
 import { measure, flip } from '@ui/utils/flip';
+import Portrait from '@ui/Portrait';
+import { rankToRingColor } from '@ui/utils/rankColors';
 
 export interface OfficerCardOptions {
   tooltip: OfficerTooltip;
@@ -54,7 +55,7 @@ export class OfficerCard {
   readonly element: HTMLElement;
   private readonly options: OfficerCardOptions;
   private officer: Officer;
-  private readonly portrait: HTMLImageElement;
+  private readonly portrait: Portrait;
   private readonly nameEl: HTMLHeadingElement;
   private readonly levelBadge: HTMLElement;
   private readonly rankBadge: HTMLElement;
@@ -76,11 +77,14 @@ export class OfficerCard {
 
     const portraitWrapper = document.createElement('div');
     portraitWrapper.className = 'officer-card__portrait';
-    this.portrait = document.createElement('img');
-    this.portrait.className = 'officer-card__portrait-img';
-    this.portrait.alt = officer.name;
-    this.portrait.src = getPortraitAsset(officer.portraitSeed);
-    portraitWrapper.appendChild(this.portrait);
+    this.portrait = new Portrait({
+      officer,
+      size: 96,
+      ringColor: rankToRingColor(officer.rank),
+      dead: officer.status === 'DEAD',
+      className: 'officer-card__portrait-img'
+    });
+    portraitWrapper.appendChild(this.portrait.element);
 
     const content = document.createElement('div');
     content.className = 'officer-card__content';
@@ -268,8 +272,13 @@ export class OfficerCard {
     this.officer = officer;
     this.element.dataset.officerId = officer.id;
     this.setRank(officer.rank);
-    this.portrait.src = getPortraitAsset(officer.portraitSeed);
-    this.portrait.alt = officer.name;
+    this.portrait.update({
+      officer,
+      size: 96,
+      ringColor: rankToRingColor(officer.rank),
+      dead: officer.status === 'DEAD',
+      className: 'officer-card__portrait-img'
+    });
     this.updateMeta(officer);
     this.updateTraits(officer);
     this.updateRelationships(officer);

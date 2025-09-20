@@ -1,7 +1,7 @@
-import { getPortraitAsset } from '@sim/portraits';
 import type { Officer } from '@sim/types';
 import type { GameMode } from '@state/ui/mode';
 import type { WarcallEntry } from '@ui/components/warcalls/types';
+import Portrait from '@ui/Portrait';
 
 const PHASES: { key: string; label: string }[] = [
   { key: 'prep', label: 'Vorbereitung' },
@@ -74,20 +74,7 @@ export class WarcallModal {
       </section>
       <section class="warcall-participants">
         <h4>Teilnehmer</h4>
-        <div class="warcall-participants__list">
-          ${entry.participants
-            .map((officer) => {
-              const src = getPortraitAsset(officer.portraitSeed);
-              return `<article>
-                <img src="${src}" alt="${officer.name}">
-                <div>
-                  <strong>${officer.name}</strong>
-                  <span>${roleFor(officer, entry)}</span>
-                </div>
-              </article>`;
-            })
-            .join('')}
-        </div>
+        <div class="warcall-participants__list"></div>
       </section>
       <section class="warcall-log">
         <h4>Log</h4>
@@ -103,6 +90,12 @@ export class WarcallModal {
         <button type="button" data-action="sabotage">Sabotieren</button>
       </footer>
     `;
+    const list = container.querySelector<HTMLDivElement>(
+      '.warcall-participants__list'
+    );
+    if (list) {
+      this.renderParticipants(list, entry);
+    }
     const join = container.querySelector<HTMLButtonElement>(
       '[data-action="join"]'
     );
@@ -150,5 +143,27 @@ export class WarcallModal {
     if (this.current) {
       this.render(this.current);
     }
+  }
+
+  private renderParticipants(list: HTMLDivElement, entry: WarcallEntry): void {
+    list.innerHTML = '';
+    entry.participants.forEach((officer) => {
+      const article = document.createElement('article');
+      const portrait = new Portrait({
+        officer,
+        size: 40,
+        dead: officer.status === 'DEAD',
+        className: 'warcall-participant__img'
+      });
+      article.appendChild(portrait.element);
+      const meta = document.createElement('div');
+      const name = document.createElement('strong');
+      name.textContent = officer.name;
+      const role = document.createElement('span');
+      role.textContent = roleFor(officer, entry);
+      meta.append(name, role);
+      article.appendChild(meta);
+      list.appendChild(article);
+    });
   }
 }
