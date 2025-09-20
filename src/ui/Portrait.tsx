@@ -51,7 +51,8 @@ export default function Portrait({
           width: size,
           height: size,
           borderRadius: 12,
-          background: '#1d2531',
+          overflow: 'hidden',
+          background: 'none',
           filter: dead ? 'grayscale(0.9) brightness(0.85)' : 'none',
           boxShadow: ringShadow
         }}
@@ -72,6 +73,7 @@ export default function Portrait({
       backgroundSize: `${atlas.cols * size}px ${atlas.rows * size}px`,
       backgroundPosition: `-${col * size}px -${row * size}px`,
       borderRadius: 12,
+      overflow: 'hidden',
       filter: dead ? 'grayscale(0.9) brightness(0.85)' : 'none',
       boxShadow: ringShadow
     }),
