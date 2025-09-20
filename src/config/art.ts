@@ -52,6 +52,18 @@ export type AtlasFile = (typeof ArtConfig.atlases)[number];
 export function getAtlasUrl(file: AtlasFile) {
   return ArtConfig.base + file + PORTRAIT_SUFFIX;
 }
+export const ArtConfig = {
+  active: getInitialArt(),
+  base: new URL('assets/orcs/portraits/', import.meta.env.BASE_URL).toString(),
+  atlases: ['set_a.webp', 'set_b.webp'] as const,
+  version: PORTRAIT_VERSION
+} as const;
+
+export type AtlasFile = (typeof ArtConfig.atlases)[number];
+
+export function getAtlasUrl(file: AtlasFile) {
+  return ArtConfig.base + file + PORTRAIT_SUFFIX;
+}
 
 export function setArtMode(mode: ArtSet) {
   try {
