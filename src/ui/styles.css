@@ -36,11 +36,16 @@
 
 .portrait {
   position: relative;
+  display: block;
   overflow: hidden;
   border-radius: inherit;
   background-color: #1d2531;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+.portrait--active {
+  background-color: transparent;
 }
 
 .portrait img {
