@@ -1,7 +1,8 @@
-import { getPortraitAsset } from '@sim/portraits';
 import type { Officer } from '@sim/types';
 import type { OfficerTooltip } from '@ui/components/officerTooltip';
 import { measure, flip } from '@ui/utils/flip';
+import Portrait from '@ui/Portrait';
+import { rankToRingColor } from '@ui/utils/rankColors';
 
 export interface OfficerCardLegacyOptions {
   tooltip: OfficerTooltip;
@@ -27,7 +28,7 @@ export class OfficerCardLegacy {
   private readonly statValues = new Map<StatKey, HTMLElement>();
   private readonly traitContainer: HTMLElement;
   private readonly subtitle: HTMLElement;
-  private readonly portrait: HTMLImageElement;
+  private readonly portrait: Portrait;
   private readonly badges: HTMLElement;
   private readonly meritBadge: HTMLElement;
   private readonly levelBadge: HTMLElement;
@@ -43,10 +44,14 @@ export class OfficerCardLegacy {
 
     const portraitWrapper = document.createElement('div');
     portraitWrapper.className = 'officer-card__portrait';
-    this.portrait = document.createElement('img');
-    this.portrait.alt = officer.name;
-    this.portrait.src = getPortraitAsset(officer.portraitSeed);
-    portraitWrapper.appendChild(this.portrait);
+    this.portrait = new Portrait({
+      officer,
+      size: 96,
+      ringColor: rankToRingColor(officer.rank),
+      dead: officer.status === 'DEAD',
+      className: 'officer-card__portrait-img'
+    });
+    portraitWrapper.appendChild(this.portrait.element);
 
     const body = document.createElement('div');
     body.className = 'officer-card__body';
@@ -206,8 +211,13 @@ export class OfficerCardLegacy {
   update(officer: Officer): void {
     const previous = this.officer;
     this.officer = officer;
-    this.portrait.src = getPortraitAsset(officer.portraitSeed);
-    this.portrait.alt = officer.name;
+    this.portrait.update({
+      officer,
+      size: 96,
+      ringColor: rankToRingColor(officer.rank),
+      dead: officer.status === 'DEAD',
+      className: 'officer-card__portrait-img'
+    });
     this.subtitle.textContent = `${officer.rank} • Merit ${Math.round(officer.merit)}`;
     this.levelBadge.textContent = `Level ${officer.level}`;
     this.meritBadge.textContent = `Zyklus ${officer.cycleJoined}`;
