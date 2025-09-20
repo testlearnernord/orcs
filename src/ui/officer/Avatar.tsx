@@ -1,29 +1,10 @@
 import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { ArtConfig } from '@/config/art';
 import Portrait, { type PortraitProps } from '@/ui/Portrait';
 
 export type AvatarProps = PortraitProps;
 
-type LegacyFactory = (props: AvatarProps) => JSX.Element | null | undefined;
-
-declare global {
-  interface Window {
-    __LEGACY_ORC_AVATAR__?: LegacyFactory;
-  }
-}
 export default function Avatar(props: AvatarProps) {
-  if (ArtConfig.active === 'legacy') {
-    const factory =
-      typeof window !== 'undefined'
-        ? (window as Window & { __LEGACY_ORC_AVATAR__?: LegacyFactory })
-            .__LEGACY_ORC_AVATAR__
-        : undefined;
-    if (factory) {
-      const element = factory(props);
-      if (element) return element;
-    }
-  }
   return <Portrait {...props} />;
 }
 

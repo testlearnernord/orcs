@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import type { Officer } from '@sim/types';
-import { ArtConfig } from '@/config/art';
 import {
   chooseTileIndex,
   loadAtlases,
   resolveTile
 } from '@/features/portraits/atlas';
-import { getLegacyPortraitUrl } from '@sim/portraits';
 
 export type PortraitProps = {
   officer: Officer;
@@ -29,10 +27,6 @@ export default function Portrait({
 
   useEffect(() => {
     let cancelled = false;
-    if (ArtConfig.active !== 'realistic') {
-      setBundle(null);
-      return;
-    }
     loadAtlases()
       .then((loaded) => {
         if (!cancelled) setBundle(loaded);
@@ -45,32 +39,21 @@ export default function Portrait({
     };
   }, []);
 
-  if (ArtConfig.active !== 'realistic' || !bundle) {
-    const legacy = getLegacyPortraitUrl(officer.portraitSeed);
-    return legacy ? (
-      <img
-        src={legacy}
-        width={size}
-        height={size}
-        alt=""
-        loading="lazy"
-        className={className}
-        style={{
-          borderRadius: 12,
-          filter: dead ? 'grayscale(0.9) brightness(0.85)' : 'none',
-          boxShadow: ringColor
-            ? `0 0 0 3px ${ringColor} inset, 0 0 18px ${ringColor}33`
-            : undefined
-        }}
-      />
-    ) : (
+  const ringShadow = ringColor
+    ? `0 0 0 3px ${ringColor} inset, 0 0 18px ${ringColor}33`
+    : undefined;
+
+  if (!bundle) {
+    return (
       <div
         className={className}
         style={{
           width: size,
           height: size,
           borderRadius: 12,
-          background: '#1d2531'
+          background: '#1d2531',
+          filter: dead ? 'grayscale(0.9) brightness(0.85)' : 'none',
+          boxShadow: ringShadow
         }}
       />
     );
@@ -90,11 +73,9 @@ export default function Portrait({
       backgroundPosition: `-${col * size}px -${row * size}px`,
       borderRadius: 12,
       filter: dead ? 'grayscale(0.9) brightness(0.85)' : 'none',
-      boxShadow: ringColor
-        ? `0 0 0 3px ${ringColor} inset, 0 0 18px ${ringColor}33`
-        : undefined
+      boxShadow: ringShadow
     }),
-    [atlas.url, atlas.cols, atlas.rows, col, dead, ringColor, row, size]
+    [atlas.url, atlas.cols, atlas.rows, col, dead, ringShadow, row, size]
   );
 
   return <div className={className} style={style} aria-hidden="true" />;
