@@ -14,7 +14,7 @@ export interface WarcallsDockOptions {
 export class WarcallsDock {
   readonly element: HTMLElement;
   private readonly tabs = new Map<Status, HTMLButtonElement>();
-  private readonly lists = new Map<Status, HTMLElement>();
+  private readonly lists = new Map<Status, HTMLDivElement>();
   private activeStatus: Status = 'active';
   private readonly options: WarcallsDockOptions;
 
@@ -32,7 +32,10 @@ export class WarcallsDock {
   }
 
   private renderTabs(buckets: WarcallBucket[]): void {
-    const nav = this.element.querySelector<HTMLDivElement>('.warcalls-tabs');
+    const nav =
+      this.element.querySelector<HTMLElementTagNameMap['nav']>(
+        'nav.warcalls-tabs'
+      );
     if (!nav) return;
     nav.innerHTML = '';
     this.tabs.clear();
@@ -56,7 +59,8 @@ export class WarcallsDock {
   }
 
   private renderLists(buckets: WarcallBucket[]): void {
-    const container = this.element.querySelector('.warcalls-content');
+    const container =
+      this.element.querySelector<HTMLDivElement>('.warcalls-content');
     if (!container) return;
     container.innerHTML = '';
     this.lists.clear();
@@ -86,34 +90,35 @@ export class WarcallsDock {
       0,
       entry.plan.resolveOn - entry.currentCycle
     );
+    const rewardHint = entry.plan.rewardHint ?? 'Unbekannte Beute';
+    const participantsMarkup = this.renderParticipants(entry.participants);
     item.innerHTML = `
       <header>
         <span class="warcall-kind">${entry.plan.kind}</span>
         <span class="warcall-phase">${phase}</span>
       </header>
       <p class="warcall-meta">${entry.plan.location} • Zyklus ${entry.plan.cycleAnnounced}</p>
-      <p class="warcall-risk">Risiko ${(entry.plan.risk * 100).toFixed(0)}% • ${
-        entry.plan.rewardHint ?? 'Unbekannte Beute'
-      }</p>
-      <div class="warcall-avatars">${this.renderParticipants(entry.participants)}</div>
+      <p class="warcall-risk">Risiko ${(entry.plan.risk * 100).toFixed(0)}% • ${rewardHint}</p>
+      <div class="warcall-avatars">${participantsMarkup}</div>
       <footer>
         <span class="warcall-timer">Noch ${timeRemaining} Zyklen</span>
         <button type="button">Details</button>
       </footer>
     `;
-    const button = item.querySelector('button');
-    button?.addEventListener('click', () => this.options.onOpenDetails(entry));
+    const button = item.querySelector<HTMLButtonElement>('button');
+    const handleOpenDetails = () => this.options.onOpenDetails(entry);
+    button?.addEventListener('click', handleOpenDetails);
     item.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        this.options.onOpenDetails(entry);
+        handleOpenDetails();
       }
     });
-    item.addEventListener('click', () => this.options.onOpenDetails(entry));
+    item.addEventListener('click', handleOpenDetails);
     return item;
   }
 
-  private renderParticipants(participants: Officer[]): string {
+  private renderParticipants(participants: readonly Officer[]): string {
     return participants
       .map((officer) => {
         const src = getPortraitAsset(officer.portraitSeed);
