@@ -13,26 +13,17 @@ export interface AtlasBundle {
   totalTiles: number;
 }
 
-function gcd(a: number, b: number): number {
-  let x = Math.abs(a);
-  let y = Math.abs(b);
-  while (y) {
-    const t = y;
-    y = x % y;
-    x = t;
+function gcd(a: number, b: number) {
+  while (b) {
+    const t = b;
+    b = a % b;
+    a = t;
   }
-  return x || 1;
+  return a;
 }
 
-function sniffGrid(
-  width: number,
-  height: number
-): {
-  cols: number;
-  rows: number;
-  tile: number;
-} {
-  const preferences: Array<[number, number]> = [
+function sniffGrid(w: number, h: number) {
+  const prefs = [
     [6, 4],
     [5, 5],
     [4, 6],
@@ -41,101 +32,64 @@ function sniffGrid(
     [8, 4],
     [4, 8]
   ];
-
-  for (const [cols, rows] of preferences) {
-    if (width % cols === 0 && height % rows === 0) {
-      const tile = Math.min(width / cols, height / rows);
-      if (tile >= 96 && tile <= 512) {
-        return { cols, rows, tile };
-      }
+  for (const [c, r] of prefs) {
+    if (w % c === 0 && h % r === 0) {
+      const tile = Math.min(w / c, h / r);
+      if (tile >= 96 && tile <= 512) return { cols: c, rows: r, tile };
     }
   }
-
-  const size = Math.max(64, Math.min(512, gcd(width, height)));
-  return {
-    cols: Math.max(1, Math.round(width / size)),
-    rows: Math.max(1, Math.round(height / size)),
-    tile: size
-  };
+  const g = gcd(w, h);
+  const tile = Math.max(64, Math.min(512, g));
+  return { cols: Math.round(w / tile), rows: Math.round(h / tile), tile };
 }
 
-async function loadImage(url: string): Promise<HTMLImageElement> {
-  return await new Promise((resolve, reject) => {
-    if (typeof Image === 'undefined') {
-      reject(new Error('Image API unavailable'));
-      return;
-    }
-    const img = new Image();
-    img.decoding = 'async';
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error(`Failed to load atlas: ${url}`));
-    img.src = url;
-  });
-}
-
-async function createBundle(): Promise<AtlasBundle | null> {
+export async function loadAtlases(): Promise<AtlasBundle | null> {
   const atlases: AtlasInfo[] = [];
-
   for (const file of ArtConfig.atlases) {
     const url = ArtConfig.base + file;
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = url;
     try {
-      const img = await loadImage(url);
+      await new Promise((res, rej) => {
+        img.onload = () => res(null);
+        img.onerror = rej;
+      });
       const { cols, rows, tile } = sniffGrid(
         img.naturalWidth,
         img.naturalHeight
       );
       atlases.push({ url, cols, rows, tile, count: cols * rows });
     } catch {
-      // Datei existiert nicht → ignorieren
+      /* fehlt → ignorieren */
     }
   }
-
-  if (atlases.length === 0) return null;
-  const totalTiles = atlases.reduce((total, atlas) => total + atlas.count, 0);
-  return { atlases, totalTiles };
+  if (!atlases.length) return null;
+  return { atlases, totalTiles: atlases.reduce((n, a) => n + a.count, 0) };
 }
 
-let bundlePromise: Promise<AtlasBundle | null> | null = null;
-
-export async function loadAtlases(): Promise<AtlasBundle | null> {
-  if (!bundlePromise) {
-    bundlePromise = createBundle().catch(() => {
-      bundlePromise = null;
-      return null;
-    });
+export function hashFNV1a(str: string) {
+  let h = 0x811c9dc5 | 0;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
   }
-  return await bundlePromise;
+  return h >>> 0;
 }
 
-export function hashFNV1a(input: string): number {
-  let hash = 0x811c9dc5 | 0;
-  for (let i = 0; i < input.length; i += 1) {
-    hash ^= input.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193);
+export function chooseTileIndex(seed: string, total: number) {
+  return total <= 0 ? 0 : hashFNV1a(seed) % total;
+}
+
+export function resolveTile(bundle: AtlasBundle, idx: number) {
+  let k = idx;
+  for (const a of bundle.atlases) {
+    if (k < a.count)
+      return { atlas: a, col: k % a.cols, row: Math.floor(k / a.cols) };
+    k -= a.count;
   }
-  return hash >>> 0;
-}
-
-export function chooseTileIndex(seed: string, total: number): number {
-  if (total <= 0) return 0;
-  return hashFNV1a(seed) % total;
-}
-
-export function resolveTile(
-  bundle: AtlasBundle,
-  globalIndex: number
-): { atlas: AtlasInfo; col: number; row: number } {
-  let index = globalIndex;
-  for (const atlas of bundle.atlases) {
-    if (index < atlas.count) {
-      const col = index % atlas.cols;
-      const row = Math.floor(index / atlas.cols);
-      return { atlas, col, row };
-    }
-    index -= atlas.count;
-  }
-  const atlas = bundle.atlases[bundle.atlases.length - 1];
-  return { atlas, col: 0, row: 0 };
+  const last = bundle.atlases[bundle.atlases.length - 1];
+  return { atlas: last, col: 0, row: 0 };
 }
 
 declare global {
@@ -143,7 +97,4 @@ declare global {
     __PORTRAITS__?: any;
   }
 }
-
-if (import.meta.env.DEV && typeof window !== 'undefined') {
-  (window as Window & { __PORTRAITS__?: any }).__PORTRAITS__ = { loadAtlases };
-}
+if (import.meta.env.DEV) (window as any).__PORTRAITS__ = { loadAtlases };

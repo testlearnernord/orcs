@@ -21,6 +21,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test
+      - run: npm run guard:portraits
       - name: ensure docs bundle is built output
         run: |
           if grep -E 'src="/?src/main\.ts"' docs/index.html; then

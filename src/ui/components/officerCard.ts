@@ -1,7 +1,7 @@
 import type { Officer, RelationshipType } from '@sim/types';
 import type { OfficerTooltip } from '@ui/components/officerTooltip';
 import { measure, flip } from '@ui/utils/flip';
-import Avatar from '@ui/officer/Avatar';
+import { AvatarView } from '@ui/officer/Avatar';
 import { rankToRingColor } from '@ui/utils/rankColors';
 
 export interface OfficerCardOptions {
@@ -55,7 +55,7 @@ export class OfficerCard {
   readonly element: HTMLElement;
   private readonly options: OfficerCardOptions;
   private officer: Officer;
-  private readonly avatar: Avatar;
+  private readonly avatar: AvatarView;
   private readonly nameEl: HTMLHeadingElement;
   private readonly levelBadge: HTMLElement;
   private readonly rankBadge: HTMLElement;
@@ -77,7 +77,7 @@ export class OfficerCard {
 
     const portraitWrapper = document.createElement('div');
     portraitWrapper.className = 'officer-card__portrait';
-    this.avatar = new Avatar({
+    this.avatar = new AvatarView({
       officer,
       size: 96,
       ringColor: rankToRingColor(officer.rank),
