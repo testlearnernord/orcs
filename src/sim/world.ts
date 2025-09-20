@@ -1,4 +1,5 @@
 import { RANK_QUOTAS } from '@sim/constants';
+import { createInitialCrownState, resetCrown } from '@sim/crown';
 import { addMemory, createOfficer } from '@sim/officerFactory';
 import { seedSpawnRelationships } from '@sim/relationships';
 import { RNG } from '@sim/rng';
@@ -18,7 +19,8 @@ export function createWorld(
     kingStatus: 'GEFESTIGT',
     kingStatusExpires: 0,
     feed: [],
-    playerId: null
+    playerId: null,
+    crown: createInitialCrownState(rng)
   };
 
   (Object.keys(RANK_QUOTAS) as Rank[]).forEach((rank) => {
@@ -38,9 +40,12 @@ export function createWorld(
   const king = state.officers.find((officer) => officer.rank === 'König');
   if (king) {
     state.kingId = king.id;
+    resetCrown(state, rng, king);
   } else if (state.officers.length > 0) {
     state.kingId = state.officers[0].id;
-    state.officers[0] = { ...state.officers[0], rank: 'König' } as Officer;
+    const promoted = { ...state.officers[0], rank: 'König' } as Officer;
+    state.officers[0] = promoted;
+    resetCrown(state, rng, promoted);
   }
 
   return state;

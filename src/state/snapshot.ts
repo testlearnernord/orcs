@@ -28,6 +28,7 @@ export function snapshotWorld(state: WorldState): WorldState {
     officers: state.officers.map(cloneOfficer),
     graveyard: state.graveyard.map(cloneOfficer),
     warcalls: state.warcalls.map(cloneWarcall),
-    feed: state.feed.map(cloneFeedEntry)
+    feed: state.feed.map(cloneFeedEntry),
+    crown: { ...state.crown }
   };
 }

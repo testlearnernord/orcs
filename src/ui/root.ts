@@ -5,6 +5,7 @@ import type {
   WarcallResolution,
   WorldState
 } from '@sim/types';
+import type { Highlight } from '@state/cycleDigest';
 import type { GameStore } from '@state/store';
 import type { GameMode, UIModeState, UIModeStore } from '@state/ui/mode';
 import {
@@ -31,7 +32,7 @@ import type {
 import { HelpOverlay } from '@ui/components/helpOverlay';
 import { Toast } from '@ui/components/toast';
 import { CycleSweep } from '@ui/components/cycleSweep';
-import { CycleDigest } from '@ui/components/cycleDigest';
+import { HighlightPortal } from '@ui/components/highlightPortal';
 import {
   bindOnce,
   getRegisteredHotkeys,
@@ -39,10 +40,40 @@ import {
   registerHotkey
 } from '@core/hotkeys';
 import { ModeGate } from '@ui/components/modeGate';
+import { HighlightStore } from '@state/ui/highlights';
+import {
+  lensMaskForFilters,
+  selectVisibleEdges,
+  selectVisibleOfficers
+} from '@state/selectors/officers';
+import {
+  UIFilterStore,
+  type FilterKey,
+  type UIFilters
+} from '@state/ui/filters';
 
 const RANK_ORDER: Rank[] = ['König', 'Spieler', 'Captain', 'Späher', 'Grunzer'];
 const MAX_COMPLETED_WARCALLS = 8;
 const RELATIONS_OVERLAY_ENABLED = true;
+const FILTER_DEFINITIONS: { key: FilterKey; label: string }[] = [
+  { key: 'loyalToKing', label: 'Loyal zum König' },
+  { key: 'rivalsOfKing', label: 'Rivale des Königs' },
+  { key: 'friendships', label: 'Freundschaften' },
+  { key: 'rivalries', label: 'Rivalitäten' },
+  { key: 'bloodoaths', label: 'Blutschwüre aktiv' },
+  { key: 'lowBravery', label: 'Niedriger Mut' },
+  { key: 'highGreed', label: 'Hohe Gier' },
+  { key: 'promotionCandidates', label: 'Aufstiegskandidaten' },
+  { key: 'coupRisk', label: 'Putschgefahr' }
+];
+const SORT_OPTIONS: { value: UIFilters['sortBy']; label: string }[] = [
+  { value: 'merit', label: 'Verdienst' },
+  { value: 'level', label: 'Level' },
+  { value: 'loyalToKing', label: 'Loyalität zum König' },
+  { value: 'relations', label: 'Beziehungen aktiv' },
+  { value: 'recentChange', label: 'Letzte Warcall-Änderung' },
+  { value: 'random', label: 'Zufall' }
+];
 
 export class NemesisUI {
   private root: HTMLElement | null = null;
@@ -53,6 +84,8 @@ export class NemesisUI {
   private warcallButton: HTMLButtonElement | null = null;
   private readonly cards = new Map<string, OfficerCard>();
   private readonly rankContainers = new Map<Rank, HTMLElement>();
+  private readonly filters = new UIFilterStore();
+  private readonly filterButtons = new Map<FilterKey, HTMLButtonElement>();
   private readonly officerIndex = new Map<string, Officer>();
   private readonly feed = new FeedView();
   private graveyard: GraveyardPanel | null = null;
@@ -65,12 +98,18 @@ export class NemesisUI {
   private readonly helpOverlay = new HelpOverlay();
   private readonly toast = new Toast();
   private readonly cycleSweep = new CycleSweep();
-  private readonly cycleDigest = new CycleDigest();
+  private readonly highlights = new HighlightStore();
+  private readonly highlightPortal: HighlightPortal;
+  private filterBarEl: HTMLElement | null = null;
+  private rankListEl: HTMLElement | null = null;
+  private sortSelect: HTMLSelectElement | null = null;
   private completedWarcalls: WarcallEntry[] = [];
   private warcallTab: WarcallStatus = 'active';
   private readonly hotkeyHints = new Set<string>();
   private readonly modeGate: ModeGate;
   private modeState: UIModeState;
+  private digestHistoryEl: HTMLElement | null = null;
+  private feedBodyEl: HTMLElement | null = null;
 
   constructor(
     private readonly store: GameStore,
@@ -109,6 +148,24 @@ export class NemesisUI {
     });
     this.warcallModal.setMode(this.modeState.mode);
 
+    this.highlightPortal = new HighlightPortal({
+      onAdvance: () => this.highlights.advance(),
+      onSkip: () => this.highlights.clear(),
+      onViewLog: () => this.focusDigestHistory()
+    });
+    this.filters.on('change', () => {
+      this.syncFilterControls();
+      if (this.ranksEl) {
+        this.ranksEl.scrollTop = 0;
+      }
+      this.renderOfficers(this.store.getState());
+    });
+    this.highlights.on('change', (state) => {
+      this.highlightPortal.update(state.showing);
+      this.renderDigestHistory(state.history);
+    });
+    this.renderDigestHistory(this.highlights.getState().history);
+
     this.modeGate = new ModeGate({
       onConfirm: (mode) => this.handleModeConfirm(mode)
     });
@@ -125,7 +182,7 @@ export class NemesisUI {
     });
     store.events.on('state:changed', (next) => {
       this.syncOfficerIndex(next.officers);
-      this.renderOfficers(next.officers);
+      this.renderOfficers(next);
       this.updateWarcalls(next.warcalls, next.cycle);
     });
     store.events.on('cycle:completed', (summary) => {
@@ -137,7 +194,7 @@ export class NemesisUI {
       }
     });
     store.events.on('cycle:digest', ({ cycle, highlights }) => {
-      this.cycleDigest.show(cycle, highlights);
+      this.highlights.enqueue(cycle, highlights);
     });
     store.events.on('warcall:planned', () => {
       const state = this.store.getState();
@@ -230,22 +287,29 @@ export class NemesisUI {
       </main>
     `;
     root.appendChild(app);
+    this.highlightPortal.attach(document.body);
 
     this.ranksEl = app.querySelector('#ranks');
+    if (this.ranksEl) {
+      this.prepareRankView();
+    }
     this.feedEl = app.querySelector('#feed');
     this.warcallsHost = app.querySelector('#warcalls');
     this.modeIndicator = app.querySelector('[data-mode-indicator]');
 
+    if (this.feedEl) {
+      this.feedEl.innerHTML = '';
+      this.digestHistoryEl = document.createElement('div');
+      this.digestHistoryEl.className = 'digest-history';
+      this.feedBodyEl = document.createElement('div');
+      this.feedBodyEl.className = 'feed-body';
+      this.feedEl.append(this.digestHistoryEl, this.feedBodyEl);
+      this.renderDigestHistory(this.highlights.getState().history);
+    }
+
     this.warcallsHost?.appendChild(this.warcallDock.element);
     this.registerUIEvents(app);
     this.syncModeUI();
-    this.renderOfficers(this.store.getState().officers);
-    this.renderFeed();
-    this.updateWarcalls(
-      this.store.getState().warcalls,
-      this.store.getState().cycle
-    );
-    this.updateGraveyardButton();
 
     if (RELATIONS_OVERLAY_ENABLED && this.ranksEl) {
       this.relations = new RelationsOverlay({
@@ -253,9 +317,7 @@ export class NemesisUI {
         getOfficerElement: (id) => this.cards.get(id)?.element,
         getOfficerData: (id) => this.officerIndex.get(id)
       });
-      const state = this.store.getState();
-      this.lastEdges = buildRelationEdges(state.officers, state.cycle);
-      this.relations.setEdges(this.lastEdges, state.cycle);
+      this.relations.setLensMask(lensMaskForFilters(this.filters.getState()));
       this.resizeObserver = new ResizeObserver(() => {
         this.relations?.refresh();
       });
@@ -265,9 +327,111 @@ export class NemesisUI {
       });
     }
 
+    const initialState = this.store.getState();
+    this.renderOfficers(initialState);
+    this.renderFeed();
+    this.updateWarcalls(initialState.warcalls, initialState.cycle);
+    this.updateGraveyardButton();
+
     initHotkeys();
     this.registerHotkeys();
     this.modeGate.open(this.modeState.mode);
+  }
+
+  private prepareRankView(): void {
+    if (!this.ranksEl) return;
+    this.ranksEl.innerHTML = '';
+    this.filterButtons.clear();
+    this.rankContainers.clear();
+
+    const bar = document.createElement('div');
+    bar.className = 'filters-bar';
+    const pillContainer = document.createElement('div');
+    pillContainer.className = 'filters-bar__pills';
+    FILTER_DEFINITIONS.forEach(({ key, label }) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'filter-pill';
+      button.textContent = label;
+      button.addEventListener('click', () => this.toggleFilter(key));
+      button.setAttribute('aria-pressed', 'false');
+      pillContainer.appendChild(button);
+      this.filterButtons.set(key, button);
+    });
+    bar.appendChild(pillContainer);
+
+    const sortWrapper = document.createElement('div');
+    sortWrapper.className = 'filters-bar__sort';
+    const sortLabel = document.createElement('span');
+    sortLabel.className = 'filters-bar__sort-label';
+    sortLabel.textContent = 'Sortieren nach';
+    const select = document.createElement('select');
+    select.className = 'filters-bar__select';
+    select.setAttribute('aria-label', 'Sortieren nach');
+    SORT_OPTIONS.forEach(({ value, label }) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      select.appendChild(option);
+    });
+    select.addEventListener('change', () =>
+      this.handleSortChange(select.value as UIFilters['sortBy'])
+    );
+    sortWrapper.append(sortLabel, select);
+    bar.appendChild(sortWrapper);
+
+    this.filterBarEl = bar;
+    this.sortSelect = select;
+    this.ranksEl.appendChild(bar);
+
+    this.rankListEl = document.createElement('div');
+    this.rankListEl.className = 'rank-list';
+    this.ranksEl.appendChild(this.rankListEl);
+
+    this.initializeRankContainers();
+    this.syncFilterControls();
+  }
+
+  private initializeRankContainers(): void {
+    const rankList = this.rankListEl;
+    if (!rankList) return;
+    rankList.innerHTML = '';
+    this.rankContainers.clear();
+    RANK_ORDER.forEach((rank) => {
+      const container = document.createElement('div');
+      container.className = 'rank-group is-empty';
+      container.dataset.rank = rank;
+      container.innerHTML = `<h3>${rank}</h3><div class="rank-grid"></div>`;
+      rankList.appendChild(container);
+      this.rankContainers.set(rank, container);
+    });
+  }
+
+  private syncFilterControls(): void {
+    if (this.filterButtons.size === 0 && !this.sortSelect) return;
+    const state = this.filters.getState();
+    this.filterButtons.forEach((button, key) => {
+      const active = Boolean(state[key]);
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    if (this.sortSelect) {
+      this.sortSelect.value = state.sortBy;
+    }
+    if (this.filterBarEl) {
+      const hasActive = FILTER_DEFINITIONS.some(({ key }) =>
+        Boolean(state[key])
+      );
+      this.filterBarEl.classList.toggle('has-active', hasActive);
+    }
+  }
+
+  private toggleFilter(key: FilterKey): void {
+    this.filters.toggle(key);
+  }
+
+  private handleSortChange(sortBy: UIFilters['sortBy']): void {
+    this.filters.setSort(sortBy);
   }
 
   private registerUIEvents(app: HTMLElement): void {
@@ -384,12 +548,15 @@ export class NemesisUI {
     officers.forEach((officer) => this.officerIndex.set(officer.id, officer));
   }
 
-  private renderOfficers(officers: Officer[]): void {
-    if (!this.ranksEl) return;
-    const existingIds = new Set(officers.map((o) => o.id));
+  private renderOfficers(state: WorldState): void {
+    const rankList = this.rankListEl;
+    if (!rankList) return;
+    const filters = this.filters.getState();
+    const visible = selectVisibleOfficers(state, filters);
+    const visibleIds = new Set(visible.map((officer) => officer.id));
 
     this.cards.forEach((card, id) => {
-      if (!existingIds.has(id)) {
+      if (!visibleIds.has(id)) {
         card.element.remove();
         this.cards.delete(id);
       }
@@ -399,13 +566,16 @@ export class NemesisUI {
       let container = this.rankContainers.get(rank);
       if (!container) {
         container = document.createElement('div');
-        container.className = 'rank-group';
+        container.className = 'rank-group is-empty';
+        container.dataset.rank = rank;
         container.innerHTML = `<h3>${rank}</h3><div class="rank-grid"></div>`;
-        this.ranksEl?.appendChild(container);
+        rankList.appendChild(container);
         this.rankContainers.set(rank, container);
       }
-      const grid = container.querySelector('.rank-grid') as HTMLElement;
-      const members = officers.filter((o) => o.rank === rank);
+      if (!container) return;
+      const grid = container.querySelector('.rank-grid') as HTMLElement | null;
+      if (!grid) return;
+      const members = visible.filter((officer) => officer.rank === rank);
       members.forEach((officer) => {
         const existing = this.cards.get(officer.id);
         if (existing) {
@@ -425,27 +595,67 @@ export class NemesisUI {
           grid.appendChild(card.element);
         }
       });
+      container.classList.toggle('is-empty', members.length === 0);
     });
 
     if (this.relations) {
-      const state = this.store.getState();
-      this.lastEdges = buildRelationEdges(state.officers, state.cycle);
-      this.relations.setEdges(this.lastEdges, state.cycle);
+      const allEdges = buildRelationEdges(state.officers, state.cycle);
+      this.lastEdges = allEdges;
+      const maskedEdges = selectVisibleEdges(visible, allEdges, filters);
+      this.relations.setLensMask(lensMaskForFilters(filters));
+      this.relations.setEdges(maskedEdges, state.cycle);
     }
   }
 
-  private renderFeed(): void {
-    if (!this.feedEl) return;
-    const lines = this.feed.getLines();
-    if (lines.length === 0) {
-      this.feedEl.innerHTML =
-        '<p class="feed-empty">Noch keine Ereignisse.</p>';
+  private renderDigestHistory(history: Highlight[][]): void {
+    if (!this.digestHistoryEl) return;
+    if (history.length === 0) {
+      this.digestHistoryEl.innerHTML =
+        '<p class="digest-history__empty">Noch keine Highlights.</p>';
       return;
     }
-    this.feedEl.innerHTML = lines
-      .map((line) => `<div class="feed-item">${line.text}</div>`)
-      .join('');
-    this.feedEl.scrollTop = this.feedEl.scrollHeight;
+    const items = history.slice(0, 6).map((entries) => {
+      const [first] = entries;
+      const cycle = first?.cycle ?? 0;
+      const count = entries.length;
+      const summary = first?.title ?? 'Keine Highlights';
+      const subtitle = count === 1 ? '1 Highlight' : `${count} Highlights`;
+      return `
+        <article class="digest-history__item">
+          <header>
+            <span class="digest-history__cycle">Zyklus ${cycle}</span>
+            <span class="digest-history__count">${subtitle}</span>
+          </header>
+          <p class="digest-history__title">${summary}</p>
+        </article>
+      `;
+    });
+    this.digestHistoryEl.innerHTML = items.join('');
+  }
+
+  private focusDigestHistory(): void {
+    if (!this.feedEl || !this.digestHistoryEl) return;
+    this.feedEl.scrollTo({ top: 0, behavior: 'smooth' });
+    this.digestHistoryEl.classList.add('is-highlighted');
+    window.setTimeout(() => {
+      this.digestHistoryEl?.classList.remove('is-highlighted');
+    }, 600);
+  }
+
+  private renderFeed(): void {
+    if (!this.feedBodyEl) return;
+    const lines = this.feed.getLines();
+    if (lines.length === 0) {
+      this.feedBodyEl.innerHTML =
+        '<p class="feed-empty">Noch keine Ereignisse.</p>';
+    } else {
+      this.feedBodyEl.innerHTML = lines
+        .map((line) => `<div class="feed-item">${line.text}</div>`)
+        .join('');
+    }
+    if (this.feedEl) {
+      this.feedEl.scrollTop = this.feedEl.scrollHeight;
+    }
   }
 
   private updateGraveyardButton(): void {

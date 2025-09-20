@@ -332,6 +332,13 @@ export class RelationsOverlay {
     'bloodoath',
     'hierarchy'
   ]);
+  private lensMask = new Set<OverlayRelationType>([
+    'ally',
+    'friend',
+    'rival',
+    'bloodoath',
+    'hierarchy'
+  ]);
   private focusId: string | null = null;
   private hoverId: string | null = null;
   private pinnedId: string | null = null;
@@ -446,6 +453,23 @@ export class RelationsOverlay {
     if (!value) {
       this.tooltip.hide();
     }
+  }
+
+  setLensMask(types: Set<OverlayRelationType>): void {
+    const next = new Set(types);
+    if (next.size === this.lensMask.size) {
+      let diff = false;
+      this.lensMask.forEach((type) => {
+        if (!next.has(type)) {
+          diff = true;
+        }
+      });
+      if (!diff) {
+        return;
+      }
+    }
+    this.lensMask = next;
+    this.requestRender();
   }
 
   setLensEnabled(value: boolean): void {
@@ -648,8 +672,17 @@ export class RelationsOverlay {
 
   private computeEdgesForFocus(): RelationEdge[] {
     if (!this.focusId) return [];
+    const allowed = new Set<OverlayRelationType>();
+    this.activeTypes.forEach((type) => {
+      if (this.lensMask.has(type)) {
+        allowed.add(type);
+      }
+    });
+    if (allowed.size === 0) {
+      return [];
+    }
     return selectEdgesForFocus(this.adjacency, this.focusId, {
-      activeTypes: this.activeTypes,
+      activeTypes: allowed,
       density: this.density,
       includeSecondOrder: this.includeSecondOrder
     });
@@ -669,13 +702,12 @@ export class RelationsOverlay {
       this.tooltip.hide();
       return;
     }
-    const hostRect = this.options.host.getBoundingClientRect();
-    this.svg.setAttribute(
-      'viewBox',
-      `0 0 ${hostRect.width} ${hostRect.height}`
-    );
-    this.svg.setAttribute('width', `${hostRect.width}`);
-    this.svg.setAttribute('height', `${hostRect.height}`);
+    const host = this.options.host;
+    const width = Math.max(host.scrollWidth, host.clientWidth);
+    const height = Math.max(host.scrollHeight, host.clientHeight);
+    this.svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    this.svg.setAttribute('width', `${width}`);
+    this.svg.setAttribute('height', `${height}`);
 
     const edges = this.computeEdgesForFocus();
     const fragment = document.createDocumentFragment();
@@ -692,9 +724,7 @@ export class RelationsOverlay {
           return;
         }
       }
-      const fromRect = fromEl.getBoundingClientRect();
-      const toRect = toEl.getBoundingClientRect();
-      const { A, B } = edgeAnchors(fromRect, toRect, hostRect);
+      const { A, B } = edgeAnchors(this.svg, fromEl, toEl);
       const path = document.createElementNS(
         'http://www.w3.org/2000/svg',
         'path'

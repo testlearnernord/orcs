@@ -15,6 +15,7 @@ import {
   collectBloodOathVictims,
   seedSpawnRelationships
 } from '@sim/relationships';
+import { resetCrown, updateCrownState } from '@sim/crown';
 import { RNG } from '@sim/rng';
 import type {
   CycleSummary,
@@ -22,6 +23,7 @@ import type {
   Officer,
   Rank,
   WarcallPlan,
+  WarcallResolution,
   WorldState
 } from '@sim/types';
 import {
@@ -98,6 +100,7 @@ function ensureKing(state: WorldState, rng: RNG, feed: FeedEntry[]): void {
   state.officers = state.officers.map((officer) =>
     officer.id === newKing.id ? newKing : officer
   );
+  resetCrown(state, rng, newKing);
   feed.push(
     createGeneralEntry(
       rng,
@@ -266,19 +269,25 @@ export function advanceCycle(state: WorldState, rng: RNG): CycleSummary {
   state.cycle += 1;
   const cycleFeed: FeedEntry[] = [];
   updateKingStability(state, rng, cycleFeed);
+  const crownResult = updateCrownState(state, rng, cycleFeed);
 
   const expiryFeed = expireBloodOaths(state, state.cycle, rng);
   cycleFeed.push(...expiryFeed);
 
-  const resolutions = resolveDueWarcalls(state, rng);
+  const resolutions: WarcallResolution[] = [];
+  if (crownResult.resolution) {
+    resolutions.push(crownResult.resolution);
+  }
+  const dueResolutions = resolveDueWarcalls(state, rng);
+  resolutions.push(...dueResolutions);
   resolutions.forEach((resolution) => {
     cycleFeed.push(...resolution.feed);
   });
 
-  const casualties = new Set<string>();
-  resolutions.forEach((resolution) =>
-    resolution.casualties.forEach((id) => casualties.add(id))
-  );
+  const casualties = new Set<string>(crownResult.casualties);
+  resolutions.forEach((resolution) => {
+    resolution.casualties.forEach((id) => casualties.add(id));
+  });
   const extra = collectBloodOathVictims(state, casualties, state.cycle);
   extra.forEach((id) => casualties.add(id));
 

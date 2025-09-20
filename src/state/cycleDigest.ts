@@ -6,13 +6,14 @@ import type {
   WorldState
 } from '@sim/types';
 
-export type Highlight = {
+export interface Highlight {
   id: string;
-  label: string;
   icon: string;
+  title: string;
+  text?: string;
   score: number;
-  details?: string;
-};
+  cycle: number;
+}
 
 const RANK_ORDER: Rank[] = ['Grunzer', 'Späher', 'Captain', 'Spieler', 'König'];
 const RANK_SCORE = new Map<Rank, number>(
@@ -74,7 +75,8 @@ function collectRelationshipPairs(
 
 function promotionHighlights(
   summary: CycleSummary | undefined,
-  lookup: Map<string, Officer>
+  lookup: Map<string, Officer>,
+  cycle: number
 ): Highlight[] {
   if (!summary) return [];
   return summary.promotions.map((promotion) => {
@@ -85,59 +87,67 @@ function promotionHighlights(
     const direction = steps >= 0 ? 'up' : 'down';
     const magnitude = Math.abs(steps);
     const base = magnitude * 5;
-    const label = officer
+    const title = officer
       ? direction === 'up'
         ? `${officer.name} steigt zum ${promotion.to} auf`
         : `${officer.name} fällt zum ${promotion.to}`
       : `${promotion.officerId} wechselt Rang`;
-    const details = `${promotion.from} → ${promotion.to}`;
+    const text = `${promotion.from} → ${promotion.to}`;
     const icon = direction === 'up' ? '⬆️' : '⬇️';
     return {
       id: `rank:${promotion.officerId}:${promotion.to}`,
-      label,
       icon,
-      details,
-      score: score(base, `rank:${promotion.officerId}:${promotion.to}`)
+      title,
+      text,
+      score: score(base, `rank:${promotion.officerId}:${promotion.to}`),
+      cycle
     };
   });
 }
 
 function deathHighlights(
   summary: CycleSummary | undefined,
-  lookup: Map<string, Officer>
+  lookup: Map<string, Officer>,
+  cycle: number
 ): Highlight[] {
   if (!summary) return [];
   return summary.deaths.map((id) => {
     const officer = lookup.get(id);
-    const label = officer
+    const title = officer
       ? `${officer.name} fällt im Zyklus ${summary.cycle}`
       : `${id} fällt im Zyklus ${summary.cycle}`;
-    const details = officer ? `Letzter Rang: ${officer.rank}` : undefined;
+    const text = officer ? `Letzter Rang: ${officer.rank}` : undefined;
     return {
       id: `death:${id}:${summary.cycle}`,
-      label,
       icon: '☠️',
-      details,
-      score: score(4, `death:${id}:${summary.cycle}`)
+      title,
+      text,
+      score: score(4, `death:${id}:${summary.cycle}`),
+      cycle
     };
   });
 }
 
-function spawnHighlights(summary: CycleSummary | undefined): Highlight[] {
+function spawnHighlights(
+  summary: CycleSummary | undefined,
+  cycle: number
+): Highlight[] {
   if (!summary) return [];
   return summary.spawns.map((officer) => ({
     id: `spawn:${officer.id}:${summary.cycle}`,
-    label: `${officer.name} verstärkt die Horde als ${officer.rank}`,
     icon: '✨',
-    details: `Trait: ${officer.traits.join(', ') || 'keine'}`,
-    score: score(4, `spawn:${officer.id}:${summary.cycle}`)
+    title: `${officer.name} verstärkt die Horde als ${officer.rank}`,
+    text: `Trait: ${officer.traits.join(', ') || 'keine'}`,
+    score: score(4, `spawn:${officer.id}:${summary.cycle}`),
+    cycle
   }));
 }
 
 function relationshipHighlights(
   prev: WorldState,
   next: WorldState,
-  lookup: Map<string, Officer>
+  lookup: Map<string, Officer>,
+  cycle: number
 ): Highlight[] {
   const highlights: Highlight[] = [];
   const prevBlood = collectRelationshipPairs(prev.officers, 'BLOOD_OATH');
@@ -148,13 +158,14 @@ function relationshipHighlights(
     const [a, b] = info.ids;
     highlights.push({
       id: `blood:new:${key}`,
-      label: `Blutschwur zwischen ${nameOf(lookup, a)} und ${nameOf(lookup, b)}`,
       icon: '🩸',
-      details:
+      title: `Blutschwur zwischen ${nameOf(lookup, a)} und ${nameOf(lookup, b)}`,
+      text:
         info.relation.sinceCycle !== undefined
           ? `Seit Zyklus ${info.relation.sinceCycle}`
           : undefined,
-      score: score(3, `blood:new:${key}`)
+      score: score(3, `blood:new:${key}`),
+      cycle
     });
   });
 
@@ -163,13 +174,14 @@ function relationshipHighlights(
     const [a, b] = info.ids;
     highlights.push({
       id: `blood:end:${key}`,
-      label: `Blutschwur erloschen: ${nameOf(lookup, a)} & ${nameOf(lookup, b)}`,
       icon: '💔',
-      details:
+      title: `Blutschwur erloschen: ${nameOf(lookup, a)} & ${nameOf(lookup, b)}`,
+      text:
         info.relation.expiresAtCycle !== undefined
           ? `Abgelaufen in Zyklus ${info.relation.expiresAtCycle}`
           : 'Bindung zerschnitten',
-      score: score(3, `blood:end:${key}`)
+      score: score(3, `blood:end:${key}`),
+      cycle
     });
   });
 
@@ -181,13 +193,14 @@ function relationshipHighlights(
     const [a, b] = info.ids;
     highlights.push({
       id: `rival:new:${key}`,
-      label: `Rivalität entflammt: ${nameOf(lookup, a)} vs. ${nameOf(lookup, b)}`,
       icon: '⚔️',
-      details:
+      title: `Rivalität entflammt: ${nameOf(lookup, a)} vs. ${nameOf(lookup, b)}`,
+      text:
         info.relation.sinceCycle !== undefined
           ? `Seit Zyklus ${info.relation.sinceCycle}`
           : undefined,
-      score: score(2, `rival:new:${key}`)
+      score: score(2, `rival:new:${key}`),
+      cycle
     });
   });
 
@@ -196,10 +209,11 @@ function relationshipHighlights(
     const [a, b] = info.ids;
     highlights.push({
       id: `rival:end:${key}`,
-      label: `Rivalität beigelegt: ${nameOf(lookup, a)} & ${nameOf(lookup, b)}`,
       icon: '🤝',
-      details: 'Konflikt beruhigt sich',
-      score: score(2, `rival:end:${key}`)
+      title: `Rivalität beigelegt: ${nameOf(lookup, a)} & ${nameOf(lookup, b)}`,
+      text: 'Konflikt beruhigt sich',
+      score: score(2, `rival:end:${key}`),
+      cycle
     });
   });
 
@@ -208,7 +222,8 @@ function relationshipHighlights(
 
 function warcallHighlights(
   summary: CycleSummary | undefined,
-  lookup: Map<string, Officer>
+  lookup: Map<string, Officer>,
+  cycle: number
 ): Highlight[] {
   if (!summary) return [];
   return summary.warcallsResolved.flatMap((resolution) => {
@@ -225,20 +240,21 @@ function warcallHighlights(
     const initiator = nameOf(lookup, resolution.warcall.initiator);
     if (hasPlayer) {
       const base = resolution.success ? 3 : 2;
-      const label = resolution.success
+      const title = resolution.success
         ? `${initiator} triumphiert bei ${resolution.warcall.location}`
         : `${initiator} scheitert bei ${resolution.warcall.location}`;
       const icon = resolution.success ? '🏆' : '⚠️';
-      const details = participantNames
+      const text = participantNames
         ? `Teilnehmer: ${participantNames}`
         : undefined;
       return [
         {
           id: `${baseId}:player`,
-          label,
           icon,
-          details,
-          score: score(base, `${baseId}:player`)
+          title,
+          text,
+          score: score(base, `${baseId}:player`),
+          cycle
         }
       ];
     }
@@ -246,12 +262,13 @@ function warcallHighlights(
       return [
         {
           id: `${baseId}:mass`,
-          label: `Große Schar bei ${resolution.warcall.location} (${participants.length})`,
           icon: '⚔️',
-          details: participantNames
+          title: `Große Schar bei ${resolution.warcall.location} (${participants.length})`,
+          text: participantNames
             ? `Teilnehmer: ${participantNames}`
             : undefined,
-          score: score(1, `${baseId}:mass`)
+          score: score(1, `${baseId}:mass`),
+          cycle
         }
       ];
     }
@@ -266,11 +283,12 @@ export function computeDigest(
 ): Highlight[] {
   const lookup = buildLookup(prev, next);
   const highlights: Highlight[] = [];
-  highlights.push(...promotionHighlights(summary, lookup));
-  highlights.push(...deathHighlights(summary, lookup));
-  highlights.push(...spawnHighlights(summary));
-  highlights.push(...relationshipHighlights(prev, next, lookup));
-  highlights.push(...warcallHighlights(summary, lookup));
+  const cycle = summary?.cycle ?? next.cycle;
+  highlights.push(...promotionHighlights(summary, lookup, cycle));
+  highlights.push(...deathHighlights(summary, lookup, cycle));
+  highlights.push(...spawnHighlights(summary, cycle));
+  highlights.push(...relationshipHighlights(prev, next, lookup, cycle));
+  highlights.push(...warcallHighlights(summary, lookup, cycle));
   return highlights
     .filter(
       (item, index, arr) =>
