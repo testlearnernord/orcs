@@ -1,21 +1,11 @@
 import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { ArtConfig } from '@/config/art';
 import Portrait, { type PortraitProps } from '@/ui/Portrait';
 
 export type AvatarProps = PortraitProps;
 
 /** Einziger erlaubter Einstiegspunkt für Offiziersbilder. */
 export default function Avatar(props: AvatarProps) {
-  if (ArtConfig.active === 'legacy') {
-    const Legacy =
-      typeof window !== 'undefined'
-        ? ((window as any).__LEGACY_ORC_AVATAR__ as
-            | ((p: AvatarProps) => JSX.Element)
-            | undefined)
-        : undefined;
-    if (Legacy) return Legacy(props);
-  }
   return <Portrait {...props} />;
 }
 
