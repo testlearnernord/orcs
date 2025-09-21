@@ -24,7 +24,6 @@ if (!portraitVersion) {
 }
 
 const PORTRAIT_VERSION = portraitVersion;
-=======
 const PORTRAIT_VERSION = (() => {
   const value = import.meta.env.VITE_PORTRAITS_VERSION;
   if (typeof value === 'string' && value.trim()) return value.trim();
