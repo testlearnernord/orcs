@@ -1,4 +1,4 @@
-import { ArtConfig } from '@/config/art';
+import { ArtConfig, getAtlasUrl } from '@/config/art';
 
 export interface AtlasInfo {
   url: string;
@@ -46,7 +46,7 @@ function sniffGrid(w: number, h: number) {
 export async function loadAtlases(): Promise<AtlasBundle | null> {
   const atlases: AtlasInfo[] = [];
   for (const file of ArtConfig.atlases) {
-    const url = ArtConfig.base + file;
+    const url = getAtlasUrl(file);
     const img = new Image();
     img.decoding = 'async';
     img.src = url;
