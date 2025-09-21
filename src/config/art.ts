@@ -9,11 +9,59 @@ function getInitialArt(): ArtSet {
   }
 }
 
-export const ArtConfig = {
+const PORTRAIT_VERSION = (() => {
+  const value = import.meta.env.VITE_PORTRAITS_VERSION;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed) return trimmed;
+  }
+  const buildStamp =
+    typeof __BUILD_TIME__ !== 'undefined' ? String(__BUILD_TIME__).trim() : '';
+  if (buildStamp) return buildStamp;
+  return 'dev';
+})();
+
+function normalizeBaseUrl(value: string | undefined) {
+  const raw = value ?? '/';
+  const isAbsolute = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(raw);
+  if (isAbsolute) return raw.endsWith('/') ? raw : `${raw}/`;
+  let prefixed = raw.startsWith('/') ? raw : `/${raw}`;
+  if (!prefixed.endsWith('/')) prefixed += '/';
+  return prefixed;
+}
+
+const PORTRAIT_BASE = (() => {
+  const base = normalizeBaseUrl(import.meta.env.BASE_URL);
+  return `${base}assets/orcs/portraits/`;
+})();
+
+const PORTRAIT_SUFFIX = PORTRAIT_VERSION
+  ? `?v=${encodeURIComponent(PORTRAIT_VERSION)}`
+  : '';
+
+const PORTRAIT_ATLASES = ['set_a.webp', 'set_b.webp'] as const;
+
+type PortraitAtlases = typeof PORTRAIT_ATLASES;
+
+interface PortraitArtConfig {
+  active: ArtSet;
+  base: string;
+  atlases: PortraitAtlases;
+  version: string;
+}
+
+export type AtlasFile = PortraitAtlases[number];
+
+export const ArtConfig: PortraitArtConfig = {
   active: getInitialArt(),
-  base: new URL('assets/orcs/portraits/', import.meta.env.BASE_URL).toString(),
-  atlases: ['set_a.webp', 'set_b.webp'] as const
-} as const;
+  base: PORTRAIT_BASE,
+  atlases: PORTRAIT_ATLASES,
+  version: PORTRAIT_VERSION
+};
+
+export function getAtlasUrl(file: AtlasFile) {
+  return ArtConfig.base + file + PORTRAIT_SUFFIX;
+}
 
 export function setArtMode(mode: ArtSet) {
   try {
@@ -21,5 +69,5 @@ export function setArtMode(mode: ArtSet) {
   } catch {
     /* ignore */
   }
-  (ArtConfig as any).active = mode;
+  ArtConfig.active = mode;
 }
