@@ -2,7 +2,6 @@ import type { Officer, RelationshipType } from '@sim/types';
 import type { OfficerTooltip } from '@ui/components/officerTooltip';
 import { measure, flip } from '@ui/utils/flip';
 import { AvatarView } from '@ui/officer/Avatar';
-import { rankToRingColor } from '@ui/utils/rankColors';
 
 export interface OfficerCardOptions {
   tooltip: OfficerTooltip;
@@ -74,15 +73,15 @@ export class OfficerCard {
     this.element.className = 'officer-card';
     this.element.tabIndex = 0;
     this.element.dataset.officerId = officer.id;
+    this.element.dataset.status = officer.status === 'DEAD' ? 'dead' : 'active';
 
     const portraitWrapper = document.createElement('div');
     portraitWrapper.className = 'officer-card__portrait';
     this.avatar = new AvatarView({
       officer,
       size: 96,
-      ringColor: rankToRingColor(officer.rank),
-      dead: officer.status === 'DEAD',
-      className: 'officer-card__portrait-img'
+      className: 'officer-card__portrait-img',
+      title: officer.name
     });
     portraitWrapper.appendChild(this.avatar.element);
 
@@ -271,13 +270,13 @@ export class OfficerCard {
     const previous = this.officer;
     this.officer = officer;
     this.element.dataset.officerId = officer.id;
+    this.element.dataset.status = officer.status === 'DEAD' ? 'dead' : 'active';
     this.setRank(officer.rank);
     this.avatar.update({
       officer,
       size: 96,
-      ringColor: rankToRingColor(officer.rank),
-      dead: officer.status === 'DEAD',
-      className: 'officer-card__portrait-img'
+      className: 'officer-card__portrait-img',
+      title: officer.name
     });
     this.updateMeta(officer);
     this.updateTraits(officer);

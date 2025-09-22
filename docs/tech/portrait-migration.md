@@ -6,14 +6,15 @@ Die Nemesis-Oberfläche setzt ab sofort ausschließlich auf manifest-getriebene 
 
 | Fundstelle | Maßnahme |
 | --- | --- |
-| `assets/orc/generated/orc_catalog.json` | Entfernt; der Base64-Katalog entfällt, Portraits stammen nur noch aus WebP-Sprite-Sheets. |
-| `assets/orc/parts/*.json` | Entfernt; Farblayer-Vorlagen sind obsolet. |
-| `scripts/generate-orcs.ts` | Gelöscht; keine PNG-Erzeugung mehr im Repo. |
-| `scripts/guards/no-legacy-orc-imports.mjs` | Ersetzt durch `scripts/guards/portrait-manifest.mjs` (Guard `npm run guard:portraits`). |
-| `src/config/art.ts` | Gelöscht; URLs & Versionierung werden durch das Manifest bestimmt. |
-| `src/features/portraits/atlas.ts` | Ersetzt durch Manifest-/Hash-basierte Pipeline (`features/portraits/*`). |
-| `src/sim/portraits.ts` | Entfernt; Offiziere besitzen nun ein `stableId`. |
-| `package.json` Scripts | Deploy-Dreigestirn (`build`, `predeploy`, `deploy`) plus Guard `npm run guard:portraits`. |
+| `public/assets/orcs/portraits/manifest.json` | Sprite-Sheet-Quellen auf relative Pfade gestellt; BASE_URL entscheidet nun über das Laufzeit-Präfix. |
+| `src/features/portraits/manifest.ts` | Loader ersetzt: lädt Manifest über `BASE_URL`, normalisiert Gewichte und cached das Ergebnis. |
+| `src/features/portraits/preload.ts` | Preload nutzt `fetch` direkt auf das Manifest und resolved Sprite-Quellen über `BASE_URL`, lädt Images `async/eager`. |
+| `src/ui/Portrait.tsx` | Wrapper zwingt alle Aufrufer durch `OfficerAvatar` und fällt deterministisch auf `officer.id`, falls `stableId` leer ist. |
+| `src/features/portraits/__tests__/avatar.smoke.test.tsx` | Test-Mock auf relative Pfade gedreht und prüft explizit auf `set_a.webp`/`set_b.webp`. |
+| `scripts/guards/portrait-manifest.mjs` | Guard akzeptiert relative Quellen und prüft weiter auf gültige Raster/Dateien. |
+| `scripts/guards/assert-no-legacy-portraits.mjs` | Neuer Build-Guard, der Repository-Scans auf Altpfade/Legacy-Funktionen erzwingt. |
+| `.gitignore` | WebP-Dateien in die Binär-Blockliste aufgenommen, damit kein neuer Raster-Müll eingecheckt wird. |
+| `package.json` Scripts | `guard:portraits` startet die Legacy-Prüfung vor CI/Build, Deploy-Skripte bleiben unverändert. |
 
 ## Neuer Ablauf
 

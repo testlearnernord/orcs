@@ -74,17 +74,16 @@ async function ensureManifest() {
       seenIds.add(set.id);
     }
 
-    if (
-      typeof set.src !== 'string' ||
-      !set.src.startsWith('/orcs/assets/orcs/portraits/')
-    ) {
-      reportError(
-        `${prefix}.src muss mit "/orcs/assets/orcs/portraits/" beginnen.`
-      );
+    if (typeof set.src !== 'string' || set.src.trim().length === 0) {
+      reportError(`${prefix}.src muss ein nicht-leerer String sein.`);
+    } else if (set.src.startsWith('/')) {
+      reportError(`${prefix}.src darf nicht mit "/" beginnen.`);
+    } else if (!set.src.startsWith('assets/orcs/portraits/')) {
+      reportError(`${prefix}.src muss mit "assets/orcs/portraits/" beginnen.`);
     } else if (!set.src.endsWith('.webp')) {
       reportError(`${prefix}.src muss auf ".webp" enden.`);
     } else {
-      const fsRelative = path.join('public', set.src.replace(/^\/orcs\//, ''));
+      const fsRelative = path.join('public', set.src);
       const fsPath = path.join(root, fsRelative);
       try {
         await access(fsPath, constants.R_OK);

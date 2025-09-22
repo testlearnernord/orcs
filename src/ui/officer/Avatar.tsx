@@ -1,8 +1,14 @@
 import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import Portrait, { type PortraitProps } from '@/ui/Portrait';
+import Portrait from '@/ui/Portrait';
+import type { Officer } from '@/sim/types';
 
-export type AvatarProps = PortraitProps;
+type AvatarProps = {
+  officer: Officer;
+  size?: number;
+  className?: string;
+  title?: string;
+};
 
 /** Einziger erlaubter Einstiegspunkt für Offiziersbilder. */
 export default function Avatar(props: AvatarProps) {

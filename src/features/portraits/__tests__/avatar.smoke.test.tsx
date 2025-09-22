@@ -8,13 +8,13 @@ const manifest = {
   sets: [
     {
       id: 'set_a',
-      src: '/orcs/assets/orcs/portraits/set_a.webp',
+      src: 'assets/orcs/portraits/set_a.webp',
       cols: 6,
       rows: 8
     },
     {
       id: 'set_b',
-      src: '/orcs/assets/orcs/portraits/set_b.webp',
+      src: 'assets/orcs/portraits/set_b.webp',
       cols: 6,
       rows: 8
     }
