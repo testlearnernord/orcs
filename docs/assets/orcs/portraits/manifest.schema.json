@@ -1,0 +1,28 @@
+{
+  "$id": "portrait-manifest",
+  "type": "object",
+  "required": ["version", "sets"],
+  "properties": {
+    "version": { "type": "integer" },
+    "sets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "src", "cols", "rows"],
+        "properties": {
+          "id": { "type": "string" },
+          "src": { "type": "string" },
+          "cols": { "type": "integer", "minimum": 1 },
+          "rows": { "type": "integer", "minimum": 1 },
+          "margin": { "type": "integer", "minimum": 0 },
+          "padding": { "type": "integer", "minimum": 0 },
+          "weight": { "type": "number", "minimum": 0 },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

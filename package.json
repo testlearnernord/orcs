@@ -13,10 +13,12 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint .",
-    "guard:portraits": "node scripts/guards/portrait-manifest.mjs",
-    "ci": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
+    "guard:portraits": "node scripts/guards/assert-no-legacy-portraits.mjs && node scripts/guards/portrait-manifest.mjs",
+    "guard:portraits:legacy": "node scripts/guards/assert-no-legacy-portraits.mjs",
+    "guard:portraits:manifest": "node scripts/guards/portrait-manifest.mjs",
+    "ci": "npm run guard:portraits && npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
     "predeploy": "rimraf docs && npm run build",
-    "deploy": "cp -r dist/* docs/"
+    "deploy": "mkdir -p docs && cp -r dist/* docs/"
   },
   "dependencies": {
     "phaser": "^3.80.1",
@@ -44,7 +46,8 @@
     "typescript": "^5.5.4",
     "vite": "^5.4.0",
     "vite-tsconfig-paths": "^4.3.2",
-    "vitest": "^2.0.5"
+    "vitest": "^2.0.5",
+    "globby": "^14.0.2"
   },
   "lint-staged": {
     "*.{ts,tsx,js,json,md}": "prettier --write"

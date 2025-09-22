@@ -442,6 +442,10 @@ button:disabled {
   background: none;
 }
 
+.officer-card[data-status='dead'] .officer-card__portrait-img {
+  filter: grayscale(0.9) brightness(0.85);
+}
+
 .officer-card__content {
   display: flex;
   flex-direction: column;
@@ -1398,6 +1402,11 @@ button:disabled {
   height: 100%;
   display: block;
   border-radius: inherit;
+}
+
+.warcall-avatar.is-dead .warcall-avatar__img,
+.warcall-participants__list article.is-dead .warcall-participant__img {
+  filter: grayscale(0.9) brightness(0.85);
 }
 
 .warcall-item footer {

@@ -149,11 +149,12 @@ export class WarcallModal {
     list.innerHTML = '';
     entry.participants.forEach((officer) => {
       const article = document.createElement('article');
+      article.classList.toggle('is-dead', officer.status === 'DEAD');
       const avatarView = new AvatarView({
         officer,
         size: 40,
-        dead: officer.status === 'DEAD',
-        className: 'warcall-participant__img'
+        className: 'warcall-participant__img',
+        title: officer.name
       });
       article.appendChild(avatarView.element);
       const meta = document.createElement('div');

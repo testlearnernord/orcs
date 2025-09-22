@@ -130,12 +130,13 @@ export class WarcallsDock {
     participants.forEach((officer) => {
       const avatar = document.createElement('span');
       avatar.className = 'warcall-avatar';
+      avatar.classList.toggle('is-dead', officer.status === 'DEAD');
       avatar.title = officer.name;
       const avatarView = new AvatarView({
         officer,
         size: 32,
-        dead: officer.status === 'DEAD',
-        className: 'warcall-avatar__img'
+        className: 'warcall-avatar__img',
+        title: officer.name
       });
       avatar.appendChild(avatarView.element);
       container.appendChild(avatar);
