@@ -5,7 +5,14 @@ import path from 'node:path';
 import process from 'node:process';
 
 const root = process.cwd();
-const manifestPath = path.join(root, 'public', 'assets', 'orcs', 'portraits', 'manifest.json');
+const manifestPath = path.join(
+  root,
+  'public',
+  'assets',
+  'orcs',
+  'portraits',
+  'manifest.json'
+);
 const portraitDir = path.dirname(manifestPath);
 
 const errors = [];
@@ -23,7 +30,9 @@ async function ensureManifest() {
   try {
     raw = await readFile(manifestPath, 'utf-8');
   } catch (err) {
-    reportError(`Portrait manifest fehlt oder ist nicht lesbar: ${rel(manifestPath)} (${err.message})`);
+    reportError(
+      `Portrait manifest fehlt oder ist nicht lesbar: ${rel(manifestPath)} (${err.message})`
+    );
     return;
   }
 
@@ -40,7 +49,9 @@ async function ensureManifest() {
   }
 
   if (!Array.isArray(manifest.sets) || manifest.sets.length === 0) {
-    reportError('Portrait manifest muss mindestens ein Set in `sets` enthalten.');
+    reportError(
+      'Portrait manifest muss mindestens ein Set in `sets` enthalten.'
+    );
     return;
   }
 
@@ -63,8 +74,13 @@ async function ensureManifest() {
       seenIds.add(set.id);
     }
 
-    if (typeof set.src !== 'string' || !set.src.startsWith('/orcs/assets/orcs/portraits/')) {
-      reportError(`${prefix}.src muss mit "/orcs/assets/orcs/portraits/" beginnen.`);
+    if (
+      typeof set.src !== 'string' ||
+      !set.src.startsWith('/orcs/assets/orcs/portraits/')
+    ) {
+      reportError(
+        `${prefix}.src muss mit "/orcs/assets/orcs/portraits/" beginnen.`
+      );
     } else if (!set.src.endsWith('.webp')) {
       reportError(`${prefix}.src muss auf ".webp" enden.`);
     } else {
@@ -85,24 +101,45 @@ async function ensureManifest() {
 
     for (const dim of ['margin', 'padding']) {
       if (dim in set && (!Number.isInteger(set[dim]) || set[dim] < 0)) {
-        reportError(`${prefix}.${dim} muss eine nicht-negative Ganzzahl sein, falls angegeben.`);
+        reportError(
+          `${prefix}.${dim} muss eine nicht-negative Ganzzahl sein, falls angegeben.`
+        );
       }
     }
 
     if ('weight' in set) {
-      if (typeof set.weight !== 'number' || !Number.isFinite(set.weight) || set.weight <= 0) {
-        reportError(`${prefix}.weight muss eine positive Zahl sein, falls angegeben.`);
+      if (
+        typeof set.weight !== 'number' ||
+        !Number.isFinite(set.weight) ||
+        set.weight <= 0
+      ) {
+        reportError(
+          `${prefix}.weight muss eine positive Zahl sein, falls angegeben.`
+        );
       }
     }
 
     if ('tags' in set) {
-      if (!Array.isArray(set.tags) || set.tags.some(tag => typeof tag !== 'string')) {
-        reportError(`${prefix}.tags muss ein Array aus Strings sein, falls angegeben.`);
+      if (
+        !Array.isArray(set.tags) ||
+        set.tags.some((tag) => typeof tag !== 'string')
+      ) {
+        reportError(
+          `${prefix}.tags muss ein Array aus Strings sein, falls angegeben.`
+        );
       }
     }
 
-    if (Number.isInteger(set.cols) && set.cols > 0 && Number.isInteger(set.rows) && set.rows > 0) {
-      const weight = typeof set.weight === 'number' && Number.isFinite(set.weight) ? set.weight : 1;
+    if (
+      Number.isInteger(set.cols) &&
+      set.cols > 0 &&
+      Number.isInteger(set.rows) &&
+      set.rows > 0
+    ) {
+      const weight =
+        typeof set.weight === 'number' && Number.isFinite(set.weight)
+          ? set.weight
+          : 1;
       if (weight > 0) {
         totalTiles += set.cols * set.rows * weight;
       }
@@ -110,7 +147,9 @@ async function ensureManifest() {
   }
 
   if (totalTiles <= 0) {
-    reportError('Portrait manifest stellt keine verfügbaren Tiles bereit (prüfe cols/rows/weight).');
+    reportError(
+      'Portrait manifest stellt keine verfügbaren Tiles bereit (prüfe cols/rows/weight).'
+    );
   }
 }
 
@@ -138,12 +177,16 @@ async function ensureNoLegacyArtifacts() {
 async function ensureNoForbiddenAssets() {
   try {
     const entries = await readdir(portraitDir);
-    const forbidden = entries.filter(name => /\.(png|jpe?g)$/i.test(name));
+    const forbidden = entries.filter((name) => /\.(png|jpe?g)$/i.test(name));
     if (forbidden.length > 0) {
-      reportError(`Unerlaubte Rasterdateien im Portrait-Ordner gefunden: ${forbidden.join(', ')}`);
+      reportError(
+        `Unerlaubte Rasterdateien im Portrait-Ordner gefunden: ${forbidden.join(', ')}`
+      );
     }
   } catch (err) {
-    reportError(`Kann Portrait-Verzeichnis nicht lesen (${rel(portraitDir)}): ${err.message}`);
+    reportError(
+      `Kann Portrait-Verzeichnis nicht lesen (${rel(portraitDir)}): ${err.message}`
+    );
   }
 }
 
