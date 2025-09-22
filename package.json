@@ -1,6 +1,6 @@
 {
   "name": "orcs",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,8 +13,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint .",
-    "guard:portraits": "node scripts/guards/no-legacy-orc-imports.mjs",
-    "ci": "npm run format:check && npm run lint && npm run typecheck && npm run guard:portraits && npm run build"
+    "ci": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
+    "predeploy": "rimraf docs && npm run build",
+    "deploy": "cp -r dist/* docs/"
   },
   "dependencies": {
     "phaser": "^3.80.1",
@@ -23,7 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.5.4",
-    "@types/pngjs": "^6.0.5",
+    "@testing-library/react": "^14.2.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
@@ -37,10 +38,8 @@
     "husky": "^9.1.4",
     "jsdom": "^27.0.0",
     "lint-staged": "^15.2.7",
-    "pngjs": "^7.0.0",
     "prettier": "^3.3.3",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.20.5",
+    "rimraf": "^5.0.9",
     "typescript": "^5.5.4",
     "vite": "^5.4.0",
     "vite-tsconfig-paths": "^4.3.2",

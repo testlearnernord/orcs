@@ -1,10 +1,6 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useMemo, type CSSProperties } from 'react';
 import type { Officer } from '@sim/types';
-import {
-  chooseTileIndex,
-  loadAtlases,
-  resolveTile
-} from '@/features/portraits/atlas';
+import { OfficerAvatar } from '@/features/portraits/Avatar';
 
 export type PortraitProps = {
   officer: Officer;
@@ -14,8 +10,6 @@ export type PortraitProps = {
   className?: string;
 };
 
-type AtlasState = Awaited<ReturnType<typeof loadAtlases>> | null;
-
 export default function Portrait({
   officer,
   size = 88,
@@ -23,62 +17,29 @@ export default function Portrait({
   dead,
   className
 }: PortraitProps) {
-  const [bundle, setBundle] = useState<AtlasState>(null);
+  const ringShadow = useMemo(() => {
+    if (!ringColor) return undefined;
+    return `0 0 0 3px ${ringColor} inset, 0 0 18px ${ringColor}33`;
+  }, [ringColor]);
 
-  useEffect(() => {
-    let cancelled = false;
-    loadAtlases()
-      .then((loaded) => {
-        if (!cancelled) setBundle(loaded);
-      })
-      .catch(() => {
-        if (!cancelled) setBundle(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const ringShadow = ringColor
-    ? `0 0 0 3px ${ringColor} inset, 0 0 18px ${ringColor}33`
-    : undefined;
-
-  if (!bundle) {
-    return (
-      <div
-        className={className}
-        style={{
-          width: size,
-          height: size,
-          borderRadius: 12,
-          overflow: 'hidden',
-          background: 'none',
-          filter: dead ? 'grayscale(0.9) brightness(0.85)' : 'none',
-          boxShadow: ringShadow
-        }}
-      />
-    );
-  }
-
-  const traits = Array.isArray(officer.traits) ? officer.traits.join(',') : '';
-  const seed = `${officer.id}|${officer.name}|${officer.level}|${traits}`;
-  const idx = chooseTileIndex(seed, bundle.totalTiles);
-  const { atlas, col, row } = resolveTile(bundle, idx);
   const style = useMemo<CSSProperties>(
     () => ({
-      width: size,
-      height: size,
-      backgroundImage: `url("${atlas.url}")`,
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: `${atlas.cols * size}px ${atlas.rows * size}px`,
-      backgroundPosition: `-${col * size}px -${row * size}px`,
-      borderRadius: 12,
-      overflow: 'hidden',
-      filter: dead ? 'grayscale(0.9) brightness(0.85)' : 'none',
-      boxShadow: ringShadow
+      boxShadow: ringShadow,
+      filter: dead ? 'grayscale(0.9) brightness(0.85)' : undefined,
+      borderRadius: 12
     }),
-    [atlas.url, atlas.cols, atlas.rows, col, dead, ringShadow, row, size]
+    [dead, ringShadow]
   );
 
-  return <div className={className} style={style} aria-hidden="true" />;
+  const stableId = officer.stableId ?? officer.id;
+
+  return (
+    <OfficerAvatar
+      officerId={stableId}
+      size={size}
+      title={officer.name}
+      className={className}
+      style={style}
+    />
+  );
 }

@@ -23,11 +23,11 @@ function officer(
     level: 5,
     traits: [],
     relationships: [],
-    portraitSeed: 'seed',
     status: 'ALIVE',
     cycleJoined: 0,
     memories: [],
     personality: { ...basePersonality },
+    stableId: partial.stableId ?? partial.id,
     ...partial
   };
 }

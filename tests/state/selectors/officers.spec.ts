@@ -12,6 +12,7 @@ import type { UIFilters } from '@state/ui/filters';
 function makeOfficer(overrides: Partial<Officer> & { id: string }): Officer {
   return {
     id: overrides.id,
+    stableId: overrides.stableId ?? overrides.id,
     name: overrides.name ?? `Officer ${overrides.id}`,
     rank: overrides.rank ?? 'Captain',
     level: overrides.level ?? 5,
@@ -26,7 +27,6 @@ function makeOfficer(overrides: Partial<Officer> & { id: string }): Officer {
         stolz: 0.5
       } as Officer['personality']),
     relationships: overrides.relationships ?? [],
-    portraitSeed: overrides.portraitSeed ?? overrides.id,
     status: overrides.status ?? 'ALIVE',
     cycleJoined: overrides.cycleJoined ?? 0,
     cycleDied: overrides.cycleDied,

@@ -1,36 +1,27 @@
-import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
-
-const buildTime = (() => {
-  const date = new Date();
-  const pad = (n: number) => n.toString().padStart(2, '0');
-  return (
-    `${date.getUTCFullYear()}` +
-    pad(date.getUTCMonth() + 1) +
-    pad(date.getUTCDate()) +
-    'T' +
-    pad(date.getUTCHours()) +
-    pad(date.getUTCMinutes()) +
-    pad(date.getUTCSeconds())
-  );
-})();
 
 export default defineConfig({
   base: '/orcs/',
   plugins: [react()],
-  define: {
-    __BUILD_TIME__: JSON.stringify(buildTime)
-  },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
       '@sim': resolve(__dirname, 'src/sim'),
       '@ui': resolve(__dirname, 'src/ui'),
       '@state': resolve(__dirname, 'src/state'),
-      '@core': resolve(__dirname, 'src/core'),
-      '@assets': resolve(__dirname, 'assets')
+      '@core': resolve(__dirname, 'src/core')
     }
   },
-  build: { outDir: 'docs', emptyOutDir: true }
+  build: {
+    assetsInlineLimit: 0,
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js'
+      }
+    }
+  }
 });

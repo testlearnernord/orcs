@@ -5,6 +5,7 @@ import { OfficerToken } from '@ui/components/officerToken';
 
 const officer: Officer = {
   id: 'o1',
+  stableId: 'o1',
   name: 'Gor',
   rank: 'Captain',
   level: 5,
@@ -12,7 +13,6 @@ const officer: Officer = {
   traits: ['Berserker'],
   personality: { gier: 0.2, tapferkeit: 0.8, loyalitaet: 0.6, stolz: 0.4 },
   relationships: [],
-  portraitSeed: 'seed',
   status: 'ALIVE',
   cycleJoined: 0,
   memories: []

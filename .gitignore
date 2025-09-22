@@ -3,3 +3,27 @@ dist/
 .DS_Store
 coverage/
 .vscode/
+
+# block new binaries
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.ico
+*.mp3
+*.wav
+*.ogg
+*.mp4
+*.mov
+*.zip
+*.7z
+*.tar
+*.gz
+*.pdf
+*.psd
+*.ai
+*.woff*
+*.ttf
+*.otf
+*.wasm
