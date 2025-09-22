@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint .",
+    "guard:portraits": "node scripts/guards/portrait-manifest.mjs",
     "ci": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
     "predeploy": "rimraf docs && npm run build",
     "deploy": "cp -r dist/* docs/"
