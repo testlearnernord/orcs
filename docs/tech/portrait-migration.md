@@ -9,7 +9,7 @@ Die Nemesis-Oberfläche setzt ab sofort ausschließlich auf manifest-getriebene 
 | `public/assets/orcs/portraits/manifest.json` | Sprite-Sheet-Quellen auf relative Pfade gestellt; BASE_URL entscheidet nun über das Laufzeit-Präfix. |
 | `src/features/portraits/manifest.ts` | Loader ersetzt: lädt Manifest über `BASE_URL`, normalisiert Gewichte und cached das Ergebnis. |
 | `src/features/portraits/preload.ts` | Preload nutzt `fetch` direkt auf das Manifest und resolved Sprite-Quellen über `BASE_URL`, lädt Images `async/eager`. |
-| `src/ui/Portrait.tsx` | Wrapper zwingt alle Aufrufer durch `OfficerAvatar` und erzeugt einen deterministischen `stableId`-Fallback. |
+| `src/ui/Portrait.tsx` | Wrapper zwingt alle Aufrufer durch `OfficerAvatar` und fällt deterministisch auf `officer.id`, falls `stableId` leer ist. |
 | `src/features/portraits/__tests__/avatar.smoke.test.tsx` | Test-Mock auf relative Pfade gedreht und prüft explizit auf `set_a.webp`/`set_b.webp`. |
 | `scripts/guards/portrait-manifest.mjs` | Guard akzeptiert relative Quellen und prüft weiter auf gültige Raster/Dateien. |
 | `scripts/guards/assert-no-legacy-portraits.mjs` | Neuer Build-Guard, der Repository-Scans auf Altpfade/Legacy-Funktionen erzwingt. |

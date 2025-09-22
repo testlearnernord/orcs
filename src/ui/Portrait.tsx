@@ -15,8 +15,7 @@ export default function Portrait({
   className = '',
   title
 }: Props) {
-  const stableId =
-    officer.stableId ?? `${officer.name}:${officer.createdAt}:${officer.seed}`;
+  const stableId = officer.stableId?.trim() || officer.id;
   return (
     <OfficerAvatar
       officerId={stableId}
