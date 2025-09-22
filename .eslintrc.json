@@ -7,12 +7,7 @@
   },
   "plugins": ["@typescript-eslint"],
   "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
-  "ignorePatterns": [
-    "dist",
-    "docs",
-    "node_modules",
-    "src/assets/orc/generated/*.png"
-  ],
+  "ignorePatterns": ["dist", "docs", "node_modules"],
   "rules": {
     "@typescript-eslint/no-unused-vars": [
       "warn",

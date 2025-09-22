@@ -1,3 +1,30 @@
+## [0.8.1] - 2025-09-22
+
+### Added
+
+- `npm run guard:portraits` überprüft das Portrait-Manifest, Asset-Pfade und blockiert Legacy-Rückfälle.
+
+### Fixed
+
+- CI-Guard-Job schlägt nicht mehr fehl, da der neue Manifest-Check das fehlende Skript ersetzt.
+
+## [0.8.0] - 2025-09-19
+
+### Added
+
+- Manifest-gestützte Portrait-Pipeline mit `<OfficerAvatar>` und Vorab-Ladevorgang für Sprite-Sheets. Siehe [docs/tech/portrait-migration.md](docs/tech/portrait-migration.md).
+- Tests für Hash-Mapping und Avatar-Rendering mit dem neuen Manifest.
+
+### Changed
+
+- Nemesis-Hof nutzt nur noch die Sprite-Sheets `set_a.webp` und `set_b.webp`, Auswahl erfolgt deterministisch über `stableId`.
+- Build-/Deploy-Skripte für GitHub Pages auf `rimraf` + `dist`-Copy umgestellt.
+
+### Removed
+
+- Legacy-Portrait-Generator, Base64-Kataloge und Guard-Skripte gegen alte Orc-Assets.
+- Verwaiste Asset-Pfade (`assets/orc/**`, `src/config/art.ts`, `src/features/portraits/atlas.ts`, `src/sim/portraits.ts`).
+
 ## [0.7.0] - 2025-09-18
 
 ### Fixed

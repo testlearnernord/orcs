@@ -43,6 +43,7 @@ export interface Memory {
 
 export interface Officer {
   id: OrcId;
+  stableId: string;
   name: string;
   rank: Rank;
   level: number;
@@ -50,7 +51,6 @@ export interface Officer {
   traits: Trait[];
   personality: Personality;
   relationships: Relationship[];
-  portraitSeed: string;
   status: OfficerStatus;
   cycleJoined: number;
   cycleDied?: number;

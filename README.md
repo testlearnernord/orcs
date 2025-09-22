@@ -18,6 +18,6 @@ PRs müssen `npm run format:check` (führt `prettier --check` aus) bestehen; bei
 
 ## Portrait-Atlanten
 
-Portrait-Atlanten werden automatisch erkannt, wenn unter `public/assets/orcs/portraits/` Dateien `set_a.webp`, `set_b.webp` liegen.
-Avatare nutzen ausschließlich diese Atlanten; eine Versionsnummer sorgt dafür, dass neue Builds die Browser-Caches aktualisieren.
-CI prüft via `npm run guard:portraits`, dass keine alten Generator-Imports mehr eingebunden werden.
+Aktive Portrait-Sets werden manifest-gesteuert. `public/assets/orcs/portraits/manifest.json` listet alle verfügbaren Sprite-Sheets samt Rasterinformationen. Neue Sets werden ausschließlich über dieses Manifest aktiviert; der Code muss dafür nicht angepasst werden.
+
+Die Komponente `<OfficerAvatar>` schneidet die benötigten Tiles per CSS aus den WebP-Sheets (`set_a.webp`, `set_b.webp`). Beim App-Start werden alle im Manifest gelisteten Sheets vorab geladen, um leere Kartenansichten zu vermeiden.

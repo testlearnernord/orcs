@@ -1,5 +1,4 @@
 * text=auto eol=lf
-*.png binary
-# Prevent large generated assets from cluttering diffs
-public/** -diff
-docs/** -diff
+*.webp binary
+*.png  binary
+*.jpg  binary

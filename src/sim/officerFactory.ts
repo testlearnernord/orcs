@@ -1,4 +1,3 @@
-import { getPortraitSeed } from '@sim/portraits';
 import { RNG } from '@sim/rng';
 import type { Memory, Officer, Personality, Rank, Trait } from '@sim/types';
 
@@ -91,10 +90,11 @@ export function createOfficer(
   const level = rng.int(minLevel, maxLevel);
   const merit = Math.max(10, Math.round(BASE_MERIT[rank] + rng.int(-15, 15)));
   const id = overrides.id ?? `orc_${cycle}_${rng.int(100, 999999)}`;
-  const portraitSeed = overrides.portraitSeed ?? getPortraitSeed(id);
+  const stableId = overrides.stableId ?? id;
 
   return {
     id,
+    stableId,
     name: overrides.name ?? randomName(rng),
     rank,
     level: overrides.level ?? level,
@@ -102,7 +102,6 @@ export function createOfficer(
     traits: overrides.traits ?? randomTraits(rng),
     personality: overrides.personality ?? randomPersonality(rng),
     relationships: overrides.relationships ?? [],
-    portraitSeed,
     status: overrides.status ?? 'ALIVE',
     cycleJoined: overrides.cycleJoined ?? cycle,
     cycleDied: overrides.cycleDied,
