@@ -16,6 +16,9 @@ function resolveInitialMode(): GameMode {
   if (modeParam === 'player' && FLAGS.PLAYER_MODE) {
     return 'player';
   }
+  if (modeParam === 'freeRoam') {
+    return 'freeRoam';
+  }
   return 'spectate';
 }
 
