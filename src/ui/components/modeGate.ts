@@ -112,6 +112,10 @@ export class ModeGate {
       this.syncSelection();
       this.confirmSelection();
     });
+    this.freeRoamButton.addEventListener('click', () => {
+      this.selection = 'freeRoam';
+      this.syncSelection();
+    });
     this.playerButton.addEventListener('click', () => {
       if (!FLAGS.PLAYER_MODE) return;
       this.selection = 'player';

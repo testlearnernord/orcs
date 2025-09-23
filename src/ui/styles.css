@@ -44,6 +44,14 @@
   background-position: center;
 }
 
+.officer-avatar--fallback {
+  background-image: none !important;
+}
+
+.officer-avatar--fallback svg {
+  display: block;
+}
+
 html,
 body {
   height: 100%;
