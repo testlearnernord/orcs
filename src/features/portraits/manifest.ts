@@ -5,6 +5,7 @@ let cache: PortraitManifest | null = null;
 
 export async function loadPortraitManifest(): Promise<PortraitManifest> {
   if (cache) return cache;
+
   const url = resolveWithBase('assets/orcs/portraits/manifest.json');
   const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) {
