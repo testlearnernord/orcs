@@ -77,7 +77,8 @@ describe('OfficerAvatar', () => {
     await waitFor(() => {
       expect(element.getAttribute('data-portrait-set')).toBeTruthy();
       expect(element.style.backgroundImage).toMatch(/set_[ab]\.webp/);
-      expect(element.style.backgroundSize).toMatch(/px/);
+      expect(element.style.backgroundSize).toMatch(/%/);
+      expect(element.style.backgroundPosition).toMatch(/%/);
     });
   });
 });
