@@ -7,7 +7,8 @@ interface ModeGateOptions {
 
 const MODE_LABEL: Record<GameMode, string> = {
   spectate: 'Spectate',
-  player: 'Player'
+  player: 'Player',
+  freeRoam: 'Free Roam (Test)'
 };
 
 export class ModeGate {
@@ -17,9 +18,15 @@ export class ModeGate {
   private readonly startButton: HTMLButtonElement;
   private readonly spectateButton: HTMLButtonElement;
   private readonly playerButton: HTMLButtonElement;
+  private readonly freeRoamButton: HTMLButtonElement;
 
   constructor(options: ModeGateOptions) {
     this.options = options;
+    if (typeof document !== 'undefined') {
+      document
+        .querySelectorAll<HTMLElement>('.mode-gate')
+        .forEach((element) => element.remove());
+    }
     this.element = document.createElement('div');
     this.element.className = 'mode-gate';
     this.element.innerHTML = `
@@ -33,6 +40,10 @@ export class ModeGate {
           <button type="button" data-mode="spectate" class="is-active">
             <span class="mode-gate__mode">Spectate</span>
             <span class="mode-gate__hint">Standardmodus • Keine Spielerfigur</span>
+          </button>
+          <button type="button" data-mode="freeRoam">
+            <span class="mode-gate__mode">Free Roam (Test)</span>
+            <span class="mode-gate__hint">Simulation live auf Karte ansehen</span>
           </button>
           <button type="button" data-mode="player" ${
             FLAGS.PLAYER_MODE ? '' : 'class="is-disabled" disabled'
@@ -56,6 +67,9 @@ export class ModeGate {
     ) as HTMLButtonElement;
     this.playerButton = this.element.querySelector(
       'button[data-mode="player"]'
+    ) as HTMLButtonElement;
+    this.freeRoamButton = this.element.querySelector(
+      'button[data-mode="freeRoam"]'
     ) as HTMLButtonElement;
     this.registerEvents();
     this.close();
@@ -87,18 +101,22 @@ export class ModeGate {
     this.element
       .querySelector('.mode-gate__backdrop')
       ?.addEventListener('click', () => this.close());
-    this.startButton.addEventListener('click', () => {
-      this.options.onConfirm(this.selection);
-      this.close();
-    });
+    this.startButton.addEventListener('click', () => this.confirmSelection());
     this.spectateButton.addEventListener('click', () => {
       this.selection = 'spectate';
       this.syncSelection();
+      this.confirmSelection();
+    });
+    this.freeRoamButton.addEventListener('click', () => {
+      this.selection = 'freeRoam';
+      this.syncSelection();
+      this.confirmSelection();
     });
     this.playerButton.addEventListener('click', () => {
       if (!FLAGS.PLAYER_MODE) return;
       this.selection = 'player';
       this.syncSelection();
+      this.confirmSelection();
     });
     if (!FLAGS.PLAYER_MODE) {
       this.playerButton.title = 'Im Spectate-Mode noch nicht verfügbar.';
@@ -111,10 +129,19 @@ export class ModeGate {
     });
   }
 
+  private confirmSelection(): void {
+    this.options.onConfirm(this.selection);
+    this.close();
+  }
+
   private syncSelection(): void {
     this.spectateButton.classList.toggle(
       'is-active',
       this.selection === 'spectate'
+    );
+    this.freeRoamButton.classList.toggle(
+      'is-active',
+      this.selection === 'freeRoam'
     );
     const playerActive = this.selection === 'player';
     this.playerButton.classList.toggle('is-active', playerActive);
