@@ -17,8 +17,8 @@
     "guard:portraits:legacy": "node scripts/guards/assert-no-legacy-portraits.mjs",
     "guard:portraits:manifest": "node scripts/guards/portrait-manifest.mjs",
     "ci": "npm run guard:portraits && npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
-    "predeploy": "rimraf docs && npm run build",
-    "deploy": "mkdir -p docs && cp -r dist/* docs/"
+    "predeploy": "rimraf docs && npm run build && mkdir -p docs && cp -r dist/* docs/ && node scripts/guards/ensure-portrait-dist.mjs",
+    "deploy": "cp -r dist/* docs/"
   },
   "dependencies": {
     "phaser": "^3.80.1",
