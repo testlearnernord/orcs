@@ -1,6 +1,6 @@
 import { EventBus } from '@state/eventBus';
 
-export type GameMode = 'spectate' | 'player';
+export type GameMode = 'spectate' | 'player' | 'freeRoam';
 
 export interface UIModeState {
   mode: GameMode;
@@ -12,8 +12,8 @@ interface UIModeEvents extends Record<string, UIModeState> {
 }
 
 function normalizeState(state: UIModeState): UIModeState {
-  if (state.mode === 'spectate') {
-    return { mode: 'spectate', playerId: null };
+  if (state.mode !== 'player') {
+    return { mode: state.mode, playerId: null };
   }
   return state;
 }

@@ -116,7 +116,7 @@ export class WarcallModal {
       const disabled = spectateDisabled || resolved;
       button.disabled = disabled;
       if (spectateDisabled) {
-        button.title = 'Im Spectate-Mode nicht verfügbar.';
+        button.title = 'Im aktuellen Modus nicht verfügbar.';
         button.classList.add('is-disabled');
       } else {
         button.classList.remove('is-disabled');

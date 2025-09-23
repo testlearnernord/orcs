@@ -7,7 +7,8 @@ interface ModeGateOptions {
 
 const MODE_LABEL: Record<GameMode, string> = {
   spectate: 'Spectate',
-  player: 'Player'
+  player: 'Player',
+  freeRoam: 'Free Roam (Test)'
 };
 
 export class ModeGate {
@@ -17,6 +18,7 @@ export class ModeGate {
   private readonly startButton: HTMLButtonElement;
   private readonly spectateButton: HTMLButtonElement;
   private readonly playerButton: HTMLButtonElement;
+  private readonly freeRoamButton: HTMLButtonElement;
 
   constructor(options: ModeGateOptions) {
     this.options = options;
@@ -33,6 +35,10 @@ export class ModeGate {
           <button type="button" data-mode="spectate" class="is-active">
             <span class="mode-gate__mode">Spectate</span>
             <span class="mode-gate__hint">Standardmodus • Keine Spielerfigur</span>
+          </button>
+          <button type="button" data-mode="freeRoam">
+            <span class="mode-gate__mode">Free Roam (Test)</span>
+            <span class="mode-gate__hint">Simulation live auf Karte ansehen</span>
           </button>
           <button type="button" data-mode="player" ${
             FLAGS.PLAYER_MODE ? '' : 'class="is-disabled" disabled'
@@ -56,6 +62,9 @@ export class ModeGate {
     ) as HTMLButtonElement;
     this.playerButton = this.element.querySelector(
       'button[data-mode="player"]'
+    ) as HTMLButtonElement;
+    this.freeRoamButton = this.element.querySelector(
+      'button[data-mode="freeRoam"]'
     ) as HTMLButtonElement;
     this.registerEvents();
     this.close();
@@ -95,6 +104,10 @@ export class ModeGate {
       this.selection = 'spectate';
       this.syncSelection();
     });
+    this.freeRoamButton.addEventListener('click', () => {
+      this.selection = 'freeRoam';
+      this.syncSelection();
+    });
     this.playerButton.addEventListener('click', () => {
       if (!FLAGS.PLAYER_MODE) return;
       this.selection = 'player';
@@ -115,6 +128,10 @@ export class ModeGate {
     this.spectateButton.classList.toggle(
       'is-active',
       this.selection === 'spectate'
+    );
+    this.freeRoamButton.classList.toggle(
+      'is-active',
+      this.selection === 'freeRoam'
     );
     const playerActive = this.selection === 'player';
     this.playerButton.classList.toggle('is-active', playerActive);
