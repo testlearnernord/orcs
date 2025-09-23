@@ -2,6 +2,20 @@ import React from 'react';
 
 import { loadPortraitManifest } from './manifest';
 import { chooseSetAndIndex } from './mapping';
+import { loadPortraitAtlases } from './portrait-atlas';
+
+type FallbackReason = 'legacy' | 'missing';
+
+function detectArtMode(): 'atlases' | 'legacy' {
+  if (typeof window === 'undefined') return 'atlases';
+  try {
+    return window.localStorage?.getItem('art.active') === 'legacy'
+      ? 'legacy'
+      : 'atlases';
+  } catch {
+    return 'atlases';
+  }
+}
 
 export type OfficerAvatarProps = {
   officerId: string;
@@ -54,18 +68,46 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
     null
   );
   const [activeSet, setActiveSet] = React.useState<string | null>(null);
+  const [artMode, setArtMode] = React.useState<'atlases' | 'legacy'>(() =>
+    detectArtMode()
+  );
+  const [fallbackReason, setFallbackReason] =
+    React.useState<FallbackReason | null>(null);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const syncMode = () => setArtMode(detectArtMode());
+    syncMode();
+    window.addEventListener('storage', syncMode);
+    return () => {
+      window.removeEventListener('storage', syncMode);
+    };
+  }, []);
 
   React.useEffect(() => {
     let alive = true;
     (async () => {
       try {
+        if (artMode === 'legacy') {
+          if (alive) {
+            setTileStyle(null);
+            setActiveSet(null);
+            setFallbackReason('legacy');
+          }
+          return;
+        }
         const manifest = await loadPortraitManifest();
         const sets = requireTag
           ? manifest.sets.filter((s) => (s.tags || []).includes(requireTag))
           : manifest.sets;
         if (!sets.length)
           throw new Error('No portrait sets available after filtering');
-        const { set, col, row } = chooseSetAndIndex(id, sets);
+        const { ok } = await loadPortraitAtlases(sets.map((s) => s.src));
+        const okSetSrc = new Set(ok);
+        const availableSets = sets.filter((set) => okSetSrc.has(set.src));
+        if (!availableSets.length)
+          throw new Error('No portrait atlases available');
+        const { set, col, row } = chooseSetAndIndex(id, availableSets);
         const cols = Math.max(1, set.cols);
         const rows = Math.max(1, set.rows);
         const colRatio = cols > 1 ? col / (cols - 1) : 0;
@@ -82,24 +124,81 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         if (alive) {
           setTileStyle(css);
           setActiveSet(set.id);
+          setFallbackReason(null);
         }
       } catch (err) {
         console.error('[PORTRAITS] avatar init failed', err);
         if (alive) {
           setTileStyle(null);
           setActiveSet(null);
+          setFallbackReason('missing');
         }
       }
     })();
     return () => {
       alive = false;
     };
-  }, [id, requireTag, size]);
+  }, [artMode, id, requireTag, size]);
 
   const combinedStyle = React.useMemo(
     () => mergeStyles(tileStyle, size, style),
     [tileStyle, size, style]
   );
+
+  if (fallbackReason) {
+    const baseLabel = title ?? id;
+    const fallbackStyle = mergeStyles(
+      {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(17, 24, 39, 0.6)',
+        border: '1px dashed rgba(148, 163, 184, 0.45)',
+        color: '#a3b5d9'
+      },
+      size,
+      style
+    );
+    const tooltip =
+      fallbackReason === 'missing' && import.meta.env.DEV
+        ? `${baseLabel} — Portrait fehlte, siehe Konsole.`
+        : fallbackReason
+          ? baseLabel
+          : title;
+    const svgSize = Math.round(size * 0.62);
+    return (
+      <div
+        role="img"
+        aria-label={baseLabel}
+        title={tooltip}
+        data-art={fallbackReason === 'legacy' ? 'legacy' : 'fallback'}
+        className={getClassName(
+          'officer-avatar officer-avatar--fallback',
+          className
+        )}
+        style={fallbackStyle}
+      >
+        <svg
+          width={svgSize}
+          height={svgSize}
+          viewBox="0 0 128 128"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <circle cx="64" cy="44" r="28" fill="rgba(148,163,184,0.4)" />
+          <path
+            d="M24 116c0-22.091 17.909-40 40-40s40 17.909 40 40"
+            fill="rgba(148,163,184,0.4)"
+          />
+          <circle cx="64" cy="44" r="18" fill="rgba(226,232,240,0.8)" />
+          <path
+            d="M40 116c2-16 12-28 24-28s22 12 24 28"
+            fill="rgba(226,232,240,0.8)"
+          />
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <div

@@ -21,3 +21,5 @@ PRs müssen `npm run format:check` (führt `prettier --check` aus) bestehen; bei
 Aktive Portrait-Sets werden manifest-gesteuert. `public/assets/orcs/portraits/manifest.json` listet alle verfügbaren Sprite-Sheets samt Rasterinformationen. Neue Sets werden ausschließlich über dieses Manifest aktiviert; der Code muss dafür nicht angepasst werden.
 
 Die Komponente `<OfficerAvatar>` schneidet die benötigten Tiles per CSS aus den WebP-Sheets (`set_a.webp`, `set_b.webp`). Beim App-Start werden alle im Manifest gelisteten Sheets vorab geladen, um leere Kartenansichten zu vermeiden.
+
+> **Hinweis:** Für statische Deployments auf GitHub Pages muss jede Asset-URL mit `import.meta.env.BASE_URL` zusammengesetzt werden. Nur so landen Requests auf `https://<user>.github.io/orcs/...` statt auf der falschen Root-URL. Siehe [GitHub Pages – Project Sites](https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages#project-sites).

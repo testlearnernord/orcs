@@ -29,3 +29,5 @@ jobs:
             exit 1
           fi
       - run: npm run build
+      - name: Verify portrait atlases copied
+        run: node scripts/check-portraits.mjs
