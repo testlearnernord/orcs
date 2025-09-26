@@ -22,6 +22,11 @@ export class ModeGate {
 
   constructor(options: ModeGateOptions) {
     this.options = options;
+    if (typeof document !== 'undefined') {
+      document
+        .querySelectorAll<HTMLElement>('.mode-gate')
+        .forEach((element) => element.remove());
+    }
     this.element = document.createElement('div');
     this.element.className = 'mode-gate';
     this.element.innerHTML = `
@@ -96,13 +101,16 @@ export class ModeGate {
     this.element
       .querySelector('.mode-gate__backdrop')
       ?.addEventListener('click', () => this.close());
-    this.startButton.addEventListener('click', () => {
-      this.options.onConfirm(this.selection);
-      this.close();
-    });
+    this.startButton.addEventListener('click', () => this.confirmSelection());
     this.spectateButton.addEventListener('click', () => {
       this.selection = 'spectate';
       this.syncSelection();
+      this.confirmSelection();
+    });
+    this.freeRoamButton.addEventListener('click', () => {
+      this.selection = 'freeRoam';
+      this.syncSelection();
+      this.confirmSelection();
     });
     this.freeRoamButton.addEventListener('click', () => {
       this.selection = 'freeRoam';
@@ -112,6 +120,7 @@ export class ModeGate {
       if (!FLAGS.PLAYER_MODE) return;
       this.selection = 'player';
       this.syncSelection();
+      this.confirmSelection();
     });
     if (!FLAGS.PLAYER_MODE) {
       this.playerButton.title = 'Im Spectate-Mode noch nicht verfügbar.';
@@ -122,6 +131,11 @@ export class ModeGate {
         this.close();
       }
     });
+  }
+
+  private confirmSelection(): void {
+    this.options.onConfirm(this.selection);
+    this.close();
   }
 
   private syncSelection(): void {
