@@ -297,6 +297,7 @@ export class NemesisUI {
       this.freeRoamRoot = createRoot(this.freeRoamContainer);
     }
     this.freeRoamContainer.hidden = false;
+    this.freeRoamContainer.removeAttribute('aria-hidden');
     this.freeRoamRoot.render(
       createElement(FreeRoamView, {
         store: this.store,
@@ -308,6 +309,7 @@ export class NemesisUI {
   private closeFreeRoam(): void {
     if (this.freeRoamContainer) {
       this.freeRoamContainer.hidden = true;
+      this.freeRoamContainer.setAttribute('aria-hidden', 'true');
     }
     if (this.freeRoamRoot) {
       this.freeRoamRoot.unmount();
@@ -343,6 +345,7 @@ export class NemesisUI {
     this.freeRoamContainer = document.createElement('div');
     this.freeRoamContainer.className = 'free-roam-shell';
     this.freeRoamContainer.hidden = true;
+    this.freeRoamContainer.setAttribute('aria-hidden', 'true');
     root.appendChild(this.freeRoamContainer);
     this.highlightPortal.attach(document.body);
 

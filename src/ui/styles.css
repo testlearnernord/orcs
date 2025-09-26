@@ -1773,6 +1773,8 @@ button:disabled {
 /* Free Roam */
 .free-roam-shell {
   height: 100%;
+  width: 100%;
+  display: flex;
 }
 
 .free-roam {
