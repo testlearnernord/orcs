@@ -5,9 +5,12 @@ import type {
   WarcallResolution,
   WorldState
 } from '@sim/types';
+import { createElement } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
 import type { Highlight } from '@state/cycleDigest';
 import type { GameStore } from '@state/store';
 import type { GameMode, UIModeState, UIModeStore } from '@state/ui/mode';
+import { FreeRoamView } from '@/features/freeRoam/FreeRoamView';
 import {
   selectWarcallsByStatus,
   statusOf,
@@ -39,7 +42,6 @@ import {
   initHotkeys,
   registerHotkey
 } from '@core/hotkeys';
-import { ModeGate } from '@ui/components/modeGate';
 import { HighlightStore } from '@state/ui/highlights';
 import {
   lensMaskForFilters,
@@ -77,11 +79,14 @@ const SORT_OPTIONS: { value: UIFilters['sortBy']; label: string }[] = [
 
 export class NemesisUI {
   private root: HTMLElement | null = null;
+  private appRoot: HTMLDivElement | null = null;
   private ranksEl: HTMLElement | null = null;
   private feedEl: HTMLElement | null = null;
   private warcallsHost: HTMLElement | null = null;
   private modeIndicator: HTMLElement | null = null;
   private warcallButton: HTMLButtonElement | null = null;
+  private freeRoamContainer: HTMLDivElement | null = null;
+  private freeRoamRoot: Root | null = null;
   private readonly cards = new Map<string, OfficerCard>();
   private readonly rankContainers = new Map<Rank, HTMLElement>();
   private readonly filters = new UIFilterStore();
@@ -106,7 +111,6 @@ export class NemesisUI {
   private completedWarcalls: WarcallEntry[] = [];
   private warcallTab: WarcallStatus = 'active';
   private readonly hotkeyHints = new Set<string>();
-  private readonly modeGate: ModeGate;
   private modeState: UIModeState;
   private digestHistoryEl: HTMLElement | null = null;
   private feedBodyEl: HTMLElement | null = null;
@@ -166,9 +170,6 @@ export class NemesisUI {
     });
     this.renderDigestHistory(this.highlights.getState().history);
 
-    this.modeGate = new ModeGate({
-      onConfirm: (mode) => this.handleModeConfirm(mode)
-    });
     this.modeStore.on('mode:changed', (next) => this.handleModeChange(next));
     this.syncModeUI();
 
@@ -206,10 +207,6 @@ export class NemesisUI {
     });
   }
 
-  private handleModeConfirm(mode: GameMode): void {
-    this.modeStore.setMode(mode);
-  }
-
   private handleModeChange(state: UIModeState): void {
     this.modeState = state;
     this.syncModeUI();
@@ -228,6 +225,7 @@ export class NemesisUI {
     this.applyModeToControls();
     this.syncModeIndicator();
     this.syncModeAttributes();
+    this.syncModeLayout();
     this.warcallModal.setMode(this.modeState.mode);
   }
 
@@ -236,10 +234,11 @@ export class NemesisUI {
     const disabled = this.modeState.mode !== 'player';
     this.warcallButton.disabled = disabled;
     if (disabled) {
-      this.warcallButton.setAttribute(
-        'title',
-        'Im Spectate-Mode nicht verfügbar.'
-      );
+      const reason =
+        this.modeState.mode === 'freeRoam'
+          ? 'Im Free-Roam-Modus nicht verfügbar.'
+          : 'Im Spectate-Mode nicht verfügbar.';
+      this.warcallButton.setAttribute('title', reason);
     } else {
       this.warcallButton.removeAttribute('title');
     }
@@ -247,10 +246,12 @@ export class NemesisUI {
 
   private syncModeIndicator(): void {
     if (!this.modeIndicator) return;
-    const label =
-      this.modeState.mode === 'player'
-        ? 'Player-Modus (Beta)'
-        : 'Spectate-Modus';
+    let label = 'Spectate-Modus';
+    if (this.modeState.mode === 'player') {
+      label = 'Player-Modus (Beta)';
+    } else if (this.modeState.mode === 'freeRoam') {
+      label = 'Free Roam (Test)';
+    }
     this.modeIndicator.textContent = label;
   }
 
@@ -263,9 +264,54 @@ export class NemesisUI {
     }
   }
 
+  private syncModeLayout(): void {
+    const isFreeRoam = this.modeState.mode === 'freeRoam';
+    if (this.appRoot) {
+      if (isFreeRoam) {
+        this.appRoot.setAttribute('hidden', 'true');
+        this.appRoot.setAttribute('aria-hidden', 'true');
+      } else {
+        this.appRoot.removeAttribute('hidden');
+        this.appRoot.removeAttribute('aria-hidden');
+      }
+    }
+    if (isFreeRoam) {
+      this.openFreeRoam();
+    } else {
+      this.closeFreeRoam();
+    }
+  }
+
+  private openFreeRoam(): void {
+    if (!this.freeRoamContainer) return;
+    if (!this.freeRoamRoot) {
+      this.freeRoamRoot = createRoot(this.freeRoamContainer);
+    }
+    this.freeRoamContainer.hidden = false;
+    this.freeRoamContainer.removeAttribute('aria-hidden');
+    this.freeRoamRoot.render(
+      createElement(FreeRoamView, {
+        store: this.store,
+        modeStore: this.modeStore
+      })
+    );
+  }
+
+  private closeFreeRoam(): void {
+    if (this.freeRoamContainer) {
+      this.freeRoamContainer.hidden = true;
+      this.freeRoamContainer.setAttribute('aria-hidden', 'true');
+    }
+    if (this.freeRoamRoot) {
+      this.freeRoamRoot.unmount();
+      this.freeRoamRoot = null;
+    }
+  }
+
   mount(root: HTMLElement): void {
     this.root = root;
     root.innerHTML = '';
+    root.classList.add('nemesis-root');
     const app = document.createElement('div');
     app.className = 'nemesis-app';
     app.innerHTML = `
@@ -286,7 +332,13 @@ export class NemesisUI {
         <aside class="feed" id="feed"></aside>
       </main>
     `;
+    this.appRoot = app;
     root.appendChild(app);
+    this.freeRoamContainer = document.createElement('div');
+    this.freeRoamContainer.className = 'free-roam-shell';
+    this.freeRoamContainer.hidden = true;
+    this.freeRoamContainer.setAttribute('aria-hidden', 'true');
+    root.appendChild(this.freeRoamContainer);
     this.highlightPortal.attach(document.body);
 
     this.ranksEl = app.querySelector('#ranks');
@@ -335,7 +387,6 @@ export class NemesisUI {
 
     initHotkeys();
     this.registerHotkeys();
-    this.modeGate.open(this.modeState.mode);
   }
 
   private prepareRankView(): void {
@@ -500,7 +551,11 @@ export class NemesisUI {
 
   private scheduleWarcall(): void {
     if (this.modeState.mode !== 'player') {
-      this.rememberHint('n-disabled', 'Im Spectate-Mode nicht verfügbar.');
+      const message =
+        this.modeState.mode === 'freeRoam'
+          ? 'Im Free-Roam-Modus nicht verfügbar.'
+          : 'Im Spectate-Mode nicht verfügbar.';
+      this.rememberHint('n-disabled', message);
       return;
     }
     this.store.scheduleWarcall();

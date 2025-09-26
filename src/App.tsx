@@ -4,6 +4,7 @@ import { GameStore } from '@state/store';
 import { FLAGS } from '@state/flags';
 import { UIModeStore, type GameMode } from '@state/ui/mode';
 import { NemesisUI } from '@ui/root';
+import { ModeGateOverlay } from '@ui/components/modeGate';
 import '@ui/styles.css';
 
 const store = new GameStore('nemesis-seed');
@@ -15,6 +16,9 @@ function resolveInitialMode(): GameMode {
   const modeParam = params.get('mode');
   if (modeParam === 'player' && FLAGS.PLAYER_MODE) {
     return 'player';
+  }
+  if (modeParam === 'freeRoam') {
+    return 'freeRoam';
   }
   return 'spectate';
 }
@@ -81,5 +85,10 @@ export default function App() {
     };
   }, []);
 
-  return <div ref={hostRef} />;
+  return (
+    <>
+      <div ref={hostRef} />
+      <ModeGateOverlay modeStore={uiMode} initialMode={initialMode} />
+    </>
+  );
 }
