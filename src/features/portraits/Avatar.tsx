@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { loadPortraitManifest } from './manifest';
 import { chooseSetAndIndex } from './mapping';
-import { loadPortraitAtlases } from './portrait-atlas';
+import { loadPortraitAtlases, type PortraitAtlasMap } from './portrait-atlas';
+import { PORTRAIT_SET_DEFINITIONS } from '@/ui/portraits/config';
+import type { PortraitSet } from './types';
 
 type FallbackReason = 'legacy' | 'missing';
 
@@ -25,6 +26,33 @@ export type OfficerAvatarProps = {
   requireTag?: string;
   style?: React.CSSProperties;
 };
+
+function filterDefinitions(tag?: string) {
+  if (!tag) return PORTRAIT_SET_DEFINITIONS;
+  return PORTRAIT_SET_DEFINITIONS.filter((definition) =>
+    definition.tags.includes(tag)
+  );
+}
+
+function deriveAvailableSets(
+  definitions: typeof PORTRAIT_SET_DEFINITIONS,
+  atlases: PortraitAtlasMap
+): PortraitSet[] {
+  const sets: PortraitSet[] = [];
+  for (const definition of definitions) {
+    const atlas = atlases.get(definition.id);
+    if (!atlas) continue;
+    sets.push({
+      id: definition.id,
+      src: atlas.url,
+      cols: definition.cols,
+      rows: definition.rows,
+      weight: definition.weight,
+      tags: [...definition.tags]
+    });
+  }
+  return sets;
+}
 
 function getClassName(base: string, extra?: string): string {
   return [base, extra].filter(Boolean).join(' ');
@@ -96,15 +124,11 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
           }
           return;
         }
-        const manifest = await loadPortraitManifest();
-        const sets = requireTag
-          ? manifest.sets.filter((s) => (s.tags || []).includes(requireTag))
-          : manifest.sets;
-        if (!sets.length)
+        const definitions = filterDefinitions(requireTag);
+        if (!definitions.length)
           throw new Error('No portrait sets available after filtering');
-        const { ok } = await loadPortraitAtlases(sets.map((s) => s.src));
-        const okSetSrc = new Set(ok);
-        const availableSets = sets.filter((set) => okSetSrc.has(set.src));
+        const { atlases } = await loadPortraitAtlases();
+        const availableSets = deriveAvailableSets(definitions, atlases);
         if (!availableSets.length)
           throw new Error('No portrait atlases available');
         const { set, col, row } = chooseSetAndIndex(id, availableSets);
@@ -127,7 +151,9 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
           setFallbackReason(null);
         }
       } catch (err) {
-        console.error('[PORTRAITS] avatar init failed', err);
+        if (import.meta.env.DEV) {
+          console.warn('[portraits] avatar init failed', err);
+        }
         if (alive) {
           setTileStyle(null);
           setActiveSet(null);

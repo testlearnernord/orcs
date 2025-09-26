@@ -13,6 +13,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@': resolve(__dirname, './src'),
       '@sim': resolve(__dirname, './src/sim'),
       '@ui': resolve(__dirname, './src/ui'),
       '@state': resolve(__dirname, './src/state'),

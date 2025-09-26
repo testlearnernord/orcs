@@ -2,17 +2,17 @@
 
 ### Added
 
-- `npm run guard:portraits` überprüft das Portrait-Manifest, Asset-Pfade und blockiert Legacy-Rückfälle.
+- `npm run guard:portraits` kontrolliert die neue Portrait-Konfiguration (`src/ui/portraits/config.ts`) und blockiert Legacy-Rückfälle.
 
 ### Fixed
 
-- CI-Guard-Job schlägt nicht mehr fehl, da der neue Manifest-Check das fehlende Skript ersetzt.
+- GitHub-Pages-Build lädt Portrait-Atlanten zuverlässig (Fallback auf raw.githubusercontent.com) und protokolliert Ladeversuche nur noch einmal.
 
 ## [0.8.0] - 2025-09-19
 
 ### Added
 
-- Manifest-gestützte Portrait-Pipeline mit `<OfficerAvatar>` und Vorab-Ladevorgang für Sprite-Sheets. Siehe [docs/tech/portrait-migration.md](docs/tech/portrait-migration.md).
+- Manifest-gestützte Portrait-Pipeline mit `<OfficerAvatar>` und Vorab-Ladevorgang für Sprite-Sheets. Siehe [notes/portrait-migration.md](notes/portrait-migration.md).
 - Tests für Hash-Mapping und Avatar-Rendering mit dem neuen Manifest.
 
 ### Changed
