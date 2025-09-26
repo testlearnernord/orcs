@@ -29,6 +29,6 @@ coverage/
 *.otf
 *.wasm
 
-# allow committed portrait atlases for public build + docs output
-!public/assets/orcs/portraits/*.webp
-!docs/assets/orcs/portraits/*.webp
+# allow committed portrait atlases in source and generated docs output
+!src/assets/orcs/portraits/*.webp
+!docs/assets/**/*.webp
