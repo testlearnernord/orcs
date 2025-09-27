@@ -13,14 +13,20 @@ export interface MainMenuEvents {
 
 export class MainMenu {
   private container: HTMLElement | null = null;
-  private listeners: Map<keyof MainMenuEvents, Array<(mode: MenuMode) => void>> = new Map();
+  private listeners: Map<
+    keyof MainMenuEvents,
+    Array<(mode: MenuMode) => void>
+  > = new Map();
   private audioManager: AudioManager;
 
   constructor(audioManager: AudioManager) {
     this.audioManager = audioManager;
   }
 
-  on<K extends keyof MainMenuEvents>(event: K, handler: (mode: MenuMode) => void): void {
+  on<K extends keyof MainMenuEvents>(
+    event: K,
+    handler: (mode: MenuMode) => void
+  ): void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, []);
     }
@@ -30,14 +36,14 @@ export class MainMenu {
   private emit<K extends keyof MainMenuEvents>(event: K, mode: MenuMode): void {
     const handlers = this.listeners.get(event);
     if (handlers) {
-      handlers.forEach(handler => handler(mode));
+      handlers.forEach((handler) => handler(mode));
     }
   }
 
   mount(parent: HTMLElement): void {
     this.container = document.createElement('div');
     this.container.className = 'main-menu-overlay';
-    
+
     this.container.innerHTML = `
       <div class="main-menu">
         <div class="main-menu-background">
@@ -66,10 +72,14 @@ export class MainMenu {
     `;
 
     // Add event listeners
-    const buttons = this.container.querySelectorAll('.menu-option:not(.menu-option-disabled)');
-    buttons.forEach(button => {
+    const buttons = this.container.querySelectorAll(
+      '.menu-option:not(.menu-option-disabled)'
+    );
+    buttons.forEach((button) => {
       button.addEventListener('click', (event) => {
-        const mode = (event.currentTarget as HTMLElement).getAttribute('data-mode') as MenuMode;
+        const mode = (event.currentTarget as HTMLElement).getAttribute(
+          'data-mode'
+        ) as MenuMode;
         if (mode) {
           this.selectMode(mode);
         }
@@ -77,7 +87,7 @@ export class MainMenu {
     });
 
     parent.appendChild(this.container);
-    
+
     // Initialize audio for main menu
     this.initializeMenuAudio();
   }
@@ -88,10 +98,10 @@ export class MainMenu {
       if (this.audioManager.isAudioAvailable()) {
         // Set Whirlpool as current track (index 1)
         this.audioManager.setTrack(1);
-        
+
         // Set volume to 10%
         this.audioManager.setVolume(0.1);
-        
+
         // Attempt to auto-start music (may be blocked by browser)
         await this.audioManager.play();
       }

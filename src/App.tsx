@@ -92,24 +92,24 @@ export default function App() {
         mainMenuRef.current.destroy();
         mainMenuRef.current = null;
       }
-      
+
       // Clear host
       host.innerHTML = '';
-      
+
       // Show main menu
       const menu = new MainMenu(audioManager);
       menu.on('menu:select', (mode: MenuMode) => {
         // Map MenuMode to GameMode
         const gameMode: GameMode = mode as GameMode;
-        
+
         // Set the mode and sync URL
         uiMode.setMode(gameMode);
         syncUrl(gameMode);
-        
+
         // Hide main menu and show game
         setShowMainMenu(false);
       });
-      
+
       menu.mount(host);
       mainMenuRef.current = menu;
     } else {
@@ -118,10 +118,10 @@ export default function App() {
         mainMenuRef.current.destroy();
         mainMenuRef.current = null;
       }
-      
+
       // Clear host
       host.innerHTML = '';
-      
+
       // Show game UI
       ui.mount(host);
     }

@@ -2584,15 +2584,15 @@ button:disabled {
   color: var(--text-muted);
 }
 
-.menu-option[data-mode="spectate"] .option-title {
+.menu-option[data-mode='spectate'] .option-title {
   color: var(--accent);
 }
 
-.menu-option[data-mode="player"] .option-title {
+.menu-option[data-mode='player'] .option-title {
   color: var(--ring-player);
 }
 
-.menu-option[data-mode="freeRoam"] .option-title {
+.menu-option[data-mode='freeRoam'] .option-title {
   color: var(--ring-scout);
 }
 
@@ -2604,8 +2604,21 @@ button:disabled {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    radial-gradient(circle at 25% 25%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(56, 189, 248, 0.1) 0%, transparent 50%),
-    linear-gradient(45deg, transparent 30%, rgba(19, 28, 43, 0.2) 50%, transparent 70%);
+  background-image:
+    radial-gradient(
+      circle at 25% 25%,
+      rgba(212, 175, 55, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 75% 75%,
+      rgba(56, 189, 248, 0.1) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      45deg,
+      transparent 30%,
+      rgba(19, 28, 43, 0.2) 50%,
+      transparent 70%
+    );
 }
