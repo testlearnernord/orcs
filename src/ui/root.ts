@@ -20,7 +20,7 @@ import {
 import { FeedView } from '@ui/components/feed';
 import { GraveyardPanel } from '@ui/components/graveyard';
 import { OfficerCard } from '@ui/components/officerCard';
-import { OfficerTooltip } from '@ui/components/officerTooltip';
+import { DetailsPanel } from '@ui/components/detailsPanel';
 import {
   buildRelationEdges,
   RelationsOverlay
@@ -36,7 +36,7 @@ import { HelpOverlay } from '@ui/components/helpOverlay';
 import { Toast } from '@ui/components/toast';
 import { CycleSweep } from '@ui/components/cycleSweep';
 import { HighlightPortal } from '@ui/components/highlightPortal';
-import { CtrlIndicator } from '@ui/components/ctrlIndicator';
+
 import {
   bindOnce,
   getRegisteredHotkeys,
@@ -102,7 +102,7 @@ export class NemesisUI {
   private relations: RelationsOverlay | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private lastEdges: RelationEdge[] = [];
-  private readonly tooltip: OfficerTooltip;
+  private readonly detailsPanel: DetailsPanel;
   private readonly warcallDock: WarcallsDock;
   private readonly warcallModal: WarcallModal;
   private readonly helpOverlay = new HelpOverlay();
@@ -110,7 +110,7 @@ export class NemesisUI {
   private readonly cycleSweep = new CycleSweep();
   private readonly highlights = new HighlightStore();
   private readonly highlightPortal: HighlightPortal;
-  private readonly ctrlIndicator = new CtrlIndicator();
+
   private filterBarEl: HTMLElement | null = null;
   private rankListEl: HTMLElement | null = null;
   private sortSelect: HTMLSelectElement | null = null;
@@ -135,16 +135,8 @@ export class NemesisUI {
     this.syncOfficerIndex(state.officers);
     this.graveyard = new GraveyardPanel(state.graveyard);
 
-    this.tooltip = new OfficerTooltip({
-      resolveName: (id) => this.officerIndex.get(id)?.name,
-      onInvite: (officer) =>
-        this.toast.show(`${officer.name} fordert Verstärkung an.`),
-      onMarkRival: (officer) =>
-        this.toast.show(`${officer.name} wurde als Rivale vorgemerkt.`),
-      onOpenDetails: (officer) =>
-        this.toast.show(
-          `Details für ${officer.name} folgen in einem späteren Build.`
-        )
+    this.detailsPanel = new DetailsPanel({
+      resolveName: (id) => this.officerIndex.get(id)?.name
     });
 
     this.warcallDock = new WarcallsDock({
@@ -425,6 +417,9 @@ export class NemesisUI {
     if (audioContainer && this.audioControls) {
       audioContainer.appendChild(this.audioControls.getElement());
     }
+
+    // Mount details panel at the bottom of the page
+    this.detailsPanel.mount(document.body);
 
     this.registerUIEvents(app);
     this.syncModeUI();
@@ -747,11 +742,7 @@ export class NemesisUI {
           existing.playFlip();
         } else {
           const card = new OfficerCard(officer, {
-            tooltip: this.tooltip,
-            onOpenDetails: () =>
-              this.toast.show(
-                `Details für ${officer.name} werden zukünftig erweitert.`
-              )
+            onOfficerClick: (officer) => this.detailsPanel.showOfficerDetails(officer)
           });
           this.cards.set(officer.id, card);
           grid.appendChild(card.element);
@@ -895,6 +886,9 @@ export class NemesisUI {
     // Clean up audio resources
     this.audioManager.destroy();
     this.audioControls?.destroy();
+
+    // Clean up details panel
+    this.detailsPanel.destroy();
 
     // Clean up other resources
     this.resizeObserver?.disconnect();
