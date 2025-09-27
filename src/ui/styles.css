@@ -1933,6 +1933,51 @@ button:disabled {
   z-index: 3;
 }
 
+.free-roam__marker--player {
+  z-index: 5;
+}
+
+.free-roam__marker--player .free-roam__marker-icon {
+  background: rgba(16, 185, 129, 0.95);
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  font-size: 1.1rem;
+  animation: playerPulse 2s infinite;
+}
+
+@keyframes playerPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 10px 18px rgba(8, 13, 23, 0.5), 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 12px 22px rgba(8, 13, 23, 0.6), 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+}
+
+.free-roam__player-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.free-roam__player-info p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.free-roam__controls {
+  padding: var(--spacing-xs);
+  background: rgba(30, 41, 59, 0.4);
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+}
+
+.free-roam__controls small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
 .free-roam__marker-avatar {
   border-radius: 14px;
   border: 2px solid rgba(148, 163, 184, 0.45);

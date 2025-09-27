@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import type { Officer, WorldState } from '@sim/types';
 import type { GameStore } from '@state/store';
 import { generateWorldMap, type WorldMap } from '@/map/generator';
@@ -23,10 +23,19 @@ export interface PositionedOfficer {
   yPercent: number;
 }
 
+export interface PlayerPosition {
+  x: number;
+  y: number;
+  xPercent: number;
+  yPercent: number;
+  coordinate: MapCoordinate;
+}
+
 interface FreeRoamSnapshot {
   cycle: number;
   warcalls: PositionedWarcall[];
   officers: PositionedOfficer[];
+  playerPosition: PlayerPosition;
 }
 
 export interface UseFreeRoamOptions {
@@ -38,16 +47,34 @@ export interface UseFreeRoamOptions {
 export interface FreeRoamState extends FreeRoamSnapshot {
   map: WorldMap;
   idleSeconds: number;
+  movePlayer: (direction: 'up' | 'down' | 'left' | 'right') => void;
 }
 
 export const DEFAULT_IDLE_MS = 60_000;
-export const DEFAULT_MAP_SIZE = 256;
+export const DEFAULT_MAP_SIZE = 512;
 export const DEFAULT_OFFICER_LIMIT = 20;
+
+function createInitialPlayerPosition(map: WorldMap): PlayerPosition {
+  // Start player in center of map
+  const x = Math.floor(map.size / 2);
+  const y = Math.floor(map.size / 2);
+  const index = y * map.size + x;
+  const biome = map.tiles[index] ?? 'plains';
+  
+  return {
+    x,
+    y,
+    xPercent: toPercent(map, x),
+    yPercent: toPercent(map, y),
+    coordinate: { x, y, index, biome }
+  };
+}
 
 function computeSnapshot(
   world: WorldState,
   map: WorldMap,
-  officerLimit: number
+  officerLimit: number,
+  playerPosition: PlayerPosition
 ): FreeRoamSnapshot {
   const warcalls = selectActiveWarcalls(world);
   const officers = selectActiveOfficers(world, officerLimit);
@@ -81,7 +108,8 @@ function computeSnapshot(
   return {
     cycle: world.cycle,
     warcalls: positionedWarcalls,
-    officers: positionedOfficers
+    officers: positionedOfficers,
+    playerPosition
   };
 }
 
@@ -98,22 +126,64 @@ export function useFreeRoam(
     return generateWorldMap(initial.seed, mapSize);
   }, [store, mapSize]);
 
+  const [playerPosition, setPlayerPosition] = useState<PlayerPosition>(() =>
+    createInitialPlayerPosition(map)
+  );
+
   const [snapshot, setSnapshot] = useState<FreeRoamSnapshot>(() =>
-    computeSnapshot(store.getState(), map, officerLimit)
+    computeSnapshot(store.getState(), map, officerLimit, playerPosition)
   );
   const [idleSeconds, setIdleSeconds] = useState(0);
   const lastInteractionRef = useRef(Date.now());
 
+  const movePlayer = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
+    setPlayerPosition((prev) => {
+      let newX = prev.x;
+      let newY = prev.y;
+      
+      switch (direction) {
+        case 'up':
+          newY = Math.max(0, prev.y - 1);
+          break;
+        case 'down':
+          newY = Math.min(map.size - 1, prev.y + 1);
+          break;
+        case 'left':
+          newX = Math.max(0, prev.x - 1);
+          break;
+        case 'right':
+          newX = Math.min(map.size - 1, prev.x + 1);
+          break;
+      }
+      
+      // Don't move if position unchanged
+      if (newX === prev.x && newY === prev.y) {
+        return prev;
+      }
+      
+      const index = newY * map.size + newX;
+      const biome = map.tiles[index] ?? 'plains';
+      
+      return {
+        x: newX,
+        y: newY,
+        xPercent: toPercent(map, newX),
+        yPercent: toPercent(map, newY),
+        coordinate: { x: newX, y: newY, index, biome }
+      };
+    });
+  }, [map]);
+
   useEffect(() => {
-    setSnapshot(computeSnapshot(store.getState(), map, officerLimit));
-  }, [store, map, officerLimit]);
+    setSnapshot(computeSnapshot(store.getState(), map, officerLimit, playerPosition));
+  }, [store, map, officerLimit, playerPosition]);
 
   useEffect(() => {
     const unsubscribe = store.events.on('state:changed', (world) => {
-      setSnapshot(computeSnapshot(world, map, officerLimit));
+      setSnapshot(computeSnapshot(world, map, officerLimit, playerPosition));
     });
     return () => unsubscribe();
-  }, [store, map, officerLimit]);
+  }, [store, map, officerLimit, playerPosition]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -157,6 +227,7 @@ export function useFreeRoam(
   return {
     map,
     idleSeconds,
+    movePlayer,
     ...snapshot
   };
 }

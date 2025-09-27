@@ -66,7 +66,7 @@ export function FreeRoamView({
   onHighlightHostChange
 }: FreeRoamViewProps) {
   const idleMs = DEFAULT_IDLE_MS;
-  const { map, warcalls, officers, cycle, idleSeconds } = useFreeRoam(store, {
+  const { map, warcalls, officers, cycle, idleSeconds, playerPosition, movePlayer } = useFreeRoam(store, {
     mapSize: DEFAULT_MAP_SIZE,
     officerLimit: DEFAULT_OFFICER_LIMIT,
     idleMs
@@ -126,11 +126,32 @@ export function FreeRoamView({
       if (event.key === 'Escape') {
         event.preventDefault();
         onRequestClose();
+        return;
+      }
+      
+      // WASD movement controls
+      switch (event.key.toLowerCase()) {
+        case 'w':
+          event.preventDefault();
+          movePlayer('up');
+          break;
+        case 's':
+          event.preventDefault();
+          movePlayer('down');
+          break;
+        case 'a':
+          event.preventDefault();
+          movePlayer('left');
+          break;
+        case 'd':
+          event.preventDefault();
+          movePlayer('right');
+          break;
       }
     };
     window.addEventListener('keydown', handleKeydown);
     return () => window.removeEventListener('keydown', handleKeydown);
-  }, [onRequestClose]);
+  }, [onRequestClose, movePlayer]);
 
   const secondsUntilCycle = useMemo(
     () => formatIdleCountdown(idleMs, idleSeconds),
@@ -296,6 +317,17 @@ export function FreeRoamView({
           <div className="free-roam__viewport" style={viewportStyle}>
             <canvas ref={canvasRef} className="free-roam__canvas" />
             <div className="free-roam__overlay">
+              {/* Player position marker */}
+              <div
+                className="free-roam__marker free-roam__marker--player"
+                style={{
+                  left: `${playerPosition.xPercent}%`,
+                  top: `${playerPosition.yPercent}%`
+                }}
+                title={`Spieler • ${BIOME_LABEL[playerPosition.coordinate.biome]} (${playerPosition.x}, ${playerPosition.y})`}
+              >
+                <span className="free-roam__marker-icon">🎯</span>
+              </div>
               {warcalls.map((entry) => (
                 <div
                   key={entry.warcall.id}
@@ -334,6 +366,16 @@ export function FreeRoamView({
           <div ref={highlightHostRef} className="free-roam__highlight-host" />
         </div>
         <aside className="free-roam__sidebar">
+          <section className="free-roam__panel">
+            <h2>Spieler Position</h2>
+            <div className="free-roam__player-info">
+              <p><strong>Position:</strong> ({playerPosition.x}, {playerPosition.y})</p>
+              <p><strong>Biom:</strong> {BIOME_LABEL[playerPosition.coordinate.biome]}</p>
+              <p className="free-roam__controls">
+                <small>WASD zum Bewegen • ESC zum Verlassen</small>
+              </p>
+            </div>
+          </section>
           <section className="free-roam__panel">
             <h2>Aktive Warcalls</h2>
             {warcalls.length === 0 ? (
