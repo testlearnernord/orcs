@@ -44,6 +44,8 @@ import {
 } from '@core/hotkeys';
 import { ModeGate } from '@ui/components/modeGate';
 import { HighlightStore } from '@state/ui/highlights';
+import { AudioManager } from '@ui/audio/manager';
+import { AudioControls } from '@ui/audio/controls';
 import {
   lensMaskForFilters,
   selectVisibleEdges,
@@ -117,6 +119,8 @@ export class NemesisUI {
   private modeState: UIModeState;
   private digestHistoryEl: HTMLElement | null = null;
   private feedBodyEl: HTMLElement | null = null;
+  private readonly audioManager = new AudioManager();
+  private audioControls: AudioControls | null = null;
 
   constructor(
     private readonly store: GameStore,
@@ -175,6 +179,15 @@ export class NemesisUI {
 
     this.modeGate = new ModeGate({
       onConfirm: (mode) => this.handleModeConfirm(mode)
+    });
+
+    // Initialize audio controls
+    this.audioControls = new AudioControls(this.audioManager, {
+      onPlayPause: () => this.rememberHint('audio-play', 'Musik pausiert/fortgesetzt.'),
+      onMute: () => this.rememberHint('audio-mute', 'Ton stumm geschaltet/aktiviert.'),
+      onNextTrack: () => this.rememberHint('audio-next', 'Nächster Track.'),
+      onPreviousTrack: () => this.rememberHint('audio-prev', 'Vorheriger Track.'),
+      onVolumeChange: () => this.rememberHint('audio-volume', 'Lautstärke angepasst.')
     });
     this.modeStore.on('mode:changed', (next) => this.handleModeChange(next));
     this.syncModeUI();
@@ -347,6 +360,7 @@ export class NemesisUI {
       <header class="hud">
         <div class="brand">NEMESIS HOF</div>
         <div class="hud-mode" data-mode-indicator>Spectate-Modus</div>
+        <div class="hud-audio" id="audio-controls-container"></div>
         <div class="hud-controls">
           <button data-action="cycle">E — Cycle</button>
           <button data-action="reset">R — Neu</button>
@@ -397,6 +411,13 @@ export class NemesisUI {
     }
 
     this.warcallsHost?.appendChild(this.warcallDock.element);
+    
+    // Add audio controls to the header
+    const audioContainer = app.querySelector('#audio-controls-container');
+    if (audioContainer && this.audioControls) {
+      audioContainer.appendChild(this.audioControls.getElement());
+    }
+    
     this.registerUIEvents(app);
     this.syncModeUI();
 
@@ -429,6 +450,14 @@ export class NemesisUI {
     if (this.shouldShowModeGate()) {
       this.modeGate.open(this.modeState.mode);
     }
+    
+    // Start background music after a short delay to allow user interaction
+    setTimeout(() => {
+      this.audioManager.play().catch(() => {
+        // Autoplay blocked - this is expected on many browsers
+        console.log('[AudioManager] Autoplay blocked - user interaction required');
+      });
+    }, 1000);
   }
 
   private prepareRankView(): void {
@@ -580,6 +609,25 @@ export class NemesisUI {
         );
       });
     }
+    
+    // Audio control hotkeys
+    registerHotkey('m', () => {
+      this.audioManager.toggleMute();
+      this.rememberHint('m', 'Musik stumm geschaltet/aktiviert (Hotkey M).');
+    });
+    registerHotkey('p', () => {
+      this.audioManager.togglePlayPause();
+      this.rememberHint('p', 'Musik pausiert/fortgesetzt (Hotkey P).');
+    });
+    registerHotkey('[', () => {
+      this.audioManager.previousTrack();
+      this.rememberHint('[', 'Vorheriger Track (Hotkey [).');
+    });
+    registerHotkey(']', () => {
+      this.audioManager.nextTrack();
+      this.rememberHint(']', 'Nächster Track (Hotkey ]).');
+    });
+    
     bindOnce('?', () => {
       const registered = getRegisteredHotkeys()
         .map((entry) => entry.key.toUpperCase())
@@ -831,5 +879,16 @@ export class NemesisUI {
   private openWarcall(entry: WarcallEntry): void {
     document.body.classList.add('modal-open');
     this.warcallModal.open(entry);
+  }
+
+  destroy(): void {
+    // Clean up audio resources
+    this.audioManager.destroy();
+    this.audioControls?.destroy();
+    
+    // Clean up other resources
+    this.resizeObserver?.disconnect();
+    this.freeRoamRoot?.unmount();
+    this.highlightPortal.detach();
   }
 }
