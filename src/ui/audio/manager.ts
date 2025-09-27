@@ -3,6 +3,13 @@
  * Handles playback, volume control, and track management
  */
 
+// Get the correct base URL for audio assets
+const rawBase = (import.meta as any)?.env?.BASE_URL ?? '/';
+const normalizedBase = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+
+// Fallback to correct base path for dev environment where BASE_URL might not be set correctly
+const developmentBase = normalizedBase === '/' ? '/orcs/' : normalizedBase;
+
 export interface AudioTrack {
   id: string;
   title: string;
@@ -40,13 +47,13 @@ export class AudioManager {
           id: 'curse-witches',
           title: 'Curse of the Witches',
           artist: 'Jimena Contreras',
-          url: '/audio/Curse of the Witches - Jimena Contreras.mp3'
+          url: `${developmentBase}audio/Curse of the Witches - Jimena Contreras.mp3`
         },
         {
           id: 'whirlpool',
           title: 'Whirlpool',
           artist: 'The Mini Vandals',
-          url: '/audio/Whirlpool - The Mini Vandals.mp3'
+          url: `${developmentBase}audio/Whirlpool - The Mini Vandals.mp3`
         }
       ]
     };
