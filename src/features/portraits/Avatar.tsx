@@ -7,6 +7,10 @@ import {
   sliceTileToURL,
   type LoadedAtlas
 } from './portrait-atlas';
+import { chooseSetAndIndex } from './mapping';
+import { loadPortraitAtlases, type PortraitAtlasMap } from './portrait-atlas';
+import { PORTRAIT_SET_DEFINITIONS } from '@/ui/portraits/config';
+import type { PortraitSet } from './types';
 
 type FallbackReason = 'legacy' | 'missing';
 
@@ -35,6 +39,31 @@ function detectArtMode(): ArtMode {
   } catch {
     return 'atlases';
   }
+function filterDefinitions(tag?: string) {
+  if (!tag) return PORTRAIT_SET_DEFINITIONS;
+  return PORTRAIT_SET_DEFINITIONS.filter((definition) =>
+    definition.tags.includes(tag)
+  );
+}
+
+function deriveAvailableSets(
+  definitions: typeof PORTRAIT_SET_DEFINITIONS,
+  atlases: PortraitAtlasMap
+): PortraitSet[] {
+  const sets: PortraitSet[] = [];
+  for (const definition of definitions) {
+    const atlas = atlases.get(definition.id);
+    if (!atlas) continue;
+    sets.push({
+      id: definition.id,
+      src: atlas.url,
+      cols: definition.cols,
+      rows: definition.rows,
+      weight: definition.weight,
+      tags: [...definition.tags]
+    });
+  }
+  return sets;
 }
 
 function getClassName(base: string, extra?: string): string {
@@ -195,6 +224,39 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         }
         cleanupObjectUrl();
         if (!cancelled) {
+        const definitions = filterDefinitions(requireTag);
+        if (!definitions.length)
+          throw new Error('No portrait sets available after filtering');
+        const { atlases } = await loadPortraitAtlases();
+        const availableSets = deriveAvailableSets(definitions, atlases);
+        if (!availableSets.length)
+          throw new Error('No portrait atlases available');
+        const { set, col, row } = chooseSetAndIndex(id, availableSets);
+        const cols = Math.max(1, set.cols);
+        const rows = Math.max(1, set.rows);
+        const colRatio = cols > 1 ? col / (cols - 1) : 0;
+        const rowRatio = rows > 1 ? row / (rows - 1) : 0;
+        const css: React.CSSProperties = {
+          width: size,
+          height: size,
+          backgroundImage: `url("${set.src}")`,
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: `${cols * 100}% ${rows * 100}%`,
+          backgroundPosition: `${colRatio * 100}% ${rowRatio * 100}%`,
+          borderRadius: 8
+        };
+        if (alive) {
+          setTileStyle(css);
+          setActiveSet(set.id);
+          setFallbackReason(null);
+        }
+      } catch (err) {
+        if (import.meta.env.DEV) {
+          console.warn('[portraits] avatar init failed', err);
+        }
+        if (alive) {
+          setTileStyle(null);
+          setActiveSet(null);
           setFallbackReason('missing');
           setPortraitUrl(null);
           setActiveSet(null);
