@@ -17,8 +17,14 @@ export type PortraitSetDefinition = {
 };
 
 const ATLAS_DEFINITIONS: PortraitSetDefinition[] = [
-  { id: 'set_a', file: 'set_a.webp', cols: 4, rows: 6, weight: 1 },
-  { id: 'set_b', file: 'set_b.webp', cols: 4, rows: 6, weight: 1 }
+  { 
+    id: 'officers_v2', 
+    file: 'officers_atlas.webp', 
+    cols: 10, 
+    rows: 5, 
+    weight: 1,
+    tags: ['diverse', 'centered', 'sharp'] 
+  }
 ];
 
 const LOCAL = ATLAS_DEFINITIONS.map(

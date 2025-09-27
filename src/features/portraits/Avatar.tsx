@@ -135,54 +135,31 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         const cols = Math.max(1, set.cols);
         const rows = Math.max(1, set.rows);
 
-        // Revolutionary portrait extraction system for consistent quality
-        // This approach completely reimagines how we extract and display portraits
+        // New modular portrait system with perfect centering
+        // Designed specifically for 10x5 grid with pre-centered faces
 
         // Calculate the actual tile dimensions as percentages of the atlas
         const tileWidth = 100 / cols;
         const tileHeight = 100 / rows;
 
-        // Calculate precise tile boundaries to avoid edge artifacts from adjacent tiles
-
         // Calculate the center position of the specific tile
         const tileCenterX = col * tileWidth + tileWidth / 2;
         const tileCenterY = row * tileHeight + tileHeight / 2;
 
-        // Advanced scaling system for optimal portrait extraction
-        // Scale the atlas appropriately to show more detail while preventing overlap
-        const scaleFactor = 1.25; // 25% larger for better face detail
+        // Perfect scaling for the new modular system - no over-scaling needed
+        // since faces are already properly centered in each tile
+        const scaleFactor = 1.0; // Perfect 1:1 scaling for pre-centered portraits
         const scaledAtlasWidth = cols * 100 * scaleFactor;
         const scaledAtlasHeight = rows * 100 * scaleFactor;
 
         // Calculate positioning to center the tile within the portrait frame
-        // This ensures the face from the specific tile is properly displayed
         const positionX = tileCenterX * scaleFactor;
         const positionY = tileCenterY * scaleFactor;
 
-        // Fine-tuning adjustments optimized for 4x6 atlas configuration
-        // These micro-adjustments account for how faces are positioned within tiles
-        let finetuneX = 0;
-        let finetuneY = 0;
-
-        // Vertical fine-tuning based on row position (now optimized for 6 rows)
-        // Faces in different rows may be positioned differently within their tiles
-        if (row === 0)
-          finetuneY = -1.0; // Top row faces tend to be lower in their tiles
-        else if (row === 1) finetuneY = -0.6;
-        else if (row === 2) finetuneY = -0.2;
-        else if (row === 3) finetuneY = 0.2;
-        else if (row === 4) finetuneY = 0.4;
-        else if (row === 5) finetuneY = 0.6; // Bottom row may need upward adjustment
-
-        // Horizontal fine-tuning based on column position (now optimized for 4 columns)
-        if (col === 0)
-          finetuneX = 0.6; // Left column faces may be offset right
-        else if (col === 1) finetuneX = 0.2;
-        else if (col === 2) finetuneX = -0.2;
-        else if (col === 3) finetuneX = -0.6; // Right column faces may be offset left
-
-        const finalPositionX = positionX + finetuneX;
-        const finalPositionY = positionY + finetuneY;
+        // No fine-tuning needed - the new modular system has perfectly centered faces
+        // Each portrait is generated with proper centering built-in
+        const finalPositionX = positionX;
+        const finalPositionY = positionY;
 
         const css: React.CSSProperties = {
           width: size,
@@ -192,8 +169,8 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
           backgroundSize: `${scaledAtlasWidth}% ${scaledAtlasHeight}%`,
           backgroundPosition: `${finalPositionX}% ${finalPositionY}%`,
           borderRadius: 8,
-          // Advanced rendering optimizations for crisp portrait display
-          imageRendering: 'crisp-edges' as any,
+          // Optimized rendering for sharp, crisp portraits
+          imageRendering: 'pixelated' as any, // Crisp edges for pixel-perfect display
           backgroundClip: 'padding-box',
           WebkitBackfaceVisibility: 'hidden' as any,
           backfaceVisibility: 'hidden' as any,

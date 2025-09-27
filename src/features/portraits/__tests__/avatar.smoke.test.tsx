@@ -54,7 +54,7 @@ describe('OfficerAvatar', () => {
     const { findByRole } = render(<OfficerAvatar officerId="Test:1" />);
     const element = await findByRole('img');
     await waitFor(() => {
-      expect(element.getAttribute('data-portrait-set')).toMatch(/set_[ab]/);
+      expect(element.getAttribute('data-portrait-set')).toBe('officers_v2');
       expect(element.style.backgroundImage).toMatch(/\.webp/);
       expect(element.style.backgroundSize).toMatch(/%/);
       expect(element.style.backgroundPosition).toMatch(/%/);
