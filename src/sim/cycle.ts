@@ -125,12 +125,15 @@ function ensureQuota(
 ): { spawns: Officer[]; feed: FeedEntry[] } {
   const feed: FeedEntry[] = [];
   const spawns: Officer[] = [];
-  
+
   // Calculate total shortage to spawn as Grunzer only
   const totalOfficers = state.officers.length;
-  const targetTotal = Object.values(RANK_QUOTAS).reduce((sum, quota) => sum + quota, 0);
+  const targetTotal = Object.values(RANK_QUOTAS).reduce(
+    (sum, quota) => sum + quota,
+    0
+  );
   const shortage = targetTotal - totalOfficers;
-  
+
   // Only spawn Grunzer - higher ranks will be filled by promotions
   for (let i = 0; i < shortage; i++) {
     let recruit = createOfficer(rng, 'Grunzer', cycle);
@@ -145,7 +148,7 @@ function ensureQuota(
     const relationFeed = seedSpawnRelationships(state, recruit, rng);
     feed.push(...relationFeed);
   }
-  
+
   return { spawns, feed };
 }
 
@@ -160,7 +163,7 @@ function processPromotions(
   const promotions: { officerId: string; from: Rank; to: Rank }[] = [];
   const counts = countByRank(state.officers);
   const ordered = [...state.officers].sort((a, b) => b.merit - a.merit);
-  
+
   // First pass: Regular merit-based promotions and demotions
   for (const officer of ordered) {
     const thresholds = PROMOTION_THRESHOLDS[officer.rank];
@@ -225,16 +228,16 @@ function processPromotions(
       );
     }
   }
-  
+
   // Second pass: Fill vacant higher ranks by promoting the best candidates
   const rankOrder: Rank[] = ['Späher', 'Captain', 'Spieler']; // Order of ranks to fill
-  
+
   for (const targetRank of rankOrder) {
     const shortage = RANK_QUOTAS[targetRank] - counts[targetRank];
     if (shortage > 0) {
       // Find eligible candidates from lower ranks
       const candidates = state.officers
-        .filter(officer => {
+        .filter((officer) => {
           // Can promote Grunzer to Späher, Späher to Captain, Captain to Spieler
           return (
             (targetRank === 'Späher' && officer.rank === 'Grunzer') ||
@@ -244,7 +247,7 @@ function processPromotions(
         })
         .sort((a, b) => b.merit - a.merit)
         .slice(0, shortage);
-      
+
       for (const candidate of candidates) {
         counts[candidate.rank] -= 1;
         counts[targetRank] += 1;
@@ -264,13 +267,11 @@ function processPromotions(
           from: candidate.rank,
           to: targetRank
         });
-        feed.push(
-          createPromotionEntry(rng, state.cycle, updated, targetRank)
-        );
+        feed.push(createPromotionEntry(rng, state.cycle, updated, targetRank));
       }
     }
   }
-  
+
   return { promotions, feed };
 }
 

@@ -36,12 +36,18 @@ describe('cycle', () => {
     const participants = state.officers
       .slice(0, 3)
       .map((officer) => officer.id);
-    
+
     // Add multiple deadly warcalls to ensure we get deaths with our balanced system
-    state.warcalls.push(buildWarcall(participants.slice(0, 1), state.cycle + 1));
-    state.warcalls.push(buildWarcall(participants.slice(1, 2), state.cycle + 1));
-    state.warcalls.push(buildWarcall(participants.slice(2, 3), state.cycle + 1));
-    
+    state.warcalls.push(
+      buildWarcall(participants.slice(0, 1), state.cycle + 1)
+    );
+    state.warcalls.push(
+      buildWarcall(participants.slice(1, 2), state.cycle + 1)
+    );
+    state.warcalls.push(
+      buildWarcall(participants.slice(2, 3), state.cycle + 1)
+    );
+
     // Set king to UNGEFESTIGT to increase casualty rate
     state.kingStatus = 'UNGEFESTIGT';
 
@@ -59,7 +65,9 @@ describe('cycle', () => {
     } else {
       // If no deaths occurred, that's fine with our balanced system
       // Just verify spawns happened if needed to maintain roster
-      expect(summary.spawns.length + summary.deaths.length).toBeGreaterThanOrEqual(0);
+      expect(
+        summary.spawns.length + summary.deaths.length
+      ).toBeGreaterThanOrEqual(0);
     }
   });
 });

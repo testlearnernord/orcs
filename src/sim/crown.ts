@@ -208,7 +208,7 @@ function triggerThroneBattle(
 } | null {
   // Only trigger throne battles when crown pressure is high enough
   if (crown.crownPressure < 0.4) return null;
-  
+
   const pool = state.officers.filter(
     (officer) => officer.id !== king.id && officer.status === 'ALIVE'
   );
@@ -218,10 +218,10 @@ function triggerThroneBattle(
     .sort((a, b) => b.score - a.score);
   const leaderEntry = scored[0];
   if (!leaderEntry) return null;
-  
+
   // Higher threshold for actually starting a battle - need strong challenger
   if (leaderEntry.score < 0.4) return null;
-  
+
   let leader = leaderEntry.officer;
   let remaining = scored.slice(1);
   if (leaderEntry.score < 0.3 && remaining.length > 0) {

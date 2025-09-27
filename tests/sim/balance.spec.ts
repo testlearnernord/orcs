@@ -18,15 +18,15 @@ describe('Simulation Balance', () => {
     for (let i = 0; i < 30; i++) {
       const summary = advanceCycle(state, rng);
       totalDeaths += summary.deaths.length;
-      
+
       // Track king changes
       if (state.kingId !== currentKing) {
         kingChanges++;
         currentKing = state.kingId;
       }
-      
+
       // Verify all new spawns are Grunzer only
-      summary.spawns.forEach(spawn => {
+      summary.spawns.forEach((spawn) => {
         if (spawn.rank !== 'Grunzer') {
           nonGrunzerSpawns++;
         }
@@ -36,22 +36,25 @@ describe('Simulation Balance', () => {
     // Balanced expectations - much improved death rate
     expect(totalDeaths).toBeLessThan(20); // Much reduced from ~140
     expect(totalDeaths).toBeGreaterThan(0); // Some risk needed, but much lower
-    
+
     // King should be more stable
     expect(kingChanges).toBeLessThan(4); // Previously would die in 3 days
-    
+
     // All spawns should be Grunzer
     expect(nonGrunzerSpawns).toBe(0);
-    
+
     // Should maintain proper officer count
     expect(state.officers.length).toBe(20);
-    
+
     // Should have proper rank distribution (higher ranks filled by promotion)
-    const ranks = state.officers.reduce((acc, officer) => {
-      acc[officer.rank] = (acc[officer.rank] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
+    const ranks = state.officers.reduce(
+      (acc, officer) => {
+        acc[officer.rank] = (acc[officer.rank] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
     expect(ranks['König']).toBe(1);
     expect(ranks['Captain']).toBeGreaterThan(0); // Should have some captains from promotions
     expect(ranks['Späher']).toBeGreaterThan(0); // Should have some scouts from promotions
@@ -68,8 +71,8 @@ describe('Simulation Balance', () => {
     // Run for 20 cycles to get good sample size
     for (let i = 0; i < 20; i++) {
       const summary = advanceCycle(state, rng);
-      
-      summary.warcallsResolved.forEach(resolution => {
+
+      summary.warcallsResolved.forEach((resolution) => {
         totalWarcalls++;
         if (resolution.success) {
           successfulWarcalls++;

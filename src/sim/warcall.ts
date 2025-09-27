@@ -66,7 +66,7 @@ export function calculateBreakdown(
   kingStatus: WorldState['kingStatus']
 ): WarcallBreakdown {
   // Improved base success rate - less punishing difficulty
-  let base = 0.6 - (warcall.baseDifficulty * 0.4);
+  let base = 0.6 - warcall.baseDifficulty * 0.4;
   if (kingStatus === 'UNGEFESTIGT') {
     base -= 0.15; // Reduced penalty for unstable king
   }
@@ -103,19 +103,23 @@ function determineCasualties(
 ): OrcId[] {
   if (participants.length === 0) return [];
   if (success) return [];
-  
+
   // Significantly reduced casualty rate - UNGEFESTIGT only adds 20% chance of extra casualty
-  if (kingStatus === 'UNGEFESTIGT' && participants.length > 1 && rng.chance(0.2)) {
+  if (
+    kingStatus === 'UNGEFESTIGT' &&
+    participants.length > 1 &&
+    rng.chance(0.2)
+  ) {
     const shuffled = rng.shuffle(participants);
     return shuffled.slice(0, 2).map((officer) => officer.id);
   }
-  
+
   // Regular casualties should be infrequent - only 50% chance of death on failure
   if (rng.chance(0.5)) {
     const unlucky = rng.pick(participants);
     return [unlucky.id];
   }
-  
+
   return [];
 }
 
