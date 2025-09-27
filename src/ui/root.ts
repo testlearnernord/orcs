@@ -88,6 +88,7 @@ export class NemesisUI {
   private warcallButton: HTMLButtonElement | null = null;
   private freeRoamContainer: HTMLDivElement | null = null;
   private freeRoamRoot: Root | null = null;
+  private freeRoamHighlightHost: HTMLElement | null = null;
   private readonly cards = new Map<string, OfficerCard>();
   private readonly rankContainers = new Map<Rank, HTMLElement>();
   private readonly filters = new UIFilterStore();
@@ -291,6 +292,15 @@ export class NemesisUI {
     }
   }
 
+  private setFreeRoamHighlightHost(host: HTMLElement | null): void {
+    this.freeRoamHighlightHost = host;
+    if (host) {
+      this.highlightPortal.attach(host);
+    } else if (typeof document !== 'undefined' && document.body) {
+      this.highlightPortal.attach(document.body);
+    }
+  }
+
   private openFreeRoam(): void {
     if (!this.freeRoamContainer) return;
     if (!this.freeRoamRoot) {
@@ -301,7 +311,8 @@ export class NemesisUI {
     this.freeRoamRoot.render(
       createElement(FreeRoamView, {
         store: this.store,
-        modeStore: this.modeStore
+        onRequestClose: () => this.modeStore.setMode('spectate'),
+        onHighlightHostChange: (host) => this.setFreeRoamHighlightHost(host)
       })
     );
   }
@@ -310,6 +321,9 @@ export class NemesisUI {
     if (this.freeRoamContainer) {
       this.freeRoamContainer.hidden = true;
       this.freeRoamContainer.setAttribute('aria-hidden', 'true');
+    }
+    if (this.freeRoamHighlightHost) {
+      this.setFreeRoamHighlightHost(null);
     }
     if (this.freeRoamRoot) {
       this.freeRoamRoot.unmount();
@@ -346,6 +360,14 @@ export class NemesisUI {
     this.freeRoamContainer.className = 'free-roam-shell';
     this.freeRoamContainer.hidden = true;
     this.freeRoamContainer.setAttribute('aria-hidden', 'true');
+    this.freeRoamContainer.addEventListener('click', (event) => {
+      if (
+        event.target === this.freeRoamContainer &&
+        this.modeState.mode === 'freeRoam'
+      ) {
+        this.modeStore.setMode('spectate');
+      }
+    });
     root.appendChild(this.freeRoamContainer);
     this.highlightPortal.attach(document.body);
 
@@ -395,7 +417,11 @@ export class NemesisUI {
 
     initHotkeys();
     this.registerHotkeys();
-    this.modeGate.open(this.modeState.mode);
+    if (this.modeState.mode === 'freeRoam') {
+      this.modeGate.close();
+    } else {
+      this.modeGate.open(this.modeState.mode);
+    }
   }
 
   private prepareRankView(): void {

@@ -19,7 +19,7 @@ function normalizeState(state: UIModeState): UIModeState {
 }
 
 export class UIModeStore extends EventBus<UIModeEvents> {
-  private state: UIModeState = { mode: 'spectate', playerId: null };
+  private state: UIModeState = { mode: 'freeRoam', playerId: null };
 
   getState(): UIModeState {
     return this.state;
