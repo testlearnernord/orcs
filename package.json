@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/copy-portraits.mjs",
+    "prebuild": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs",
     "build": "vite build",
-    "postbuild": "node scripts/copy-portraits.mjs",
+    "postbuild": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs",
     "preview": "vite preview",
     "format:write": "prettier --write .",
     "format": "prettier --write .",
