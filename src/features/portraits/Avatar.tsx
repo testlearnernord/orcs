@@ -159,26 +159,25 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         const positionX = tileCenterX * scaleFactor;
         const positionY = tileCenterY * scaleFactor;
         
-        // Fine-tuning adjustments based on empirical analysis of the atlas
+        // Fine-tuning adjustments optimized for 4x6 atlas configuration
         // These micro-adjustments account for how faces are positioned within tiles
         let finetuneX = 0;
         let finetuneY = 0;
         
-        // Vertical fine-tuning based on row position
+        // Vertical fine-tuning based on row position (now optimized for 6 rows)
         // Faces in different rows may be positioned differently within their tiles
-        if (row === 0) finetuneY = -1.2; // Top row faces tend to be lower in their tiles
-        else if (row === 1) finetuneY = -0.8;
-        else if (row === 2) finetuneY = -0.4;
-        else if (row >= 3 && row < 6) finetuneY = 0.2;
-        else if (row >= 6) finetuneY = 0.6; // Bottom rows may need upward adjustment
+        if (row === 0) finetuneY = -1.0; // Top row faces tend to be lower in their tiles
+        else if (row === 1) finetuneY = -0.6;
+        else if (row === 2) finetuneY = -0.2;
+        else if (row === 3) finetuneY = 0.2;
+        else if (row === 4) finetuneY = 0.4;
+        else if (row === 5) finetuneY = 0.6; // Bottom row may need upward adjustment
         
-        // Horizontal fine-tuning based on column position
-        if (col === 0) finetuneX = 0.8; // Left column faces may be offset right
-        else if (col === 1) finetuneX = 0.4;
-        else if (col === 2) finetuneX = 0;
-        else if (col === 3) finetuneX = -0.2;
-        else if (col === 4) finetuneX = -0.4;
-        else if (col === 5) finetuneX = -0.6; // Right column faces may be offset left
+        // Horizontal fine-tuning based on column position (now optimized for 4 columns)
+        if (col === 0) finetuneX = 0.6; // Left column faces may be offset right
+        else if (col === 1) finetuneX = 0.2;
+        else if (col === 2) finetuneX = -0.2;
+        else if (col === 3) finetuneX = -0.6; // Right column faces may be offset left
         
         const finalPositionX = positionX + finetuneX;
         const finalPositionY = positionY + finetuneY;
