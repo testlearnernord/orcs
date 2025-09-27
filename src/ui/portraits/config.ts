@@ -17,9 +17,30 @@ export type PortraitSetDefinition = {
 };
 
 const ATLAS_DEFINITIONS: PortraitSetDefinition[] = [
-  { id: 'officers1', file: 'officers1.png', cols: 4, rows: 4, weight: 1, tags: ['officer'] },
-  { id: 'officers2', file: 'officers2.png', cols: 4, rows: 4, weight: 1, tags: ['officer'] },
-  { id: 'officers3', file: 'officers3.png', cols: 4, rows: 4, weight: 1, tags: ['officer'] }
+  {
+    id: 'officers1',
+    file: 'officers1.png',
+    cols: 4,
+    rows: 4,
+    weight: 1,
+    tags: ['officer']
+  },
+  {
+    id: 'officers2',
+    file: 'officers2.png',
+    cols: 4,
+    rows: 4,
+    weight: 1,
+    tags: ['officer']
+  },
+  {
+    id: 'officers3',
+    file: 'officers3.png',
+    cols: 4,
+    rows: 4,
+    weight: 1,
+    tags: ['officer']
+  }
 ];
 
 const LOCAL = ATLAS_DEFINITIONS.map(
