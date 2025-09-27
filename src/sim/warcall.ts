@@ -35,7 +35,12 @@ const REWARD_HINTS = [
   'Rufzuwachs',
   'Sonderrechte im Hof',
   'Seltene Trophäe',
-  'Strategischer Vorteil'
+  'Strategischer Vorteil',
+  'Geheiminformationen',
+  'Territoriumsgewinn',
+  'Handelspartner',
+  'Magische Artefakte',
+  'Veteranentraining'
 ];
 
 function logistic(x: number): number {
@@ -60,9 +65,10 @@ export function calculateBreakdown(
   participants: Officer[],
   kingStatus: WorldState['kingStatus']
 ): WarcallBreakdown {
-  let base = 0.5 - warcall.baseDifficulty;
+  // Improved base success rate - less punishing difficulty
+  let base = 0.6 - (warcall.baseDifficulty * 0.4);
   if (kingStatus === 'UNGEFESTIGT') {
-    base -= 0.2;
+    base -= 0.15; // Reduced penalty for unstable king
   }
   const traitScore = participants.reduce((sum, officer) => {
     const officerBonus = officer.traits.reduce(
@@ -77,7 +83,8 @@ export function calculateBreakdown(
   );
   const normalizedTrait = traitScore / Math.max(participants.length, 1);
   const normalizedRel = relationshipScore / Math.max(participants.length, 1);
-  const random = rng.fork(`warcall:${warcall.id}`).next() - 0.5;
+  // Reduced randomness impact for more predictable outcomes
+  const random = (rng.fork(`warcall:${warcall.id}`).next() - 0.5) * 0.8;
   const logisticInput = base + normalizedTrait + normalizedRel + random;
   return {
     base,
@@ -96,12 +103,20 @@ function determineCasualties(
 ): OrcId[] {
   if (participants.length === 0) return [];
   if (success) return [];
-  if (kingStatus === 'UNGEFESTIGT' && participants.length > 1) {
+  
+  // Significantly reduced casualty rate - UNGEFESTIGT only adds 20% chance of extra casualty
+  if (kingStatus === 'UNGEFESTIGT' && participants.length > 1 && rng.chance(0.2)) {
     const shuffled = rng.shuffle(participants);
     return shuffled.slice(0, 2).map((officer) => officer.id);
   }
-  const unlucky = rng.pick(participants);
-  return [unlucky.id];
+  
+  // Regular casualties should be infrequent - only 50% chance of death on failure
+  if (rng.chance(0.5)) {
+    const unlucky = rng.pick(participants);
+    return [unlucky.id];
+  }
+  
+  return [];
 }
 
 function applyMerit(

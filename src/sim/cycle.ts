@@ -125,26 +125,27 @@ function ensureQuota(
 ): { spawns: Officer[]; feed: FeedEntry[] } {
   const feed: FeedEntry[] = [];
   const spawns: Officer[] = [];
-  const counts = countByRank(state.officers);
-  (Object.keys(RANK_QUOTAS) as Rank[]).forEach((rank) => {
-    const quota = RANK_QUOTAS[rank];
-    while (
-      counts[rank] + spawns.filter((officer) => officer.rank === rank).length <
-      quota
-    ) {
-      let recruit = createOfficer(rng, rank, cycle);
-      recruit = addMemory(recruit, {
-        cycle,
-        category: 'SPAWN',
-        summary: 'Neu in der Horde'
-      });
-      state.officers.push(recruit);
-      spawns.push(recruit);
-      feed.push(createSpawnEntry(rng, cycle, recruit));
-      const relationFeed = seedSpawnRelationships(state, recruit, rng);
-      feed.push(...relationFeed);
-    }
-  });
+  
+  // Calculate total shortage to spawn as Grunzer only
+  const totalOfficers = state.officers.length;
+  const targetTotal = Object.values(RANK_QUOTAS).reduce((sum, quota) => sum + quota, 0);
+  const shortage = targetTotal - totalOfficers;
+  
+  // Only spawn Grunzer - higher ranks will be filled by promotions
+  for (let i = 0; i < shortage; i++) {
+    let recruit = createOfficer(rng, 'Grunzer', cycle);
+    recruit = addMemory(recruit, {
+      cycle,
+      category: 'SPAWN',
+      summary: 'Neu in der Horde'
+    });
+    state.officers.push(recruit);
+    spawns.push(recruit);
+    feed.push(createSpawnEntry(rng, cycle, recruit));
+    const relationFeed = seedSpawnRelationships(state, recruit, rng);
+    feed.push(...relationFeed);
+  }
+  
   return { spawns, feed };
 }
 
@@ -159,6 +160,8 @@ function processPromotions(
   const promotions: { officerId: string; from: Rank; to: Rank }[] = [];
   const counts = countByRank(state.officers);
   const ordered = [...state.officers].sort((a, b) => b.merit - a.merit);
+  
+  // First pass: Regular merit-based promotions and demotions
   for (const officer of ordered) {
     const thresholds = PROMOTION_THRESHOLDS[officer.rank];
     if (thresholds.promoteAt !== undefined && thresholds.promoteTo) {
@@ -222,6 +225,52 @@ function processPromotions(
       );
     }
   }
+  
+  // Second pass: Fill vacant higher ranks by promoting the best candidates
+  const rankOrder: Rank[] = ['Späher', 'Captain', 'Spieler']; // Order of ranks to fill
+  
+  for (const targetRank of rankOrder) {
+    const shortage = RANK_QUOTAS[targetRank] - counts[targetRank];
+    if (shortage > 0) {
+      // Find eligible candidates from lower ranks
+      const candidates = state.officers
+        .filter(officer => {
+          // Can promote Grunzer to Späher, Späher to Captain, Captain to Spieler
+          return (
+            (targetRank === 'Späher' && officer.rank === 'Grunzer') ||
+            (targetRank === 'Captain' && officer.rank === 'Späher') ||
+            (targetRank === 'Spieler' && officer.rank === 'Captain')
+          );
+        })
+        .sort((a, b) => b.merit - a.merit)
+        .slice(0, shortage);
+      
+      for (const candidate of candidates) {
+        counts[candidate.rank] -= 1;
+        counts[targetRank] += 1;
+        const updated = addMemory(
+          { ...candidate, rank: targetRank },
+          {
+            cycle: state.cycle,
+            category: 'PROMOTION',
+            summary: `Beförderung zu ${targetRank} (Merit-basiert)`
+          }
+        );
+        state.officers = state.officers.map((officer) =>
+          officer.id === updated.id ? updated : officer
+        );
+        promotions.push({
+          officerId: candidate.id,
+          from: candidate.rank,
+          to: targetRank
+        });
+        feed.push(
+          createPromotionEntry(rng, state.cycle, updated, targetRank)
+        );
+      }
+    }
+  }
+  
   return { promotions, feed };
 }
 
@@ -247,7 +296,8 @@ function updateKingStability(
 
 function planNextWarcalls(state: WorldState, rng: RNG): WarcallPlan[] {
   const planned: WarcallPlan[] = [];
-  const attempts = 1 + (state.cycle % 2);
+  // Reduced warcall frequency - only every other cycle gets extra warcall
+  const attempts = state.cycle % 3 === 0 ? 2 : 1;
   for (let i = 0; i < attempts; i += 1) {
     const plan = planWarcall(state, rng, state.cycle);
     if (plan) planned.push(plan);

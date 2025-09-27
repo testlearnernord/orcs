@@ -53,7 +53,7 @@ export const RELATIONSHIP_BONUS = {
 } as const;
 
 export const BLOOD_OATH_DURATION = 10;
-export const KING_UNSTABLE_DURATION = 5;
+export const KING_UNSTABLE_DURATION = 8;
 
 export const FEED_PRIORITIES: Record<FeedEntry['tone'], number> = {
   DEATH: 100,
