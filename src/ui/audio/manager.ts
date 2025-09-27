@@ -177,9 +177,14 @@ export class AudioManager {
     } catch (error) {
       const errorName = (error as Error)?.name;
       if (errorName === 'NotAllowedError') {
-        console.log('[AudioManager] Autoplay blocked - user interaction required');
+        console.log(
+          '[AudioManager] Autoplay blocked - user interaction required'
+        );
       } else if (errorName === 'NotSupportedError') {
-        console.error('[AudioManager] Audio format not supported or file not found:', this.getCurrentTrack()?.url);
+        console.error(
+          '[AudioManager] Audio format not supported or file not found:',
+          this.getCurrentTrack()?.url
+        );
       } else {
         console.error('[AudioManager] Play failed:', error);
       }

@@ -62,7 +62,7 @@ describe('AudioManager', () => {
       const state = manager.getState();
 
       // Test that URLs with spaces can be properly encoded
-      state.tracks.forEach(track => {
+      state.tracks.forEach((track) => {
         const url = new URL(track.url, 'http://localhost');
         expect(url.pathname).toContain('audio/');
         // The URL constructor should handle encoding automatically
