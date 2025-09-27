@@ -15,6 +15,10 @@ interface Binding {
 const bindings = new Map<string, Set<Binding>>();
 let teardown: (() => void) | null = null;
 
+// CTRL key state tracking
+let isCtrlPressed = false;
+const ctrlStateChangeListeners = new Set<(pressed: boolean) => void>();
+
 function normalizeKey(key: string): string {
   return key.trim().toLowerCase();
 }
@@ -33,6 +37,12 @@ export function isInputFocused(): boolean {
 }
 
 function onKeyDown(event: KeyboardEvent): void {
+  // Track CTRL key state
+  if (event.key === 'Control' && !isCtrlPressed) {
+    isCtrlPressed = true;
+    ctrlStateChangeListeners.forEach(listener => listener(true));
+  }
+
   if (event.defaultPrevented) return;
   const key = normalizeKey(event.key);
   const bucket = bindings.get(key);
@@ -56,13 +66,35 @@ function onKeyDown(event: KeyboardEvent): void {
   }
 }
 
+function onKeyUp(event: KeyboardEvent): void {
+  // Track CTRL key state
+  if (event.key === 'Control' && isCtrlPressed) {
+    isCtrlPressed = false;
+    ctrlStateChangeListeners.forEach(listener => listener(false));
+  }
+}
+
+function onWindowBlur(): void {
+  // Reset CTRL state when window loses focus
+  if (isCtrlPressed) {
+    isCtrlPressed = false;
+    ctrlStateChangeListeners.forEach(listener => listener(false));
+  }
+}
+
 export function initHotkeys(): void {
   if (teardown) return;
   if (typeof window === 'undefined') return;
-  const listener = (event: KeyboardEvent) => onKeyDown(event);
-  window.addEventListener('keydown', listener, { passive: false });
+  const keyDownListener = (event: KeyboardEvent) => onKeyDown(event);
+  const keyUpListener = (event: KeyboardEvent) => onKeyUp(event);
+  const blurListener = () => onWindowBlur();
+  window.addEventListener('keydown', keyDownListener, { passive: false });
+  window.addEventListener('keyup', keyUpListener, { passive: false });
+  window.addEventListener('blur', blurListener, { passive: true });
   teardown = () => {
-    window.removeEventListener('keydown', listener);
+    window.removeEventListener('keydown', keyDownListener);
+    window.removeEventListener('keyup', keyUpListener);
+    window.removeEventListener('blur', blurListener);
     teardown = null;
   };
 }
@@ -102,4 +134,16 @@ export function getRegisteredHotkeys(): {
     });
   });
   return entries;
+}
+
+// CTRL key state functions
+export function isCtrlKeyPressed(): boolean {
+  return isCtrlPressed;
+}
+
+export function onCtrlStateChange(listener: (pressed: boolean) => void): () => void {
+  ctrlStateChangeListeners.add(listener);
+  return () => {
+    ctrlStateChangeListeners.delete(listener);
+  };
 }
