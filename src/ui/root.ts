@@ -36,6 +36,7 @@ import { HelpOverlay } from '@ui/components/helpOverlay';
 import { Toast } from '@ui/components/toast';
 import { CycleSweep } from '@ui/components/cycleSweep';
 import { HighlightPortal } from '@ui/components/highlightPortal';
+import { CtrlIndicator } from '@ui/components/ctrlIndicator';
 import {
   bindOnce,
   getRegisteredHotkeys,
@@ -109,6 +110,7 @@ export class NemesisUI {
   private readonly cycleSweep = new CycleSweep();
   private readonly highlights = new HighlightStore();
   private readonly highlightPortal: HighlightPortal;
+  private readonly ctrlIndicator = new CtrlIndicator();
   private filterBarEl: HTMLElement | null = null;
   private rankListEl: HTMLElement | null = null;
   private sortSelect: HTMLSelectElement | null = null;

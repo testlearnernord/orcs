@@ -1,4 +1,5 @@
 import type { Officer, Relationship } from '@sim/types';
+import { isCtrlKeyPressed, onCtrlStateChange } from '@core/hotkeys';
 
 type OfficerAction = (officer: Officer) => void;
 
@@ -75,7 +76,10 @@ export class OfficerTooltip {
   private readonly root: HTMLDivElement;
   private hideTimer: number | null = null;
   private currentTarget: HTMLElement | null = null;
+  private currentOfficer: Officer | null = null;
+  private isHovering = false;
   private readonly options: OfficerTooltipOptions;
+  private ctrlStateUnsubscribe: (() => void) | null = null;
 
   constructor(options: OfficerTooltipOptions = {}) {
     this.options = options;
@@ -86,6 +90,17 @@ export class OfficerTooltip {
     this.root.addEventListener('mouseenter', () => this.cancelHide());
     this.root.addEventListener('mouseleave', () => this.scheduleHide(120));
     document.body.appendChild(this.root);
+
+    // Listen for CTRL key state changes
+    this.ctrlStateUnsubscribe = onCtrlStateChange((pressed) => {
+      if (this.isHovering && this.currentTarget && this.currentOfficer) {
+        if (pressed) {
+          this.showTooltip(this.currentTarget, this.currentOfficer);
+        } else {
+          this.hide();
+        }
+      }
+    });
   }
 
   private cancelHide(): void {
@@ -194,9 +209,19 @@ export class OfficerTooltip {
   }
 
   show(target: HTMLElement, officer: Officer): void {
+    this.isHovering = true;
+    this.currentTarget = target;
+    this.currentOfficer = officer;
+
+    // Only show tooltip if CTRL is pressed
+    if (isCtrlKeyPressed()) {
+      this.showTooltip(target, officer);
+    }
+  }
+
+  private showTooltip(target: HTMLElement, officer: Officer): void {
     this.cancelHide();
     this.render(officer);
-    this.currentTarget = target;
     const id = `tooltip-${officer.id}`;
     this.root.id = id;
     target.setAttribute('aria-describedby', id);
@@ -243,6 +268,17 @@ export class OfficerTooltip {
   }
 
   scheduleHideFromTarget(): void {
+    this.isHovering = false;
+    this.currentTarget = null;
+    this.currentOfficer = null;
     this.scheduleHide();
+  }
+
+  destroy(): void {
+    if (this.ctrlStateUnsubscribe) {
+      this.ctrlStateUnsubscribe();
+      this.ctrlStateUnsubscribe = null;
+    }
+    this.root.remove();
   }
 }
