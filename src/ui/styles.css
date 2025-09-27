@@ -42,6 +42,34 @@
   background-color: rgba(17, 24, 39, 0.4);
   background-repeat: no-repeat;
   background-position: center;
+  border: 2px solid rgba(148, 163, 184, 0.3);
+  transition: border-color 200ms ease;
+}
+
+/* Rank-based colored borders for officer avatars */
+.officer-avatar[data-rank='king'] {
+  border-color: var(--ring-king);
+  box-shadow: 0 0 8px rgba(255, 209, 102, 0.4);
+}
+
+.officer-avatar[data-rank='player'] {
+  border-color: var(--ring-player);
+  box-shadow: 0 0 8px rgba(244, 162, 97, 0.32);
+}
+
+.officer-avatar[data-rank='captain'] {
+  border-color: var(--ring-captain);
+  box-shadow: 0 0 8px rgba(142, 202, 230, 0.32);
+}
+
+.officer-avatar[data-rank='scout'] {
+  border-color: var(--ring-scout);
+  box-shadow: 0 0 8px rgba(149, 213, 178, 0.32);
+}
+
+.officer-avatar[data-rank='grunt'] {
+  border-color: var(--ring-grunt);
+  box-shadow: 0 0 8px rgba(173, 181, 189, 0.28);
 }
 
 .officer-avatar--fallback {
