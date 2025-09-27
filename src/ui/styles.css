@@ -1933,6 +1933,181 @@ button:disabled {
   z-index: 3;
 }
 
+.free-roam__marker--dynamic-warcall {
+  z-index: 4;
+}
+
+.free-roam__marker--dynamic-warcall .free-roam__marker-icon {
+  background: rgba(147, 51, 234, 0.9);
+  border: 2px solid rgba(147, 51, 234, 0.3);
+  animation: dynamicWarcallPulse 3s infinite;
+}
+
+@keyframes dynamicWarcallPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 10px 18px rgba(8, 13, 23, 0.5),
+      0 0 0 0 rgba(147, 51, 234, 0.7);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow:
+      0 12px 22px rgba(8, 13, 23, 0.6),
+      0 0 0 10px rgba(147, 51, 234, 0);
+  }
+}
+
+.free-roam__marker--officer-moving .free-roam__marker-avatar {
+  border-color: rgba(34, 197, 94, 0.7);
+  animation: movingOfficer 1s infinite alternate;
+}
+
+.free-roam__marker--officer-fighting .free-roam__marker-avatar {
+  border-color: rgba(239, 68, 68, 0.9);
+  animation: fightingOfficer 0.5s infinite;
+}
+
+.free-roam__marker--officer-warcall .free-roam__marker-avatar {
+  border-color: rgba(59, 130, 246, 0.8);
+  animation: warcallOfficer 2s infinite;
+}
+
+@keyframes movingOfficer {
+  0% {
+    transform: translateX(-1px);
+  }
+  100% {
+    transform: translateX(1px);
+  }
+}
+
+@keyframes fightingOfficer {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes warcallOfficer {
+  0%,
+  100% {
+    transform: scale(1);
+    border-color: rgba(59, 130, 246, 0.8);
+  }
+  50% {
+    transform: scale(1.05);
+    border-color: rgba(59, 130, 246, 1);
+  }
+}
+
+.free-roam__target-indicator {
+  position: absolute;
+  color: rgba(34, 197, 94, 0.8);
+  font-size: 12px;
+  font-weight: bold;
+  pointer-events: none;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  animation: targetIndicator 1s infinite;
+}
+
+@keyframes targetIndicator {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.free-roam__marker-state {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.free-roam__ai-state {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.free-roam__ai-state--idle {
+  color: var(--text-muted);
+}
+
+.free-roam__ai-state--moving {
+  color: rgba(34, 197, 94, 0.9);
+}
+
+.free-roam__ai-state--fighting {
+  color: rgba(239, 68, 68, 0.9);
+}
+
+.free-roam__ai-state--warcall {
+  color: rgba(59, 130, 246, 0.9);
+}
+
+.free-roam__list-item--dynamic {
+  border-left: 3px solid rgba(147, 51, 234, 0.6);
+  background: rgba(147, 51, 234, 0.1);
+}
+
+.free-roam__marker--player {
+  z-index: 5;
+}
+
+.free-roam__marker--player .free-roam__marker-icon {
+  background: rgba(16, 185, 129, 0.95);
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  font-size: 1.1rem;
+  animation: playerPulse 2s infinite;
+}
+
+@keyframes playerPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 10px 18px rgba(8, 13, 23, 0.5),
+      0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow:
+      0 12px 22px rgba(8, 13, 23, 0.6),
+      0 0 0 8px rgba(16, 185, 129, 0);
+  }
+}
+
+.free-roam__player-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.free-roam__player-info p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.free-roam__controls {
+  padding: var(--spacing-xs);
+  background: rgba(30, 41, 59, 0.4);
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+}
+
+.free-roam__controls small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
 .free-roam__marker-avatar {
   border-radius: 14px;
   border: 2px solid rgba(148, 163, 184, 0.45);
