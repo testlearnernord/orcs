@@ -226,6 +226,12 @@ export function FreeRoamView({
     [idleMs, idleSeconds]
   );
 
+
+  const secondsUntilCycle = useMemo(
+    () => formatIdleCountdown(idleMs, idleSeconds),
+    [idleMs, idleSeconds]
+  );
+
   const handleAdvanceCycle = useCallback(() => {
     store.tick();
   }, [store]);
