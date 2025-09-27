@@ -46,9 +46,9 @@ describe('AudioManager', () => {
 
       // URLs should contain the audio filename
       expect(state.tracks[0].url).toContain(
-        'curse-of-the-witches-jimena-contreras.mp3'
+        'Curse-of-the-Witches-Jimena-Contreras.mp3'
       );
-      expect(state.tracks[1].url).toContain('whirlpool-the-mini-vandals.mp3');
+      expect(state.tracks[1].url).toContain('Whirlpool-The-Mini-Vandals.mp3');
 
       // URLs should be absolute paths
       expect(state.tracks[0].url).toMatch(/^\/.*audio\/.*\.mp3$/);
