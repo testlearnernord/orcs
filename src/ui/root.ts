@@ -742,7 +742,8 @@ export class NemesisUI {
           existing.playFlip();
         } else {
           const card = new OfficerCard(officer, {
-            onOfficerClick: (officer) => this.detailsPanel.showOfficerDetails(officer)
+            onOfficerClick: (officer) =>
+              this.detailsPanel.showOfficerDetails(officer)
           });
           this.cards.set(officer.id, card);
           grid.appendChild(card.element);

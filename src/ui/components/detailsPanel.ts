@@ -97,8 +97,12 @@ export class DetailsPanel {
       </div>
     `;
 
-    this.checkbox = this.container.querySelector('.details-checkbox') as HTMLInputElement;
-    this.detailsContent = this.container.querySelector('.details-content') as HTMLElement;
+    this.checkbox = this.container.querySelector(
+      '.details-checkbox'
+    ) as HTMLInputElement;
+    this.detailsContent = this.container.querySelector(
+      '.details-content'
+    ) as HTMLElement;
 
     this.checkbox.addEventListener('change', () => {
       this.toggleDetailsVisibility();
@@ -122,14 +126,16 @@ export class DetailsPanel {
 
   showOfficerDetails(officer: Officer): void {
     this.currentOfficer = officer;
-    
+
     // Only render if details are currently visible
     if (this.checkbox?.checked) {
       this.renderOfficerDetails(officer);
     }
   }
 
-  private resolveRelations(officer: Officer): Array<Relationship & { name?: string }> {
+  private resolveRelations(
+    officer: Officer
+  ): Array<Relationship & { name?: string }> {
     return officer.relationships.map((relation) => ({
       ...relation,
       name: this.options.resolveName?.(relation.with)
@@ -172,7 +178,7 @@ export class DetailsPanel {
             })
             .join('')}</ul>`
         : '<p class="details-empty">Keine bekannten Bande.</p>';
-    
+
     const traits =
       officer.traits.length > 0
         ? officer.traits

@@ -200,7 +200,7 @@ export class AudioManager {
    * Gets tracks that are not battle-exclusive (suitable for main menu)
    */
   private getNonBattleTracks(): AudioTrack[] {
-    return this.state.tracks.filter(track => !track.battleExclusive);
+    return this.state.tracks.filter((track) => !track.battleExclusive);
   }
 
   /**
@@ -209,12 +209,14 @@ export class AudioManager {
   setRandomMainMenuTrack(): void {
     const nonBattleTracks = this.getNonBattleTracks();
     if (nonBattleTracks.length === 0) return;
-    
+
     const randomIndex = Math.floor(Math.random() * nonBattleTracks.length);
     const randomTrack = nonBattleTracks[randomIndex];
-    
+
     // Find the index of this track in the full tracks array
-    const fullIndex = this.state.tracks.findIndex(track => track.id === randomTrack.id);
+    const fullIndex = this.state.tracks.findIndex(
+      (track) => track.id === randomTrack.id
+    );
     if (fullIndex !== -1) {
       this.setTrack(fullIndex);
     }

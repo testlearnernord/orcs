@@ -153,7 +153,7 @@ export class OfficerCard {
     this.element.addEventListener('click', () => {
       this.options.onOfficerClick?.(this.officer);
     });
-    
+
     // Keep keyboard support for accessibility
     this.element.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {

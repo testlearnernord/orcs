@@ -46,7 +46,7 @@ export class MainMenu {
       '/orcs/orcs-main-menu2.png',
       '/orcs/orc-main-menu3.png'
     ];
-    
+
     const randomIndex = Math.floor(Math.random() * mainMenuImages.length);
     return mainMenuImages[randomIndex];
   }
