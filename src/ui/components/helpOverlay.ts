@@ -18,6 +18,10 @@ export class HelpOverlay {
             <li><kbd>R</kbd> Soft-Reset</li>
             <li><kbd>N</kbd> Neuer Warcall</li>
             <li><kbd>H</kbd> Hilfe anzeigen</li>
+            <li><kbd>P</kbd> Musik abspielen/pausieren</li>
+            <li><kbd>M</kbd> Musik stumm schalten</li>
+            <li><kbd>[</kbd> Vorheriger Track</li>
+            <li><kbd>]</kbd> Nächster Track</li>
           </ul>
         </section>
         <section>
