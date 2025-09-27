@@ -162,21 +162,29 @@ describe('OfficerTooltip CTRL key behavior', () => {
   });
 
   it('should not show tooltip when quickly switching between officers without CTRL after previous CTRL usage', () => {
-    // This test simulates the exact issue: user presses CTRL, sees tooltip, 
+    // This test simulates the exact issue: user presses CTRL, sees tooltip,
     // releases CTRL, then hovers over different officers without CTRL
-    
+
     const secondTargetElement = document.createElement('div');
     const thirdTargetElement = document.createElement('div');
     document.body.appendChild(secondTargetElement);
     document.body.appendChild(thirdTargetElement);
 
-    const secondOfficer: Officer = { ...mockOfficer, id: 'officer-2', name: 'Officer 2' };
-    const thirdOfficer: Officer = { ...mockOfficer, id: 'officer-3', name: 'Officer 3' };
+    const secondOfficer: Officer = {
+      ...mockOfficer,
+      id: 'officer-2',
+      name: 'Officer 2'
+    };
+    const thirdOfficer: Officer = {
+      ...mockOfficer,
+      id: 'officer-3',
+      name: 'Officer 3'
+    };
 
     // 1. CTRL + hover first officer -> tooltip shows
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Control' }));
     tooltip.show(targetElement, mockOfficer);
-    
+
     const tooltipElement = document.querySelector('.officer-tooltip');
     expect(tooltipElement?.classList.contains('is-visible')).toBe(true);
 
@@ -200,64 +208,72 @@ describe('OfficerTooltip CTRL key behavior', () => {
 
   it('should properly handle state when CTRL is released while tooltip is animating', () => {
     // Test the specific edge case where hide() doesn't clear all state
-    
+
     // 1. CTRL + hover -> tooltip shows
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Control' }));
     tooltip.show(targetElement, mockOfficer);
-    
+
     const tooltipElement = document.querySelector('.officer-tooltip');
     expect(tooltipElement?.classList.contains('is-visible')).toBe(true);
 
     // 2. Release CTRL (this calls hide() but animation might still be running)
     window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Control' }));
-    
+
     // At this point, tooltip should be hidden but animation might be running
     // The isHovering and currentOfficer state might still be set incorrectly
-    
+
     // 3. Immediately hover different officer without CTRL
     const secondTargetElement = document.createElement('div');
     document.body.appendChild(secondTargetElement);
-    const secondOfficer: Officer = { ...mockOfficer, id: 'officer-2', name: 'Officer 2' };
-    
+    const secondOfficer: Officer = {
+      ...mockOfficer,
+      id: 'officer-2',
+      name: 'Officer 2'
+    };
+
     tooltip.show(secondTargetElement, secondOfficer);
-    
+
     // Tooltip should NOT be visible
     expect(tooltipElement?.classList.contains('is-visible')).toBe(false);
-    
+
     // Cleanup
     secondTargetElement.remove();
   });
 
   it('should handle race condition between hide animation and new show call', async () => {
     // This test specifically checks if there's a race condition with the animation
-    
+
     // 1. CTRL + hover -> tooltip shows
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Control' }));
     tooltip.show(targetElement, mockOfficer);
-    
+
     const tooltipElement = document.querySelector('.officer-tooltip');
     expect(tooltipElement?.classList.contains('is-visible')).toBe(true);
 
     // 2. Release CTRL -> triggers hide() with animation
     window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Control' }));
-    
+
     // 3. Immediately (before animation finishes) try to show on another officer without CTRL
     const secondTargetElement = document.createElement('div');
     document.body.appendChild(secondTargetElement);
-    const secondOfficer: Officer = { ...mockOfficer, id: 'officer-2', name: 'Officer 2' };
-    
+    const secondOfficer: Officer = {
+      ...mockOfficer,
+      id: 'officer-2',
+      name: 'Officer 2'
+    };
+
     // This should not show the tooltip since CTRL is not pressed
     tooltip.show(secondTargetElement, secondOfficer);
-    
+
     // Even if animation is still running, tooltip should not be considered visible for new officer
     expect(tooltipElement?.classList.contains('is-visible')).toBe(false);
-    
+
     // Wait for animation to complete
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     // After animation, tooltip should definitely not be visible
     expect(tooltipElement?.classList.contains('is-visible')).toBe(false);
-    
+
     // Cleanup
     secondTargetElement.remove();
   });
