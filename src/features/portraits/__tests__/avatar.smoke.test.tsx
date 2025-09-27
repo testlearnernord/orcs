@@ -142,6 +142,9 @@ describe('OfficerAvatar', () => {
       expect(element.getAttribute('data-portrait-set')).toMatch(/set_[ab]/);
       expect(element.getAttribute('src')).toMatch(/^blob:mock-/);
       expect(element.getAttribute('data-art')).toBeNull();
+      expect(element.style.backgroundImage).toMatch(/\.webp/);
+      expect(element.style.backgroundSize).toMatch(/%/);
+      expect(element.style.backgroundPosition).toMatch(/%/);
     });
 
     const status = (window as any).__orcsPortraitStatus;
@@ -164,5 +167,7 @@ describe('OfficerAvatar', () => {
     const status = (window as any).__orcsPortraitStatus;
     expect(status.tried.length).toBeGreaterThan(0);
     expect(status.fail.length).toBeGreaterThanOrEqual(2);
+    expect(status.failed.length).toBeGreaterThanOrEqual(2);
+    expect(element.querySelector('svg')).toBeTruthy();
   });
 });
