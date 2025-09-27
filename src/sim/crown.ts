@@ -15,9 +15,9 @@ const TRIBUTE_MAX = 0.25;
 const TRIBUTE_INCREMENT = 0.002;
 const BLOOD_OATH_PRESSURE_REDUCTION = 0.005;
 const BLOOD_OATH_TRIBUTE_BONUS = 0.01;
-const BASE_PRESSURE_GAIN = 0.002;
-const SHAKY_PRESSURE_GAIN = 0.01;
-const CRISIS_PRESSURE_GAIN = 0.03;
+const BASE_PRESSURE_GAIN = 0.001;
+const SHAKY_PRESSURE_GAIN = 0.005;
+const CRISIS_PRESSURE_GAIN = 0.015;
 const DECAY_TAPFERKEIT = 0.0015;
 const DECAY_LOYALITAET = 0.0005;
 const DECAY_STOLZ = 0.0005;
@@ -206,6 +206,9 @@ function triggerThroneBattle(
   casualties: string[];
   pressure: number;
 } | null {
+  // Only trigger throne battles when crown pressure is high enough
+  if (crown.crownPressure < 0.4) return null;
+
   const pool = state.officers.filter(
     (officer) => officer.id !== king.id && officer.status === 'ALIVE'
   );
@@ -215,6 +218,10 @@ function triggerThroneBattle(
     .sort((a, b) => b.score - a.score);
   const leaderEntry = scored[0];
   if (!leaderEntry) return null;
+
+  // Higher threshold for actually starting a battle - need strong challenger
+  if (leaderEntry.score < 0.4) return null;
+
   let leader = leaderEntry.officer;
   let remaining = scored.slice(1);
   if (leaderEntry.score < 0.3 && remaining.length > 0) {
@@ -261,27 +268,31 @@ function triggerThroneBattle(
   const casualties: string[] = [];
   if (challengersWin) {
     casualties.push(king.id);
+    // Reduced likelihood of extra casualties in throne battles
     if (
-      rng.fork(`crown:spill:${state.cycle}`).next() > 0.6 &&
+      rng.fork(`crown:spill:${state.cycle}`).next() > 0.8 &&
       challengers.length > 1
     ) {
       const fallen = rng.fork(`crown:support:${state.cycle}`).pick(supporters);
       casualties.push(fallen.id);
     }
   } else {
-    const fallenLeader = rng
-      .fork(`crown:leader:${state.cycle}`)
-      .pick(challengers);
-    casualties.push(fallenLeader.id);
-    if (
-      rng.fork(`crown:return:${state.cycle}`).next() > 0.7 &&
-      supporters.length > 0
-    ) {
-      const extra = rng
-        .fork(`crown:return-extra:${state.cycle}`)
-        .pick(supporters);
-      if (!casualties.includes(extra.id)) {
-        casualties.push(extra.id);
+    // Only 50% chance someone dies when challengers lose
+    if (rng.fork(`crown:leader-death:${state.cycle}`).next() < 0.5) {
+      const fallenLeader = rng
+        .fork(`crown:leader:${state.cycle}`)
+        .pick(challengers);
+      casualties.push(fallenLeader.id);
+      if (
+        rng.fork(`crown:return:${state.cycle}`).next() > 0.85 &&
+        supporters.length > 0
+      ) {
+        const extra = rng
+          .fork(`crown:return-extra:${state.cycle}`)
+          .pick(supporters);
+        if (!casualties.includes(extra.id)) {
+          casualties.push(extra.id);
+        }
       }
     }
   }

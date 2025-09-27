@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+
+// Dummy script for testing/development purposes
+// This script would handle audio-related functionality
+
+console.log('Dummy audio script executed');
 /**
  * Creates dummy/placeholder audio files to prevent 404 errors
  *
