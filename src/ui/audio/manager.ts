@@ -34,6 +34,8 @@ export class AudioManager {
   private state: AudioState;
   private listeners: Map<AudioEventName, Array<(data?: any) => void>> =
     new Map();
+  private audioAvailable: boolean = true;
+  private errorLogged: boolean = false;
 
   constructor() {
     this.state = {
@@ -65,7 +67,7 @@ export class AudioManager {
   private initializeAudio(): void {
     this.audio = new Audio();
     this.audio.loop = false; // We'll handle track cycling manually
-    this.audio.preload = 'metadata';
+    this.audio.preload = 'none'; // Don't preload to avoid immediate errors
 
     // Set up event listeners
     this.audio.addEventListener('loadedmetadata', () => {
@@ -87,11 +89,16 @@ export class AudioManager {
     });
 
     this.audio.addEventListener('error', (error) => {
-      console.error('[AudioManager] Playback error:', error);
+      // Only log audio errors once to prevent console spam
+      if (!this.errorLogged) {
+        console.warn('[AudioManager] Audio files not available - music disabled');
+        this.errorLogged = true;
+      }
+      this.audioAvailable = false;
       this.emit('error', error);
     });
 
-    // Load initial track
+    // Load initial track (but don't preload)
     this.loadCurrentTrack();
   }
 
@@ -129,7 +136,7 @@ export class AudioManager {
 
   private loadCurrentTrack(): void {
     const track = this.getCurrentTrack();
-    if (track && this.audio) {
+    if (track && this.audio && this.audioAvailable) {
       // Ensure URL is properly encoded for HTML Audio element
       this.audio.src = encodeURI(track.url);
       this.audio.volume = this.state.isMuted ? 0 : this.state.volume;
@@ -168,7 +175,7 @@ export class AudioManager {
   }
 
   async play(): Promise<void> {
-    if (!this.audio) return;
+    if (!this.audio || !this.audioAvailable) return;
 
     try {
       await this.audio.play();
@@ -181,23 +188,32 @@ export class AudioManager {
           '[AudioManager] Autoplay blocked - user interaction required'
         );
       } else if (errorName === 'NotSupportedError') {
-        console.error(
-          '[AudioManager] Audio format not supported or file not found:',
-          this.getCurrentTrack()?.url
-        );
+        if (!this.errorLogged) {
+          console.warn('[AudioManager] Audio files not available - music disabled');
+          this.errorLogged = true;
+        }
+        this.audioAvailable = false;
       } else {
-        console.error('[AudioManager] Play failed:', error);
+        if (!this.errorLogged) {
+          console.warn('[AudioManager] Audio playback failed - music disabled');
+          this.errorLogged = true;
+        }
+        this.audioAvailable = false;
       }
       this.emit('error', error);
     }
   }
 
   pause(): void {
-    if (!this.audio) return;
+    if (!this.audio || !this.audioAvailable) return;
 
     this.audio.pause();
     this.state.isPlaying = false;
     this.emit('stateChange', this.state);
+  }
+
+  isAudioAvailable(): boolean {
+    return this.audioAvailable;
   }
 
   togglePlayPause(): void {
