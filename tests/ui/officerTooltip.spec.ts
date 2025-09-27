@@ -90,6 +90,26 @@ describe('OfficerTooltip CTRL key behavior', () => {
     expect(tooltipElement?.classList.contains('is-visible')).toBe(false);
   });
 
+  it('should not show tooltip on subsequent hovers after CTRL-hover-release sequence', () => {
+    // Press CTRL and hover to show tooltip
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Control' }));
+    tooltip.show(targetElement, mockOfficer);
+    
+    const tooltipElement = document.querySelector('.officer-tooltip');
+    expect(tooltipElement?.classList.contains('is-visible')).toBe(true);
+    
+    // Release CTRL while hovering (this should hide tooltip)
+    window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Control' }));
+    expect(tooltipElement?.classList.contains('is-visible')).toBe(false);
+    
+    // Move away and hover on different officer without CTRL
+    tooltip.scheduleHideFromTarget();
+    tooltip.show(targetElement, mockOfficer);
+    
+    // Tooltip should not show because CTRL is not pressed
+    expect(tooltipElement?.classList.contains('is-visible')).toBe(false);
+  });
+
   it('should show tooltip immediately when CTRL is pressed while already hovering', () => {
     // Start hovering without CTRL
     tooltip.show(targetElement, mockOfficer);
