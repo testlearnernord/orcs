@@ -48,7 +48,7 @@ _None currently implemented_
 To add the actual audio files:
 
 1. **For development**: Place MP3 files in `audio/` directory (highest priority)
-2. **For local override**: Place MP3 files in `local-audio/` directory (takes precedence over src/assets)  
+2. **For local override**: Place MP3 files in `local-audio/` directory (takes precedence over src/assets)
 3. **For fallback**: Replace the placeholder files in `src/assets/audio/` directory
 4. **Required files**:
    - `Curse-of-the-Witches-Jimena-Contreras.mp3`
