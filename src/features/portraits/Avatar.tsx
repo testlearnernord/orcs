@@ -4,6 +4,7 @@ import { chooseSetAndIndex } from './mapping';
 import { loadPortraitAtlases, type PortraitAtlasMap } from './portrait-atlas';
 import { PORTRAIT_SET_DEFINITIONS } from '@/ui/portraits/config';
 import type { PortraitSet } from './types';
+import type { Rank } from '@/sim/types';
 
 type FallbackReason = 'legacy' | 'missing';
 
@@ -25,6 +26,7 @@ export type OfficerAvatarProps = {
   className?: string;
   requireTag?: string;
   style?: React.CSSProperties;
+  rank?: Rank;
 };
 
 function filterDefinitions(tag?: string) {
@@ -62,6 +64,15 @@ function safeId(id: string): string {
   return id && id.trim() ? id.trim() : 'unknown-officer';
 }
 
+// Rank to CSS slug mapping (for border colors)
+const RANK_SLUG: Record<Rank, string> = {
+  König: 'king',
+  Spieler: 'player',
+  Captain: 'captain',
+  Späher: 'scout',
+  Grunzer: 'grunt'
+};
+
 function mergeStyles(
   computed: React.CSSProperties | null,
   size: number,
@@ -89,7 +100,8 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
   title,
   className,
   requireTag,
-  style
+  style,
+  rank
 }) => {
   const id = safeId(officerId);
   const [tileStyle, setTileStyle] = React.useState<React.CSSProperties | null>(
@@ -288,6 +300,7 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
       aria-label={title ?? id}
       title={title}
       data-portrait-set={activeSet ?? undefined}
+      data-rank={rank ? RANK_SLUG[rank] : undefined}
       className={getClassName('officer-avatar', className)}
       style={combinedStyle}
     />

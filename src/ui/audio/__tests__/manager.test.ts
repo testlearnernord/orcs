@@ -46,9 +46,9 @@ describe('AudioManager', () => {
 
       // URLs should contain the audio filename
       expect(state.tracks[0].url).toContain(
-        'curse-of-the-witches-jimena-contreras.mp3'
+        'Curse-of-the-Witches-Jimena-Contreras.mp3'
       );
-      expect(state.tracks[1].url).toContain('whirlpool-the-mini-vandals.mp3');
+      expect(state.tracks[1].url).toContain('Whirlpool-The-Mini-Vandals.mp3');
 
       // URLs should be absolute paths
       expect(state.tracks[0].url).toMatch(/^\/.*audio\/.*\.mp3$/);
@@ -113,6 +113,31 @@ describe('AudioManager', () => {
       expect(manager.getState().isMuted).toBe(true);
       manager.toggleMute();
       expect(manager.getState().isMuted).toBe(false);
+
+      manager.destroy();
+    });
+
+    it('should handle audio availability status', () => {
+      const manager = new AudioManager();
+
+      // Initially audio should be considered available
+      expect(manager.isAudioAvailable()).toBe(true);
+
+      manager.destroy();
+    });
+
+    it('should handle graceful degradation when audio is not available', () => {
+      const manager = new AudioManager();
+
+      // The AudioManager should handle missing files gracefully
+      // In a test environment, audio files won't actually load
+      // but the manager should not crash or spam errors
+      expect(() => {
+        manager.play();
+        manager.pause();
+        manager.nextTrack();
+        manager.previousTrack();
+      }).not.toThrow();
 
       manager.destroy();
     });
