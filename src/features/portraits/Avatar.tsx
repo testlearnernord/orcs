@@ -134,8 +134,8 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         const { set, col, row } = chooseSetAndIndex(id, availableSets);
         const cols = Math.max(1, set.cols);
         const rows = Math.max(1, set.rows);
-        const colRatio = cols > 1 ? col / cols : 0;
-        const rowRatio = rows > 1 ? row / rows : 0;
+        const colRatio = cols > 1 ? (col + 0.5) / cols : 0.5;
+        const rowRatio = rows > 1 ? (row + 0.5) / rows : 0.5;
         const css: React.CSSProperties = {
           width: size,
           height: size,
