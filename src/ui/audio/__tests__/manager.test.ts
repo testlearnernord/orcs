@@ -57,6 +57,21 @@ describe('AudioManager', () => {
       manager.destroy();
     });
 
+    it('should handle audio URLs that can be properly encoded', () => {
+      const manager = new AudioManager();
+      const state = manager.getState();
+
+      // Test that URLs with spaces can be properly encoded
+      state.tracks.forEach(track => {
+        const url = new URL(track.url, 'http://localhost');
+        expect(url.pathname).toContain('audio/');
+        // The URL constructor should handle encoding automatically
+        expect(() => encodeURI(track.url)).not.toThrow();
+      });
+
+      manager.destroy();
+    });
+
     it('should navigate between tracks', () => {
       const manager = new AudioManager();
 
