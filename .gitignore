@@ -5,18 +5,8 @@ coverage/
 .vscode/
 
 # block new binaries
-*.png
-*.jpg
-*.jpeg
-*.webp
-*.gif
-*.bmp
-*.ico
-*.mp3
-*.wav
+
 *.ogg
-*.mp4
-*.mov
 *.zip
 *.7z
 *.tar
@@ -34,4 +24,9 @@ coverage/
 !src/assets/orcs/portraits/*.png
 !docs/assets/**/*.webp
 !docs/assets/**/*.png
+=======
+
+# allow committed audio assets in source and generated docs output  
+!src/assets/audio/*.mp3
+!docs/audio/*.mp3
 public/assets/
