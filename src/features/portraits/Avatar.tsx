@@ -134,14 +134,24 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         const { set, col, row } = chooseSetAndIndex(id, availableSets);
         const cols = Math.max(1, set.cols);
         const rows = Math.max(1, set.rows);
-        // Position at the center of each tile with fine-tuning for optimal face centering
-        // This prevents overlapping and ensures orc faces are perfectly centered
-        const colRatio = cols > 1 ? (col + 0.5) / cols : 0.5;
-        const rowRatio = rows > 1 ? (row + 0.5) / rows : 0.5;
         
-        // Apply slight scaling adjustment to ensure better face visibility
-        // Increase size slightly to account for any padding in atlas tiles
-        const scaleAdjustment = 1.05; // 5% larger to reduce any edge cropping
+        // Advanced centering with optimized positioning and scaling
+        // This approach uses more aggressive adjustments to ensure perfect face centering
+        
+        // Calculate base tile center positions
+        const baseCenterX = (col + 0.5) / cols;
+        const baseCenterY = (row + 0.5) / rows;
+        
+        // Apply fine-tuning offsets to account for atlas inconsistencies
+        // These micro-adjustments help center faces that may be off-center in their tiles
+        const xOffset = 0.002; // Slight horizontal adjustment
+        const yOffset = -0.008; // Slight upward adjustment to better center faces
+        
+        const colRatio = Math.max(0, Math.min(1, baseCenterX + xOffset));
+        const rowRatio = Math.max(0, Math.min(1, baseCenterY + yOffset));
+        
+        // More aggressive scaling to ensure full face visibility while reducing edge artifacts
+        const scaleAdjustment = 1.12; // 12% larger for better face visibility
         const adjustedSize = `${cols * 100 * scaleAdjustment}% ${rows * 100 * scaleAdjustment}%`;
         
         const css: React.CSSProperties = {
@@ -151,7 +161,10 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
           backgroundRepeat: 'no-repeat',
           backgroundSize: adjustedSize,
           backgroundPosition: `${colRatio * 100}% ${rowRatio * 100}%`,
-          borderRadius: 8
+          borderRadius: 8,
+          // Additional CSS properties for better rendering
+          imageRendering: 'crisp-edges' as any,
+          backgroundClip: 'padding-box'
         };
         if (alive) {
           setTileStyle(css);
