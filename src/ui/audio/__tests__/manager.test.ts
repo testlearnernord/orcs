@@ -98,7 +98,7 @@ describe('AudioManager', () => {
       // Test cycling: go to the last track and then next should cycle back to first
       manager.setTrack(8); // Set to last track (higher-octane)
       expect(manager.getCurrentTrack()?.id).toBe('higher-octane');
-      
+
       manager.nextTrack(); // Should cycle back to first
       expect(manager.getCurrentTrack()?.id).toBe('curse-witches');
 
