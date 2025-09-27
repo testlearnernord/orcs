@@ -97,6 +97,7 @@ export class NemesisUI {
   private readonly filters = new UIFilterStore();
   private readonly filterButtons = new Map<FilterKey, HTMLButtonElement>();
   private readonly officerIndex = new Map<string, Officer>();
+  private lastRenderedOfficerState = new Map<string, Officer>();
   private readonly feed = new FeedView();
   private graveyard: GraveyardPanel | null = null;
   private relations: RelationsOverlay | null = null;
@@ -705,6 +706,31 @@ export class NemesisUI {
     officers.forEach((officer) => this.officerIndex.set(officer.id, officer));
   }
 
+  private hasOfficerChanged(officer: Officer): boolean {
+    const lastState = this.lastRenderedOfficerState.get(officer.id);
+    if (!lastState) return true;
+    
+    // Check for meaningful changes that would require UI updates
+    return (
+      lastState.rank !== officer.rank ||
+      lastState.name !== officer.name ||
+      lastState.level !== officer.level ||
+      lastState.merit !== officer.merit ||
+      lastState.traits.length !== officer.traits.length ||
+      lastState.traits.some((trait, index) => trait !== officer.traits[index]) ||
+      lastState.relationships.length !== officer.relationships.length ||
+      lastState.relationships.some((rel, index) => 
+        !officer.relationships[index] ||
+        rel.with !== officer.relationships[index].with ||
+        rel.type !== officer.relationships[index].type
+      ) ||
+      Math.abs(lastState.personality.gier - officer.personality.gier) > 0.001 ||
+      Math.abs(lastState.personality.tapferkeit - officer.personality.tapferkeit) > 0.001 ||
+      Math.abs(lastState.personality.loyalitaet - officer.personality.loyalitaet) > 0.001 ||
+      Math.abs(lastState.personality.stolz - officer.personality.stolz) > 0.001
+    );
+  }
+
   private renderOfficers(state: WorldState): void {
     const rankList = this.rankListEl;
     if (!rankList) return;
@@ -716,6 +742,7 @@ export class NemesisUI {
       if (!visibleIds.has(id)) {
         card.element.remove();
         this.cards.delete(id);
+        this.lastRenderedOfficerState.delete(id);
       }
     });
 
@@ -736,10 +763,21 @@ export class NemesisUI {
       members.forEach((officer) => {
         const existing = this.cards.get(officer.id);
         if (existing) {
-          existing.captureBounds();
-          existing.update(officer);
+          // Only update if officer data has meaningfully changed
+          const hasChanged = this.hasOfficerChanged(officer);
+          if (hasChanged) {
+            existing.captureBounds();
+            existing.update(officer);
+            existing.playFlip();
+            this.lastRenderedOfficerState.set(officer.id, { 
+              ...officer, 
+              personality: { ...officer.personality }, 
+              relationships: [...officer.relationships], 
+              traits: [...officer.traits] 
+            });
+          }
+          // Always ensure element is in correct position
           grid.appendChild(existing.element);
-          existing.playFlip();
         } else {
           const card = new OfficerCard(officer, {
             onOfficerClick: (officer) =>
@@ -747,6 +785,12 @@ export class NemesisUI {
           });
           this.cards.set(officer.id, card);
           grid.appendChild(card.element);
+          this.lastRenderedOfficerState.set(officer.id, { 
+            ...officer, 
+            personality: { ...officer.personality }, 
+            relationships: [...officer.relationships], 
+            traits: [...officer.traits] 
+          });
         }
       });
       container.classList.toggle('is-empty', members.length === 0);
