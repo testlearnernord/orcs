@@ -1,21 +1,18 @@
 import React from 'react';
 
-import { loadPortraitManifest } from './manifest';
-import { chooseSetAndIndex } from './mapping';
-import { loadPortraitAtlases } from './portrait-atlas';
+import { makeSilhouetteDataURL } from '@/ui/portraits/fallback';
+import { portraitIndexFor } from '@/ui/portraits/indexFor';
+import type { LoadedAtlas } from './portrait-atlas';
+import { loadPortraitAtlases, sliceTileToURL } from './portrait-atlas';
 
 type FallbackReason = 'legacy' | 'missing';
 
-function detectArtMode(): 'atlases' | 'legacy' {
-  if (typeof window === 'undefined') return 'atlases';
-  try {
-    return window.localStorage?.getItem('art.active') === 'legacy'
-      ? 'legacy'
-      : 'atlases';
-  } catch {
-    return 'atlases';
-  }
-}
+type ArtMode = 'atlases' | 'legacy';
+
+type Selection = {
+  atlas: LoadedAtlas;
+  index: number;
+};
 
 export type OfficerAvatarProps = {
   officerId: string;
@@ -25,6 +22,17 @@ export type OfficerAvatarProps = {
   requireTag?: string;
   style?: React.CSSProperties;
 };
+
+function detectArtMode(): ArtMode {
+  if (typeof window === 'undefined') return 'atlases';
+  try {
+    return window.localStorage?.getItem('art.active') === 'legacy'
+      ? 'legacy'
+      : 'atlases';
+  } catch {
+    return 'atlases';
+  }
+}
 
 function getClassName(base: string, extra?: string): string {
   return [base, extra].filter(Boolean).join(' ');
@@ -39,20 +47,48 @@ function mergeStyles(
   size: number,
   override?: React.CSSProperties
 ): React.CSSProperties {
-  const base: React.CSSProperties = computed
-    ? { ...computed }
-    : { width: size, height: size, borderRadius: 8 };
+  const base: React.CSSProperties = computed ? { ...computed } : {};
+  const dimension = Math.max(1, Math.round(size));
   if (override) {
     Object.assign(base, override);
   }
-  base.width = size;
-  base.height = size;
+  base.width = dimension;
+  base.height = dimension;
   if (override?.borderRadius !== undefined) {
     base.borderRadius = override.borderRadius;
   } else if (base.borderRadius === undefined) {
-    base.borderRadius = 8;
+    base.borderRadius = 12;
   }
   return base;
+}
+
+function totalTiles(atlases: LoadedAtlas[]): number {
+  return atlases.reduce((sum, atlas) => {
+    const tiles = Math.max(
+      0,
+      Math.floor(atlas.spec.cols) * Math.floor(atlas.spec.rows)
+    );
+    return sum + tiles;
+  }, 0);
+}
+
+function selectAtlas(
+  atlases: LoadedAtlas[],
+  globalIndex: number
+): Selection | null {
+  let cursor = globalIndex;
+  for (const atlas of atlases) {
+    const tiles = Math.max(
+      0,
+      Math.floor(atlas.spec.cols) * Math.floor(atlas.spec.rows)
+    );
+    if (tiles <= 0) continue;
+    if (cursor < tiles) {
+      return { atlas, index: cursor };
+    }
+    cursor -= tiles;
+  }
+  return null;
 }
 
 export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
@@ -64,15 +100,12 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
   style
 }) => {
   const id = safeId(officerId);
-  const [tileStyle, setTileStyle] = React.useState<React.CSSProperties | null>(
-    null
-  );
+  const [portraitUrl, setPortraitUrl] = React.useState<string | null>(null);
   const [activeSet, setActiveSet] = React.useState<string | null>(null);
-  const [artMode, setArtMode] = React.useState<'atlases' | 'legacy'>(() =>
-    detectArtMode()
-  );
+  const [artMode, setArtMode] = React.useState<ArtMode>(() => detectArtMode());
   const [fallbackReason, setFallbackReason] =
     React.useState<FallbackReason | null>(null);
+  const objectUrlRef = React.useRef<string | null>(null);
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -85,126 +118,165 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
   }, []);
 
   React.useEffect(() => {
-    let alive = true;
+    if (requireTag && import.meta.env.DEV) {
+      console.warn(
+        '[portraits] requireTag is not supported with atlas slicing'
+      );
+    }
+  }, [requireTag]);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const cleanupObjectUrl = () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
+      }
+    };
+
     (async () => {
+      cleanupObjectUrl();
+      setPortraitUrl(null);
+      setActiveSet(null);
+      setFallbackReason(null);
+
+      if (artMode === 'legacy') {
+        if (!cancelled) {
+          setFallbackReason('legacy');
+        }
+        return;
+      }
+
       try {
-        if (artMode === 'legacy') {
-          if (alive) {
-            setTileStyle(null);
-            setActiveSet(null);
-            setFallbackReason('legacy');
-          }
+        const atlases = await loadPortraitAtlases();
+        const usableAtlases = atlases.filter(
+          (atlas) => atlas.spec.cols > 0 && atlas.spec.rows > 0
+        );
+
+        if (!usableAtlases.length) {
+          throw new Error('No portrait atlases available');
+        }
+
+        const total = totalTiles(usableAtlases);
+        if (total <= 0) {
+          throw new Error('No portrait tiles available');
+        }
+
+        const globalIndex = portraitIndexFor(id, total);
+        const picked = selectAtlas(usableAtlases, globalIndex);
+        if (!picked) {
+          throw new Error('Unable to resolve portrait index');
+        }
+
+        const targetSize = Math.max(1, Math.round(size));
+        const url = await sliceTileToURL(
+          picked.atlas,
+          picked.index,
+          targetSize
+        );
+
+        if (cancelled) {
+          URL.revokeObjectURL(url);
           return;
         }
-        const manifest = await loadPortraitManifest();
-        const sets = requireTag
-          ? manifest.sets.filter((s) => (s.tags || []).includes(requireTag))
-          : manifest.sets;
-        if (!sets.length)
-          throw new Error('No portrait sets available after filtering');
-        const { ok } = await loadPortraitAtlases(sets.map((s) => s.src));
-        const okSetSrc = new Set(ok);
-        const availableSets = sets.filter((set) => okSetSrc.has(set.src));
-        if (!availableSets.length)
-          throw new Error('No portrait atlases available');
-        const { set, col, row } = chooseSetAndIndex(id, availableSets);
-        const cols = Math.max(1, set.cols);
-        const rows = Math.max(1, set.rows);
-        const colRatio = cols > 1 ? col / (cols - 1) : 0;
-        const rowRatio = rows > 1 ? row / (rows - 1) : 0;
-        const css: React.CSSProperties = {
-          width: size,
-          height: size,
-          backgroundImage: `url("${set.src}")`,
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: `${cols * 100}% ${rows * 100}%`,
-          backgroundPosition: `${colRatio * 100}% ${rowRatio * 100}%`,
-          borderRadius: 8
-        };
-        if (alive) {
-          setTileStyle(css);
-          setActiveSet(set.id);
-          setFallbackReason(null);
+
+        cleanupObjectUrl();
+        objectUrlRef.current = url;
+        setPortraitUrl(url);
+        setActiveSet(picked.atlas.spec.id);
+        setFallbackReason(null);
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.warn('[portraits] avatar init failed', error);
         }
-      } catch (err) {
-        console.error('[PORTRAITS] avatar init failed', err);
-        if (alive) {
-          setTileStyle(null);
-          setActiveSet(null);
+        cleanupObjectUrl();
+        if (!cancelled) {
           setFallbackReason('missing');
+          setPortraitUrl(null);
+          setActiveSet(null);
         }
       }
     })();
+
     return () => {
-      alive = false;
+      cancelled = true;
+      cleanupObjectUrl();
     };
-  }, [artMode, id, requireTag, size]);
+  }, [artMode, id, size, requireTag]);
 
   const combinedStyle = React.useMemo(
-    () => mergeStyles(tileStyle, size, style),
-    [tileStyle, size, style]
+    () => mergeStyles(null, size, style),
+    [size, style]
   );
 
+  const fallbackStyle = React.useMemo(
+    () =>
+      mergeStyles(
+        {
+          backgroundColor: 'rgba(17, 24, 39, 0.6)',
+          border: '1px dashed rgba(148, 163, 184, 0.45)',
+          color: '#a3b5d9'
+        },
+        size,
+        style
+      ),
+    [size, style]
+  );
+
+  const width = Math.max(1, Math.round(size));
+  const height = width;
+  const label = title ?? id;
+
   if (fallbackReason) {
-    const baseLabel = title ?? id;
-    const fallbackStyle = mergeStyles(
-      {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(17, 24, 39, 0.6)',
-        border: '1px dashed rgba(148, 163, 184, 0.45)',
-        color: '#a3b5d9'
-      },
-      size,
-      style
-    );
+    const fallbackSrc = makeSilhouetteDataURL(width);
     const tooltip =
       fallbackReason === 'missing' && import.meta.env.DEV
-        ? `${baseLabel} — Portrait fehlte, siehe Konsole.`
-        : fallbackReason
-          ? baseLabel
-          : title;
-    const svgSize = Math.round(size * 0.62);
+        ? `${label} — Portrait fehlte, siehe Konsole.`
+        : label;
+
     return (
-      <div
-        role="img"
-        aria-label={baseLabel}
+      <img
+        src={fallbackSrc || undefined}
+        alt={label}
         title={tooltip}
+        width={width}
+        height={height}
         data-art={fallbackReason === 'legacy' ? 'legacy' : 'fallback'}
         className={getClassName(
           'officer-avatar officer-avatar--fallback',
           className
         )}
         style={fallbackStyle}
-      >
-        <svg
-          width={svgSize}
-          height={svgSize}
-          viewBox="0 0 128 128"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <circle cx="64" cy="44" r="28" fill="rgba(148,163,184,0.4)" />
-          <path
-            d="M24 116c0-22.091 17.909-40 40-40s40 17.909 40 40"
-            fill="rgba(148,163,184,0.4)"
-          />
-          <circle cx="64" cy="44" r="18" fill="rgba(226,232,240,0.8)" />
-          <path
-            d="M40 116c2-16 12-28 24-28s22 12 24 28"
-            fill="rgba(226,232,240,0.8)"
-          />
-        </svg>
-      </div>
+      />
+    );
+  }
+
+  if (!portraitUrl) {
+    return (
+      <div
+        role="img"
+        aria-label={label}
+        title={title}
+        data-state="loading"
+        className={getClassName(
+          'officer-avatar officer-avatar--loading',
+          className
+        )}
+        style={combinedStyle}
+      />
     );
   }
 
   return (
-    <div
-      role="img"
-      aria-label={title ?? id}
+    <img
+      src={portraitUrl}
+      alt={label}
       title={title}
+      width={width}
+      height={height}
+      decoding="async"
+      loading="lazy"
       data-portrait-set={activeSet ?? undefined}
       className={getClassName('officer-avatar', className)}
       style={combinedStyle}
