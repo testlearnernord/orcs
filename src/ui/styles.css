@@ -1784,6 +1784,10 @@ button:disabled {
   box-sizing: border-box;
 }
 
+.free-roam-shell[hidden] {
+  display: none !important;
+}
+
 .free-roam {
   display: flex;
   flex-direction: column;

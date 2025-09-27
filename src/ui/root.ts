@@ -301,6 +301,13 @@ export class NemesisUI {
     }
   }
 
+  private shouldShowModeGate(): boolean {
+    // Only show mode gate if no mode parameter was provided in URL
+    if (typeof window === 'undefined') return false;
+    const params = new URLSearchParams(window.location.search);
+    return !params.has('mode');
+  }
+
   private openFreeRoam(): void {
     if (!this.freeRoamContainer) return;
     if (!this.freeRoamRoot) {
@@ -417,7 +424,11 @@ export class NemesisUI {
 
     initHotkeys();
     this.registerHotkeys();
-    this.modeGate.open(this.modeState.mode);
+
+    // Only show mode gate if no mode was explicitly set via URL
+    if (this.shouldShowModeGate()) {
+      this.modeGate.open(this.modeState.mode);
+    }
   }
 
   private prepareRankView(): void {
