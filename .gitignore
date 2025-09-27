@@ -31,5 +31,7 @@ coverage/
 
 # allow committed portrait atlases in source and generated docs output
 !src/assets/orcs/portraits/*.webp
+!src/assets/orcs/portraits/*.png
 !docs/assets/**/*.webp
+!docs/assets/**/*.png
 public/assets/
