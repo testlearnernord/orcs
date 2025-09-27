@@ -47,13 +47,13 @@ export class AudioManager {
           id: 'curse-witches',
           title: 'Curse of the Witches',
           artist: 'Jimena Contreras',
-          url: `${developmentBase}audio/Curse of the Witches - Jimena Contreras.mp3`
+          url: `${developmentBase}audio/curse-of-the-witches-jimena-contreras.mp3`
         },
         {
           id: 'whirlpool',
           title: 'Whirlpool',
           artist: 'The Mini Vandals',
-          url: `${developmentBase}audio/Whirlpool - The Mini Vandals.mp3`
+          url: `${developmentBase}audio/whirlpool-the-mini-vandals.mp3`
         }
       ]
     };

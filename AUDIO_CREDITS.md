@@ -7,7 +7,7 @@ This file documents all audio assets used in the Nemesis Hof project.
 ### Track 1: "Curse of the Witches"
 
 - **Artist:** Jimena Contreras
-- **File:** `public/audio/Curse of the Witches - Jimena Contreras.mp3`
+- **File:** `public/audio/curse-of-the-witches-jimena-contreras.mp3`
 - **Usage:** Background music for atmospheric gameplay
 - **License:** [Please specify license/attribution requirements]
 - **Source:** [Please specify source/website]
@@ -15,7 +15,7 @@ This file documents all audio assets used in the Nemesis Hof project.
 ### Track 2: "Whirlpool"
 
 - **Artist:** The Mini Vandals
-- **File:** `public/audio/Whirlpool - The Mini Vandals.mp3`
+- **File:** `public/audio/whirlpool-the-mini-vandals.mp3`
 - **Usage:** Background music for dynamic gameplay
 - **License:** [Please specify license/attribution requirements]
 - **Source:** [Please specify source/website]
