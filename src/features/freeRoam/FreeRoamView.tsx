@@ -96,7 +96,23 @@ export function FreeRoamView({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    renderWorldMap(canvas, map);
+    
+    const renderCanvas = () => {
+      renderWorldMap(canvas, map);
+    };
+    
+    // Initial render
+    renderCanvas();
+    
+    // Re-render on resize
+    const resizeObserver = new ResizeObserver(() => {
+      renderCanvas();
+    });
+    resizeObserver.observe(canvas);
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, [map]);
 
   useEffect(() => {

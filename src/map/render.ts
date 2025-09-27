@@ -34,11 +34,32 @@ export function renderWorldMap(
   const context = canvas.getContext('2d');
   if (!context) return;
 
-  if (canvas.width !== map.size || canvas.height !== map.size) {
-    canvas.width = map.size;
-    canvas.height = map.size;
+  // Get the display size and device pixel ratio for crisp rendering
+  const rect = canvas.getBoundingClientRect();
+  const displayWidth = rect.width;
+  const displayHeight = rect.height;
+  const pixelRatio = window.devicePixelRatio || 1;
+
+  // Set canvas size to match display size * pixel ratio for crisp rendering
+  const canvasWidth = Math.floor(displayWidth * pixelRatio);
+  const canvasHeight = Math.floor(displayHeight * pixelRatio);
+
+  if (canvas.width !== canvasWidth || canvas.height !== canvasHeight) {
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    
+    // Scale context to match device pixel ratio
+    context.scale(pixelRatio, pixelRatio);
   }
 
+  // Set CSS size to actual display size
+  canvas.style.width = displayWidth + 'px';
+  canvas.style.height = displayHeight + 'px';
+
+  // Clear canvas
+  context.clearRect(0, 0, displayWidth, displayHeight);
+
+  // Create image data at map resolution
   const imageData = context.createImageData(map.size, map.size);
   const { data } = imageData;
 
@@ -56,5 +77,17 @@ export function renderWorldMap(
     data[index + 3] = 255;
   }
 
-  context.putImageData(imageData, 0, 0);
+  // Create an off-screen canvas to render the map data
+  const offscreenCanvas = document.createElement('canvas');
+  offscreenCanvas.width = map.size;
+  offscreenCanvas.height = map.size;
+  const offscreenContext = offscreenCanvas.getContext('2d');
+  
+  if (offscreenContext) {
+    offscreenContext.putImageData(imageData, 0, 0);
+    
+    // Draw the off-screen canvas to the main canvas, scaled to fit
+    context.imageSmoothingEnabled = false; // Keep pixelated look
+    context.drawImage(offscreenCanvas, 0, 0, displayWidth, displayHeight);
+  }
 }
