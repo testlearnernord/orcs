@@ -3,13 +3,7 @@ import type {
   PointerEvent as ReactPointerEvent,
   WheelEvent as ReactWheelEvent
 } from 'react';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GameStore } from '@state/store';
 import type { Phase } from '@state/selectors/warcalls';
 import Portrait from '@/ui/Portrait';
@@ -168,23 +162,26 @@ export function FreeRoamView({
     [camera]
   );
 
-  const handlePointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
-    const state = pointerState.current;
-    if (!state.isDragging || state.pointerId !== event.pointerId) {
-      return;
-    }
-    const deltaX = event.clientX - state.startX;
-    const deltaY = event.clientY - state.startY;
-    setCamera((prev) => {
-      if (!state.isDragging) return prev;
-      const nextX = state.originX + deltaX;
-      const nextY = state.originY + deltaY;
-      if (prev.x === nextX && prev.y === nextY) {
-        return prev;
+  const handlePointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const state = pointerState.current;
+      if (!state.isDragging || state.pointerId !== event.pointerId) {
+        return;
       }
-      return { ...prev, x: nextX, y: nextY };
-    });
-  }, []);
+      const deltaX = event.clientX - state.startX;
+      const deltaY = event.clientY - state.startY;
+      setCamera((prev) => {
+        if (!state.isDragging) return prev;
+        const nextX = state.originX + deltaX;
+        const nextY = state.originY + deltaY;
+        if (prev.x === nextX && prev.y === nextY) {
+          return prev;
+        }
+        return { ...prev, x: nextX, y: nextY };
+      });
+    },
+    []
+  );
 
   const stopDragging = useCallback(() => {
     const state = pointerState.current;
@@ -210,33 +207,30 @@ export function FreeRoamView({
     [stopDragging]
   );
 
-  const handleWheel = useCallback(
-    (event: ReactWheelEvent<HTMLDivElement>) => {
-      if (!stageRef.current) return;
-      event.preventDefault();
-      const scaleFactor = event.deltaY < 0 ? 1.12 : 0.88;
-      setCamera((prev) => {
-        const nextScale = clamp(prev.scale * scaleFactor, MIN_SCALE, MAX_SCALE);
-        if (nextScale === prev.scale) {
-          return prev;
-        }
-        const rect = stageRef.current?.getBoundingClientRect();
-        if (!rect) {
-          return { ...prev, scale: nextScale };
-        }
-        const offsetX = event.clientX - rect.left - rect.width / 2;
-        const offsetY = event.clientY - rect.top - rect.height / 2;
-        const scaleDelta = nextScale / prev.scale;
-        const nextX = prev.x - offsetX * (scaleDelta - 1);
-        const nextY = prev.y - offsetY * (scaleDelta - 1);
-        if (nextX === prev.x && nextY === prev.y && nextScale === prev.scale) {
-          return prev;
-        }
-        return { scale: nextScale, x: nextX, y: nextY };
-      });
-    },
-    []
-  );
+  const handleWheel = useCallback((event: ReactWheelEvent<HTMLDivElement>) => {
+    if (!stageRef.current) return;
+    event.preventDefault();
+    const scaleFactor = event.deltaY < 0 ? 1.12 : 0.88;
+    setCamera((prev) => {
+      const nextScale = clamp(prev.scale * scaleFactor, MIN_SCALE, MAX_SCALE);
+      if (nextScale === prev.scale) {
+        return prev;
+      }
+      const rect = stageRef.current?.getBoundingClientRect();
+      if (!rect) {
+        return { ...prev, scale: nextScale };
+      }
+      const offsetX = event.clientX - rect.left - rect.width / 2;
+      const offsetY = event.clientY - rect.top - rect.height / 2;
+      const scaleDelta = nextScale / prev.scale;
+      const nextX = prev.x - offsetX * (scaleDelta - 1);
+      const nextY = prev.y - offsetY * (scaleDelta - 1);
+      if (nextX === prev.x && nextY === prev.y && nextScale === prev.scale) {
+        return prev;
+      }
+      return { scale: nextScale, x: nextX, y: nextY };
+    });
+  }, []);
 
   const handleBackdropClick = useCallback(
     (event: ReactMouseEvent<HTMLDivElement>) => {
@@ -246,7 +240,10 @@ export function FreeRoamView({
     [onRequestClose]
   );
 
-  const secondsLabel = useMemo(() => `${secondsUntilCycle}s`, [secondsUntilCycle]);
+  const secondsLabel = useMemo(
+    () => `${secondsUntilCycle}s`,
+    [secondsUntilCycle]
+  );
 
   const viewportStyle = useMemo(
     () => ({
@@ -280,11 +277,7 @@ export function FreeRoamView({
           <button type="button" onClick={handleResetCamera}>
             Kamera zurücksetzen
           </button>
-          <button
-            type="button"
-            onClick={onRequestClose}
-            ref={closeButtonRef}
-          >
+          <button type="button" onClick={onRequestClose} ref={closeButtonRef}>
             Zurück
           </button>
         </div>
