@@ -709,7 +709,7 @@ export class NemesisUI {
   private hasOfficerChanged(officer: Officer): boolean {
     const lastState = this.lastRenderedOfficerState.get(officer.id);
     if (!lastState) return true;
-    
+
     // Check for meaningful changes that would require UI updates
     return (
       lastState.rank !== officer.rank ||
@@ -717,16 +717,23 @@ export class NemesisUI {
       lastState.level !== officer.level ||
       lastState.merit !== officer.merit ||
       lastState.traits.length !== officer.traits.length ||
-      lastState.traits.some((trait, index) => trait !== officer.traits[index]) ||
+      lastState.traits.some(
+        (trait, index) => trait !== officer.traits[index]
+      ) ||
       lastState.relationships.length !== officer.relationships.length ||
-      lastState.relationships.some((rel, index) => 
-        !officer.relationships[index] ||
-        rel.with !== officer.relationships[index].with ||
-        rel.type !== officer.relationships[index].type
+      lastState.relationships.some(
+        (rel, index) =>
+          !officer.relationships[index] ||
+          rel.with !== officer.relationships[index].with ||
+          rel.type !== officer.relationships[index].type
       ) ||
       Math.abs(lastState.personality.gier - officer.personality.gier) > 0.001 ||
-      Math.abs(lastState.personality.tapferkeit - officer.personality.tapferkeit) > 0.001 ||
-      Math.abs(lastState.personality.loyalitaet - officer.personality.loyalitaet) > 0.001 ||
+      Math.abs(
+        lastState.personality.tapferkeit - officer.personality.tapferkeit
+      ) > 0.001 ||
+      Math.abs(
+        lastState.personality.loyalitaet - officer.personality.loyalitaet
+      ) > 0.001 ||
       Math.abs(lastState.personality.stolz - officer.personality.stolz) > 0.001
     );
   }
@@ -769,11 +776,11 @@ export class NemesisUI {
             existing.captureBounds();
             existing.update(officer);
             existing.playFlip();
-            this.lastRenderedOfficerState.set(officer.id, { 
-              ...officer, 
-              personality: { ...officer.personality }, 
-              relationships: [...officer.relationships], 
-              traits: [...officer.traits] 
+            this.lastRenderedOfficerState.set(officer.id, {
+              ...officer,
+              personality: { ...officer.personality },
+              relationships: [...officer.relationships],
+              traits: [...officer.traits]
             });
           }
           // Always ensure element is in correct position
@@ -785,11 +792,11 @@ export class NemesisUI {
           });
           this.cards.set(officer.id, card);
           grid.appendChild(card.element);
-          this.lastRenderedOfficerState.set(officer.id, { 
-            ...officer, 
-            personality: { ...officer.personality }, 
-            relationships: [...officer.relationships], 
-            traits: [...officer.traits] 
+          this.lastRenderedOfficerState.set(officer.id, {
+            ...officer,
+            personality: { ...officer.personality },
+            relationships: [...officer.relationships],
+            traits: [...officer.traits]
           });
         }
       });
