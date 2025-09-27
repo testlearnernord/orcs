@@ -105,12 +105,6 @@ export class ModeGate {
     this.spectateButton.addEventListener('click', () => {
       this.selection = 'spectate';
       this.syncSelection();
-      this.confirmSelection();
-    });
-    this.freeRoamButton.addEventListener('click', () => {
-      this.selection = 'freeRoam';
-      this.syncSelection();
-      this.confirmSelection();
     });
     this.freeRoamButton.addEventListener('click', () => {
       this.selection = 'freeRoam';
@@ -120,7 +114,6 @@ export class ModeGate {
       if (!FLAGS.PLAYER_MODE) return;
       this.selection = 'player';
       this.syncSelection();
-      this.confirmSelection();
     });
     if (!FLAGS.PLAYER_MODE) {
       this.playerButton.title = 'Im Spectate-Mode noch nicht verfügbar.';
