@@ -250,11 +250,11 @@ export class OfficerTooltip {
   hide(): void {
     this.cancelHide();
     this.currentTarget?.removeAttribute('aria-describedby');
-    
+
     // Clear state immediately to prevent tooltip from reappearing incorrectly
     const previousTarget = this.currentTarget;
     this.currentTarget = null;
-    
+
     if (typeof this.root.animate === 'function') {
       const animation = this.root.animate(
         [
