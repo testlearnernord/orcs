@@ -2383,15 +2383,15 @@ button:disabled {
     gap: var(--spacing-sm);
     padding: 4px 8px;
   }
-  
+
   .audio-controls__info {
     max-width: 120px;
   }
-  
+
   .audio-controls__track-info {
     font-size: 0.75rem;
   }
-  
+
   .audio-controls__slider {
     width: 50px;
   }

@@ -25,7 +25,8 @@ export type AudioEventName = 'stateChange' | 'trackChange' | 'error';
 export class AudioManager {
   private audio: HTMLAudioElement | null = null;
   private state: AudioState;
-  private listeners: Map<AudioEventName, Array<(data?: any) => void>> = new Map();
+  private listeners: Map<AudioEventName, Array<(data?: any) => void>> =
+    new Map();
 
   constructor() {
     this.state = {
@@ -58,7 +59,7 @@ export class AudioManager {
     this.audio = new Audio();
     this.audio.loop = false; // We'll handle track cycling manually
     this.audio.preload = 'metadata';
-    
+
     // Set up event listeners
     this.audio.addEventListener('loadedmetadata', () => {
       const track = this.getCurrentTrack();
@@ -94,8 +95,9 @@ export class AudioManager {
         const prefs = JSON.parse(saved);
         this.state.volume = prefs.volume ?? this.state.volume;
         this.state.isMuted = prefs.isMuted ?? this.state.isMuted;
-        this.state.currentTrackIndex = prefs.currentTrackIndex ?? this.state.currentTrackIndex;
-        
+        this.state.currentTrackIndex =
+          prefs.currentTrackIndex ?? this.state.currentTrackIndex;
+
         if (this.audio) {
           this.audio.volume = this.state.isMuted ? 0 : this.state.volume;
         }
@@ -128,7 +130,7 @@ export class AudioManager {
 
   private emit(eventName: AudioEventName, data?: any): void {
     const handlers = this.listeners.get(eventName) || [];
-    handlers.forEach(handler => handler(data));
+    handlers.forEach((handler) => handler(data));
   }
 
   // Public API
@@ -159,7 +161,7 @@ export class AudioManager {
 
   async play(): Promise<void> {
     if (!this.audio) return;
-    
+
     try {
       await this.audio.play();
       this.state.isPlaying = true;
@@ -172,7 +174,7 @@ export class AudioManager {
 
   pause(): void {
     if (!this.audio) return;
-    
+
     this.audio.pause();
     this.state.isPlaying = false;
     this.emit('stateChange', this.state);
@@ -205,11 +207,12 @@ export class AudioManager {
   }
 
   nextTrack(): void {
-    this.state.currentTrackIndex = (this.state.currentTrackIndex + 1) % this.state.tracks.length;
+    this.state.currentTrackIndex =
+      (this.state.currentTrackIndex + 1) % this.state.tracks.length;
     this.loadCurrentTrack();
     this.saveUserPreferences();
     this.emit('trackChange', this.getCurrentTrack());
-    
+
     // Continue playing if we were playing before
     if (this.state.isPlaying) {
       this.play();
@@ -217,13 +220,14 @@ export class AudioManager {
   }
 
   previousTrack(): void {
-    this.state.currentTrackIndex = this.state.currentTrackIndex === 0 
-      ? this.state.tracks.length - 1 
-      : this.state.currentTrackIndex - 1;
+    this.state.currentTrackIndex =
+      this.state.currentTrackIndex === 0
+        ? this.state.tracks.length - 1
+        : this.state.currentTrackIndex - 1;
     this.loadCurrentTrack();
     this.saveUserPreferences();
     this.emit('trackChange', this.getCurrentTrack());
-    
+
     // Continue playing if we were playing before
     if (this.state.isPlaying) {
       this.play();
@@ -232,7 +236,10 @@ export class AudioManager {
 
   seek(time: number): void {
     if (this.audio) {
-      this.audio.currentTime = Math.max(0, Math.min(this.audio.duration || 0, time));
+      this.audio.currentTime = Math.max(
+        0,
+        Math.min(this.audio.duration || 0, time)
+      );
       this.state.currentTime = this.audio.currentTime;
       this.emit('stateChange', this.state);
     }

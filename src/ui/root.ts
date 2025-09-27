@@ -183,11 +183,15 @@ export class NemesisUI {
 
     // Initialize audio controls
     this.audioControls = new AudioControls(this.audioManager, {
-      onPlayPause: () => this.rememberHint('audio-play', 'Musik pausiert/fortgesetzt.'),
-      onMute: () => this.rememberHint('audio-mute', 'Ton stumm geschaltet/aktiviert.'),
+      onPlayPause: () =>
+        this.rememberHint('audio-play', 'Musik pausiert/fortgesetzt.'),
+      onMute: () =>
+        this.rememberHint('audio-mute', 'Ton stumm geschaltet/aktiviert.'),
       onNextTrack: () => this.rememberHint('audio-next', 'Nächster Track.'),
-      onPreviousTrack: () => this.rememberHint('audio-prev', 'Vorheriger Track.'),
-      onVolumeChange: () => this.rememberHint('audio-volume', 'Lautstärke angepasst.')
+      onPreviousTrack: () =>
+        this.rememberHint('audio-prev', 'Vorheriger Track.'),
+      onVolumeChange: () =>
+        this.rememberHint('audio-volume', 'Lautstärke angepasst.')
     });
     this.modeStore.on('mode:changed', (next) => this.handleModeChange(next));
     this.syncModeUI();
@@ -411,13 +415,13 @@ export class NemesisUI {
     }
 
     this.warcallsHost?.appendChild(this.warcallDock.element);
-    
+
     // Add audio controls to the header
     const audioContainer = app.querySelector('#audio-controls-container');
     if (audioContainer && this.audioControls) {
       audioContainer.appendChild(this.audioControls.getElement());
     }
-    
+
     this.registerUIEvents(app);
     this.syncModeUI();
 
@@ -450,12 +454,14 @@ export class NemesisUI {
     if (this.shouldShowModeGate()) {
       this.modeGate.open(this.modeState.mode);
     }
-    
+
     // Start background music after a short delay to allow user interaction
     setTimeout(() => {
       this.audioManager.play().catch(() => {
         // Autoplay blocked - this is expected on many browsers
-        console.log('[AudioManager] Autoplay blocked - user interaction required');
+        console.log(
+          '[AudioManager] Autoplay blocked - user interaction required'
+        );
       });
     }, 1000);
   }
@@ -609,7 +615,7 @@ export class NemesisUI {
         );
       });
     }
-    
+
     // Audio control hotkeys
     registerHotkey('m', () => {
       this.audioManager.toggleMute();
@@ -627,7 +633,7 @@ export class NemesisUI {
       this.audioManager.nextTrack();
       this.rememberHint(']', 'Nächster Track (Hotkey ]).');
     });
-    
+
     bindOnce('?', () => {
       const registered = getRegisteredHotkeys()
         .map((entry) => entry.key.toUpperCase())
@@ -885,10 +891,9 @@ export class NemesisUI {
     // Clean up audio resources
     this.audioManager.destroy();
     this.audioControls?.destroy();
-    
+
     // Clean up other resources
     this.resizeObserver?.disconnect();
     this.freeRoamRoot?.unmount();
-    this.highlightPortal.detach();
   }
 }

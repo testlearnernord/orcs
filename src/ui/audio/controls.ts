@@ -15,12 +15,12 @@ export interface AudioControlsOptions {
 
 export class AudioControls {
   private root: HTMLDivElement;
-  private playButton: HTMLButtonElement;
-  private muteButton: HTMLButtonElement;
-  private volumeSlider: HTMLInputElement;
-  private trackInfo: HTMLSpanElement;
-  private prevButton: HTMLButtonElement;
-  private nextButton: HTMLButtonElement;
+  private playButton!: HTMLButtonElement;
+  private muteButton!: HTMLButtonElement;
+  private volumeSlider!: HTMLInputElement;
+  private trackInfo!: HTMLSpanElement;
+  private prevButton!: HTMLButtonElement;
+  private nextButton!: HTMLButtonElement;
   private audioManager: AudioManager;
 
   constructor(audioManager: AudioManager, options: AudioControlsOptions = {}) {
@@ -53,12 +53,24 @@ export class AudioControls {
     `;
 
     // Cache element references
-    this.playButton = container.querySelector('.audio-controls__play') as HTMLButtonElement;
-    this.muteButton = container.querySelector('.audio-controls__mute') as HTMLButtonElement;
-    this.volumeSlider = container.querySelector('.audio-controls__slider') as HTMLInputElement;
-    this.trackInfo = container.querySelector('.audio-controls__track-info') as HTMLSpanElement;
-    this.prevButton = container.querySelector('.audio-controls__prev') as HTMLButtonElement;
-    this.nextButton = container.querySelector('.audio-controls__next') as HTMLButtonElement;
+    this.playButton = container.querySelector(
+      '.audio-controls__play'
+    ) as HTMLButtonElement;
+    this.muteButton = container.querySelector(
+      '.audio-controls__mute'
+    ) as HTMLButtonElement;
+    this.volumeSlider = container.querySelector(
+      '.audio-controls__slider'
+    ) as HTMLInputElement;
+    this.trackInfo = container.querySelector(
+      '.audio-controls__track-info'
+    ) as HTMLSpanElement;
+    this.prevButton = container.querySelector(
+      '.audio-controls__prev'
+    ) as HTMLButtonElement;
+    this.nextButton = container.querySelector(
+      '.audio-controls__next'
+    ) as HTMLButtonElement;
 
     return container;
   }
@@ -94,13 +106,25 @@ export class AudioControls {
   private updateDisplay(state: AudioState): void {
     // Update play/pause button
     this.playButton.textContent = state.isPlaying ? '⏸' : '▶';
-    this.playButton.setAttribute('aria-label', state.isPlaying ? 'Pause' : 'Wiedergabe');
-    this.playButton.setAttribute('title', state.isPlaying ? 'Pause' : 'Wiedergabe');
+    this.playButton.setAttribute(
+      'aria-label',
+      state.isPlaying ? 'Pause' : 'Wiedergabe'
+    );
+    this.playButton.setAttribute(
+      'title',
+      state.isPlaying ? 'Pause' : 'Wiedergabe'
+    );
 
     // Update mute button
     this.muteButton.textContent = state.isMuted ? '🔇' : '🔊';
-    this.muteButton.setAttribute('aria-label', state.isMuted ? 'Ton einschalten' : 'Stumm schalten');
-    this.muteButton.setAttribute('title', state.isMuted ? 'Ton einschalten' : 'Stumm schalten');
+    this.muteButton.setAttribute(
+      'aria-label',
+      state.isMuted ? 'Ton einschalten' : 'Stumm schalten'
+    );
+    this.muteButton.setAttribute(
+      'title',
+      state.isMuted ? 'Ton einschalten' : 'Stumm schalten'
+    );
 
     // Update volume slider
     this.volumeSlider.value = Math.round(state.volume * 100).toString();
@@ -110,7 +134,10 @@ export class AudioControls {
     const track = state.tracks[state.currentTrackIndex];
     if (track) {
       this.trackInfo.textContent = `${track.title} – ${track.artist}`;
-      this.trackInfo.setAttribute('title', `${track.title} von ${track.artist}`);
+      this.trackInfo.setAttribute(
+        'title',
+        `${track.title} von ${track.artist}`
+      );
     } else {
       this.trackInfo.textContent = 'Keine Musik';
       this.trackInfo.removeAttribute('title');
@@ -124,7 +151,10 @@ export class AudioControls {
   private updateTrackDisplay(track: any): void {
     if (track) {
       this.trackInfo.textContent = `${track.title} – ${track.artist}`;
-      this.trackInfo.setAttribute('title', `${track.title} von ${track.artist}`);
+      this.trackInfo.setAttribute(
+        'title',
+        `${track.title} von ${track.artist}`
+      );
     }
   }
 
