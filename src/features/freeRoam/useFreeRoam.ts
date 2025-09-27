@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import type { Officer, WorldState } from '@sim/types';
+import type { Officer, WorldState, WarcallKind } from '@sim/types';
 import type { GameStore } from '@state/store';
 import { generateWorldMap, type WorldMap } from '@/map/generator';
 import { findOpenTile, toPercent, type MapCoordinate } from '@/map/navgrid';
@@ -112,7 +112,13 @@ function generateRandomWarcall(
   cycle: number,
   occupied: Set<number>
 ) {
-  const warcallTypes = ['Raid', 'Scouting', 'Hunt', 'Patrol', 'Skirmish'];
+  const warcallTypes: WarcallKind[] = [
+    'Hunt',
+    'Ambush',
+    'Duel',
+    'Monsterjagd',
+    'Diplomatie'
+  ];
   const locations = [
     'North Pass',
     'Dark Woods',
@@ -139,7 +145,7 @@ function generateRandomWarcall(
     risk: rng.next(),
     rewardHint: 'Mysterious treasure',
     phase: 'prep' as const,
-    breakdown: null,
+    breakdown: undefined,
     coordinate
   };
 }
