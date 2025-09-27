@@ -14,12 +14,16 @@ Taste **E**: führt einen Simulations-Cycle aus und loggt Ereignisse in die Kons
 
 ## CI & Format
 
-PRs müssen `npm run format:check` (führt `prettier --check` aus) bestehen; bei lokalen Änderungen `npm run format:write` ausführen. Keine Builds/Assets in PRs commiten.
+PRs müssen `npm run format:check` (führt `prettier --check` aus) bestehen; bei lokalen Änderungen `npm run format:write` ausführen. Der GitHub-Pages-Build landet direkt in `docs/`; aktualisiere die Dateien nur, wenn du den veröffentlichten Stand ändern möchtest.
 
 ## Portrait-Atlanten
 
-Aktive Portrait-Sets werden manifest-gesteuert. `public/assets/orcs/portraits/manifest.json` listet alle verfügbaren Sprite-Sheets samt Rasterinformationen. Neue Sets werden ausschließlich über dieses Manifest aktiviert; der Code muss dafür nicht angepasst werden.
+Die Portrait-Komponenten laden zwei WebP-Atlanten (`set_a.webp`, `set_b.webp`). Standardmäßig versucht der Loader zuerst, die Dateien aus dem Pages-Build zu holen (`${import.meta.env.BASE_URL}assets/orcs/portraits/…`). Falls sie dort fehlen, greift automatisch ein Fallback auf `raw.githubusercontent.com/testlearnernord/orcs/main/docs/assets/orcs/portraits/`.
 
-Die Komponente `<OfficerAvatar>` schneidet die benötigten Tiles per CSS aus den WebP-Sheets (`set_a.webp`, `set_b.webp`). Beim App-Start werden alle im Manifest gelisteten Sheets vorab geladen, um leere Kartenansichten zu vermeiden.
+Für lokale Builds gibt es drei Optionen:
 
-> **Hinweis:** Für statische Deployments auf GitHub Pages muss jede Asset-URL mit `import.meta.env.BASE_URL` zusammengesetzt werden. Nur so landen Requests auf `https://<user>.github.io/orcs/...` statt auf der falschen Root-URL. Siehe [GitHub Pages – Project Sites](https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages#project-sites).
+1. **GitHub Pages befüllen:** Lade `set_a.webp` und `set_b.webp` manuell in `docs/assets/orcs/portraits/` hoch.
+2. **Lokales Verzeichnis spiegeln:** Lege die Dateien unter `local-portraits/` ab. `npm run build` kopiert sie dank `scripts/copy-portraits.mjs` automatisch nach `docs/assets/orcs/portraits/`.
+3. **Remote-Fallback nutzen:** Wenn weder Pages noch `local-portraits/` die Dateien liefern, lädt die App die Atlanten direkt von GitHub (CORS-kompatibel).
+
+Beim Laden werden alle Versuche protokolliert (`window.__orcsPortraitStatus`). Schlägt alles fehl, erscheint eine Silhouette mit `data-art="fallback"` statt eines leeren Platzhalters.
