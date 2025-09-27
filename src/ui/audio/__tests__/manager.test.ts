@@ -128,7 +128,7 @@ describe('AudioManager', () => {
 
     it('should handle graceful degradation when audio is not available', () => {
       const manager = new AudioManager();
-      
+
       // The AudioManager should handle missing files gracefully
       // In a test environment, audio files won't actually load
       // but the manager should not crash or spam errors

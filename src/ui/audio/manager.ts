@@ -91,7 +91,9 @@ export class AudioManager {
     this.audio.addEventListener('error', (error) => {
       // Only log audio errors once to prevent console spam
       if (!this.errorLogged) {
-        console.warn('[AudioManager] Audio files not available - music disabled');
+        console.warn(
+          '[AudioManager] Audio files not available - music disabled'
+        );
         this.errorLogged = true;
       }
       this.audioAvailable = false;
@@ -189,7 +191,9 @@ export class AudioManager {
         );
       } else if (errorName === 'NotSupportedError') {
         if (!this.errorLogged) {
-          console.warn('[AudioManager] Audio files not available - music disabled');
+          console.warn(
+            '[AudioManager] Audio files not available - music disabled'
+          );
           this.errorLogged = true;
         }
         this.audioAvailable = false;
