@@ -116,5 +116,30 @@ describe('AudioManager', () => {
 
       manager.destroy();
     });
+
+    it('should handle audio availability status', () => {
+      const manager = new AudioManager();
+
+      // Initially audio should be considered available
+      expect(manager.isAudioAvailable()).toBe(true);
+
+      manager.destroy();
+    });
+
+    it('should handle graceful degradation when audio is not available', () => {
+      const manager = new AudioManager();
+
+      // The AudioManager should handle missing files gracefully
+      // In a test environment, audio files won't actually load
+      // but the manager should not crash or spam errors
+      expect(() => {
+        manager.play();
+        manager.pause();
+        manager.nextTrack();
+        manager.previousTrack();
+      }).not.toThrow();
+
+      manager.destroy();
+    });
   });
 });
