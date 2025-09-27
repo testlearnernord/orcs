@@ -134,16 +134,22 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         const { set, col, row } = chooseSetAndIndex(id, availableSets);
         const cols = Math.max(1, set.cols);
         const rows = Math.max(1, set.rows);
-        // Position at the center of each tile instead of edges
-        // This prevents overlapping and ensures faces are properly centered
+        // Position at the center of each tile with fine-tuning for optimal face centering
+        // This prevents overlapping and ensures orc faces are perfectly centered
         const colRatio = cols > 1 ? (col + 0.5) / cols : 0.5;
         const rowRatio = rows > 1 ? (row + 0.5) / rows : 0.5;
+        
+        // Apply slight scaling adjustment to ensure better face visibility
+        // Increase size slightly to account for any padding in atlas tiles
+        const scaleAdjustment = 1.05; // 5% larger to reduce any edge cropping
+        const adjustedSize = `${cols * 100 * scaleAdjustment}% ${rows * 100 * scaleAdjustment}%`;
+        
         const css: React.CSSProperties = {
           width: size,
           height: size,
           backgroundImage: `url("${set.src}")`,
           backgroundRepeat: 'no-repeat',
-          backgroundSize: `${cols * 100}% ${rows * 100}%`,
+          backgroundSize: adjustedSize,
           backgroundPosition: `${colRatio * 100}% ${rowRatio * 100}%`,
           borderRadius: 8
         };
