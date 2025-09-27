@@ -99,6 +99,9 @@ export class OfficerTooltip {
         } else {
           this.hide();
         }
+      } else if (!pressed) {
+        // Always hide tooltip when CTRL is released, even if not currently hovering
+        this.hide();
       }
     });
   }
