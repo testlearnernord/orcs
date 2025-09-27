@@ -549,7 +549,14 @@ export class NemesisUI {
   }
 
   private registerHotkeys(): void {
-    registerHotkey('e', () => this.triggerCycle());
+    // Only register spectate mode hotkeys when not in Free Roam mode
+    registerHotkey('e', () => {
+      if (this.modeState.mode === 'freeRoam') {
+        this.toast.show('Cycle-Hotkey im Free-Roam-Modus deaktiviert.');
+        return;
+      }
+      this.triggerCycle();
+    });
     registerHotkey('r', () => this.reset());
     registerHotkey('n', () => this.scheduleWarcall());
     registerHotkey('h', () => this.helpOverlay.toggle());
