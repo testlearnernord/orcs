@@ -121,13 +121,15 @@ export class NemesisUI {
   private modeState: UIModeState;
   private digestHistoryEl: HTMLElement | null = null;
   private feedBodyEl: HTMLElement | null = null;
-  private readonly audioManager = new AudioManager();
+  private readonly audioManager: AudioManager;
   private audioControls: AudioControls | null = null;
 
   constructor(
     private readonly store: GameStore,
-    private readonly modeStore: UIModeStore
+    private readonly modeStore: UIModeStore,
+    audioManager?: AudioManager
   ) {
+    this.audioManager = audioManager || new AudioManager();
     const state = store.getState();
     this.modeState = modeStore.getState();
     this.syncOfficerIndex(state.officers);

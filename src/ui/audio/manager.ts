@@ -274,6 +274,15 @@ export class AudioManager {
     }
   }
 
+  setTrack(trackIndex: number): void {
+    if (trackIndex >= 0 && trackIndex < this.state.tracks.length) {
+      this.state.currentTrackIndex = trackIndex;
+      this.loadCurrentTrack();
+      this.saveUserPreferences();
+      this.emit('trackChange', this.getCurrentTrack());
+    }
+  }
+
   seek(time: number): void {
     if (this.audio) {
       this.audio.currentTime = Math.max(

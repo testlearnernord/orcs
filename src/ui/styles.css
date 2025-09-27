@@ -2474,3 +2474,138 @@ button:disabled {
     width: 50px;
   }
 }
+
+/* Main Menu Styles */
+.main-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #0d1117 0%, #1a1a1a 50%, #0d1117 100%);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-menu {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-menu-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  opacity: 0.3;
+}
+
+.start-screen-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(2px) brightness(0.4);
+}
+
+.main-menu-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 600px;
+  padding: var(--spacing-xxl);
+}
+
+.main-menu-title h1 {
+  font-size: 4rem;
+  font-weight: bold;
+  color: var(--ring-king);
+  margin: 0 0 3rem 0;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.1em;
+}
+
+.main-menu-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.menu-option {
+  background: rgba(19, 28, 43, 0.9);
+  border: 2px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.menu-option:hover:not(.menu-option-disabled) {
+  background: rgba(19, 28, 43, 0.95);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(56, 189, 248, 0.2);
+}
+
+.menu-option:active:not(.menu-option-disabled) {
+  transform: translateY(0);
+}
+
+.menu-option-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(19, 28, 43, 0.5);
+}
+
+.option-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.option-description {
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.menu-option[data-mode="spectate"] .option-title {
+  color: var(--accent);
+}
+
+.menu-option[data-mode="player"] .option-title {
+  color: var(--ring-player);
+}
+
+.menu-option[data-mode="freeRoam"] .option-title {
+  color: var(--ring-scout);
+}
+
+/* Fallback background pattern when no image is available */
+.main-menu-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(56, 189, 248, 0.1) 0%, transparent 50%),
+    linear-gradient(45deg, transparent 30%, rgba(19, 28, 43, 0.2) 50%, transparent 70%);
+}
