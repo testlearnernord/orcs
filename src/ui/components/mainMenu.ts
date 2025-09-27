@@ -40,19 +40,29 @@ export class MainMenu {
     }
   }
 
+  private getRandomMainMenuImage(): string {
+    const mainMenuImages = [
+      '/orcs/orcs-main-menu.png',
+      '/orcs/orcs-main-menu2.png',
+      '/orcs/orc-main-menu3.png'
+    ];
+
+    const randomIndex = Math.floor(Math.random() * mainMenuImages.length);
+    return mainMenuImages[randomIndex];
+  }
+
   mount(parent: HTMLElement): void {
     this.container = document.createElement('div');
     this.container.className = 'main-menu-overlay';
 
+    const randomMainMenuImage = this.getRandomMainMenuImage();
+
     this.container.innerHTML = `
       <div class="main-menu">
         <div class="main-menu-background">
-          <img src="/orcs/assets/start-screen.svg" alt="Nemesis Hof Start Screen" class="start-screen-image" />
+          <img src="${randomMainMenuImage}" alt="ORCS Main Menu" class="start-screen-image" />
         </div>
         <div class="main-menu-content">
-          <div class="main-menu-title">
-            <h1>NEMESIS HOF</h1>
-          </div>
           <div class="main-menu-options">
             <button class="menu-option" data-mode="spectate">
               <span class="option-title">SPECTATE</span>
@@ -96,8 +106,8 @@ export class MainMenu {
     try {
       // Only try to play audio once per menu instance
       if (this.audioManager.isAudioAvailable()) {
-        // Set Whirlpool as current track (index 1)
-        this.audioManager.setTrack(1);
+        // Select a random non-battle track for main menu
+        this.audioManager.setRandomMainMenuTrack();
 
         // Set volume to 10%
         this.audioManager.setVolume(0.1);

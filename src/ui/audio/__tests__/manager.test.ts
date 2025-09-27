@@ -15,7 +15,7 @@ describe('AudioManager', () => {
       expect(state.volume).toBe(0.7);
       expect(state.currentTrackIndex).toBe(0);
       expect(state.currentTime).toBe(0);
-      expect(state.tracks).toHaveLength(2);
+      expect(state.tracks).toHaveLength(9);
 
       manager.destroy();
     });
@@ -54,6 +54,15 @@ describe('AudioManager', () => {
       expect(state.tracks[0].url).toMatch(/^\/.*audio\/.*\.mp3$/);
       expect(state.tracks[1].url).toMatch(/^\/.*audio\/.*\.mp3$/);
 
+      // Test that all tracks have valid URLs
+      state.tracks.forEach((track, index) => {
+        expect(track.url).toMatch(/^\/.*audio\/.*\.mp3$/);
+        expect(track.url).toContain('.mp3');
+        expect(track.id).toBeTruthy();
+        expect(track.title).toBeTruthy();
+        expect(track.artist).toBeTruthy();
+      });
+
       manager.destroy();
     });
 
@@ -82,13 +91,20 @@ describe('AudioManager', () => {
       manager.nextTrack();
       expect(manager.getCurrentTrack()?.id).toBe('whirlpool');
 
-      // Go to next track (should cycle back to first)
+      // Go to next track
       manager.nextTrack();
+      expect(manager.getCurrentTrack()?.id).toBe('city-wolf');
+
+      // Test cycling: go to the last track and then next should cycle back to first
+      manager.setTrack(8); // Set to last track (higher-octane)
+      expect(manager.getCurrentTrack()?.id).toBe('higher-octane');
+
+      manager.nextTrack(); // Should cycle back to first
       expect(manager.getCurrentTrack()?.id).toBe('curse-witches');
 
-      // Go to previous track
+      // Go to previous track (should go to last)
       manager.previousTrack();
-      expect(manager.getCurrentTrack()?.id).toBe('whirlpool');
+      expect(manager.getCurrentTrack()?.id).toBe('higher-octane');
 
       manager.destroy();
     });

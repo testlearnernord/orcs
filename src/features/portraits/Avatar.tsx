@@ -162,7 +162,7 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
 
         // Advanced scaling system for optimal portrait extraction
         // Scale the atlas appropriately to show more detail while preventing overlap
-        const scaleFactor = 1.25; // 25% larger for better face detail
+        const scaleFactor = 1.8; // 80% larger for better face detail - shows faces instead of body pieces
         const scaledAtlasWidth = cols * 100 * scaleFactor;
         const scaledAtlasHeight = rows * 100 * scaleFactor;
 
@@ -171,27 +171,25 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         const positionX = tileCenterX * scaleFactor;
         const positionY = tileCenterY * scaleFactor;
 
-        // Fine-tuning adjustments optimized for 4x6 atlas configuration
+        // Fine-tuning adjustments optimized for 4x4 atlas configuration (officers1-3.png)
         // These micro-adjustments account for how faces are positioned within tiles
         let finetuneX = 0;
         let finetuneY = 0;
 
-        // Vertical fine-tuning based on row position (now optimized for 6 rows)
+        // Vertical fine-tuning based on row position (optimized for 4 rows)
         // Faces in different rows may be positioned differently within their tiles
         if (row === 0)
-          finetuneY = -1.0; // Top row faces tend to be lower in their tiles
-        else if (row === 1) finetuneY = -0.6;
-        else if (row === 2) finetuneY = -0.2;
-        else if (row === 3) finetuneY = 0.2;
-        else if (row === 4) finetuneY = 0.4;
-        else if (row === 5) finetuneY = 0.6; // Bottom row may need upward adjustment
+          finetuneY = -1.2; // Top row faces tend to be lower in their tiles
+        else if (row === 1) finetuneY = -0.4;
+        else if (row === 2) finetuneY = 0.4;
+        else if (row === 3) finetuneY = 1.0; // Bottom row may need upward adjustment
 
-        // Horizontal fine-tuning based on column position (now optimized for 4 columns)
+        // Horizontal fine-tuning based on column position (optimized for 4 columns)
         if (col === 0)
-          finetuneX = 0.6; // Left column faces may be offset right
-        else if (col === 1) finetuneX = 0.2;
-        else if (col === 2) finetuneX = -0.2;
-        else if (col === 3) finetuneX = -0.6; // Right column faces may be offset left
+          finetuneX = 0.8; // Left column faces may be offset right
+        else if (col === 1) finetuneX = 0.3;
+        else if (col === 2) finetuneX = -0.3;
+        else if (col === 3) finetuneX = -0.8; // Right column faces may be offset left
 
         const finalPositionX = positionX + finetuneX;
         const finalPositionY = positionY + finetuneY;

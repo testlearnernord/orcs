@@ -1,11 +1,10 @@
 import type { Officer, RelationshipType } from '@sim/types';
-import type { OfficerTooltip } from '@ui/components/officerTooltip';
 import { measure, flip } from '@ui/utils/flip';
 import { AvatarView } from '@ui/officer/Avatar';
 
 export interface OfficerCardOptions {
-  tooltip: OfficerTooltip;
   onOpenDetails?: (officer: Officer) => void;
+  onOfficerClick?: (officer: Officer) => void; // New click handler for details panel
 }
 
 type StatKey = keyof Officer['personality'];
@@ -145,26 +144,21 @@ export class OfficerCard {
     content.appendChild(this.footer);
 
     this.element.append(portraitWrapper, content);
-    this.attachTooltipListeners();
+    this.attachClickListeners();
     this.update(officer);
   }
 
-  private attachTooltipListeners(): void {
-    const { tooltip } = this.options;
-    this.element.addEventListener('mouseenter', () => {
-      tooltip.show(this.element, this.officer);
+  private attachClickListeners(): void {
+    // Add click handler to show officer details
+    this.element.addEventListener('click', () => {
+      this.options.onOfficerClick?.(this.officer);
     });
-    this.element.addEventListener('mouseleave', () => {
-      tooltip.scheduleHideFromTarget();
-    });
-    this.element.addEventListener('focus', () => {
-      tooltip.show(this.element, this.officer);
-    });
-    this.element.addEventListener('blur', () => tooltip.hide());
+
+    // Keep keyboard support for accessibility
     this.element.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
+      if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        this.options.onOpenDetails?.(this.officer);
+        this.options.onOfficerClick?.(this.officer);
       }
     });
   }

@@ -16,6 +16,7 @@ export interface AudioTrack {
   artist: string;
   url: string;
   duration?: number;
+  battleExclusive?: boolean; // Tracks reserved for battle scenes
 }
 
 export interface AudioState {
@@ -56,6 +57,51 @@ export class AudioManager {
           title: 'Whirlpool',
           artist: 'The Mini Vandals',
           url: `${developmentBase}audio/Whirlpool-The-Mini-Vandals.mp3`
+        },
+        {
+          id: 'city-wolf',
+          title: 'City of the Wolf',
+          artist: 'The Mini Vandals',
+          url: `${developmentBase}audio/City-of-the-Wolf-The-Mini-Vandals.mp3`
+        },
+        {
+          id: 'ready-more',
+          title: 'Ready for More',
+          artist: 'Ezra Lipp',
+          url: `${developmentBase}audio/Ready-for-More-Ezra-Lipp.mp3`
+        },
+        {
+          id: 'black-thorns',
+          title: 'Black Thorns',
+          artist: 'Jimena Contreras',
+          url: `${developmentBase}audio/Black-Thorns-Jimena-Contreras.mp3`
+        },
+        {
+          id: 'shining-dubai',
+          title: 'The Shining in Dubai',
+          artist: 'Unicorn Heads',
+          url: `${developmentBase}audio/The-Shining-in-Dubai-Unicorn-Heads.mp3`
+        },
+        {
+          id: 'fever',
+          title: 'A Fever',
+          artist: 'Devon Church',
+          url: `${developmentBase}audio/A-Fever-Devon-Church.mp3`
+        },
+        // Battle-exclusive tracks
+        {
+          id: 'cthulthu',
+          title: 'Cthulthu',
+          artist: 'Quincas Moreira',
+          url: `${developmentBase}audio/Chtulthu-Quincas-Moreira.mp3`,
+          battleExclusive: true
+        },
+        {
+          id: 'higher-octane',
+          title: 'Higher Octane',
+          artist: 'Vans in Japan',
+          url: `${developmentBase}audio/Higher-Octane-Vans-in-Japan.mp3`,
+          battleExclusive: true
         }
       ]
     };
@@ -148,6 +194,32 @@ export class AudioManager {
   private emit(eventName: AudioEventName, data?: any): void {
     const handlers = this.listeners.get(eventName) || [];
     handlers.forEach((handler) => handler(data));
+  }
+
+  /**
+   * Gets tracks that are not battle-exclusive (suitable for main menu)
+   */
+  private getNonBattleTracks(): AudioTrack[] {
+    return this.state.tracks.filter((track) => !track.battleExclusive);
+  }
+
+  /**
+   * Sets a random non-battle track for main menu
+   */
+  setRandomMainMenuTrack(): void {
+    const nonBattleTracks = this.getNonBattleTracks();
+    if (nonBattleTracks.length === 0) return;
+
+    const randomIndex = Math.floor(Math.random() * nonBattleTracks.length);
+    const randomTrack = nonBattleTracks[randomIndex];
+
+    // Find the index of this track in the full tracks array
+    const fullIndex = this.state.tracks.findIndex(
+      (track) => track.id === randomTrack.id
+    );
+    if (fullIndex !== -1) {
+      this.setTrack(fullIndex);
+    }
   }
 
   // Public API
