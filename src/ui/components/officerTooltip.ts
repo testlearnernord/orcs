@@ -251,25 +251,23 @@ export class OfficerTooltip {
     this.cancelHide();
     this.currentTarget?.removeAttribute('aria-describedby');
 
-    // Clear state immediately to prevent tooltip from reappearing incorrectly
-    const previousTarget = this.currentTarget;
+    // Clear all state immediately to prevent tooltip from reappearing incorrectly
     this.currentTarget = null;
+    this.isHovering = false;
+    this.currentOfficer = null;
+
+    // Immediately remove visibility to prevent sticking, regardless of animation
+    this.root.classList.remove('is-visible');
+    this.root.setAttribute('aria-hidden', 'true');
 
     if (typeof this.root.animate === 'function') {
-      const animation = this.root.animate(
+      this.root.animate(
         [
           { opacity: 1, transform: 'translateY(0)' },
           { opacity: 0, transform: 'translateY(4px)' }
         ],
         { duration: 80, easing: 'ease-out' }
       );
-      animation.addEventListener('finish', () => {
-        this.root.classList.remove('is-visible');
-        this.root.setAttribute('aria-hidden', 'true');
-      });
-    } else {
-      this.root.classList.remove('is-visible');
-      this.root.setAttribute('aria-hidden', 'true');
     }
   }
 

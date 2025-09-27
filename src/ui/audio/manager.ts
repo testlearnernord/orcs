@@ -130,7 +130,8 @@ export class AudioManager {
   private loadCurrentTrack(): void {
     const track = this.getCurrentTrack();
     if (track && this.audio) {
-      this.audio.src = track.url;
+      // Ensure URL is properly encoded for HTML Audio element
+      this.audio.src = encodeURI(track.url);
       this.audio.volume = this.state.isMuted ? 0 : this.state.volume;
     }
   }
@@ -174,7 +175,19 @@ export class AudioManager {
       this.state.isPlaying = true;
       this.emit('stateChange', this.state);
     } catch (error) {
-      console.error('[AudioManager] Play failed:', error);
+      const errorName = (error as Error)?.name;
+      if (errorName === 'NotAllowedError') {
+        console.log(
+          '[AudioManager] Autoplay blocked - user interaction required'
+        );
+      } else if (errorName === 'NotSupportedError') {
+        console.error(
+          '[AudioManager] Audio format not supported or file not found:',
+          this.getCurrentTrack()?.url
+        );
+      } else {
+        console.error('[AudioManager] Play failed:', error);
+      }
       this.emit('error', error);
     }
   }
