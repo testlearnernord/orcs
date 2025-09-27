@@ -43,12 +43,16 @@ _None currently implemented_
 
 ### Adding Audio Files
 
+**Current Status**: The repository contains minimal placeholder audio files to prevent 404 errors. These are silent, very small MP3 files that serve as placeholders.
+
 To add the actual audio files:
 
-1. **For development**: Place MP3 files in `src/assets/audio/` directory
+1. **For development**: Replace the placeholder files in `src/assets/audio/` directory with real MP3 files
 2. **For local override**: Place MP3 files in `local-audio/` directory (takes precedence)
 3. **Required files**:
    - `curse-of-the-witches-jimena-contreras.mp3`
    - `whirlpool-the-mini-vandals.mp3`
 
-The build process will automatically copy these files to the correct locations.
+The build process will automatically copy these files to the correct locations (`docs/audio/` and `public/audio/`).
+
+**Note**: The current placeholder files are minimal silent audio files created to prevent console errors. Replace them with actual licensed music files according to the attribution requirements above.
