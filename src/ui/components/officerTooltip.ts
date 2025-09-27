@@ -212,7 +212,7 @@ export class OfficerTooltip {
     this.isHovering = true;
     this.currentTarget = target;
     this.currentOfficer = officer;
-    
+
     // Only show tooltip if CTRL is pressed
     if (isCtrlKeyPressed()) {
       this.showTooltip(target, officer);

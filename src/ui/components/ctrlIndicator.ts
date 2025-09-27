@@ -16,10 +16,10 @@ export class CtrlIndicator {
       </div>
       <div class="ctrl-indicator__label">STRG + Hover für Details</div>
     `;
-    
+
     // Initially hidden
     this.root.classList.add('is-hidden');
-    
+
     document.body.appendChild(this.root);
 
     // Listen for CTRL key state changes

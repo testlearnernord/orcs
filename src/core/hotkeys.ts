@@ -40,7 +40,7 @@ function onKeyDown(event: KeyboardEvent): void {
   // Track CTRL key state
   if (event.key === 'Control' && !isCtrlPressed) {
     isCtrlPressed = true;
-    ctrlStateChangeListeners.forEach(listener => listener(true));
+    ctrlStateChangeListeners.forEach((listener) => listener(true));
   }
 
   if (event.defaultPrevented) return;
@@ -70,7 +70,7 @@ function onKeyUp(event: KeyboardEvent): void {
   // Track CTRL key state
   if (event.key === 'Control' && isCtrlPressed) {
     isCtrlPressed = false;
-    ctrlStateChangeListeners.forEach(listener => listener(false));
+    ctrlStateChangeListeners.forEach((listener) => listener(false));
   }
 }
 
@@ -78,7 +78,7 @@ function onWindowBlur(): void {
   // Reset CTRL state when window loses focus
   if (isCtrlPressed) {
     isCtrlPressed = false;
-    ctrlStateChangeListeners.forEach(listener => listener(false));
+    ctrlStateChangeListeners.forEach((listener) => listener(false));
   }
 }
 
@@ -141,7 +141,9 @@ export function isCtrlKeyPressed(): boolean {
   return isCtrlPressed;
 }
 
-export function onCtrlStateChange(listener: (pressed: boolean) => void): () => void {
+export function onCtrlStateChange(
+  listener: (pressed: boolean) => void
+): () => void {
   ctrlStateChangeListeners.add(listener);
   return () => {
     ctrlStateChangeListeners.delete(listener);
