@@ -2,11 +2,8 @@ import React from 'react';
 
 import { makeSilhouetteDataURL } from '@/ui/portraits/fallback';
 import { portraitIndexFor } from '@/ui/portraits/indexFor';
-import {
-  loadPortraitAtlases,
-  sliceTileToURL,
-  type LoadedAtlas
-} from './portrait-atlas';
+import type { LoadedAtlas } from './portrait-atlas';
+import { loadPortraitAtlases, sliceTileToURL } from './portrait-atlas';
 
 type FallbackReason = 'legacy' | 'missing';
 
