@@ -67,7 +67,16 @@ export function FreeRoamView({
   onHighlightHostChange
 }: FreeRoamViewProps) {
   const idleMs = DEFAULT_IDLE_MS;
-  const { map, warcalls, officers, cycle, idleSeconds, playerPosition, movePlayer, dynamicWarcalls } = useFreeRoam(store, {
+  const {
+    map,
+    warcalls,
+    officers,
+    cycle,
+    idleSeconds,
+    playerPosition,
+    movePlayer,
+    dynamicWarcalls
+  } = useFreeRoam(store, {
     mapSize: DEFAULT_MAP_SIZE,
     officerLimit: DEFAULT_OFFICER_LIMIT,
     idleMs
@@ -129,7 +138,7 @@ export function FreeRoamView({
         onRequestClose();
         return;
       }
-      
+
       // WASD movement controls
       switch (event.key.toLowerCase()) {
         case 'w':
@@ -375,11 +384,16 @@ export function FreeRoamView({
                   />
                   <span className="free-roam__marker-label">
                     {entry.officer.name}
-                    {entry.state !== 'idle' && <span className="free-roam__marker-state"> ({entry.state})</span>}
+                    {entry.state !== 'idle' && (
+                      <span className="free-roam__marker-state">
+                        {' '}
+                        ({entry.state})
+                      </span>
+                    )}
                   </span>
                   {/* Show movement target indicator */}
                   {entry.target && (
-                    <div 
+                    <div
                       className="free-roam__target-indicator"
                       style={{
                         left: `${toPercent(map, entry.target.x) - entry.xPercent}%`,
@@ -399,8 +413,14 @@ export function FreeRoamView({
           <section className="free-roam__panel">
             <h2>Spieler Position</h2>
             <div className="free-roam__player-info">
-              <p><strong>Position:</strong> ({playerPosition.x}, {playerPosition.y})</p>
-              <p><strong>Biom:</strong> {BIOME_LABEL[playerPosition.coordinate.biome]}</p>
+              <p>
+                <strong>Position:</strong> ({playerPosition.x},{' '}
+                {playerPosition.y})
+              </p>
+              <p>
+                <strong>Biom:</strong>{' '}
+                {BIOME_LABEL[playerPosition.coordinate.biome]}
+              </p>
               <p className="free-roam__controls">
                 <small>WASD zum Bewegen • ESC zum Verlassen</small>
               </p>
@@ -425,13 +445,17 @@ export function FreeRoamView({
                   </li>
                 ))}
                 {dynamicWarcalls.map((entry) => (
-                  <li key={entry.warcall.id} className="free-roam__list-item free-roam__list-item--dynamic">
+                  <li
+                    key={entry.warcall.id}
+                    className="free-roam__list-item free-roam__list-item--dynamic"
+                  >
                     <div className="free-roam__list-title">
                       <strong>[AI] {entry.warcall.kind}</strong>
                       <span> • {entry.warcall.location}</span>
                     </div>
                     <div className="free-roam__list-meta">
-                      KI-generiert • Auflösung in {entry.warcall.resolveOn - cycle} Zyklen
+                      KI-generiert • Auflösung in{' '}
+                      {entry.warcall.resolveOn - cycle} Zyklen
                     </div>
                   </li>
                 ))}
@@ -449,7 +473,9 @@ export function FreeRoamView({
                     <div className="free-roam__list-title">
                       <strong>{entry.officer.name}</strong>
                       <span> • {entry.officer.rank}</span>
-                      <span className={`free-roam__ai-state free-roam__ai-state--${entry.state}`}>
+                      <span
+                        className={`free-roam__ai-state free-roam__ai-state--${entry.state}`}
+                      >
                         • {entry.state.toUpperCase()}
                       </span>
                     </div>
@@ -457,7 +483,10 @@ export function FreeRoamView({
                       Merit {Math.round(entry.officer.merit)} •{' '}
                       {BIOME_LABEL[entry.coordinate.biome]}
                       {entry.target && (
-                        <span> • Ziel: ({entry.target.x}, {entry.target.y})</span>
+                        <span>
+                          {' '}
+                          • Ziel: ({entry.target.x}, {entry.target.y})
+                        </span>
                       )}
                     </div>
                   </li>

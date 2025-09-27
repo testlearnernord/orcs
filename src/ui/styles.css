@@ -1944,13 +1944,18 @@ button:disabled {
 }
 
 @keyframes dynamicWarcallPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
-    box-shadow: 0 10px 18px rgba(8, 13, 23, 0.5), 0 0 0 0 rgba(147, 51, 234, 0.7);
+    box-shadow:
+      0 10px 18px rgba(8, 13, 23, 0.5),
+      0 0 0 0 rgba(147, 51, 234, 0.7);
   }
   50% {
     transform: scale(1.1);
-    box-shadow: 0 12px 22px rgba(8, 13, 23, 0.6), 0 0 0 10px rgba(147, 51, 234, 0);
+    box-shadow:
+      0 12px 22px rgba(8, 13, 23, 0.6),
+      0 0 0 10px rgba(147, 51, 234, 0);
   }
 }
 
@@ -1970,21 +1975,31 @@ button:disabled {
 }
 
 @keyframes movingOfficer {
-  0% { transform: translateX(-1px); }
-  100% { transform: translateX(1px); }
+  0% {
+    transform: translateX(-1px);
+  }
+  100% {
+    transform: translateX(1px);
+  }
 }
 
 @keyframes fightingOfficer {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 @keyframes warcallOfficer {
-  0%, 100% { 
+  0%,
+  100% {
     transform: scale(1);
     border-color: rgba(59, 130, 246, 0.8);
   }
-  50% { 
+  50% {
     transform: scale(1.05);
     border-color: rgba(59, 130, 246, 1);
   }
@@ -2001,8 +2016,13 @@ button:disabled {
 }
 
 @keyframes targetIndicator {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .free-roam__marker-state {
@@ -2050,13 +2070,18 @@ button:disabled {
 }
 
 @keyframes playerPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
-    box-shadow: 0 10px 18px rgba(8, 13, 23, 0.5), 0 0 0 0 rgba(16, 185, 129, 0.7);
+    box-shadow:
+      0 10px 18px rgba(8, 13, 23, 0.5),
+      0 0 0 0 rgba(16, 185, 129, 0.7);
   }
   50% {
     transform: scale(1.05);
-    box-shadow: 0 12px 22px rgba(8, 13, 23, 0.6), 0 0 0 8px rgba(16, 185, 129, 0);
+    box-shadow:
+      0 12px 22px rgba(8, 13, 23, 0.6),
+      0 0 0 8px rgba(16, 185, 129, 0);
   }
 }
 

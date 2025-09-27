@@ -64,7 +64,7 @@ function createInitialPlayerPosition(map: WorldMap): PlayerPosition {
   const y = Math.floor(map.size / 2);
   const index = y * map.size + x;
   const biome = map.tiles[index] ?? 'plains';
-  
+
   return {
     x,
     y,
@@ -80,34 +80,53 @@ function distance(a: MapCoordinate, b: MapCoordinate): number {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-function moveTowards(from: MapCoordinate, to: MapCoordinate, mapSize: number): MapCoordinate {
+function moveTowards(
+  from: MapCoordinate,
+  to: MapCoordinate,
+  mapSize: number
+): MapCoordinate {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
-  
+
   // Simple pathfinding - move one step towards target
   let newX = from.x;
   let newY = from.y;
-  
+
   if (Math.abs(dx) > Math.abs(dy)) {
     newX = from.x + (dx > 0 ? 1 : -1);
   } else if (dy !== 0) {
     newY = from.y + (dy > 0 ? 1 : -1);
   }
-  
+
   // Clamp to map bounds
   newX = Math.max(0, Math.min(mapSize - 1, newX));
   newY = Math.max(0, Math.min(mapSize - 1, newY));
-  
+
   const index = newY * mapSize + newX;
   return { x: newX, y: newY, index, biome: from.biome };
 }
 
-function generateRandomWarcall(rng: RNG, map: WorldMap, cycle: number, occupied: Set<number>) {
+function generateRandomWarcall(
+  rng: RNG,
+  map: WorldMap,
+  cycle: number,
+  occupied: Set<number>
+) {
   const warcallTypes = ['Raid', 'Scouting', 'Hunt', 'Patrol', 'Skirmish'];
-  const locations = ['North Pass', 'Dark Woods', 'Iron Hills', 'Bone Valley', 'Stone Bridge'];
-  
-  const coordinate = findOpenTile(map, `random_warcall_${cycle}_${rng.int(0, 999)}`, occupied);
-  
+  const locations = [
+    'North Pass',
+    'Dark Woods',
+    'Iron Hills',
+    'Bone Valley',
+    'Stone Bridge'
+  ];
+
+  const coordinate = findOpenTile(
+    map,
+    `random_warcall_${cycle}_${rng.int(0, 999)}`,
+    occupied
+  );
+
   return {
     id: `warcall_${cycle}_${rng.int(100, 999999)}`,
     cycleAnnounced: cycle,
@@ -154,7 +173,8 @@ function computeSnapshot(
 
   // Generate new dynamic warcalls occasionally
   const updatedDynamicWarcalls = [...dynamicWarcalls];
-  if (rng.next() < 0.1 && updatedDynamicWarcalls.length < 3) { // 10% chance per update, max 3
+  if (rng.next() < 0.1 && updatedDynamicWarcalls.length < 3) {
+    // 10% chance per update, max 3
     const newWarcall = generateRandomWarcall(rng, map, world.cycle, occupied);
     updatedDynamicWarcalls.push({
       warcall: newWarcall as WarcallWithPhase,
@@ -166,7 +186,7 @@ function computeSnapshot(
 
   // Remove expired dynamic warcalls
   const activeDynamicWarcalls = updatedDynamicWarcalls.filter(
-    dw => dw.warcall.resolveOn > world.cycle
+    (dw) => dw.warcall.resolveOn > world.cycle
   );
 
   // All warcalls (official + dynamic)
@@ -174,8 +194,10 @@ function computeSnapshot(
 
   const positionedOfficers: PositionedOfficer[] = officers.map((officer) => {
     const key = `${officer.stableId ?? officer.id}`;
-    const previousOfficer = previousOfficers.find(po => po.officer.id === officer.id);
-    
+    const previousOfficer = previousOfficers.find(
+      (po) => po.officer.id === officer.id
+    );
+
     let coordinate: MapCoordinate;
     let target: MapCoordinate | undefined;
     let state: 'idle' | 'moving' | 'fighting' | 'warcall' = 'idle';
@@ -199,11 +221,13 @@ function computeSnapshot(
         }
       } else {
         // No target, find one
-        if (allWarcalls.length > 0 && rng.next() < 0.3) { // 30% chance to move to warcall
+        if (allWarcalls.length > 0 && rng.next() < 0.3) {
+          // 30% chance to move to warcall
           const targetWarcall = rng.pick(allWarcalls);
           target = targetWarcall.coordinate;
           state = 'warcall';
-        } else if (rng.next() < 0.1) { // 10% chance to move randomly
+        } else if (rng.next() < 0.1) {
+          // 10% chance to move randomly
           target = {
             x: rng.int(0, map.size - 1),
             y: rng.int(0, map.size - 1),
@@ -214,11 +238,10 @@ function computeSnapshot(
           state = 'moving';
         }
       }
-
     } else {
       // New officer, place randomly
       coordinate = findOpenTile(map, key, occupied);
-      
+
       // 20% chance to start with a target
       if (allWarcalls.length > 0 && rng.next() < 0.2) {
         target = rng.pick(allWarcalls).coordinate;
@@ -238,12 +261,14 @@ function computeSnapshot(
 
   // Check for officer encounters after all officers are positioned
   for (const officer of positionedOfficers) {
-    const nearbyOfficers = positionedOfficers.filter(other => 
-      other.officer.id !== officer.officer.id && 
-      distance(officer.coordinate, other.coordinate) <= 2
+    const nearbyOfficers = positionedOfficers.filter(
+      (other) =>
+        other.officer.id !== officer.officer.id &&
+        distance(officer.coordinate, other.coordinate) <= 2
     );
-    
-    if (nearbyOfficers.length > 0 && rng.next() < 0.05) { // 5% chance to fight
+
+    if (nearbyOfficers.length > 0 && rng.next() < 0.05) {
+      // 5% chance to fight
       officer.state = 'fighting';
       officer.target = undefined;
     }
@@ -280,65 +305,80 @@ export function useFreeRoam(
     createInitialPlayerPosition(map)
   );
 
-  const [dynamicWarcalls, setDynamicWarcalls] = useState<PositionedWarcall[]>([]);
-  const [previousOfficers, setPreviousOfficers] = useState<PositionedOfficer[]>([]);
+  const [dynamicWarcalls, setDynamicWarcalls] = useState<PositionedWarcall[]>(
+    []
+  );
+  const [previousOfficers, setPreviousOfficers] = useState<PositionedOfficer[]>(
+    []
+  );
 
   const [snapshot, setSnapshot] = useState<FreeRoamSnapshot>(() =>
-    computeSnapshot(store.getState(), map, officerLimit, playerPosition, [], rng, [])
+    computeSnapshot(
+      store.getState(),
+      map,
+      officerLimit,
+      playerPosition,
+      [],
+      rng,
+      []
+    )
   );
   const [idleSeconds, setIdleSeconds] = useState(0);
   const lastInteractionRef = useRef(Date.now());
   const aiUpdateIntervalRef = useRef<number | null>(null);
 
-  const movePlayer = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
-    setPlayerPosition((prev) => {
-      let newX = prev.x;
-      let newY = prev.y;
-      
-      switch (direction) {
-        case 'up':
-          newY = Math.max(0, prev.y - 1);
-          break;
-        case 'down':
-          newY = Math.min(map.size - 1, prev.y + 1);
-          break;
-        case 'left':
-          newX = Math.max(0, prev.x - 1);
-          break;
-        case 'right':
-          newX = Math.min(map.size - 1, prev.x + 1);
-          break;
-      }
-      
-      // Don't move if position unchanged
-      if (newX === prev.x && newY === prev.y) {
-        return prev;
-      }
-      
-      const index = newY * map.size + newX;
-      const biome = map.tiles[index] ?? 'plains';
-      
-      return {
-        x: newX,
-        y: newY,
-        xPercent: toPercent(map, newX),
-        yPercent: toPercent(map, newY),
-        coordinate: { x: newX, y: newY, index, biome }
-      };
-    });
-  }, [map]);
+  const movePlayer = useCallback(
+    (direction: 'up' | 'down' | 'left' | 'right') => {
+      setPlayerPosition((prev) => {
+        let newX = prev.x;
+        let newY = prev.y;
+
+        switch (direction) {
+          case 'up':
+            newY = Math.max(0, prev.y - 1);
+            break;
+          case 'down':
+            newY = Math.min(map.size - 1, prev.y + 1);
+            break;
+          case 'left':
+            newX = Math.max(0, prev.x - 1);
+            break;
+          case 'right':
+            newX = Math.min(map.size - 1, prev.x + 1);
+            break;
+        }
+
+        // Don't move if position unchanged
+        if (newX === prev.x && newY === prev.y) {
+          return prev;
+        }
+
+        const index = newY * map.size + newX;
+        const biome = map.tiles[index] ?? 'plains';
+
+        return {
+          x: newX,
+          y: newY,
+          xPercent: toPercent(map, newX),
+          yPercent: toPercent(map, newY),
+          coordinate: { x: newX, y: newY, index, biome }
+        };
+      });
+    },
+    [map]
+  );
 
   // Update AI every 2 seconds
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
-    
+
     aiUpdateIntervalRef.current = window.setInterval(() => {
       const newSnapshot = computeSnapshot(
-        store.getState(), 
-        map, 
-        officerLimit, 
-        playerPosition, 
-        previousOfficers, 
+        store.getState(),
+        map,
+        officerLimit,
+        playerPosition,
+        previousOfficers,
         rng,
         dynamicWarcalls
       );
@@ -352,29 +392,45 @@ export function useFreeRoam(
         window.clearInterval(aiUpdateIntervalRef.current);
       }
     };
-  }, [store, map, officerLimit, playerPosition, previousOfficers, rng, dynamicWarcalls]);
+  }, [
+    store,
+    map,
+    officerLimit,
+    playerPosition,
+    previousOfficers,
+    rng,
+    dynamicWarcalls
+  ]);
 
   useEffect(() => {
     const newSnapshot = computeSnapshot(
-      store.getState(), 
-      map, 
-      officerLimit, 
-      playerPosition, 
-      previousOfficers, 
+      store.getState(),
+      map,
+      officerLimit,
+      playerPosition,
+      previousOfficers,
       rng,
       dynamicWarcalls
     );
     setSnapshot(newSnapshot);
-  }, [store, map, officerLimit, playerPosition, previousOfficers, rng, dynamicWarcalls]);
+  }, [
+    store,
+    map,
+    officerLimit,
+    playerPosition,
+    previousOfficers,
+    rng,
+    dynamicWarcalls
+  ]);
 
   useEffect(() => {
     const unsubscribe = store.events.on('state:changed', (world) => {
       const newSnapshot = computeSnapshot(
-        world, 
-        map, 
-        officerLimit, 
-        playerPosition, 
-        previousOfficers, 
+        world,
+        map,
+        officerLimit,
+        playerPosition,
+        previousOfficers,
         rng,
         dynamicWarcalls
       );
@@ -383,7 +439,14 @@ export function useFreeRoam(
       setDynamicWarcalls(newSnapshot.dynamicWarcalls);
     });
     return () => unsubscribe();
-  }, [map, officerLimit, playerPosition, previousOfficers, rng, dynamicWarcalls]);
+  }, [
+    map,
+    officerLimit,
+    playerPosition,
+    previousOfficers,
+    rng,
+    dynamicWarcalls
+  ]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
