@@ -40,16 +40,16 @@
   overflow: hidden;
   border-radius: 12px;
   background-color: rgba(17, 24, 39, 0.4);
-  background-repeat: no-repeat;
-  background-position: center;
+  object-fit: cover;
+}
+
+.officer-avatar--loading {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 .officer-avatar--fallback {
-  background-image: none !important;
-}
-
-.officer-avatar--fallback svg {
-  display: block;
+  object-fit: contain;
 }
 
 html,

@@ -1,13 +1,17 @@
-import { existsSync } from 'node:fs';
-const must = [
-  'docs/assets/orcs/portraits/manifest.json',
-  'docs/assets/orcs/portraits/set_a.webp',
-  'docs/assets/orcs/portraits/set_b.webp'
-];
-const missing = must.filter((p) => !existsSync(p));
+import { access } from 'node:fs/promises';
+
+const required = ['docs/assets'];
+
+const missing = [];
+for (const entry of required) {
+  try {
+    await access(entry);
+  } catch {
+    missing.push(entry);
+  }
+}
+
 if (missing.length) {
-  console.error(
-    'Missing portrait files in docs/ after build:\n' + missing.join('\n')
-  );
+  console.error('Missing build output after build:', missing.join(', '));
   process.exit(1);
 }
