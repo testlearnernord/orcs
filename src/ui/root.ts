@@ -559,6 +559,24 @@ export class NemesisUI {
     });
     bar.appendChild(pillContainer);
 
+    // Add neutral relations toggle as per redesign requirements
+    const neutralToggle = document.createElement('div');
+    neutralToggle.className = 'neutral-relations-toggle';
+    const neutralCheckbox = document.createElement('input');
+    neutralCheckbox.type = 'checkbox';
+    neutralCheckbox.id = 'show-neutral-relations';
+    neutralCheckbox.checked = this.filters.getState().neutralRelations;
+    neutralCheckbox.addEventListener('change', () => {
+      this.toggleFilter('neutralRelations');
+      this.updateNeutralCounter();
+    });
+    const neutralLabel = document.createElement('label');
+    neutralLabel.htmlFor = 'show-neutral-relations';
+    neutralLabel.className = 'neutral-relations-label';
+    neutralLabel.innerHTML = '• Neutrale Beziehungen anzeigen <span class="neutral-counter" id="neutral-counter">+0 Neutral</span>';
+    neutralToggle.append(neutralCheckbox, neutralLabel);
+    bar.appendChild(neutralToggle);
+
     const sortWrapper = document.createElement('div');
     sortWrapper.className = 'filters-bar__sort';
     const sortLabel = document.createElement('span');
@@ -631,6 +649,19 @@ export class NemesisUI {
 
   private handleSortChange(sortBy: UIFilters['sortBy']): void {
     this.filters.setSort(sortBy);
+  }
+
+  private updateNeutralCounter(): void {
+    const counterEl = document.getElementById('neutral-counter');
+    if (!counterEl) return;
+    
+    const state = this.store.getState();
+    let neutralCount = 0;
+    state.officers.forEach(officer => {
+      neutralCount += officer.relationships.filter(rel => rel.type === 'NEUTRAL').length;
+    });
+    
+    counterEl.textContent = `+${neutralCount} Neutral`;
   }
 
   private registerUIEvents(app: HTMLElement): void {
@@ -1007,6 +1038,9 @@ export class NemesisUI {
       this.relations.setLensMask(lensMaskForFilters(filters));
       this.relations.setEdges(maskedEdges, state.cycle);
     }
+
+    // Update neutral relations counter
+    this.updateNeutralCounter();
   }
 
   private hierarchyContainer: HTMLElement | null = null;
