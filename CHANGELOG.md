@@ -1,3 +1,19 @@
+## [0.8.3] - 2025-01-27
+
+### Fixed
+
+- **SPECTATE Simulation UI Updates**: Fixed issue where UI cards/lanes were not updating after cycle advances due to state immutability problem
+- Added `version` and `updatedAt` fields to WorldState for better change tracking
+- GameStore now creates new state references after each cycle to ensure UI reactivity
+- Added reactivity tests to prevent regression
+
+### Technical
+
+- Modified `advanceCycle()` to properly increment version and timestamp
+- Updated `GameStore.tick()` to create new state references for UI updates
+- Added debug logging for development (`?debugWorld=1` URL parameter)
+- New test: `store.reactivity.spec.ts` validates state reference changes
+
 ## [0.8.2] - 2025-01-27
 
 ### Added

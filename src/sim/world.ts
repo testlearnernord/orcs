@@ -12,6 +12,8 @@ export function createWorld(
   const state: WorldState = {
     seed,
     cycle: 0,
+    version: 1,
+    updatedAt: Date.now(),
     officers: [],
     graveyard: [],
     warcalls: [],

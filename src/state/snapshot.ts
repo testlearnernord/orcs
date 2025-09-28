@@ -25,6 +25,8 @@ function cloneWarcall(plan: WarcallPlan): WarcallPlan {
 export function snapshotWorld(state: WorldState): WorldState {
   return {
     ...state,
+    version: state.version,
+    updatedAt: state.updatedAt,
     officers: state.officers.map(cloneOfficer),
     graveyard: state.graveyard.map(cloneOfficer),
     warcalls: state.warcalls.map(cloneWarcall),
