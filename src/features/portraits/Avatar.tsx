@@ -161,7 +161,7 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         // For 256x256 orcs, we want to focus on the upper portion of each tile (where the face is)
         // This crops out the lower body and centers on the head/chest area
         const faceAreaHeight = 0.65; // Focus on top 65% of the tile for better face coverage
-        const faceAreaWidth = 1.0;   // Use full width of the tile
+        const faceAreaWidth = 1.0; // Use full width of the tile
 
         // Scale factor to enlarge the cropped face area to fill the portrait frame
         // Since we're only showing 65% of the height, we scale up to fill the frame
@@ -170,8 +170,10 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
 
         // Position to show the top portion of the tile (where the face is)
         // backgroundPosition works as: left% top%
-        const positionX = (tileLeft + (tileWidth * 0.5)) * (1 / faceAreaWidth) * 1.05; // Center horizontally within tile
-        const positionY = (tileTop + (tileHeight * 0.15)) * (1 / faceAreaHeight) * 1.05; // Focus on upper portion (face area)
+        const positionX =
+          (tileLeft + tileWidth * 0.5) * (1 / faceAreaWidth) * 1.05; // Center horizontally within tile
+        const positionY =
+          (tileTop + tileHeight * 0.15) * (1 / faceAreaHeight) * 1.05; // Focus on upper portion (face area)
 
         const css: React.CSSProperties = {
           width: size,
