@@ -15,6 +15,10 @@ export interface KeybindState {
   lockOn: boolean; // Alt (toggle)
   signature: boolean; // E
   reset: boolean; // R
+  
+  // Lock-on cycling
+  cycleLeft: boolean; // Q
+  cycleRight: boolean; // E (note: shares with signature - needs special handling)
 
   // Player Mode specific
   musicToggle: boolean; // M
@@ -44,7 +48,8 @@ export class PlayerKeybinds {
     shift: 'dash',
     control: 'block',
     alt: 'lockOn',
-    e: 'signature',
+    e: 'signature', // Primary binding for E
+    q: 'cycleLeft',
     r: 'reset',
     m: 'musicToggle',
     f9: 'arenaReset'
@@ -61,6 +66,8 @@ export class PlayerKeybinds {
       lockOn: false,
       signature: false,
       reset: false,
+      cycleLeft: false,
+      cycleRight: false,
       musicToggle: false,
       arenaReset: false,
       lockOnToggled: false,
@@ -165,8 +172,26 @@ export class PlayerKeybinds {
 
   private handleKeyDown = (event: KeyboardEvent): void => {
     const key = event.key.toLowerCase();
+    
+    // Special handling for E key (signature/cycleRight)
+    if (key === 'e') {
+      if (this.state.lockOn) {
+        // If lock-on is active, E cycles right
+        if (!this.state.cycleRight) {
+          this.updateKeyState('cycleRight', true);
+          event.preventDefault();
+        }
+      } else {
+        // If lock-on is not active, E is signature
+        if (!this.state.signature) {
+          this.updateKeyState('signature', true);
+          event.preventDefault();
+        }
+      }
+      return;
+    }
+    
     const action = this.keyMap[key];
-
     if (action && !this.state[action]) {
       this.updateKeyState(action, true);
       event.preventDefault();
@@ -175,8 +200,21 @@ export class PlayerKeybinds {
 
   private handleKeyUp = (event: KeyboardEvent): void => {
     const key = event.key.toLowerCase();
+    
+    // Special handling for E key (signature/cycleRight)
+    if (key === 'e') {
+      if (this.state.cycleRight) {
+        this.updateKeyState('cycleRight', false);
+        event.preventDefault();
+      }
+      if (this.state.signature) {
+        this.updateKeyState('signature', false);
+        event.preventDefault();
+      }
+      return;
+    }
+    
     const action = this.keyMap[key];
-
     if (action && this.state[action]) {
       this.updateKeyState(action, false);
       event.preventDefault();

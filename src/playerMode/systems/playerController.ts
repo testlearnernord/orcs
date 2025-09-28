@@ -6,6 +6,9 @@ import { BALANCE } from '../../simulation/archetypes';
 import type { Point2D } from '../../combat/hitbox';
 import { angle, withinArc } from '../../combat/hitbox';
 import type { KeybindState } from '../input/keybinds';
+import { LockOnManager, type LockOnTarget } from '../lockon/LockOnManager';
+import { LockOnInputHandler } from '../lockon/lockOnInput';
+import { orbitVelocity, inputToOrbitValues, dirFromAngle } from './orbitMovement';
 
 export interface PlayerState {
   position: Point2D;
@@ -18,6 +21,13 @@ export interface PlayerState {
   iframeEndTime: number;
   lastStaminaUse: number;
   blockDirection: number;
+  // New properties for enhanced berserker system
+  motion: 'idle' | 'walk' | 'dash' | 'signature' | 'hurt';
+  direction: 'L' | 'R' | 'U' | 'D';
+  isLockedOn: boolean;
+  lockOnTargetId?: string;
+  speed: number;
+  walkPhase: number;
 }
 
 export interface PlayerAction {
@@ -31,8 +41,15 @@ export interface PlayerAction {
 export class PlayerController {
   private state: PlayerState;
   private actions: PlayerAction[] = [];
+  private lockOnManager: LockOnManager;
+  private lockOnInputHandler: LockOnInputHandler;
+  private availableTargets: LockOnTarget[] = [];
+  private baseSpeed = 100; // px/s
 
   constructor(startPosition: Point2D = { x: 0, y: 0 }) {
+    this.lockOnManager = new LockOnManager();
+    this.lockOnInputHandler = new LockOnInputHandler();
+    
     this.state = {
       position: { ...startPosition },
       rotation: 0,
@@ -43,7 +60,13 @@ export class PlayerController {
       dashEndTime: 0,
       iframeEndTime: 0,
       lastStaminaUse: 0,
-      blockDirection: 0
+      blockDirection: 0,
+      // New properties
+      motion: 'idle',
+      direction: 'D',
+      isLockedOn: false,
+      speed: 0,
+      walkPhase: 0
     };
   }
 
@@ -70,17 +93,24 @@ export class PlayerController {
     const now = Date.now();
     const deltaSeconds = deltaMs / 1000;
 
+    // Process lock-on input first
+    this.processLockOn(input);
+
     // Update time-based states
     this.updateTimedStates(now);
 
     // Regenerate stamina
     this.updateStamina(deltaMs, now);
 
-    // Process input
+    // Process input with lock-on awareness
     this.processMovement(input, deltaSeconds);
     this.processDash(input, now);
     this.processBlock(input);
     this.processSignature(input, now);
+    
+    // Update motion state and direction
+    this.updateMotionState();
+    this.updateDirection();
   }
 
   /**
@@ -183,19 +213,47 @@ export class PlayerController {
     const movement = this.getMovementVector(input);
 
     if (movement.x !== 0 || movement.y !== 0) {
-      // Update rotation to face movement direction
-      this.state.rotation = Math.atan2(movement.y, movement.x);
+      let velocity: Point2D;
+      let speed: number;
 
-      // Apply movement speed
-      const speed = this.state.isDashing ? BALANCE.dash.speedMul * 2.5 : 2.5; // Base movement speed
+      // Check if lock-on is active and we have a target
+      const lockOnTarget = this.getCurrentLockOnTarget();
+      if (this.state.isLockedOn && lockOnTarget) {
+        // Use orbit movement
+        const orbitInput = inputToOrbitValues({
+          moveUp: input.moveUp,
+          moveDown: input.moveDown,  
+          moveLeft: input.moveLeft,
+          moveRight: input.moveRight
+        });
+        
+        speed = this.state.isDashing ? this.baseSpeed * BALANCE.dash.speedMul : this.baseSpeed;
+        velocity = orbitVelocity(orbitInput, this.state.position, lockOnTarget.pos, speed);
+      } else {
+        // Standard world-relative movement
+        this.state.rotation = Math.atan2(movement.y, movement.x);
+        speed = this.state.isDashing ? this.baseSpeed * BALANCE.dash.speedMul : this.baseSpeed;
+        velocity = {
+          x: movement.x * speed,
+          y: movement.y * speed
+        };
+      }
 
-      this.state.position.x += movement.x * speed * deltaSeconds;
-      this.state.position.y += movement.y * speed * deltaSeconds;
+      this.state.position.x += velocity.x * deltaSeconds;
+      this.state.position.y += velocity.y * deltaSeconds;
+      this.state.speed = speed;
+
+      // Update walk phase for distance-coupled animation
+      if (!this.state.isDashing) {
+        this.state.walkPhase = (this.state.walkPhase + (speed * deltaSeconds) / (40 * 8)) % 1;
+      }
 
       this.actions.push({
         type: 'move',
         data: { position: this.state.position, rotation: this.state.rotation }
       });
+    } else {
+      this.state.speed = 0;
     }
   }
 
@@ -246,6 +304,112 @@ export class PlayerController {
         data: { position: this.state.position, rotation: this.state.rotation }
       });
     }
+  }
+
+  /**
+   * Process lock-on input and manage target acquisition
+   */
+  private processLockOn(input: KeybindState): void {
+    // Convert KeybindState to the format expected by LockOnInputHandler
+    const keyState: { [key: string]: boolean } = {
+      'AltLeft': input.lockOn || false, // assuming lockOn is added to KeybindState
+      'KeyQ': input.cycleLeft || false, // assuming cycleLeft is added
+      'KeyE': input.cycleRight || false // assuming cycleRight is added
+    };
+
+    const lockOnInput = this.lockOnInputHandler.processInput(keyState);
+
+    // Handle lock-on toggle
+    if (lockOnInput.toggleLockOn) {
+      if (this.state.isLockedOn) {
+        // Clear lock-on
+        this.lockOnManager.clear();
+        this.state.isLockedOn = false;
+        this.state.lockOnTargetId = undefined;
+      } else {
+        // Acquire new target
+        const targetId = this.lockOnManager.acquire(
+          this.availableTargets,
+          this.state.position,
+          this.state.rotation
+        );
+        if (targetId) {
+          this.lockOnManager.current = targetId;
+          this.state.isLockedOn = true;
+          this.state.lockOnTargetId = targetId;
+        }
+      }
+    }
+
+    // Handle target cycling
+    if (this.state.isLockedOn && (lockOnInput.cycleLeft || lockOnInput.cycleRight)) {
+      const direction = lockOnInput.cycleLeft ? -1 : 1;
+      const targetId = this.lockOnManager.cycle(
+        this.availableTargets,
+        direction,
+        this.state.position
+      );
+      if (targetId) {
+        this.lockOnManager.current = targetId;
+        this.state.lockOnTargetId = targetId;
+      }
+    }
+  }
+
+  /**
+   * Update motion state based on current actions
+   */
+  private updateMotionState(): void {
+    if (this.state.isDashing) {
+      this.state.motion = 'dash';
+    } else if (this.actions.some(a => a.type === 'signature')) {
+      this.state.motion = 'signature';
+    } else if (this.state.speed > 0) {
+      this.state.motion = 'walk';
+    } else {
+      this.state.motion = 'idle';
+    }
+  }
+
+  /**
+   * Update direction based on rotation or lock-on target
+   */
+  private updateDirection(): void {
+    if (this.state.isLockedOn && this.state.lockOnTargetId) {
+      // Find the locked target
+      const lockedTarget = this.availableTargets.find(t => t.id === this.state.lockOnTargetId);
+      if (lockedTarget) {
+        const targetAngle = angle(this.state.position, lockedTarget.pos);
+        this.state.direction = dirFromAngle(targetAngle);
+        this.state.rotation = targetAngle; // Also update rotation to face target
+        return;
+      }
+    }
+    
+    // Default: use rotation to determine direction
+    this.state.direction = dirFromAngle(this.state.rotation);
+  }
+
+  /**
+   * Set available targets for lock-on system
+   */
+  public setAvailableTargets(targets: LockOnTarget[]): void {
+    this.availableTargets = targets;
+    
+    // Clear lock-on if current target is no longer available
+    if (this.state.lockOnTargetId && !targets.find(t => t.id === this.state.lockOnTargetId && t.alive)) {
+      this.lockOnManager.clear();
+      this.state.isLockedOn = false;
+      this.state.lockOnTargetId = undefined;
+    }
+  }
+
+  /**
+   * Get current lock-on target
+   */
+  public getCurrentLockOnTarget(): LockOnTarget | undefined {
+    if (!this.state.lockOnTargetId) return undefined;
+    return this.availableTargets.find(t => t.id === this.state.lockOnTargetId);
   }
 
   private getMovementVector(input: KeybindState): Point2D {
