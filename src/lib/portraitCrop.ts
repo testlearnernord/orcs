@@ -43,7 +43,10 @@ type SheetOffsets = {
 const SHEET_OFFSETS: Record<string, SheetOffsets> = {
   officers1: { x: 0, y: 0 }, // No offset needed
   officers2: { x: 0, y: 0 }, // No offset needed
-  officers3: { x: 0, y: 0 } // No offset needed
+  officers3: { x: 0, y: 0 }, // No offset needed
+  officers4: { x: 0, y: 0 }, // No offset needed
+  officers5: { x: 0, y: 0 }, // No offset needed
+  officers6: { x: 0, y: 0 } // No offset needed
   // Add offsets here if specific sheets need fine-tuning
 };
 
