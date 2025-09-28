@@ -28,13 +28,7 @@ export function drawTerrain(
   ctx.translate(-camera.x, -camera.y);
 
   // Draw terrain image
-  ctx.drawImage(
-    map.terrain,
-    0,
-    0,
-    map.terrain.width,
-    map.terrain.height
-  );
+  ctx.drawImage(map.terrain, 0, 0, map.terrain.width, map.terrain.height);
 
   ctx.restore();
 }
@@ -58,15 +52,15 @@ export function drawDebugCollision(
 
   // Draw blocked tiles
   ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; // Semi-transparent red
-  
+
   const tileSize = map.meta.tileSize;
-  
+
   // Calculate visible tile range to optimize rendering
-  const viewLeft = camera.x - (canvasWidth / (2 * camera.scale));
-  const viewRight = camera.x + (canvasWidth / (2 * camera.scale));
-  const viewTop = camera.y - (canvasHeight / (2 * camera.scale));
-  const viewBottom = camera.y + (canvasHeight / (2 * camera.scale));
-  
+  const viewLeft = camera.x - canvasWidth / (2 * camera.scale);
+  const viewRight = camera.x + canvasWidth / (2 * camera.scale);
+  const viewTop = camera.y - canvasHeight / (2 * camera.scale);
+  const viewBottom = camera.y + canvasHeight / (2 * camera.scale);
+
   const startGx = Math.max(0, Math.floor(viewLeft / tileSize));
   const endGx = Math.min(map.gridWidth - 1, Math.ceil(viewRight / tileSize));
   const startGy = Math.max(0, Math.floor(viewTop / tileSize));
@@ -76,12 +70,7 @@ export function drawDebugCollision(
     for (let gx = startGx; gx <= endGx; gx++) {
       const index = gy * map.gridWidth + gx;
       if (map.blocked[index] === 1) {
-        ctx.fillRect(
-          gx * tileSize,
-          gy * tileSize,
-          tileSize,
-          tileSize
-        );
+        ctx.fillRect(gx * tileSize, gy * tileSize, tileSize, tileSize);
       }
     }
   }
@@ -110,7 +99,7 @@ export function drawPOILabels(
   ctx.font = '14px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  
+
   // Draw POI labels
   for (const poi of map.meta.pois) {
     // Draw background
@@ -119,14 +108,9 @@ export function drawPOILabels(
     const padding = 4;
     const bgWidth = textMetrics.width + padding * 2;
     const bgHeight = 20;
-    
-    ctx.fillRect(
-      poi.x - bgWidth / 2,
-      poi.y - bgHeight / 2,
-      bgWidth,
-      bgHeight
-    );
-    
+
+    ctx.fillRect(poi.x - bgWidth / 2, poi.y - bgHeight / 2, bgWidth, bgHeight);
+
     // Draw text
     ctx.fillStyle = 'white';
     ctx.fillText(poi.label, poi.x, poi.y);
@@ -158,17 +142,17 @@ export function drawOfficerIcons(
     ctx.beginPath();
     ctx.arc(officer.x, officer.y, 8, 0, Math.PI * 2);
     ctx.fill();
-    
+
     // Draw border
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 2;
     ctx.stroke();
-    
+
     // Draw name label
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    
+
     // Background
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     const textMetrics = ctx.measureText(officer.name);
@@ -179,7 +163,7 @@ export function drawOfficerIcons(
       textMetrics.width + padding * 2,
       14
     );
-    
+
     // Text
     ctx.fillStyle = 'white';
     ctx.fillText(officer.name, officer.x, officer.y + 14);
@@ -211,12 +195,12 @@ export function drawPlayer(
   ctx.beginPath();
   ctx.arc(playerX, playerY, 10, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Draw border
   ctx.strokeStyle = 'white';
   ctx.lineWidth = 3;
   ctx.stroke();
-  
+
   // Draw inner dot
   ctx.fillStyle = 'white';
   ctx.beginPath();

@@ -11,7 +11,8 @@ async function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = (error) => reject(new Error(`Failed to load image: ${url} - ${error}`));
+    img.onerror = (error) =>
+      reject(new Error(`Failed to load image: ${url} - ${error}`));
     img.src = url;
   });
 }
@@ -22,7 +23,9 @@ async function loadImage(url: string): Promise<HTMLImageElement> {
 async function loadJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`Failed to load JSON: ${url} - ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Failed to load JSON: ${url} - ${response.status} ${response.statusText}`
+    );
   }
   return response.json();
 }
@@ -30,7 +33,10 @@ async function loadJson<T>(url: string): Promise<T> {
 /**
  * Generate collision grid from collision image
  */
-function generateCollisionGrid(collisionImg: HTMLImageElement, tileSize: number): {
+function generateCollisionGrid(
+  collisionImg: HTMLImageElement,
+  tileSize: number
+): {
   blocked: Uint8Array;
   gridWidth: number;
   gridHeight: number;
@@ -52,17 +58,23 @@ function generateCollisionGrid(collisionImg: HTMLImageElement, tileSize: number)
   // Sample each tile at its center pixel
   for (let gy = 0; gy < gridHeight; gy++) {
     for (let gx = 0; gx < gridWidth; gx++) {
-      const centerX = Math.min(gx * tileSize + Math.floor(tileSize / 2), collisionImg.width - 1);
-      const centerY = Math.min(gy * tileSize + Math.floor(tileSize / 2), collisionImg.height - 1);
-      
+      const centerX = Math.min(
+        gx * tileSize + Math.floor(tileSize / 2),
+        collisionImg.width - 1
+      );
+      const centerY = Math.min(
+        gy * tileSize + Math.floor(tileSize / 2),
+        collisionImg.height - 1
+      );
+
       const imageData = ctx.getImageData(centerX, centerY, 1, 1);
       const [r, g, b, a] = imageData.data;
-      
+
       // Blocked if alpha is 0 (transparent) or RGB is very dark (close to black)
       const isTransparent = a === 0;
       const isDark = r < 50 && g < 50 && b < 50; // Very dark threshold
       const isBlocked = isTransparent || isDark;
-      
+
       const index = gy * gridWidth + gx;
       blocked[index] = isBlocked ? 1 : 0;
     }
@@ -96,7 +108,7 @@ export function canStandPx(map: HandMapData, px: number, py: number): boolean {
  */
 export async function loadHandMap(mapId: string): Promise<HandMapData> {
   const basePath = `/orcs/assets/maps/${mapId}`;
-  
+
   try {
     // Load all assets in parallel
     const [meta, terrain, collision] = await Promise.all([
@@ -111,21 +123,30 @@ export async function loadHandMap(mapId: string): Promise<HandMapData> {
     }
 
     // Generate collision grid
-    const { blocked, gridWidth, gridHeight } = generateCollisionGrid(collision, meta.tileSize);
+    const { blocked, gridWidth, gridHeight } = generateCollisionGrid(
+      collision,
+      meta.tileSize
+    );
 
     // Verify terrain and collision images are compatible
-    if (terrain.width !== collision.width || terrain.height !== collision.height) {
+    if (
+      terrain.width !== collision.width ||
+      terrain.height !== collision.height
+    ) {
       throw new Error(
         `Terrain and collision images must have the same dimensions. ` +
-        `Terrain: ${terrain.width}x${terrain.height}, Collision: ${collision.width}x${collision.height}`
+          `Terrain: ${terrain.width}x${terrain.height}, Collision: ${collision.width}x${collision.height}`
       );
     }
 
     // Verify pixel size matches actual image dimensions
-    if (meta.pixelSize.width !== terrain.width || meta.pixelSize.height !== terrain.height) {
+    if (
+      meta.pixelSize.width !== terrain.width ||
+      meta.pixelSize.height !== terrain.height
+    ) {
       console.warn(
         `Meta pixelSize (${meta.pixelSize.width}x${meta.pixelSize.height}) ` +
-        `does not match actual image size (${terrain.width}x${terrain.height}). Using actual size.`
+          `does not match actual image size (${terrain.width}x${terrain.height}). Using actual size.`
       );
       meta.pixelSize.width = terrain.width;
       meta.pixelSize.height = terrain.height;
@@ -140,6 +161,8 @@ export async function loadHandMap(mapId: string): Promise<HandMapData> {
       gridHeight
     };
   } catch (error) {
-    throw new Error(`Failed to load handcrafted map '${mapId}': ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to load handcrafted map '${mapId}': ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }

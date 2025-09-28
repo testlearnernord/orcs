@@ -72,7 +72,10 @@ function createInitialPlayerPosition(map: HandMapData): PlayerPosition {
   };
 }
 
-function distance(a: { x: number; y: number }, b: { x: number; y: number }): number {
+function distance(
+  a: { x: number; y: number },
+  b: { x: number; y: number }
+): number {
   const dx = a.x - b.x;
   const dy = a.y - b.y;
   return Math.sqrt(dx * dx + dy * dy);
@@ -97,12 +100,12 @@ function generateRandomWarcall(
   occupied: Set<string>
 ): PositionedWarcall | null {
   const warcallTypes: WarcallKind[] = ['Hunt', 'Ambush', 'Duel'];
-  
+
   // Try to find a free position
   for (let attempt = 0; attempt < 50; attempt++) {
     const x = rng.int(50, map.meta.pixelSize.width - 50);
     const y = rng.int(50, map.meta.pixelSize.height - 50);
-    
+
     if (canStandPx(map, x, y)) {
       const posKey = `${x},${y}`;
       if (!occupied.has(posKey)) {
@@ -120,7 +123,7 @@ function generateRandomWarcall(
       }
     }
   }
-  
+
   return null; // Couldn't find a valid position
 }
 
@@ -142,11 +145,11 @@ function computeSnapshot(
 
   // Position officers
   const positionedOfficers: PositionedOfficer[] = [];
-  
+
   for (let i = 0; i < Math.min(officers.length, officerLimit); i++) {
     const officer = officers[i];
-    const previousOfficer = previousOfficers.find(o => o.id === officer.id);
-    
+    const previousOfficer = previousOfficers.find((o) => o.id === officer.id);
+
     let x: number, y: number;
     let state: 'idle' | 'moving' = 'idle';
     let target: { x: number; y: number } | undefined;
@@ -173,10 +176,11 @@ function computeSnapshot(
         }
       } else {
         // No target, find one occasionally
-        if (rng.next() < 0.1) { // 10% chance to move
+        if (rng.next() < 0.1) {
+          // 10% chance to move
           // Try to move to a random POI or spawn point
           const targets = [
-            ...map.meta.pois.map(poi => ({ x: poi.x, y: poi.y })),
+            ...map.meta.pois.map((poi) => ({ x: poi.x, y: poi.y })),
             ...map.meta.spawns.officers
           ];
           if (targets.length > 0) {
@@ -197,7 +201,7 @@ function computeSnapshot(
         x = spawn.x;
         y = spawn.y;
       }
-      
+
       // Snap to walkable position if needed
       const walkable = findNearestWalkablePosition(map, x, y);
       if (walkable) {
@@ -221,7 +225,7 @@ function computeSnapshot(
 
   // Position warcalls
   const positionedWarcalls: PositionedWarcall[] = [...dynamicWarcalls];
-  
+
   for (const warcall of warcalls) {
     // Try to place at a POI first, then random location
     let x: number, y: number;
@@ -233,7 +237,7 @@ function computeSnapshot(
       x = rng.int(100, map.meta.pixelSize.width - 100);
       y = rng.int(100, map.meta.pixelSize.height - 100);
     }
-    
+
     // Snap to walkable position
     const walkable = findNearestWalkablePosition(map, x, y);
     if (walkable) {
@@ -282,28 +286,32 @@ export function useHandcraftedFreeRoam(
     y: 768
   }));
 
-  const [dynamicWarcalls, setDynamicWarcalls] = useState<PositionedWarcall[]>([]);
-  const [previousOfficers, setPreviousOfficers] = useState<PositionedOfficer[]>([]);
-  
+  const [dynamicWarcalls, setDynamicWarcalls] = useState<PositionedWarcall[]>(
+    []
+  );
+  const [previousOfficers, setPreviousOfficers] = useState<PositionedOfficer[]>(
+    []
+  );
+
   const [snapshot, setSnapshot] = useState<HandcraftedFreeRoamSnapshot>(() => ({
     cycle: 0,
     officers: [],
     warcalls: []
   }));
-  
+
   const [idleSeconds, setIdleSeconds] = useState(0);
   const lastInteractionRef = useRef(Date.now());
 
   // Load map
   useEffect(() => {
     let cancelled = false;
-    
+
     async function loadMap() {
       try {
         setLoading(true);
         setError(null);
         const loadedMap = await loadHandMap(mapId);
-        
+
         if (!cancelled) {
           setMap(loadedMap);
           setPlayerPosition(createInitialPlayerPosition(loadedMap));
@@ -320,7 +328,7 @@ export function useHandcraftedFreeRoam(
     }
 
     loadMap();
-    
+
     return () => {
       cancelled = true;
     };
@@ -329,7 +337,7 @@ export function useHandcraftedFreeRoam(
   // Update snapshot when map loads or world changes
   useEffect(() => {
     if (!map) return;
-    
+
     const unsubscribe = store.events.on('state:changed', (world) => {
       const newSnapshot = computeSnapshot(
         world,
@@ -359,12 +367,20 @@ export function useHandcraftedFreeRoam(
     setPreviousOfficers(initialSnapshot.officers);
 
     return () => unsubscribe();
-  }, [map, store, officerLimit, playerPosition, rng, dynamicWarcalls, previousOfficers]);
+  }, [
+    map,
+    store,
+    officerLimit,
+    playerPosition,
+    rng,
+    dynamicWarcalls,
+    previousOfficers
+  ]);
 
   const moveTo = useCallback(
     (x: number, y: number) => {
       if (!map) return;
-      
+
       const walkable = findNearestWalkablePosition(map, x, y);
       if (walkable) {
         setPlayerPosition({ x: walkable.px, y: walkable.py });
@@ -377,7 +393,7 @@ export function useHandcraftedFreeRoam(
 
   const resetCamera = useCallback(() => {
     if (!map) return { x: 0, y: 0, scale: 1 };
-    
+
     return {
       x: map.meta.spawns.player.x,
       y: map.meta.spawns.player.y,

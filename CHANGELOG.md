@@ -6,7 +6,7 @@
 - URL parameter support: `?mode=freeRoam&map=gogouds-manor` (default: gogouds-manor)
 - **Map Asset System**: Load terrain.png, collision.png, and meta.json from `/assets/maps/{mapId}/`
 - **Collision Grid Generation**: Convert collision.png to tile-based blocked array using alpha/RGB analysis
-- **A* Pathfinding**: 4-directional pathfinding with pixel-to-grid coordinate conversion
+- **A\* Pathfinding**: 4-directional pathfinding with pixel-to-grid coordinate conversion
 - **Terrain Renderer**: Custom canvas rendering for terrain.png with camera/zoom support
 - **Debug Overlay**: F2 key toggles collision visualization (red semi-transparent areas)
 - **Click Movement**: Click-to-move with collision-aware pathfinding
@@ -23,7 +23,7 @@
 
 ### Controls
 
-- **Click**: Move player to clicked position (with A* pathfinding)
+- **Click**: Move player to clicked position (with A\* pathfinding)
 - **F2**: Toggle debug collision overlay
 - **ESC**: Return to main menu
 - **Mouse wheel**: Zoom in/out

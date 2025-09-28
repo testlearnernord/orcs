@@ -8,8 +8,18 @@ import type { GameStore } from '@state/store';
 import type { Phase } from '@state/selectors/warcalls';
 import Portrait from '@/ui/Portrait';
 import { renderWorldMap } from '@/map/render';
-import { useHandcraftedFreeRoam, type HandcraftedFreeRoamState } from './useHandcraftedFreeRoam';
-import { drawTerrain, drawDebugCollision, drawPOILabels, drawOfficerIcons, drawPlayer, type CameraState as RendererCameraState } from './hmap/renderer';
+import {
+  useHandcraftedFreeRoam,
+  type HandcraftedFreeRoamState
+} from './useHandcraftedFreeRoam';
+import {
+  drawTerrain,
+  drawDebugCollision,
+  drawPOILabels,
+  drawOfficerIcons,
+  drawPlayer,
+  type CameraState as RendererCameraState
+} from './hmap/renderer';
 import type { Biome } from '@/map/generator';
 import { toPercent } from '@/map/navgrid';
 import {
@@ -71,21 +81,25 @@ export function FreeRoamView({
   mapId
 }: FreeRoamViewProps) {
   const idleMs = DEFAULT_IDLE_MS;
-  
+
   // Use handcrafted map if mapId is provided, otherwise use generated map
   const useHandcrafted = Boolean(mapId);
-  
+
   const legacyState = useFreeRoam(store, {
     mapSize: DEFAULT_MAP_SIZE,
     officerLimit: DEFAULT_OFFICER_LIMIT,
     idleMs
   });
-  
-  const handcraftedState = useHandcraftedFreeRoam(store, mapId || 'gogouds-manor', {
-    officerLimit: DEFAULT_OFFICER_LIMIT,
-    idleMs
-  });
-  
+
+  const handcraftedState = useHandcraftedFreeRoam(
+    store,
+    mapId || 'gogouds-manor',
+    {
+      officerLimit: DEFAULT_OFFICER_LIMIT,
+      idleMs
+    }
+  );
+
   // Choose the appropriate state based on whether we're using handcrafted maps
   const state = useHandcrafted ? handcraftedState : legacyState;
 
@@ -108,7 +122,7 @@ export function FreeRoamView({
     originY: 0,
     isDragging: false
   });
-  
+
   // Initialize camera based on map type
   const [camera, setCamera] = useState<CameraState>(() => {
     if (useHandcrafted && !handcraftedState.loading && handcraftedState.map) {
@@ -117,7 +131,7 @@ export function FreeRoamView({
     }
     return { scale: 1, x: 0, y: 0 };
   });
-  
+
   const [showDebug, setShowDebug] = useState(false);
 
   useEffect(() => {
@@ -128,37 +142,73 @@ export function FreeRoamView({
       // Render handcrafted map
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      
+
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       // Draw terrain
-      drawTerrain(ctx, handcraftedState.map, camera, canvas.width, canvas.height);
-      
+      drawTerrain(
+        ctx,
+        handcraftedState.map,
+        camera,
+        canvas.width,
+        canvas.height
+      );
+
       // Draw officers
       if (useHandcrafted) {
         const handcraftedState = state as HandcraftedFreeRoamState;
-        const officerIcons = handcraftedState.officers.map(officer => ({
+        const officerIcons = handcraftedState.officers.map((officer) => ({
           x: officer.x,
           y: officer.y,
           name: officer.name
         }));
-        drawOfficerIcons(ctx, officerIcons, camera, canvas.width, canvas.height);
-        
+        drawOfficerIcons(
+          ctx,
+          officerIcons,
+          camera,
+          canvas.width,
+          canvas.height
+        );
+
         // Draw player
-        drawPlayer(ctx, handcraftedState.playerPosition.x, handcraftedState.playerPosition.y, camera, canvas.width, canvas.height);
-        
+        drawPlayer(
+          ctx,
+          handcraftedState.playerPosition.x,
+          handcraftedState.playerPosition.y,
+          camera,
+          canvas.width,
+          canvas.height
+        );
+
         // Draw POI labels
         if (handcraftedState.map) {
-          drawPOILabels(ctx, handcraftedState.map, camera, canvas.width, canvas.height);
+          drawPOILabels(
+            ctx,
+            handcraftedState.map,
+            camera,
+            canvas.width,
+            canvas.height
+          );
         }
-        
+
         // Draw debug overlay if enabled
         if (showDebug && handcraftedState.map) {
-          drawDebugCollision(ctx, handcraftedState.map, camera, canvas.width, canvas.height);
+          drawDebugCollision(
+            ctx,
+            handcraftedState.map,
+            camera,
+            canvas.width,
+            canvas.height
+          );
         }
       }
-    } else if (!useHandcrafted && 'map' in state && state.map && 'tiles' in state.map) {
+    } else if (
+      !useHandcrafted &&
+      'map' in state &&
+      state.map &&
+      'tiles' in state.map
+    ) {
       // Render legacy generated map (only if it's a WorldMap)
       renderWorldMap(canvas, state.map as any);
     }
@@ -167,14 +217,14 @@ export function FreeRoamView({
   // Debug toggle (F2)
   useEffect(() => {
     if (typeof document === 'undefined') return undefined;
-    
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'F2') {
         event.preventDefault();
-        setShowDebug(prev => !prev);
+        setShowDebug((prev) => !prev);
       }
     };
-    
+
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -344,24 +394,24 @@ export function FreeRoamView({
     (event: ReactMouseEvent<HTMLCanvasElement>) => {
       // Only handle clicks for handcrafted maps
       if (!useHandcrafted || !('moveTo' in state) || !state.map) return;
-      
+
       // Prevent click if we were dragging
       if (pointerState.current.isDragging) return;
-      
+
       const canvas = canvasRef.current;
       if (!canvas) return;
-      
+
       const rect = canvas.getBoundingClientRect();
       const clientX = event.clientX - rect.left;
       const clientY = event.clientY - rect.top;
-      
+
       // Convert screen coordinates to world coordinates
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
-      
+
       const worldX = camera.x + (clientX - centerX) / camera.scale;
       const worldY = camera.y + (clientY - centerY) / camera.scale;
-      
+
       // Move player to clicked position
       state.moveTo(worldX, worldY);
     },
@@ -430,9 +480,9 @@ export function FreeRoamView({
           onWheel={handleWheel}
         >
           <div className="free-roam__viewport" style={viewportStyle}>
-            <canvas 
-              ref={canvasRef} 
-              className="free-roam__canvas" 
+            <canvas
+              ref={canvasRef}
+              className="free-roam__canvas"
               onClick={handleCanvasClick}
             />
             <div className="free-roam__overlay">
@@ -452,100 +502,113 @@ export function FreeRoamView({
                   >
                     <span className="free-roam__marker-icon">🎯</span>
                   </div>
-                  
+
                   {/* Officers */}
-                  {(state as HandcraftedFreeRoamState).officers.map((officer) => (
-                    <div
-                      key={officer.id}
-                      className={`free-roam__marker free-roam__marker--officer free-roam__marker--officer-${officer.state}`}
-                      style={{
-                        left: `${officer.x}px`,
-                        top: `${officer.y}px`,
-                        transform: 'translate(-50%, -50%)'
-                      }}
-                      title={`${officer.name} • ${officer.state.toUpperCase()}`}
-                    >
-                      <Portrait officer={{ id: officer.id, name: officer.name } as any} size={24} />
-                    </div>
-                  ))}
-                  
+                  {(state as HandcraftedFreeRoamState).officers.map(
+                    (officer) => (
+                      <div
+                        key={officer.id}
+                        className={`free-roam__marker free-roam__marker--officer free-roam__marker--officer-${officer.state}`}
+                        style={{
+                          left: `${officer.x}px`,
+                          top: `${officer.y}px`,
+                          transform: 'translate(-50%, -50%)'
+                        }}
+                        title={`${officer.name} • ${officer.state.toUpperCase()}`}
+                      >
+                        <Portrait
+                          officer={
+                            { id: officer.id, name: officer.name } as any
+                          }
+                          size={24}
+                        />
+                      </div>
+                    )
+                  )}
+
                   {/* Warcalls */}
-                  {(state as HandcraftedFreeRoamState).warcalls.map((warcall) => (
-                    <div
-                      key={warcall.id}
-                      className={`free-roam__marker free-roam__marker--warcall free-roam__marker--${warcall.phase}`}
-                      style={{
-                        left: `${warcall.x}px`,
-                        top: `${warcall.y}px`,
-                        transform: 'translate(-50%, -50%)'
-                      }}
-                      title={`${warcall.kind} — ${warcall.rewardHint}`}
-                    >
-                      <span className="free-roam__marker-icon">⚔️</span>
-                    </div>
-                  ))}
+                  {(state as HandcraftedFreeRoamState).warcalls.map(
+                    (warcall) => (
+                      <div
+                        key={warcall.id}
+                        className={`free-roam__marker free-roam__marker--warcall free-roam__marker--${warcall.phase}`}
+                        style={{
+                          left: `${warcall.x}px`,
+                          top: `${warcall.y}px`,
+                          transform: 'translate(-50%, -50%)'
+                        }}
+                        title={`${warcall.kind} — ${warcall.rewardHint}`}
+                      >
+                        <span className="free-roam__marker-icon">⚔️</span>
+                      </div>
+                    )
+                  )}
                 </>
               ) : (
                 // Legacy generated map rendering
                 <>
                   {/* Player position marker */}
-                  {'playerPosition' in state && 'xPercent' in state.playerPosition && (
-                    <div
-                      className="free-roam__marker free-roam__marker--player"
-                      style={{
-                        left: `${state.playerPosition.xPercent}%`,
-                        top: `${state.playerPosition.yPercent}%`
-                      }}
-                      title={`Spieler • ${(state.playerPosition as any).coordinate?.biome ? BIOME_LABEL[(state.playerPosition as any).coordinate.biome as keyof typeof BIOME_LABEL] : ''} (${state.playerPosition.x}, ${state.playerPosition.y})`}
-                    >
-                      <span className="free-roam__marker-icon">🎯</span>
-                    </div>
-                  )}
-                  
+                  {'playerPosition' in state &&
+                    'xPercent' in state.playerPosition && (
+                      <div
+                        className="free-roam__marker free-roam__marker--player"
+                        style={{
+                          left: `${state.playerPosition.xPercent}%`,
+                          top: `${state.playerPosition.yPercent}%`
+                        }}
+                        title={`Spieler • ${(state.playerPosition as any).coordinate?.biome ? BIOME_LABEL[(state.playerPosition as any).coordinate.biome as keyof typeof BIOME_LABEL] : ''} (${state.playerPosition.x}, ${state.playerPosition.y})`}
+                      >
+                        <span className="free-roam__marker-icon">🎯</span>
+                      </div>
+                    )}
+
                   {/* Official warcalls */}
-                  {'warcalls' in state && state.warcalls.map((entry: any) => (
-                    <div
-                      key={entry.warcall.id}
-                      className={`free-roam__marker free-roam__marker--warcall free-roam__marker--${entry.warcall.phase}`}
-                      style={{
-                        left: `${entry.xPercent}%`,
-                        top: `${entry.yPercent}%`
-                      }}
-                      title={`${entry.warcall.kind} — ${entry.warcall.location}`}
-                    >
-                      <span className="free-roam__marker-icon">⚔️</span>
-                    </div>
-                  ))}
-                  
+                  {'warcalls' in state &&
+                    state.warcalls.map((entry: any) => (
+                      <div
+                        key={entry.warcall.id}
+                        className={`free-roam__marker free-roam__marker--warcall free-roam__marker--${entry.warcall.phase}`}
+                        style={{
+                          left: `${entry.xPercent}%`,
+                          top: `${entry.yPercent}%`
+                        }}
+                        title={`${entry.warcall.kind} — ${entry.warcall.location}`}
+                      >
+                        <span className="free-roam__marker-icon">⚔️</span>
+                      </div>
+                    ))}
+
                   {/* Dynamic AI-generated warcalls */}
-                  {'dynamicWarcalls' in state && state.dynamicWarcalls.map((entry: any) => (
-                    <div
-                      key={entry.warcall.id}
-                      className="free-roam__marker free-roam__marker--dynamic-warcall"
-                      style={{
-                        left: `${entry.xPercent}%`,
-                        top: `${entry.yPercent}%`
-                      }}
-                      title={`[AI] ${entry.warcall.kind} — ${entry.warcall.location}`}
-                    >
-                      <span className="free-roam__marker-icon">🗡️</span>
-                    </div>
-                  ))}
-                  
+                  {'dynamicWarcalls' in state &&
+                    state.dynamicWarcalls.map((entry: any) => (
+                      <div
+                        key={entry.warcall.id}
+                        className="free-roam__marker free-roam__marker--dynamic-warcall"
+                        style={{
+                          left: `${entry.xPercent}%`,
+                          top: `${entry.yPercent}%`
+                        }}
+                        title={`[AI] ${entry.warcall.kind} — ${entry.warcall.location}`}
+                      >
+                        <span className="free-roam__marker-icon">🗡️</span>
+                      </div>
+                    ))}
+
                   {/* Officers with AI state indicators */}
-                  {'officers' in state && state.officers.map((entry: any) => (
-                    <div
-                      key={entry.officer.id}
-                      className={`free-roam__marker free-roam__marker--officer free-roam__marker--officer-${entry.state}`}
-                      style={{
-                        left: `${entry.xPercent}%`,
-                        top: `${entry.yPercent}%`
-                      }}
-                      title={`${entry.officer.name} • ${entry.coordinate?.biome ? BIOME_LABEL[entry.coordinate.biome as keyof typeof BIOME_LABEL] : ''} • ${entry.state.toUpperCase()}`}
-                    >
-                      <Portrait officer={entry.officer} size={24} />
-                    </div>
-                  ))}
+                  {'officers' in state &&
+                    state.officers.map((entry: any) => (
+                      <div
+                        key={entry.officer.id}
+                        className={`free-roam__marker free-roam__marker--officer free-roam__marker--officer-${entry.state}`}
+                        style={{
+                          left: `${entry.xPercent}%`,
+                          top: `${entry.yPercent}%`
+                        }}
+                        title={`${entry.officer.name} • ${entry.coordinate?.biome ? BIOME_LABEL[entry.coordinate.biome as keyof typeof BIOME_LABEL] : ''} • ${entry.state.toUpperCase()}`}
+                      >
+                        <Portrait officer={entry.officer} size={24} />
+                      </div>
+                    ))}
                 </>
               )}
             </div>
@@ -557,18 +620,26 @@ export function FreeRoamView({
             <h2>Spieler Position</h2>
             <div className="free-roam__player-info">
               <p>
-                <strong>Position:</strong> ({Math.round(state.playerPosition.x)},{' '}
-                {Math.round(state.playerPosition.y)})
+                <strong>Position:</strong> ({Math.round(state.playerPosition.x)}
+                , {Math.round(state.playerPosition.y)})
               </p>
-              {!useHandcrafted && 'playerPosition' in state && 'coordinate' in state.playerPosition && (
-                <p>
-                  <strong>Biom:</strong>{' '}
-                  {(state.playerPosition as any).coordinate?.biome ? BIOME_LABEL[(state.playerPosition as any).coordinate.biome as keyof typeof BIOME_LABEL] : ''}
-                </p>
-              )}
+              {!useHandcrafted &&
+                'playerPosition' in state &&
+                'coordinate' in state.playerPosition && (
+                  <p>
+                    <strong>Biom:</strong>{' '}
+                    {(state.playerPosition as any).coordinate?.biome
+                      ? BIOME_LABEL[
+                          (state.playerPosition as any).coordinate
+                            .biome as keyof typeof BIOME_LABEL
+                        ]
+                      : ''}
+                  </p>
+                )}
               <p className="free-roam__controls">
                 <small>
-                  {useHandcrafted ? 'Klicken zum Bewegen' : 'WASD zum Bewegen'} • ESC zum Verlassen
+                  {useHandcrafted ? 'Klicken zum Bewegen' : 'WASD zum Bewegen'}{' '}
+                  • ESC zum Verlassen
                   {useHandcrafted && ' • F2 für Debug-Overlay'}
                 </small>
               </p>
@@ -581,17 +652,26 @@ export function FreeRoamView({
             ) : (
               <ul className="free-roam__list">
                 {state.warcalls.map((warcall, index) => (
-                  <li key={useHandcrafted ? (warcall as any).id : `${index}`} className="free-roam__list-item">
+                  <li
+                    key={useHandcrafted ? (warcall as any).id : `${index}`}
+                    className="free-roam__list-item"
+                  >
                     <div className="free-roam__list-title">
                       <strong>{(warcall as any).kind}</strong>
                       {useHandcrafted ? (
                         <span> • {(warcall as any).rewardHint}</span>
                       ) : (
-                        'location' in warcall && <span> • {(warcall as any).location}</span>
+                        'location' in warcall && (
+                          <span> • {(warcall as any).location}</span>
+                        )
                       )}
                     </div>
                     <div className="free-roam__list-meta">
-                      {'phase' in warcall && PHASE_LABEL[(warcall as any).phase as keyof typeof PHASE_LABEL]} •{' '}
+                      {'phase' in warcall &&
+                        PHASE_LABEL[
+                          (warcall as any).phase as keyof typeof PHASE_LABEL
+                        ]}{' '}
+                      •{' '}
                       <span className="free-roam__list-risk">
                         Risiko: {Math.round((warcall as any).risk * 100)}%
                       </span>
@@ -608,17 +688,33 @@ export function FreeRoamView({
             ) : (
               <ul className="free-roam__list">
                 {state.officers.map((officer, index) => (
-                  <li key={useHandcrafted ? (officer as any).id : `${index}`} className="free-roam__list-item">
+                  <li
+                    key={useHandcrafted ? (officer as any).id : `${index}`}
+                    className="free-roam__list-item"
+                  >
                     <div className="free-roam__list-title">
                       <strong>{(officer as any).name}</strong>
                       {(officer as any).state !== 'idle' && (
-                        <span className="free-roam__list-state"> • {(officer as any).state}</span>
+                        <span className="free-roam__list-state">
+                          {' '}
+                          • {(officer as any).state}
+                        </span>
                       )}
                     </div>
                     <div className="free-roam__list-meta">
-                      Position: ({Math.round((officer as any).x)}, {Math.round((officer as any).y)})
+                      Position: ({Math.round((officer as any).x)},{' '}
+                      {Math.round((officer as any).y)})
                       {!useHandcrafted && 'coordinate' in officer && (
-                        <span> • {(officer as any).coordinate?.biome ? BIOME_LABEL[(officer as any).coordinate.biome as keyof typeof BIOME_LABEL] : ''}</span>
+                        <span>
+                          {' '}
+                          •{' '}
+                          {(officer as any).coordinate?.biome
+                            ? BIOME_LABEL[
+                                (officer as any).coordinate
+                                  .biome as keyof typeof BIOME_LABEL
+                              ]
+                            : ''}
+                        </span>
                       )}
                     </div>
                   </li>

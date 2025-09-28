@@ -351,12 +351,14 @@ export class NemesisUI {
     }
     this.freeRoamContainer.hidden = false;
     this.freeRoamContainer.removeAttribute('aria-hidden');
-    
+
     // Get map parameter from URL
-    const mapId = typeof window !== 'undefined' 
-      ? new URLSearchParams(window.location.search).get('map') ?? 'gogouds-manor'
-      : 'gogouds-manor';
-    
+    const mapId =
+      typeof window !== 'undefined'
+        ? (new URLSearchParams(window.location.search).get('map') ??
+          'gogouds-manor')
+        : 'gogouds-manor';
+
     this.freeRoamRoot.render(
       createElement(FreeRoamView, {
         store: this.store,

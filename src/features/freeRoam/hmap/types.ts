@@ -54,7 +54,11 @@ export interface PixelCoordinate {
 /**
  * Convert pixel coordinates to grid coordinates
  */
-export function pixelToGrid(px: number, py: number, tileSize: number): GridCoordinate {
+export function pixelToGrid(
+  px: number,
+  py: number,
+  tileSize: number
+): GridCoordinate {
   return {
     gx: Math.floor(px / tileSize),
     gy: Math.floor(py / tileSize)
@@ -64,7 +68,11 @@ export function pixelToGrid(px: number, py: number, tileSize: number): GridCoord
 /**
  * Convert grid coordinates to pixel coordinates (center of tile)
  */
-export function gridToPixel(gx: number, gy: number, tileSize: number): PixelCoordinate {
+export function gridToPixel(
+  gx: number,
+  gy: number,
+  tileSize: number
+): PixelCoordinate {
   return {
     px: gx * tileSize + tileSize / 2,
     py: gy * tileSize + tileSize / 2
@@ -74,7 +82,12 @@ export function gridToPixel(gx: number, gy: number, tileSize: number): PixelCoor
 /**
  * Check if a grid coordinate is within bounds
  */
-export function isValidGridCoord(gx: number, gy: number, gridWidth: number, gridHeight: number): boolean {
+export function isValidGridCoord(
+  gx: number,
+  gy: number,
+  gridWidth: number,
+  gridHeight: number
+): boolean {
   return gx >= 0 && gx < gridWidth && gy >= 0 && gy < gridHeight;
 }
 

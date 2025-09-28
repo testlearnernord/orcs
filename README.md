@@ -14,7 +14,7 @@ Taste **E**: führt einen Simulations-Cycle aus und loggt Ereignisse in die Kons
 
 ## Game Modi
 
-- **Spectate Mode**: `?mode=spectate` - Standardmodus zum Beobachten der Simulation  
+- **Spectate Mode**: `?mode=spectate` - Standardmodus zum Beobachten der Simulation
 - **Player Mode**: `?mode=player` - Direktes Spielen als Offizier (experimentell)
 - **Free-Roam Mode**: `?mode=freeRoam&map=gogouds-manor` - Erkunde handgefertigte Karten
 
@@ -33,7 +33,7 @@ src/assets/maps/{map-id}/
 
 1. **Gleiche Pixelgröße**: `terrain.png` und `collision.png` müssen identische Abmessungen haben
 2. **32px Tile-Raster**: Verwende ein 32-Pixel-Raster für optimale Kollisionserkennung
-3. **Kollisionsmaske**: 
+3. **Kollisionsmaske**:
    - Schwarz (RGB < 50) oder transparent (Alpha = 0) = blockiert
    - Weiß oder helle Farben = begehbar
 4. **meta.json** Beispiel:
@@ -52,7 +52,8 @@ src/assets/maps/{map-id}/
    ```
 
 #### Controls im Free-Roam
-- **Klick**: Bewege Spieler zum angeklickten Punkt (mit A* Pathfinding)
+
+- **Klick**: Bewege Spieler zum angeklickten Punkt (mit A\* Pathfinding)
 - **F2**: Debug-Overlay ein/ausschalten (zeigt Kollisionsflächen)
 - **ESC**: Zurück zum Hauptmenü
 - **Mausrad**: Zoom
