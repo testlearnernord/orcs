@@ -318,6 +318,9 @@ function orderFeed(entries: FeedEntry[]): FeedEntry[] {
 
 export function advanceCycle(state: WorldState, rng: RNG): CycleSummary {
   state.cycle += 1;
+  state.version = (state.version || 0) + 1;
+  state.updatedAt = Date.now();
+  
   const cycleFeed: FeedEntry[] = [];
   updateKingStability(state, rng, cycleFeed);
   const crownResult = updateCrownState(state, rng, cycleFeed);

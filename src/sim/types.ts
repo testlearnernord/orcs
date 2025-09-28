@@ -131,6 +131,8 @@ export interface CrownState {
 export interface WorldState {
   seed: string;
   cycle: number;
+  version: number;
+  updatedAt: number;
   officers: Officer[];
   graveyard: Officer[];
   warcalls: WarcallPlan[];
