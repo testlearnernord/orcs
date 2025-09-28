@@ -5,7 +5,7 @@ import path from 'node:path';
 import process from 'node:process';
 
 const root = process.cwd();
-const configPath = path.join(root, 'src', 'ui', 'portraits', 'config.ts');
+const configPath = path.join(root, 'src', 'features', 'portraits', 'config.ts');
 const legacyManifest = path.join(
   root,
   'src',
@@ -21,7 +21,7 @@ async function ensureConfigExists() {
   try {
     await access(configPath, constants.R_OK);
   } catch {
-    errors.push('Portrait config fehlt: src/ui/portraits/config.ts');
+    errors.push('Portrait config fehlt: src/features/portraits/config.ts');
     return;
   }
 
