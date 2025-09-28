@@ -198,7 +198,7 @@ Error generating stack: `+s.message+`
           </button>
           <button type="button" data-mode="player" >
             <span class="mode-gate__mode">Player</span>
-            <span class="mode-gate__hint">Coming soon</span>
+            <span class="mode-gate__hint">Kampf-Sandbox bereit</span>
           </button>
         </div>
         <footer>
