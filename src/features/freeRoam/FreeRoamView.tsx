@@ -17,11 +17,9 @@ import {
   drawDebugCollision,
   drawPOILabels,
   drawOfficerIcons,
-  drawPlayer,
-  type CameraState as RendererCameraState
+  drawPlayer
 } from './hmap/renderer';
 import type { Biome } from '@/map/generator';
-import { toPercent } from '@/map/navgrid';
 import {
   DEFAULT_IDLE_MS,
   DEFAULT_OFFICER_LIMIT,

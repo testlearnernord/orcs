@@ -6,8 +6,7 @@ import type { HandMapData, GridCoordinate, PixelCoordinate } from './types';
 import {
   pixelToGrid,
   gridToPixel,
-  isValidGridCoord,
-  gridToIndex
+  isValidGridCoord
 } from './types';
 import { isBlocked } from './loader';
 
@@ -157,7 +156,7 @@ export function findPath(
       const tentativeGCost = current.gCost + 1; // Distance to neighbor is always 1 in grid
 
       // Check if this neighbor is already in open set
-      let existingNode = openSet.find(
+      const existingNode = openSet.find(
         (node) => node.gx === neighbor.gx && node.gy === neighbor.gy
       );
 

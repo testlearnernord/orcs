@@ -2,7 +2,7 @@
  * Unit tests for handcrafted map loader
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 describe('Map Loader', () => {
   it('should validate basic functionality', () => {

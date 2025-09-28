@@ -7,7 +7,6 @@ describe('GameStore Reactivity', () => {
     const initialState = store.getState();
     const initialVersion = initialState.version;
     const initialCycle = initialState.cycle;
-    const initialOfficerCount = initialState.officers.length;
 
     // Advance the cycle
     const summary = store.tick();

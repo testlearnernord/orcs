@@ -3,18 +3,16 @@
  */
 
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import type { Officer, WorldState, WarcallKind } from '@sim/types';
+import type { WorldState, WarcallKind } from '@sim/types';
 import type { GameStore } from '@state/store';
 import { RNG } from '@sim/rng';
 import type { HandMapData } from './hmap/types';
-import { loadHandMap, canStandPx } from './hmap/loader';
+import { loadHandMap } from './hmap/loader';
 import { findPath, findNearestWalkablePosition } from './hmap/pathfinding';
-import { pixelToGrid, gridToPixel } from './hmap/types';
 import {
   selectActiveOfficers,
   selectActiveWarcalls
 } from '@/sim/adapters/freeRoam.selectors';
-import type { WarcallWithPhase } from '@state/selectors/warcalls';
 
 export interface PositionedWarcall {
   id: string;
@@ -93,48 +91,13 @@ function moveTowards(
   return from; // No path found, stay in place
 }
 
-function generateRandomWarcall(
-  rng: RNG,
-  map: HandMapData,
-  cycle: number,
-  occupied: Set<string>
-): PositionedWarcall | null {
-  const warcallTypes: WarcallKind[] = ['Hunt', 'Ambush', 'Duel'];
-
-  // Try to find a free position
-  for (let attempt = 0; attempt < 50; attempt++) {
-    const x = rng.int(50, map.meta.pixelSize.width - 50);
-    const y = rng.int(50, map.meta.pixelSize.height - 50);
-
-    if (canStandPx(map, x, y)) {
-      const posKey = `${x},${y}`;
-      if (!occupied.has(posKey)) {
-        occupied.add(posKey);
-        return {
-          id: `warcall-${cycle}-${attempt}`,
-          x,
-          y,
-          kind: rng.pick(warcallTypes),
-          risk: rng.next(),
-          rewardHint: 'Mysterious treasure',
-          phase: 'prep' as const,
-          breakdown: undefined
-        };
-      }
-    }
-  }
-
-  return null; // Couldn't find a valid position
-}
-
 function computeSnapshot(
   world: WorldState,
   map: HandMapData,
   officerLimit: number,
   playerPosition: PlayerPosition,
   previousOfficers: PositionedOfficer[] = [],
-  rng: RNG,
-  dynamicWarcalls: PositionedWarcall[] = []
+  rng: RNG
 ): HandcraftedFreeRoamSnapshot {
   const officers = selectActiveOfficers(world);
   const warcalls = selectActiveWarcalls(world);
@@ -224,7 +187,7 @@ function computeSnapshot(
   }
 
   // Position warcalls
-  const positionedWarcalls: PositionedWarcall[] = [...dynamicWarcalls];
+  const positionedWarcalls: PositionedWarcall[] = [];
 
   for (const warcall of warcalls) {
     // Try to place at a POI first, then random location
@@ -286,9 +249,6 @@ export function useHandcraftedFreeRoam(
     y: 768
   }));
 
-  const [dynamicWarcalls, setDynamicWarcalls] = useState<PositionedWarcall[]>(
-    []
-  );
   const [previousOfficers, setPreviousOfficers] = useState<PositionedOfficer[]>(
     []
   );
@@ -345,8 +305,7 @@ export function useHandcraftedFreeRoam(
         officerLimit,
         playerPosition,
         previousOfficers,
-        rng,
-        dynamicWarcalls
+        rng
       );
       setSnapshot(newSnapshot);
       setPreviousOfficers(newSnapshot.officers);
@@ -360,22 +319,13 @@ export function useHandcraftedFreeRoam(
       officerLimit,
       playerPosition,
       previousOfficers,
-      rng,
-      dynamicWarcalls
+      rng
     );
     setSnapshot(initialSnapshot);
     setPreviousOfficers(initialSnapshot.officers);
 
     return () => unsubscribe();
-  }, [
-    map,
-    store,
-    officerLimit,
-    playerPosition,
-    rng,
-    dynamicWarcalls,
-    previousOfficers
-  ]);
+  }, [map, store, officerLimit, playerPosition, rng, previousOfficers]);
 
   const moveTo = useCallback(
     (x: number, y: number) => {
