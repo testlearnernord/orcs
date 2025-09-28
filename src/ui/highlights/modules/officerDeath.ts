@@ -1,5 +1,9 @@
 import type { CycleSummary, WorldState } from '@sim/types';
-import type { EnhancedHighlight, HighlightModule, HighlightDisplayOptions } from '../types';
+import type {
+  EnhancedHighlight,
+  HighlightModule,
+  HighlightDisplayOptions
+} from '../types';
 import { HighlightType } from '../types';
 
 /**
@@ -18,7 +22,7 @@ export class OfficerDeathModule implements HighlightModule {
     if (!summary?.deaths?.length) return [];
 
     const officerLookup = new Map();
-    [...prev.officers, ...prev.graveyard].forEach(officer => {
+    [...prev.officers, ...prev.graveyard].forEach((officer) => {
       officerLookup.set(officer.id, officer);
     });
 
@@ -27,7 +31,7 @@ export class OfficerDeathModule implements HighlightModule {
       const title = officer
         ? `${officer.name} fällt im Kampf`
         : `Offizier ${officerId} fällt im Kampf`;
-      
+
       const description = officer
         ? `Der ${officer.rank} ${officer.name} ist gefallen. Seine Verdienste werden in Ehren gehalten.`
         : `Ein Offizier ist auf dem Schlachtfeld gefallen.`;
@@ -49,7 +53,10 @@ export class OfficerDeathModule implements HighlightModule {
     });
   }
 
-  shouldShow(highlight: EnhancedHighlight, options: HighlightDisplayOptions): boolean {
+  shouldShow(
+    highlight: EnhancedHighlight,
+    options: HighlightDisplayOptions
+  ): boolean {
     return options.enabled && !options.skipAll;
   }
 }

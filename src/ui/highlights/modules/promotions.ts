@@ -1,5 +1,9 @@
 import type { CycleSummary, WorldState, Officer, Rank } from '@sim/types';
-import type { EnhancedHighlight, HighlightModule, HighlightDisplayOptions } from '../types';
+import type {
+  EnhancedHighlight,
+  HighlightModule,
+  HighlightDisplayOptions
+} from '../types';
 import { HighlightType } from '../types';
 
 /**
@@ -10,7 +14,13 @@ export class PromotionsModule implements HighlightModule {
   readonly type = HighlightType.PROMOTION;
   readonly priority = 4;
 
-  private readonly RANK_ORDER: Rank[] = ['Grunzer', 'Späher', 'Captain', 'Spieler', 'König'];
+  private readonly RANK_ORDER: Rank[] = [
+    'Grunzer',
+    'Späher',
+    'Captain',
+    'Spieler',
+    'König'
+  ];
   private readonly RANK_SCORE = new Map<Rank, number>(
     this.RANK_ORDER.map((rank, index) => [rank, index])
   );
@@ -23,7 +33,7 @@ export class PromotionsModule implements HighlightModule {
     if (!summary?.promotions?.length) return [];
 
     const officerLookup = new Map<string, Officer>();
-    [...prev.officers, ...next.officers].forEach(officer => {
+    [...prev.officers, ...next.officers].forEach((officer) => {
       officerLookup.set(officer.id, officer);
     });
 
@@ -32,11 +42,11 @@ export class PromotionsModule implements HighlightModule {
       const fromScore = this.RANK_SCORE.get(promotion.from) ?? 0;
       const toScore = this.RANK_SCORE.get(promotion.to) ?? 0;
       const isPromotion = toScore > fromScore;
-      
+
       const title = isPromotion
         ? `${officer?.name || promotion.officerId} wird befördert`
         : `${officer?.name || promotion.officerId} wird degradiert`;
-      
+
       const description = isPromotion
         ? `Aufstieg von ${promotion.from} zu ${promotion.to} für verdiente Leistungen`
         : `Abstieg von ${promotion.from} zu ${promotion.to} aufgrund mangelnder Leistung`;
@@ -64,7 +74,10 @@ export class PromotionsModule implements HighlightModule {
     });
   }
 
-  shouldShow(highlight: EnhancedHighlight, options: HighlightDisplayOptions): boolean {
+  shouldShow(
+    highlight: EnhancedHighlight,
+    options: HighlightDisplayOptions
+  ): boolean {
     return options.enabled && !options.skipAll;
   }
 }

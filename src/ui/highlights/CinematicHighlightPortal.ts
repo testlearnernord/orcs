@@ -121,7 +121,7 @@ export class CinematicHighlightPortal {
   private createEnabledCheckbox(): HTMLInputElement {
     const container = document.createElement('label');
     container.className = 'cinematic-highlight-portal__checkbox';
-    
+
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.checked = true;
@@ -142,7 +142,8 @@ export class CinematicHighlightPortal {
   private createAdvanceButton(): HTMLButtonElement {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'cinematic-highlight-portal__button cinematic-highlight-portal__button--primary';
+    btn.className =
+      'cinematic-highlight-portal__button cinematic-highlight-portal__button--primary';
     btn.textContent = 'Weiter';
     btn.addEventListener('click', () => this.options.onAdvance());
     return btn;
@@ -160,7 +161,8 @@ export class CinematicHighlightPortal {
   private createSkipAllButton(): HTMLButtonElement {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'cinematic-highlight-portal__button cinematic-highlight-portal__button--skip-all';
+    btn.className =
+      'cinematic-highlight-portal__button cinematic-highlight-portal__button--skip-all';
     btn.textContent = 'Alle überspringen';
     btn.addEventListener('click', () => this.options.onSkipAll());
     return btn;
@@ -207,7 +209,10 @@ export class CinematicHighlightPortal {
     parent.appendChild(this.root);
   }
 
-  update(highlight: EnhancedHighlight | null, options: HighlightDisplayOptions): void {
+  update(
+    highlight: EnhancedHighlight | null,
+    options: HighlightDisplayOptions
+  ): void {
     if (highlight === this.current) return;
 
     this.enabledCheckbox.checked = options.enabled;
@@ -249,31 +254,47 @@ export class CinematicHighlightPortal {
 
     // Set animation duration
     if (highlight.duration) {
-      this.card.style.setProperty('--animation-duration', `${highlight.duration}ms`);
+      this.card.style.setProperty(
+        '--animation-duration',
+        `${highlight.duration}ms`
+      );
     }
   }
 
   private renderOfficerConfrontation(highlight: EnhancedHighlight): void {
     if (highlight.primaryOfficer) {
-      const primaryCard = this.createOfficerCard(highlight.primaryOfficer, 'primary');
+      const primaryCard = this.createOfficerCard(
+        highlight.primaryOfficer,
+        'primary'
+      );
       this.officersContainer.appendChild(primaryCard);
     }
 
     if (highlight.secondaryOfficer) {
-      const secondaryCard = this.createOfficerCard(highlight.secondaryOfficer, 'secondary');
+      const secondaryCard = this.createOfficerCard(
+        highlight.secondaryOfficer,
+        'secondary'
+      );
       this.officersContainer.appendChild(secondaryCard);
     }
 
     // Add relationship indicator if present
     if (highlight.relationshipChange) {
       const indicator = document.createElement('div');
-      indicator.className = 'cinematic-highlight-portal__relationship-indicator';
-      indicator.innerHTML = this.getRelationshipIcon(highlight.relationshipChange.before, highlight.relationshipChange.after);
+      indicator.className =
+        'cinematic-highlight-portal__relationship-indicator';
+      indicator.innerHTML = this.getRelationshipIcon(
+        highlight.relationshipChange.before,
+        highlight.relationshipChange.after
+      );
       this.officersContainer.appendChild(indicator);
     }
   }
 
-  private createOfficerCard(officer: any, role: 'primary' | 'secondary'): HTMLElement {
+  private createOfficerCard(
+    officer: any,
+    role: 'primary' | 'secondary'
+  ): HTMLElement {
     const card = document.createElement('div');
     card.className = `cinematic-highlight-portal__officer-card cinematic-highlight-portal__officer-card--${role}`;
 
@@ -284,10 +305,10 @@ export class CinematicHighlightPortal {
 
     const info = document.createElement('div');
     info.className = 'cinematic-highlight-portal__officer-info';
-    
+
     const name = document.createElement('h4');
     name.textContent = officer.name;
-    
+
     const rank = document.createElement('span');
     rank.textContent = officer.rank;
 
@@ -347,7 +368,7 @@ export class CinematicHighlightPortal {
 
   private handleKeydown(event: KeyboardEvent): void {
     if (!this.current) return;
-    
+
     const key = event.key.toLowerCase();
     if (key === 'escape') {
       event.preventDefault();

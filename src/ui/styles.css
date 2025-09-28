@@ -2976,7 +2976,11 @@ button:disabled {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(13, 17, 23, 0.95));
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.9),
+    rgba(13, 17, 23, 0.95)
+  );
   backdrop-filter: blur(4px);
 }
 
@@ -2990,10 +2994,10 @@ button:disabled {
   max-width: 800px;
   min-height: 300px;
   display: grid;
-  grid-template-areas: 
-    "icon officers"
-    "content content"
-    "controls controls";
+  grid-template-areas:
+    'icon officers'
+    'content content'
+    'controls controls';
   grid-template-rows: auto 1fr auto;
   gap: var(--spacing-lg);
   box-shadow:
@@ -3150,7 +3154,7 @@ button:disabled {
   justify-self: start;
 }
 
-.cinematic-highlight-portal__checkbox input[type="checkbox"] {
+.cinematic-highlight-portal__checkbox input[type='checkbox'] {
   width: 16px;
   height: 16px;
   accent-color: var(--accent);
@@ -3205,55 +3209,86 @@ button:disabled {
 /* Animation types */
 .cinematic-highlight-portal__card--tragedy {
   border-color: var(--danger);
-  box-shadow: 
+  box-shadow:
     0 12px 40px rgba(238, 102, 102, 0.3),
     0 0 0 1px rgba(238, 102, 102, 0.2);
 }
 
 .cinematic-highlight-portal__card--celebration {
   border-color: var(--ally);
-  box-shadow: 
+  box-shadow:
     0 12px 40px rgba(106, 170, 255, 0.3),
     0 0 0 1px rgba(106, 170, 255, 0.2);
 }
 
 .cinematic-highlight-portal__card--confrontation {
   border-color: var(--line-rival);
-  box-shadow: 
+  box-shadow:
     0 12px 40px rgba(238, 102, 102, 0.3),
     0 0 0 1px rgba(238, 102, 102, 0.2);
 }
 
 .cinematic-highlight-portal__card--emergence {
   border-color: var(--accent);
-  box-shadow: 
+  box-shadow:
     0 12px 40px rgba(56, 189, 248, 0.3),
     0 0 0 1px rgba(56, 189, 248, 0.2);
 }
 
 /* Cinematic Animations */
 @keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 0.9; }
-  50% { transform: scale(1.1); opacity: 1; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
 }
 
 @keyframes slideInLeft {
-  0% { transform: translateX(-100px); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
+  0% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slideInRight {
-  0% { transform: translateX(100px); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
+  0% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes bounceIn {
-  0% { transform: translate(-50%, -50%) scale(0); }
-  50% { transform: translate(-50%, -50%) scale(1.2); }
-  100% { transform: translate(-50%, -50%) scale(1); }
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 @keyframes fadeInUp {
-  0% { transform: translateY(20px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

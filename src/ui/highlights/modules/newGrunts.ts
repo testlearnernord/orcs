@@ -1,5 +1,9 @@
 import type { CycleSummary, WorldState } from '@sim/types';
-import type { EnhancedHighlight, HighlightModule, HighlightDisplayOptions } from '../types';
+import type {
+  EnhancedHighlight,
+  HighlightModule,
+  HighlightDisplayOptions
+} from '../types';
 import { HighlightType } from '../types';
 
 /**
@@ -18,8 +22,9 @@ export class NewGruntsModule implements HighlightModule {
     if (!summary?.spawns?.length) return [];
 
     return summary.spawns.map((officer) => {
-      const traits = officer.traits.join(', ') || 'keine besonderen Eigenschaften';
-      
+      const traits =
+        officer.traits.join(', ') || 'keine besonderen Eigenschaften';
+
       const title = `${officer.name} tritt der Horde bei`;
       const description = `Ein neuer ${officer.rank} verstärkt unsere Reihen. Eigenschaften: ${traits}`;
 
@@ -40,7 +45,10 @@ export class NewGruntsModule implements HighlightModule {
     });
   }
 
-  shouldShow(highlight: EnhancedHighlight, options: HighlightDisplayOptions): boolean {
+  shouldShow(
+    highlight: EnhancedHighlight,
+    options: HighlightDisplayOptions
+  ): boolean {
     return options.enabled && !options.skipAll;
   }
 }

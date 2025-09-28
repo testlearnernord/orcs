@@ -1,5 +1,14 @@
-import type { CycleSummary, WorldState, Officer, Relationship } from '@sim/types';
-import type { EnhancedHighlight, HighlightModule, HighlightDisplayOptions } from '../types';
+import type {
+  CycleSummary,
+  WorldState,
+  Officer,
+  Relationship
+} from '@sim/types';
+import type {
+  EnhancedHighlight,
+  HighlightModule,
+  HighlightDisplayOptions
+} from '../types';
 import { HighlightType } from '../types';
 
 /**
@@ -19,7 +28,7 @@ export class DiplomacyModule implements HighlightModule {
     const cycle = summary?.cycle ?? next.cycle;
 
     const officerLookup = new Map<string, Officer>();
-    [...prev.officers, ...next.officers].forEach(officer => {
+    [...prev.officers, ...next.officers].forEach((officer) => {
       officerLookup.set(officer.id, officer);
     });
 
@@ -90,8 +99,11 @@ export class DiplomacyModule implements HighlightModule {
     officers: Officer[],
     type: Relationship['type']
   ): Map<string, { ids: [string, string]; relation: Relationship }> {
-    const map = new Map<string, { ids: [string, string]; relation: Relationship }>();
-    
+    const map = new Map<
+      string,
+      { ids: [string, string]; relation: Relationship }
+    >();
+
     officers.forEach((officer) => {
       officer.relationships.forEach((relation) => {
         if (relation.type !== type) return;
@@ -101,11 +113,14 @@ export class DiplomacyModule implements HighlightModule {
         map.set(key, { ids: [a, b], relation });
       });
     });
-    
+
     return map;
   }
 
-  shouldShow(highlight: EnhancedHighlight, options: HighlightDisplayOptions): boolean {
+  shouldShow(
+    highlight: EnhancedHighlight,
+    options: HighlightDisplayOptions
+  ): boolean {
     return options.enabled && !options.skipAll;
   }
 }

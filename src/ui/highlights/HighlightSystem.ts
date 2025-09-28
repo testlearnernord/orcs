@@ -1,10 +1,10 @@
 import type { CycleSummary, WorldState } from '@sim/types';
 import { EventBus } from '@state/eventBus';
-import type { 
-  EnhancedHighlight, 
-  HighlightModule, 
-  HighlightDisplayOptions, 
-  HighlightSystemEvents 
+import type {
+  EnhancedHighlight,
+  HighlightModule,
+  HighlightDisplayOptions,
+  HighlightSystemEvents
 } from './types';
 import { HighlightType } from './types';
 import {
@@ -60,14 +60,14 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
    */
   private registerDefaultModules(): void {
     const modules = [
-      new OfficerDeathModule(),      // Priority 1
-      new WarcallResolutionModule(), // Priority 2  
-      new DiplomacyModule(),         // Priority 3
-      new PromotionsModule(),        // Priority 4
-      new NewGruntsModule()          // Priority 5
+      new OfficerDeathModule(), // Priority 1
+      new WarcallResolutionModule(), // Priority 2
+      new DiplomacyModule(), // Priority 3
+      new PromotionsModule(), // Priority 4
+      new NewGruntsModule() // Priority 5
     ];
 
-    modules.forEach(module => {
+    modules.forEach((module) => {
       this.modules.set(module.type, module);
     });
   }
@@ -83,8 +83,8 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
    * Generate and queue highlights for a cycle
    */
   processcycle(
-    prev: WorldState, 
-    next: WorldState, 
+    prev: WorldState,
+    next: WorldState,
     summary?: CycleSummary
   ): void {
     if (!this.state.options.enabled) return;
@@ -92,10 +92,12 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
     const allHighlights: EnhancedHighlight[] = [];
 
     // Generate highlights from all modules
-    this.modules.forEach(module => {
+    this.modules.forEach((module) => {
       const highlights = module.generate(prev, next, summary);
-      const filteredHighlights = highlights.filter(highlight => 
-        module.shouldShow ? module.shouldShow(highlight, this.state.options) : true
+      const filteredHighlights = highlights.filter((highlight) =>
+        module.shouldShow
+          ? module.shouldShow(highlight, this.state.options)
+          : true
       );
       allHighlights.push(...filteredHighlights);
     });
@@ -114,7 +116,9 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
     const trimmedHighlights = sortedHighlights.slice(0, this.MAX_QUEUE);
     if (sortedHighlights.length > this.MAX_QUEUE) {
       const overflow = sortedHighlights.slice(this.MAX_QUEUE);
-      trimmedHighlights.push(this.createOverflowHighlight(overflow, next.cycle));
+      trimmedHighlights.push(
+        this.createOverflowHighlight(overflow, next.cycle)
+      );
     }
 
     this.enqueueHighlights(trimmedHighlights, next.cycle);
@@ -124,7 +128,7 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
    * Create an overflow highlight for excessive highlights
    */
   private createOverflowHighlight(
-    overflow: EnhancedHighlight[], 
+    overflow: EnhancedHighlight[],
     cycle: number
   ): EnhancedHighlight {
     const count = overflow.length;
@@ -135,13 +139,15 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
       cycle,
       icon: '➕',
       title: `+${count} weitere Ereignisse`,
-      description: count === 1 
-        ? 'Ein weiteres Ereignis wurde protokolliert.' 
-        : `${count} weitere Ereignisse wurden protokolliert.`,
+      description:
+        count === 1
+          ? 'Ein weiteres Ereignis wurde protokolliert.'
+          : `${count} weitere Ereignisse wurden protokolliert.`,
       score: 10 + Math.random() * 0.1,
-      text: count === 1 
-        ? 'Ein weiteres Ereignis wurde protokolliert.' 
-        : `${count} weitere Ereignisse wurden protokolliert.`,
+      text:
+        count === 1
+          ? 'Ein weiteres Ereignis wurde protokolliert.'
+          : `${count} weitere Ereignisse wurden protokolliert.`,
       animationType: 'emergence',
       duration: 1000
     };
@@ -150,10 +156,16 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
   /**
    * Add highlights to the queue and update state
    */
-  private enqueueHighlights(highlights: EnhancedHighlight[], cycle: number): void {
+  private enqueueHighlights(
+    highlights: EnhancedHighlight[],
+    cycle: number
+  ): void {
     const newQueue = [...this.state.queue, ...highlights];
-    const newHistory = [highlights, ...this.state.history].slice(0, this.HISTORY_LIMIT);
-    
+    const newHistory = [highlights, ...this.state.history].slice(
+      0,
+      this.HISTORY_LIMIT
+    );
+
     let showing = this.state.showing;
     let queue = newQueue;
 
@@ -206,9 +218,9 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
    */
   clearAll(): void {
     const cycle = this.state.showing?.cycle ?? 0;
-    this.updateState({ 
-      queue: [], 
-      showing: null 
+    this.updateState({
+      queue: [],
+      showing: null
     });
     this.emit('highlights:cleared', { cycle });
   }
