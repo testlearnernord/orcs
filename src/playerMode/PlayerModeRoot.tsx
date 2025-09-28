@@ -199,9 +199,9 @@ export const PlayerModeRoot: React.FC = () => {
       pos: enemy.position,
       alive: enemy.isAlive
     }));
-    
+
     playerController.setAvailableTargets(lockOnTargets);
-    
+
     // Update player controller
     playerController.update(deltaMs, input);
     const playerState = playerController.getState();
@@ -212,7 +212,7 @@ export const PlayerModeRoot: React.FC = () => {
 
     // Update camera to follow player with lock-on support
     camera.setTarget(playerState.position);
-    
+
     // Set camera lock-on target if active
     const currentLockTarget = playerController.getCurrentLockOnTarget();
     if (currentLockTarget) {
@@ -392,7 +392,8 @@ export const PlayerModeRoot: React.FC = () => {
   }
 
   const playerState = systemsRef.current.playerController.getState();
-  const currentLockTarget = systemsRef.current.playerController.getCurrentLockOnTarget();
+  const currentLockTarget =
+    systemsRef.current.playerController.getCurrentLockOnTarget();
   const cameraPos = systemsRef.current.camera.getPosition();
   const arena = systemsRef.current.arena;
   const enemies = arena.getEnemies();
@@ -437,4 +438,3 @@ export const PlayerModeRoot: React.FC = () => {
     </>
   );
 };
-

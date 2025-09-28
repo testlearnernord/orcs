@@ -33,7 +33,7 @@ export class PlayerSpriteRenderer {
   private animController: AnimationController;
   private config: PlayerSpriteConfig;
   private lastState: Partial<PlayerSpriteState> = {};
-  
+
   // Berserker sprite atlases (loaded images)
   private berserkerImages: {
     walk?: HTMLImageElement;
@@ -41,7 +41,7 @@ export class PlayerSpriteRenderer {
     slash?: HTMLImageElement;
     hurt?: HTMLImageElement;
   } = {};
-  
+
   // Walk animation state for distance-coupled animation
   private walkPhase = 0;
 
@@ -68,7 +68,7 @@ export class PlayerSpriteRenderer {
     this.config = config;
     this.animController = new AnimationController();
     this.setupAnimations();
-    
+
     // Load berserker sprites if archetype is Berserker
     if (config.archetype === 'Berserker') {
       this.loadBerserkerSprites();
@@ -94,11 +94,16 @@ export class PlayerSpriteRenderer {
       loadImage(BERS.run.url),
       loadImage(BERS.slash.url),
       loadImage(BERS.hurt.url)
-    ]).then(([walk, run, slash, hurt]) => {
-      this.berserkerImages = { walk, run, slash, hurt };
-    }).catch(error => {
-      console.warn('[PlayerSpriteRenderer] Failed to load berserker sprites:', error);
-    });
+    ])
+      .then(([walk, run, slash, hurt]) => {
+        this.berserkerImages = { walk, run, slash, hurt };
+      })
+      .catch((error) => {
+        console.warn(
+          '[PlayerSpriteRenderer] Failed to load berserker sprites:',
+          error
+        );
+      });
   }
 
   /**
@@ -242,13 +247,15 @@ export class PlayerSpriteRenderer {
    * Update berserker animation with distance-coupled walk cycle
    */
   private updateBerserkerAnimation(state: PlayerSpriteState): void {
-    const deltaTime = Date.now() - (this.lastState.position ? Date.now() : Date.now());
-    
+    const deltaTime =
+      Date.now() - (this.lastState.position ? Date.now() : Date.now());
+
     // Update walk phase based on speed for distance-coupled animation
     if (state.isMoving && state.speed) {
-      this.walkPhase = (this.walkPhase + (state.speed * deltaTime) / (40 * 8)) % 1;
+      this.walkPhase =
+        (this.walkPhase + (state.speed * deltaTime) / (40 * 8)) % 1;
     }
-    
+
     // Store the current state for berserker rendering
     this.lastState = { ...state };
   }
@@ -298,20 +305,26 @@ export class PlayerSpriteRenderer {
   /**
    * Render berserker sprite using atlas system
    */
-  private renderBerserkerSprite(ctx: CanvasRenderingContext2D, state: PlayerSpriteState): void {
+  private renderBerserkerSprite(
+    ctx: CanvasRenderingContext2D,
+    state: PlayerSpriteState
+  ): void {
     // Enable pixel-perfect rendering
     ctx.imageSmoothingEnabled = false;
-    
+
     // Determine direction from rotation if not provided
     const direction = state.direction || dirFromAngle(state.rotation);
-    
+
     let atlas: HTMLImageElement | undefined;
     let frameIndex = 0;
-    
+
     // Determine which atlas and frame to use
     if (state.isHurt && this.berserkerImages.hurt) {
       atlas = this.berserkerImages.hurt;
-      frameIndex = idxHurt(direction, Math.floor(Math.random() * 6) as 0 | 1 | 2 | 3 | 4 | 5); // Random hurt frame
+      frameIndex = idxHurt(
+        direction,
+        Math.floor(Math.random() * 6) as 0 | 1 | 2 | 3 | 4 | 5
+      ); // Random hurt frame
     } else if (state.isExecutingSignature && this.berserkerImages.slash) {
       atlas = this.berserkerImages.slash;
       // Use time-based animation, could be enhanced with proper frame tracking
@@ -322,7 +335,7 @@ export class PlayerSpriteRenderer {
       // Fast run animation for dash
       const frame = Math.floor((Date.now() / 50) % 8);
       frameIndex = idxRun(direction, frame as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7);
-      
+
       // Add afterimage trail
       ctx.globalAlpha = 0.3;
       for (let i = 1; i <= 3; i++) {
@@ -342,38 +355,52 @@ export class PlayerSpriteRenderer {
       atlas = this.berserkerImages.walk;
       frameIndex = idxWalk(direction, 'idle');
     }
-    
+
     // Draw the sprite frame
     if (atlas) {
       this.drawBerserkerFrame(ctx, atlas, frameIndex);
     } else {
       // Fallback to placeholder if sprites not loaded
-      this.drawPlayerShape(ctx, this.archetypePalettes.Berserker, state.isBlocking || false);
+      this.drawPlayerShape(
+        ctx,
+        this.archetypePalettes.Berserker,
+        state.isBlocking || false
+      );
     }
   }
 
   /**
    * Draw a specific frame from berserker atlas
    */
-  private drawBerserkerFrame(ctx: CanvasRenderingContext2D, atlas: HTMLImageElement, frameIndex: number): void {
+  private drawBerserkerFrame(
+    ctx: CanvasRenderingContext2D,
+    atlas: HTMLImageElement,
+    frameIndex: number
+  ): void {
     const cols = 9; // Max cols from any berserker atlas
     const frameWidth = atlas.width / cols;
     const frameHeight = atlas.height / 4; // 4 rows for directions
-    
+
     const col = frameIndex % cols;
     const row = Math.floor(frameIndex / cols);
-    
+
     const srcX = col * frameWidth;
     const srcY = row * frameHeight;
-    
+
     // Draw centered at current position
     const drawWidth = 64; // Scale up from 256px sprites
     const drawHeight = 64;
-    
+
     ctx.drawImage(
       atlas,
-      srcX, srcY, frameWidth, frameHeight,
-      -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight
+      srcX,
+      srcY,
+      frameWidth,
+      frameHeight,
+      -drawWidth / 2,
+      -drawHeight / 2,
+      drawWidth,
+      drawHeight
     );
   }
 

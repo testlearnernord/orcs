@@ -15,7 +15,7 @@ export interface KeybindState {
   lockOn: boolean; // Alt (toggle)
   signature: boolean; // E
   reset: boolean; // R
-  
+
   // Lock-on cycling
   cycleLeft: boolean; // Q
   cycleRight: boolean; // E (note: shares with signature - needs special handling)
@@ -172,7 +172,7 @@ export class PlayerKeybinds {
 
   private handleKeyDown = (event: KeyboardEvent): void => {
     const key = event.key.toLowerCase();
-    
+
     // Special handling for E key (signature/cycleRight)
     if (key === 'e') {
       if (this.state.lockOn) {
@@ -190,7 +190,7 @@ export class PlayerKeybinds {
       }
       return;
     }
-    
+
     const action = this.keyMap[key];
     if (action && !this.state[action]) {
       this.updateKeyState(action, true);
@@ -200,7 +200,7 @@ export class PlayerKeybinds {
 
   private handleKeyUp = (event: KeyboardEvent): void => {
     const key = event.key.toLowerCase();
-    
+
     // Special handling for E key (signature/cycleRight)
     if (key === 'e') {
       if (this.state.cycleRight) {
@@ -213,7 +213,7 @@ export class PlayerKeybinds {
       }
       return;
     }
-    
+
     const action = this.keyMap[key];
     if (action && this.state[action]) {
       this.updateKeyState(action, false);

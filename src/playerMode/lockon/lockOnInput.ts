@@ -28,7 +28,8 @@ export class LockOnInputHandler {
 
     // Detect rising edges (key just pressed)
     const result: LockOnInput = {
-      toggleLockOn: currentState.toggleLockOn && !this.previousState.toggleLockOn,
+      toggleLockOn:
+        currentState.toggleLockOn && !this.previousState.toggleLockOn,
       cycleLeft: currentState.cycleLeft && !this.previousState.cycleLeft,
       cycleRight: currentState.cycleRight && !this.previousState.cycleRight
     };

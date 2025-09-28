@@ -71,12 +71,12 @@ export function inputToOrbitValues(input: {
  */
 export function dirFromAngle(rad: number): 'L' | 'R' | 'U' | 'D' {
   const a = (rad + Math.PI * 2) % (Math.PI * 2);
-  
-  if (a > Math.PI * 3/4 && a <= Math.PI * 5/4) {
+
+  if (a > (Math.PI * 3) / 4 && a <= (Math.PI * 5) / 4) {
     return 'L'; // Left
-  } else if (a > Math.PI * 5/4 && a <= Math.PI * 7/4) {
+  } else if (a > (Math.PI * 5) / 4 && a <= (Math.PI * 7) / 4) {
     return 'D'; // Down
-  } else if (a > Math.PI * 7/4 || a <= Math.PI * 1/4) {
+  } else if (a > (Math.PI * 7) / 4 || a <= (Math.PI * 1) / 4) {
     return 'R'; // Right
   } else {
     return 'U'; // Up

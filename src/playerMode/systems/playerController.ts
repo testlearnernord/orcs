@@ -8,7 +8,11 @@ import { angle, withinArc } from '../../combat/hitbox';
 import type { KeybindState } from '../input/keybinds';
 import { LockOnManager, type LockOnTarget } from '../lockon/LockOnManager';
 import { LockOnInputHandler } from '../lockon/lockOnInput';
-import { orbitVelocity, inputToOrbitValues, dirFromAngle } from './orbitMovement';
+import {
+  orbitVelocity,
+  inputToOrbitValues,
+  dirFromAngle
+} from './orbitMovement';
 
 export interface PlayerState {
   position: Point2D;
@@ -49,7 +53,7 @@ export class PlayerController {
   constructor(startPosition: Point2D = { x: 0, y: 0 }) {
     this.lockOnManager = new LockOnManager();
     this.lockOnInputHandler = new LockOnInputHandler();
-    
+
     this.state = {
       position: { ...startPosition },
       rotation: 0,
@@ -107,7 +111,7 @@ export class PlayerController {
     this.processDash(input, now);
     this.processBlock(input);
     this.processSignature(input, now);
-    
+
     // Update motion state and direction
     this.updateMotionState();
     this.updateDirection();
@@ -222,17 +226,26 @@ export class PlayerController {
         // Use orbit movement
         const orbitInput = inputToOrbitValues({
           moveUp: input.moveUp,
-          moveDown: input.moveDown,  
+          moveDown: input.moveDown,
           moveLeft: input.moveLeft,
           moveRight: input.moveRight
         });
-        
-        speed = this.state.isDashing ? this.baseSpeed * BALANCE.dash.speedMul : this.baseSpeed;
-        velocity = orbitVelocity(orbitInput, this.state.position, lockOnTarget.pos, speed);
+
+        speed = this.state.isDashing
+          ? this.baseSpeed * BALANCE.dash.speedMul
+          : this.baseSpeed;
+        velocity = orbitVelocity(
+          orbitInput,
+          this.state.position,
+          lockOnTarget.pos,
+          speed
+        );
       } else {
         // Standard world-relative movement
         this.state.rotation = Math.atan2(movement.y, movement.x);
-        speed = this.state.isDashing ? this.baseSpeed * BALANCE.dash.speedMul : this.baseSpeed;
+        speed = this.state.isDashing
+          ? this.baseSpeed * BALANCE.dash.speedMul
+          : this.baseSpeed;
         velocity = {
           x: movement.x * speed,
           y: movement.y * speed
@@ -245,7 +258,8 @@ export class PlayerController {
 
       // Update walk phase for distance-coupled animation
       if (!this.state.isDashing) {
-        this.state.walkPhase = (this.state.walkPhase + (speed * deltaSeconds) / (40 * 8)) % 1;
+        this.state.walkPhase =
+          (this.state.walkPhase + (speed * deltaSeconds) / (40 * 8)) % 1;
       }
 
       this.actions.push({
@@ -312,9 +326,9 @@ export class PlayerController {
   private processLockOn(input: KeybindState): void {
     // Convert KeybindState to the format expected by LockOnInputHandler
     const keyState: { [key: string]: boolean } = {
-      'AltLeft': input.lockOn || false, // assuming lockOn is added to KeybindState
-      'KeyQ': input.cycleLeft || false, // assuming cycleLeft is added
-      'KeyE': input.cycleRight || false // assuming cycleRight is added
+      AltLeft: input.lockOn || false, // assuming lockOn is added to KeybindState
+      KeyQ: input.cycleLeft || false, // assuming cycleLeft is added
+      KeyE: input.cycleRight || false // assuming cycleRight is added
     };
 
     const lockOnInput = this.lockOnInputHandler.processInput(keyState);
@@ -342,7 +356,10 @@ export class PlayerController {
     }
 
     // Handle target cycling
-    if (this.state.isLockedOn && (lockOnInput.cycleLeft || lockOnInput.cycleRight)) {
+    if (
+      this.state.isLockedOn &&
+      (lockOnInput.cycleLeft || lockOnInput.cycleRight)
+    ) {
       const direction = lockOnInput.cycleLeft ? -1 : 1;
       const targetId = this.lockOnManager.cycle(
         this.availableTargets,
@@ -362,7 +379,7 @@ export class PlayerController {
   private updateMotionState(): void {
     if (this.state.isDashing) {
       this.state.motion = 'dash';
-    } else if (this.actions.some(a => a.type === 'signature')) {
+    } else if (this.actions.some((a) => a.type === 'signature')) {
       this.state.motion = 'signature';
     } else if (this.state.speed > 0) {
       this.state.motion = 'walk';
@@ -377,7 +394,9 @@ export class PlayerController {
   private updateDirection(): void {
     if (this.state.isLockedOn && this.state.lockOnTargetId) {
       // Find the locked target
-      const lockedTarget = this.availableTargets.find(t => t.id === this.state.lockOnTargetId);
+      const lockedTarget = this.availableTargets.find(
+        (t) => t.id === this.state.lockOnTargetId
+      );
       if (lockedTarget) {
         const targetAngle = angle(this.state.position, lockedTarget.pos);
         this.state.direction = dirFromAngle(targetAngle);
@@ -385,7 +404,7 @@ export class PlayerController {
         return;
       }
     }
-    
+
     // Default: use rotation to determine direction
     this.state.direction = dirFromAngle(this.state.rotation);
   }
@@ -395,9 +414,12 @@ export class PlayerController {
    */
   public setAvailableTargets(targets: LockOnTarget[]): void {
     this.availableTargets = targets;
-    
+
     // Clear lock-on if current target is no longer available
-    if (this.state.lockOnTargetId && !targets.find(t => t.id === this.state.lockOnTargetId && t.alive)) {
+    if (
+      this.state.lockOnTargetId &&
+      !targets.find((t) => t.id === this.state.lockOnTargetId && t.alive)
+    ) {
       this.lockOnManager.clear();
       this.state.isLockedOn = false;
       this.state.lockOnTargetId = undefined;
@@ -409,7 +431,9 @@ export class PlayerController {
    */
   public getCurrentLockOnTarget(): LockOnTarget | undefined {
     if (!this.state.lockOnTargetId) return undefined;
-    return this.availableTargets.find(t => t.id === this.state.lockOnTargetId);
+    return this.availableTargets.find(
+      (t) => t.id === this.state.lockOnTargetId
+    );
   }
 
   private getMovementVector(input: KeybindState): Point2D {
