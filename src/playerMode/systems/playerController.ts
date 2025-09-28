@@ -25,7 +25,7 @@ export interface PlayerState {
   iframeEndTime: number;
   lastStaminaUse: number;
   blockDirection: number;
-  // New properties for enhanced berserker system
+  // New properties for enhanced LPC sprite system
   motion: 'idle' | 'walk' | 'dash' | 'signature' | 'hurt';
   direction: 'L' | 'R' | 'U' | 'D';
   isLockedOn: boolean;
