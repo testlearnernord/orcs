@@ -1,12 +1,12 @@
 # Import Analysis Report
 
-Generated: 2025-09-28T18:15:54.853Z
+Generated: 2025-09-28T18:42:59.927Z
 
 ## Summary
 
-- **Total source files analyzed**: 130
-- **Referenced files**: 34
-- **Unreferenced files**: 67
+- **Total source files analyzed**: 164
+- **Referenced files**: 40
+- **Unreferenced files**: 94
 
 ## Unreferenced Files
 
@@ -39,9 +39,34 @@ Generated: 2025-09-28T18:15:54.853Z
 - `src/ui/primitives.ts`
 - `src/ui/root.ts`
 - `src/features/freeRoam/FreeRoamView.tsx`
+- `src/features/map/FreeRoamView.tsx`
+- `src/features/portraits/index.ts`
+- `src/features/portraits/loader.ts`
 - `src/features/portraits/preload.ts`
 - `src/features/portraits/types.ts`
 - `src/playerMode/systems/lockOn.ts`
+- `src/shared/config/flags.ts`
+- `src/shared/types/common.ts`
+- `src/shared/types/game.ts`
+- `src/shared/types/index.ts`
+- `src/shared/ui/ctrlIndicator.ts`
+- `src/shared/ui/cycleDigest.ts`
+- `src/shared/ui/cycleSweep.ts`
+- `src/shared/ui/detailsPanel.ts`
+- `src/shared/ui/emptySlot.ts`
+- `src/shared/ui/feed.ts`
+- `src/shared/ui/graveyard.ts`
+- `src/shared/ui/helpOverlay.ts`
+- `src/shared/ui/highlightPortal.ts`
+- `src/shared/ui/hotkeys.ts`
+- `src/shared/ui/mainMenu.ts`
+- `src/shared/ui/modeGate.ts`
+- `src/shared/ui/officerCard.ts`
+- `src/shared/ui/officerCardLegacy.ts`
+- `src/shared/ui/officerToken.ts`
+- `src/shared/ui/officerTooltip.ts`
+- `src/shared/ui/toast.ts`
+- `src/shared/ui/tooltip.ts`
 - `src/sim/adapters/freeRoam.selectors.ts`
 - `src/state/selectors/officers.ts`
 - `src/state/selectors/warcalls.ts`
@@ -72,15 +97,17 @@ Generated: 2025-09-28T18:15:54.853Z
 - `src/ui/overlay/anchors.ts`
 - `src/ui/overlay/coords.ts`
 - `src/ui/overlay/domCoords.ts`
-- `src/ui/portraits/loader.ts`
 - `src/ui/utils/flip.ts`
+- `src/shared/ui/warcalls/dock.ts`
+- `src/shared/ui/warcalls/modal.ts`
+- `src/shared/ui/warcalls/types.ts`
 - `src/ui/components/warcalls/dock.ts`
 - `src/ui/components/warcalls/modal.ts`
 - `src/ui/components/warcalls/types.ts`
 
 ## Recommendations
 
-- Review the 67 unreferenced files above
+- Review the 94 unreferenced files above
 - Verify if they are truly unused or if the analysis missed dynamic imports
 - Consider removing files that are confirmed as dead code
 - Keep test files and entry points even if not directly imported

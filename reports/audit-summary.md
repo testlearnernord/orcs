@@ -1,7 +1,7 @@
 # Audit Summary Report
 
-Generated: 2025-09-28T18:15:55.141Z  
-Duration: 0.3s
+Generated: 2025-09-28T18:43:00.228Z  
+Duration: 0.4s
 
 ## Overview
 
@@ -11,38 +11,38 @@ This report summarizes the findings from all audit scripts run on the codebase.
 
 | Metric | Count | Notes |
 |--------|-------|-------|
-| **Total source files** | 130 | TS/TSX/JS files analyzed |
-| **Unreferenced files** | 67 | Files not imported anywhere |
+| **Total source files** | 164 | TS/TSX/JS files analyzed |
+| **Unreferenced files** | 94 | Files not imported anywhere |
 | **Total assets** | 43 | Images, audio, fonts, etc. |
 | **Unreferenced assets** | 15 | Assets with no usage found |
-| **Exact duplicate groups** | 6 | Identical files (same hash) |
+| **Exact duplicate groups** | 35 | Identical files (same hash) |
 | **Size duplicate groups** | 1 | Same size, different content |
-| **Name duplicate groups** | 10 | Same name, different locations |
+| **Name duplicate groups** | 35 | Same name, different locations |
 
 ## Cleanup Potential
 
 | Category | Potential Savings | Priority |
 |----------|------------------|----------|
 | **Unreferenced assets** | 353.8KB | High |
-| **Exact duplicates** | 1.8MB | High |
-| **Unreferenced code files** | 67 files | Medium |
+| **Exact duplicates** | 1.9MB | High |
+| **Unreferenced code files** | 94 files | Medium |
 
-**Total potential savings**: 2.1MB
+**Total potential savings**: 2.3MB
 
 ## Priority Actions
 
 ### 🔴 High Priority
 - Review and remove 15 unreferenced assets
-- Consolidate 6 exact duplicate file groups
-- Potential bundle size reduction: 2.1MB
+- Consolidate 35 exact duplicate file groups
+- Potential bundle size reduction: 2.3MB
 
 ### 🟡 Medium Priority
-- Review 67 unreferenced source files
+- Review 94 unreferenced source files
 - Investigate 1 size duplicate groups
-- Consider name standardization for 10 name duplicate groups
+- Consider name standardization for 35 name duplicate groups
 
 ### 🟢 Low Priority
-- Review 39 similar name pairs for consistency
+- Review 84 similar name pairs for consistency
 
 ## Detailed Reports
 
