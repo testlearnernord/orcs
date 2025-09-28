@@ -126,7 +126,7 @@ describe('computeDigest', () => {
     expect(highlights[0].title).toContain('steigt');
     expect(highlights[0].score).toBeGreaterThanOrEqual(highlights[1].score);
     const titles = highlights.map((entry) => entry.title);
-    expect(titles.some((title) => title.includes('Blutschwur'))).toBe(true);
+    // Remove blood oath check since blood oaths no longer exist
     expect(titles.some((title) => title.includes('verstärkt'))).toBe(true);
     expect(titles.some((title) => title.includes('triumphiert'))).toBe(true);
   });

@@ -1,12 +1,7 @@
 import type { Officer } from '@sim/types';
 import { bezierD, edgeAnchors } from '@ui/overlay/anchors';
 
-export type OverlayRelationType =
-  | 'ally'
-  | 'friend'
-  | 'rival'
-  | 'bloodoath'
-  | 'hierarchy';
+export type OverlayRelationType = 'ally' | 'rival' | 'neutral' | 'hierarchy';
 
 export interface RelationEdge {
   id: string;
@@ -35,29 +30,26 @@ interface TooltipContext {
 
 const TYPE_LABEL: Record<OverlayRelationType, string> = {
   ally: 'Allianz',
-  friend: 'Freundschaft',
   rival: 'Rivalität',
-  bloodoath: 'Blutschwur',
+  neutral: 'Neutral',
   hierarchy: 'Befehlskette'
 };
 
 const EDGE_COLORS: Record<OverlayRelationType, string> = {
   ally: 'var(--line-ally)',
-  friend: 'var(--line-friend)',
   rival: 'var(--line-rival)',
-  bloodoath: 'var(--line-blood)',
+  neutral: 'var(--line-neutral)',
   hierarchy: 'var(--line-hierarchy)'
 };
 
 const DASH_PATTERN: Partial<Record<OverlayRelationType, string>> = {
-  bloodoath: '6 4'
+  neutral: '4 2' // Make neutral relationships dashed
 };
 
 const TYPE_PRIORITY: Record<OverlayRelationType, number> = {
-  bloodoath: 5,
   rival: 4,
   ally: 3,
-  friend: 2,
+  neutral: 2,
   hierarchy: 1
 };
 
@@ -74,13 +66,11 @@ function mapRelationType(
   switch (type) {
     case 'ALLY':
       return 'ally';
-    case 'FRIEND':
-      return 'friend';
     case 'RIVAL':
       return 'rival';
-    case 'BLOOD_OATH':
+    case 'NEUTRAL':
     default:
-      return 'bloodoath';
+      return 'neutral';
   }
 }
 
@@ -190,13 +180,11 @@ export function buildRelationEdges(
       const type = mapRelationType(relation.type);
       const lastMemory = resolveLastMemory(officer, peer);
       const strength =
-        relation.type === 'BLOOD_OATH'
-          ? 1
-          : relation.type === 'RIVAL'
-            ? 0.75
-            : relation.type === 'ALLY'
-              ? 0.65
-              : 0.5;
+        relation.type === 'RIVAL'
+          ? 0.75
+          : relation.type === 'ALLY'
+            ? 0.65
+            : 0.3; // NEUTRAL gets lower strength
       edges.push({
         id: key,
         fromId: officer.id,
@@ -327,16 +315,14 @@ export class RelationsOverlay {
   private readonly visibleCards = new Set<string>();
   private readonly activeTypes = new Set<OverlayRelationType>([
     'ally',
-    'friend',
     'rival',
-    'bloodoath',
+    'neutral',
     'hierarchy'
   ]);
   private lensMask = new Set<OverlayRelationType>([
     'ally',
-    'friend',
     'rival',
-    'bloodoath',
+    'neutral',
     'hierarchy'
   ]);
   private focusId: string | null = null;

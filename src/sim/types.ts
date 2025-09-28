@@ -19,7 +19,7 @@ export interface Personality {
 
 export type OfficerStatus = 'ALIVE' | 'DEAD';
 
-export type RelationshipType = 'ALLY' | 'RIVAL' | 'BLOOD_OATH' | 'FRIEND';
+export type RelationshipType = 'ALLY' | 'RIVAL' | 'NEUTRAL';
 
 export interface Relationship {
   with: OrcId;

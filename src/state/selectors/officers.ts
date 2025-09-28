@@ -8,9 +8,8 @@ import type { UIFilters } from '@state/ui/filters';
 
 const ALL_RELATION_TYPES: OverlayRelationType[] = [
   'ally',
-  'friend',
   'rival',
-  'bloodoath',
+  'neutral',
   'hierarchy'
 ];
 
@@ -90,13 +89,10 @@ function applyOfficerFilters(
     ) {
       return false;
     }
-    if (filters.friendships && !officerHasRelation(officer, 'FRIEND')) {
-      return false;
-    }
     if (filters.rivalries && !officerHasRelation(officer, 'RIVAL')) {
       return false;
     }
-    if (filters.bloodoaths && !officerHasRelation(officer, 'BLOOD_OATH')) {
+    if (filters.neutralRelations && !officerHasRelation(officer, 'NEUTRAL')) {
       return false;
     }
     if (filters.lowBravery && officer.personality.tapferkeit > 0.3) {
@@ -173,20 +169,16 @@ export function lensMaskForFilters(
   const mask = new Set<OverlayRelationType>();
   let constrained = false;
 
-  if (filters.friendships) {
-    mask.add('friend');
-    constrained = true;
-  }
   if (filters.rivalries) {
     mask.add('rival');
     constrained = true;
   }
-  if (filters.rivalsOfKing) {
-    mask.add('rival');
+  if (filters.neutralRelations) {
+    mask.add('neutral');
     constrained = true;
   }
-  if (filters.bloodoaths) {
-    mask.add('bloodoath');
+  if (filters.rivalsOfKing) {
+    mask.add('rival');
     constrained = true;
   }
   if (filters.coupRisk) {

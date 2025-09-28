@@ -43,8 +43,7 @@ export function formRelationship(
   const second = findOfficer(state, secondId);
   if (!first || !second) return undefined;
 
-  const expiresAt =
-    type === 'BLOOD_OATH' ? cycle + BLOOD_OATH_DURATION : undefined;
+  const expiresAt = undefined; // No special expiration for any relationship type
 
   const firstRelation: Relationship = {
     with: second.id,
@@ -64,12 +63,12 @@ export function formRelationship(
 
   updatedFirst = addMemory(updatedFirst, {
     cycle,
-    category: type === 'BLOOD_OATH' ? 'BLOOD_OATH' : 'RELATIONSHIP',
+    category: 'RELATIONSHIP',
     summary: `${type} mit ${updatedSecond.name}`
   });
   updatedSecond = addMemory(updatedSecond, {
     cycle,
-    category: type === 'BLOOD_OATH' ? 'BLOOD_OATH' : 'RELATIONSHIP',
+    category: 'RELATIONSHIP',
     summary: `${type} mit ${updatedFirst.name}`
   });
 
@@ -95,10 +94,9 @@ export function seedSpawnRelationships(
     const partner = rng.pick(others);
     const roll = rng.next();
     let type: RelationshipType | undefined;
-    if (roll < 0.05) type = 'BLOOD_OATH';
-    else if (roll < 0.2) type = 'RIVAL';
-    else if (roll < 0.5) type = 'ALLY';
-    else if (roll < 0.7) type = 'FRIEND';
+    if (roll < 0.15) type = 'RIVAL';
+    else if (roll < 0.45) type = 'ALLY';
+    else if (roll < 0.7) type = 'NEUTRAL';
 
     if (!type) continue;
 
@@ -123,41 +121,8 @@ export function expireBloodOaths(
   cycle: number,
   rng: RNG
 ): FeedEntry[] {
-  const feed: FeedEntry[] = [];
-  const processed = new Set<string>();
-  for (const officer of state.officers) {
-    for (const relation of officer.relationships) {
-      if (relation.type !== 'BLOOD_OATH') continue;
-      if (
-        relation.expiresAtCycle === undefined ||
-        relation.expiresAtCycle > cycle
-      )
-        continue;
-      const pairKey = [officer.id, relation.with].sort().join(':');
-      if (processed.has(pairKey)) continue;
-      processed.add(pairKey);
-      const partner = findOfficer(state, relation.with);
-      if (!partner) continue;
-      const loyalty =
-        (officer.personality.loyalitaet + partner.personality.loyalitaet) / 2;
-      const pride = (officer.personality.stolz + partner.personality.stolz) / 2;
-      const greed = (officer.personality.gier + partner.personality.gier) / 2;
-      let targetType: RelationshipType = 'ALLY';
-      if (greed > loyalty && pride > loyalty) {
-        targetType = 'RIVAL';
-      }
-      const entry = formRelationship(
-        state,
-        officer.id,
-        partner.id,
-        targetType,
-        cycle,
-        rng
-      );
-      if (entry) feed.push(entry);
-    }
-  }
-  return feed;
+  // No more blood oaths to expire
+  return [];
 }
 
 export function collectBloodOathVictims(
@@ -165,26 +130,8 @@ export function collectBloodOathVictims(
   fallen: Set<string>,
   cycle: number
 ): Set<string> {
-  const extra = new Set<string>();
-  const queue = [...fallen];
-  while (queue.length > 0) {
-    const id = queue.pop();
-    if (!id) continue;
-    const officer = findOfficer(state, id);
-    if (!officer) continue;
-    for (const relation of officer.relationships) {
-      if (relation.type !== 'BLOOD_OATH') continue;
-      if (
-        relation.expiresAtCycle !== undefined &&
-        relation.expiresAtCycle <= cycle
-      )
-        continue;
-      if (fallen.has(relation.with) || extra.has(relation.with)) continue;
-      extra.add(relation.with);
-      queue.push(relation.with);
-    }
-  }
-  return extra;
+  // No more blood oath victims since blood oaths don't exist
+  return new Set<string>();
 }
 
 export function relationshipModifier(

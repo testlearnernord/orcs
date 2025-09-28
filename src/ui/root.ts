@@ -5,6 +5,7 @@ import type {
   WarcallResolution,
   WorldState
 } from '@sim/types';
+import { RANK_QUOTAS } from '@sim/constants';
 import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { Highlight } from '@state/cycleDigest';
@@ -21,6 +22,7 @@ import {
 import { FeedView } from '@ui/components/feed';
 import { GraveyardPanel } from '@ui/components/graveyard';
 import { OfficerCard } from '@ui/components/officerCard';
+import { EmptySlot } from '@ui/components/emptySlot';
 import { DetailsPanel } from '@ui/components/detailsPanel';
 import {
   buildRelationEdges,
@@ -65,9 +67,8 @@ const RELATIONS_OVERLAY_ENABLED = true;
 const FILTER_DEFINITIONS: { key: FilterKey; label: string }[] = [
   { key: 'loyalToKing', label: 'Loyal zum König' },
   { key: 'rivalsOfKing', label: 'Rivale des Königs' },
-  { key: 'friendships', label: 'Freundschaften' },
   { key: 'rivalries', label: 'Rivalitäten' },
-  { key: 'bloodoaths', label: 'Blutschwüre aktiv' },
+  { key: 'neutralRelations', label: 'Neutrale Beziehungen' },
   { key: 'lowBravery', label: 'Niedriger Mut' },
   { key: 'highGreed', label: 'Hohe Gier' },
   { key: 'promotionCandidates', label: 'Aufstiegskandidaten' },
@@ -96,6 +97,7 @@ export class NemesisUI {
   private playerModeContainer: HTMLDivElement | null = null;
   private playerModeRoot: Root | null = null;
   private readonly cards = new Map<string, OfficerCard>();
+  private readonly emptySlots = new Map<string, EmptySlot>(); // key: rank-slotIndex
   private readonly rankContainers = new Map<Rank, HTMLElement>();
   private readonly filters = new UIFilterStore();
   private readonly filterButtons = new Map<FilterKey, HTMLButtonElement>();
@@ -169,7 +171,7 @@ export class NemesisUI {
       if (this.ranksEl) {
         this.ranksEl.scrollTop = 0;
       }
-      this.renderOfficers(this.store.getState());
+      this.renderOfficersHierarchical(this.store.getState());
     });
     this.highlights.on('change', (state) => {
       this.highlightPortal.update(state.showing);
@@ -215,7 +217,7 @@ export class NemesisUI {
         );
       }
       this.syncOfficerIndex(next.officers);
-      this.renderOfficers(next);
+      this.renderOfficersHierarchical(next);
       this.updateWarcalls(next.warcalls, next.cycle);
     });
     store.events.on('cycle:completed', (summary) => {
@@ -511,7 +513,7 @@ export class NemesisUI {
     }
 
     const initialState = this.store.getState();
-    this.renderOfficers(initialState);
+    this.renderOfficersHierarchical(initialState);
     this.renderFeed();
     this.updateWarcalls(initialState.warcalls, initialState.cycle);
     this.updateGraveyardButton();
@@ -885,6 +887,190 @@ export class NemesisUI {
       this.relations.setLensMask(lensMaskForFilters(filters));
       this.relations.setEdges(maskedEdges, state.cycle);
     }
+  }
+
+  private renderOfficersHierarchical(state: WorldState): void {
+    const rankList = this.rankListEl;
+    if (!rankList) return;
+    const filters = this.filters.getState();
+    const visible = selectVisibleOfficers(state, filters);
+
+    // Create hierarchy layout if it doesn't exist
+    if (!this.hierarchyContainer) {
+      this.createHierarchyStructure(rankList);
+    }
+
+    // Render each rank with fixed slots
+    RANK_ORDER.forEach((rank) => {
+      if (rank === 'Spieler') return; // Skip Spieler rank
+
+      const maxSlots = RANK_QUOTAS[rank];
+      const officers = visible.filter((officer) => officer.rank === rank);
+      const container = this.rankContainers.get(rank);
+
+      if (!container) return;
+      const grid = container.querySelector('.rank-grid') as HTMLElement | null;
+      if (!grid) return;
+
+      // Clear existing content
+      grid.innerHTML = '';
+
+      // Render officer cards and empty slots
+      for (let slotIndex = 0; slotIndex < maxSlots; slotIndex++) {
+        const officer = officers[slotIndex];
+        const slotKey = `${rank}-${slotIndex}`;
+
+        if (officer) {
+          // Render officer card
+          let card = this.cards.get(officer.id);
+          if (!card) {
+            card = new OfficerCard(officer, {
+              onOfficerClick: (officer) =>
+                this.detailsPanel.showOfficerDetails(officer)
+            });
+            this.cards.set(officer.id, card);
+            this.lastRenderedOfficerState.set(officer.id, {
+              ...officer,
+              personality: { ...officer.personality },
+              relationships: [...officer.relationships],
+              traits: [...officer.traits]
+            });
+          } else {
+            // Update existing card if changed
+            const hasChanged = this.hasOfficerChanged(officer);
+            if (hasChanged) {
+              card.captureBounds();
+              card.update(officer);
+              card.playFlip();
+              this.lastRenderedOfficerState.set(officer.id, {
+                ...officer,
+                personality: { ...officer.personality },
+                relationships: [...officer.relationships],
+                traits: [...officer.traits]
+              });
+            }
+          }
+
+          // Clean up any existing empty slot
+          const existingEmptySlot = this.emptySlots.get(slotKey);
+          if (existingEmptySlot) {
+            existingEmptySlot.destroy();
+            this.emptySlots.delete(slotKey);
+          }
+
+          grid.appendChild(card.element);
+        } else {
+          // Render empty slot
+          let emptySlot = this.emptySlots.get(slotKey);
+          if (!emptySlot) {
+            emptySlot = new EmptySlot({
+              rank,
+              slotIndex,
+              onClick: () => {
+                // Show tooltip about promotion requirements
+                this.toast.show(
+                  `Rang ${rank}: Slot ${slotIndex + 1} wartet auf Beförderung`
+                );
+              }
+            });
+            this.emptySlots.set(slotKey, emptySlot);
+          }
+
+          grid.appendChild(emptySlot.element);
+        }
+      }
+
+      // Update the count display
+      const countElement = container.querySelector(
+        `[data-rank-count="${rank}"]`
+      );
+      if (countElement) {
+        countElement.textContent = `${officers.length}/${maxSlots}`;
+      }
+    });
+
+    // Clean up cards for officers that are no longer visible
+    const visibleIds = new Set(visible.map((officer) => officer.id));
+    this.cards.forEach((card, id) => {
+      if (!visibleIds.has(id)) {
+        card.element.remove();
+        this.cards.delete(id);
+        this.lastRenderedOfficerState.delete(id);
+      }
+    });
+
+    // Update relations overlay
+    if (this.relations) {
+      const allEdges = buildRelationEdges(state.officers, state.cycle);
+      this.lastEdges = allEdges;
+      const maskedEdges = selectVisibleEdges(visible, allEdges, filters);
+      this.relations.setLensMask(lensMaskForFilters(filters));
+      this.relations.setEdges(maskedEdges, state.cycle);
+    }
+  }
+
+  private hierarchyContainer: HTMLElement | null = null;
+
+  private createHierarchyStructure(rankList: HTMLElement): void {
+    // Clear existing content
+    rankList.innerHTML = '';
+
+    // Create hierarchy container
+    this.hierarchyContainer = document.createElement('div');
+    this.hierarchyContainer.className = 'hierarchy-container';
+
+    // Create rank containers in hierarchical order
+    RANK_ORDER.forEach((rank) => {
+      if (rank === 'Spieler') return; // Skip Spieler rank
+
+      const container = document.createElement('div');
+      container.className = 'rank-group';
+      container.dataset.rank = rank;
+
+      // Add rank-specific styling classes
+      const rankClass = this.getRankStyleClass(rank);
+      container.classList.add(`rank-group--${rankClass}`);
+
+      container.innerHTML = `
+        <h3 class="rank-group__title">
+          <span class="rank-group__icon">${this.getRankIcon(rank)}</span>
+          ${rank}
+          <span class="rank-group__count" data-rank-count="${rank}">0/${RANK_QUOTAS[rank]}</span>
+        </h3>
+        <div class="rank-grid"></div>
+      `;
+
+      this.rankContainers.set(rank, container);
+      if (this.hierarchyContainer) {
+        this.hierarchyContainer.appendChild(container);
+      }
+    });
+
+    if (this.hierarchyContainer) {
+      rankList.appendChild(this.hierarchyContainer);
+    }
+  }
+
+  private getRankStyleClass(rank: Rank): string {
+    const classes: Record<Rank, string> = {
+      König: 'king',
+      Spieler: 'player',
+      Captain: 'captain',
+      Späher: 'scout',
+      Grunzer: 'grunt'
+    };
+    return classes[rank];
+  }
+
+  private getRankIcon(rank: Rank): string {
+    const icons: Record<Rank, string> = {
+      König: '👑',
+      Spieler: '🎮',
+      Captain: '⚡',
+      Späher: '👁',
+      Grunzer: '⚔'
+    };
+    return icons[rank];
   }
 
   private renderDigestHistory(history: Highlight[][]): void {
