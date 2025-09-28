@@ -25,6 +25,12 @@ function resolveInitialMode(): GameMode {
   return 'spectate';
 }
 
+function getMapParam(): string {
+  if (typeof window === 'undefined') return 'gogouds-manor';
+  const params = new URLSearchParams(window.location.search);
+  return params.get('map') ?? 'gogouds-manor';
+}
+
 function syncUrl(mode: GameMode): void {
   if (typeof window === 'undefined') return;
   const url = new URL(window.location.href);
