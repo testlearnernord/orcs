@@ -261,16 +261,16 @@ export function useHandcraftedFreeRoam(
 
   const [idleSeconds, setIdleSeconds] = useState(0);
   const lastInteractionRef = useRef(Date.now());
-  
+
   // Use refs to avoid dependency loops
   const playerPositionRef = useRef(playerPosition);
   const previousOfficersRef = useRef(previousOfficers);
-  
+
   // Update refs when state changes
   useEffect(() => {
     playerPositionRef.current = playerPosition;
   }, [playerPosition]);
-  
+
   useEffect(() => {
     previousOfficersRef.current = previousOfficers;
   }, [previousOfficers]);
