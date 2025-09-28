@@ -65,6 +65,37 @@ export class LPCCharacterLoader {
   }
 
   /**
+   * Try loading an image from multiple potential paths
+   */
+  static async loadSpriteImageWithFallbacks(
+    basePath: string,
+    animation: LPCAnimation,
+    frameSize: number
+  ): Promise<HTMLImageElement> {
+    // Define potential paths in order of preference
+    const potentialPaths = [
+      `${basePath}/${animation}_${frameSize}.png`,  // Direct naming: walk_64.png
+      `${basePath}/standard/${animation}.png`,      // Standard subdirectory: standard/walk.png
+      `${basePath}/${animation}.png`                // Simple naming: walk.png
+    ];
+
+    // Try each path until one succeeds
+    for (const imagePath of potentialPaths) {
+      try {
+        const image = await this.loadSpriteImage(imagePath);
+        console.log(`[LPCLoader] Successfully loaded ${animation} from: ${imagePath}`);
+        return image;
+      } catch (error) {
+        // Continue to next path
+        console.debug(`[LPCLoader] Failed to load ${animation} from: ${imagePath}`);
+      }
+    }
+
+    // If all paths fail, throw an error
+    throw new Error(`Failed to load sprite image for ${animation}. Tried paths: ${potentialPaths.join(', ')}`);
+  }
+
+  /**
    * Create atlas configuration for an animation based on metadata
    */
   static createAnimationAtlas(
@@ -75,17 +106,8 @@ export class LPCCharacterLoader {
   ): LPCAnimationAtlas {
     const frameCount = frameCounts[animation] || 1;
 
-    // Try multiple potential file paths based on common LPC export patterns
-    let url = `${basePath}/${animation}_${frameSize}.png`;
-    
-    // If frameSize is 64, also try the standard/ subdirectory (common LPC export structure)
-    if (frameSize === 64) {
-      url = `${basePath}/standard/${animation}.png`;
-    }
-    // For larger frame sizes, use the _size naming convention
-    else if (frameSize > 64) {
-      url = `${basePath}/${animation}_${frameSize}.png`;
-    }
+    // Use the first potential path as the base URL (will be overridden during loading)
+    const url = `${basePath}/${animation}_${frameSize}.png`;
 
     return {
       url,
@@ -126,7 +148,11 @@ export class LPCCharacterLoader {
         );
 
         try {
-          const image = await this.loadSpriteImage(atlas.url);
+          const image = await this.loadSpriteImageWithFallbacks(
+            basePath,
+            animation,
+            metadata.frameSize
+          );
           atlases.set(animation, atlas);
           images.set(animation, image);
         } catch (error) {
