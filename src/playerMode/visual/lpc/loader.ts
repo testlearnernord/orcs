@@ -75,8 +75,20 @@ export class LPCCharacterLoader {
   ): LPCAnimationAtlas {
     const frameCount = frameCounts[animation] || 1;
 
+    // Try multiple potential file paths based on common LPC export patterns
+    let url = `${basePath}/${animation}_${frameSize}.png`;
+    
+    // If frameSize is 64, also try the standard/ subdirectory (common LPC export structure)
+    if (frameSize === 64) {
+      url = `${basePath}/standard/${animation}.png`;
+    }
+    // For larger frame sizes, use the _size naming convention
+    else if (frameSize > 64) {
+      url = `${basePath}/${animation}_${frameSize}.png`;
+    }
+
     return {
-      url: `${basePath}/${animation}_${frameSize}.png`,
+      url,
       frameWidth: frameSize,
       frameHeight: frameSize,
       cols: frameCount,

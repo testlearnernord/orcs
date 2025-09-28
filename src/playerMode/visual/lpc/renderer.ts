@@ -12,6 +12,7 @@ import type {
   LPCLayer
 } from './types';
 import type { OrcArchetype } from '../../../simulation/archetypes';
+import { assetPath } from '../../../lib/paths';
 
 export interface LPCRenderState {
   position: { x: number; y: number };
@@ -229,10 +230,7 @@ export class LPCRenderer {
    * Get sprite path for an archetype
    */
   private getArchetypeSpritePath(archetype: OrcArchetype): string {
-    return new URL(
-      `../../../assets/battlesystem/${archetype.toLowerCase()}`,
-      import.meta.url
-    ).toString();
+    return assetPath(`assets/battlesystem/${archetype.toLowerCase()}`);
   }
 
   /**
