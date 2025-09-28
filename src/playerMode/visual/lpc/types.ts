@@ -107,15 +107,14 @@ export interface LPCCharacterSprites {
 
 /**
  * Standard LPC sprite sheet row mapping for directions
- * Corrected based on actual sprite behavior testing:
- * Row 0=UP, Row 1=DOWN, Row 2=RIGHT, Row 3=LEFT (sprite content)
- * But the mapping was wrong for movement direction
+ * Based on empirical testing with actual berserker sprites:
+ * Row 0: UP (North), Row 1: DOWN (South), Row 2: RIGHT (East), Row 3: LEFT (West) 
  */
 export const LPC_DIRECTION_ROWS: Record<LPCDirection, number> = {
-  U: 0, // Up - Row 0 (confirmed correct)
-  D: 1, // Down - Row 1 (contains down-facing sprites)
-  R: 2, // Right - Row 2 (contains right-facing sprites)
-  L: 3 // Left - Row 3 (contains left-facing sprites)
+  U: 0, // Up - Row 0 (North-facing sprites) ✓ verified correct
+  L: 3, // Left - Row 3 (West-facing sprites) - empirically determined
+  D: 1, // Down - Row 1 (South-facing sprites) - empirically determined  
+  R: 2  // Right - Row 2 (East-facing sprites) - empirically determined
 } as const;
 
 /**

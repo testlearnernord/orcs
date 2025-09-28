@@ -16,12 +16,12 @@ import {
 
 describe('LPC Animation System', () => {
   describe('LPC Constants', () => {
-    it('should have correct direction row mapping based on berserker test expectations', () => {
-      // Based on the empirical mapping from berserker tests
+    it('should have correct direction row mapping based on LPC standard', () => {
+      // Based on Universal LPC Spritesheet Generator standard
       expect(LPC_DIRECTION_ROWS.U).toBe(0); // Up -> Row 0
-      expect(LPC_DIRECTION_ROWS.D).toBe(1); // Down -> Row 1
-      expect(LPC_DIRECTION_ROWS.R).toBe(2); // Right -> Row 2
-      expect(LPC_DIRECTION_ROWS.L).toBe(3); // Left -> Row 3
+      expect(LPC_DIRECTION_ROWS.L).toBe(1); // Left -> Row 1
+      expect(LPC_DIRECTION_ROWS.D).toBe(2); // Down -> Row 2
+      expect(LPC_DIRECTION_ROWS.R).toBe(3); // Right -> Row 3
     });
 
     it('should have standard frame counts for LPC animations', () => {
@@ -178,10 +178,10 @@ describe('LPC System Integration', () => {
       expect(row).toBeLessThan(4);
     }
 
-    // Specific mapping verification based on berserker test expectations
-    expect(LPC_DIRECTION_ROWS.D).toBe(1); // Down -> Row 1 (verified correct in berserker tests)
-    expect(LPC_DIRECTION_ROWS.L).toBe(3); // Left -> Row 3 (was correct in original)
-    expect(LPC_DIRECTION_ROWS.R).toBe(2); // Right -> Row 2 (empirically determined)
-    expect(LPC_DIRECTION_ROWS.U).toBe(0); // Up -> Row 0 (empirically determined)
+    // Specific mapping verification based on LPC standard
+    expect(LPC_DIRECTION_ROWS.U).toBe(0); // Up -> Row 0 (LPC standard)
+    expect(LPC_DIRECTION_ROWS.L).toBe(1); // Left -> Row 1 (LPC standard)
+    expect(LPC_DIRECTION_ROWS.D).toBe(2); // Down -> Row 2 (LPC standard)
+    expect(LPC_DIRECTION_ROWS.R).toBe(3); // Right -> Row 3 (LPC standard)
   });
 });

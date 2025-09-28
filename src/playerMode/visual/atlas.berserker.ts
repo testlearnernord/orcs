@@ -53,12 +53,8 @@ export const BERS = {
     cols: 6,
     rows: 4
   },
-  // Empirically determined mapping based on actual sprite layout:
-  // Row 1: DOWN sprites (verified correct)
-  // Row 3: LEFT sprites (was correct in original)
-  // Row 0: UP sprites (needs verification)
-  // Row 2: RIGHT sprites (needs verification)
-  rowByDir: { D: 1, L: 3, R: 2, U: 0 } as const
+  // LPC standard mapping: Row 0=UP, Row 1=LEFT, Row 2=DOWN, Row 3=RIGHT
+  rowByDir: { D: 2, L: 1, R: 3, U: 0 } as const
 } as const;
 
 // Indizes: Walk nutzt Col0 als Idle, Col1..8 als Schritte
