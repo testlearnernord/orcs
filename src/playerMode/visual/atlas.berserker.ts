@@ -51,11 +51,11 @@ export const BERS = {
     rows: 4
   },
   // Universal LPC Spritesheet Generator standard mapping:
-  // Row 0: DOWN sprites (character facing down/south)
+  // Row 0: UP sprites (character facing up/north)
   // Row 1: LEFT sprites (character facing left/west)
-  // Row 2: RIGHT sprites (character facing right/east)
-  // Row 3: UP sprites (character facing up/north)
-  rowByDir: { D: 0, L: 1, R: 2, U: 3 } as const
+  // Row 2: DOWN sprites (character facing down/south)
+  // Row 3: RIGHT sprites (character facing right/east)
+  rowByDir: { U: 0, L: 1, D: 2, R: 3 } as const
 } as const;
 
 // Indizes: Walk nutzt Col0 als Idle, Col1..8 als Schritte

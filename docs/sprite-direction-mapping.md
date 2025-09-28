@@ -10,10 +10,10 @@ The Universal LPC Spritesheet Generator uses the following **fixed** row layout:
 
 | Row | Direction | Description |
 |-----|-----------|-------------|
-| 0   | DOWN      | Character facing down (south) |
+| 0   | UP        | Character facing up (north) |
 | 1   | LEFT      | Character facing left (west) |
-| 2   | RIGHT     | Character facing right (east) |
-| 3   | UP        | Character facing up (north) |
+| 2   | DOWN      | Character facing down (south) |
+| 3   | RIGHT     | Character facing right (east) |
 
 ### Implementation in Code
 
@@ -21,11 +21,11 @@ When creating atlas configuration for any archetype, use this exact mapping:
 
 ```typescript
 // Universal LPC Spritesheet Generator standard mapping:
-// Row 0: DOWN sprites (character facing down/south)
-// Row 1: LEFT sprites (character facing left/west)  
-// Row 2: RIGHT sprites (character facing right/east)
-// Row 3: UP sprites (character facing up/north)
-rowByDir: { D: 0, L: 1, R: 2, U: 3 } as const
+// Row 0: UP sprites (character facing up/north)
+// Row 1: LEFT sprites (character facing left/west)
+// Row 2: DOWN sprites (character facing down/south)
+// Row 3: RIGHT sprites (character facing right/east)
+rowByDir: { U: 0, L: 1, D: 2, R: 3 } as const
 ```
 
 ### WASD Key Mapping
@@ -41,10 +41,10 @@ The WASD keys correspond to the following directions in screen coordinates:
 
 Always verify your sprite direction mapping with these tests:
 
-1. **W Key**: Character should face UP (north) - sprite from Row 3
+1. **W Key**: Character should face UP (north) - sprite from Row 0
 2. **A Key**: Character should face LEFT (west) - sprite from Row 1
-3. **S Key**: Character should face DOWN (south) - sprite from Row 0  
-4. **D Key**: Character should face RIGHT (east) - sprite from Row 2
+3. **S Key**: Character should face DOWN (south) - sprite from Row 2
+4. **D Key**: Character should face RIGHT (east) - sprite from Row 3
 
 ### Historical Note
 
