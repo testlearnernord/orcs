@@ -969,6 +969,12 @@ export class NemesisUI {
           grid.appendChild(emptySlot.element);
         }
       }
+
+      // Update the count display
+      const countElement = container.querySelector(`[data-rank-count="${rank}"]`);
+      if (countElement) {
+        countElement.textContent = `${officers.length}/${maxSlots}`;
+      }
     });
 
     // Clean up cards for officers that are no longer visible
