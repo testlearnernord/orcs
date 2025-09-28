@@ -40,6 +40,30 @@ const ATLAS_DEFINITIONS: PortraitSetDefinition[] = [
     rows: 4,
     weight: 1,
     tags: ['officer']
+  },
+  {
+    id: 'officers4',
+    file: 'officers4.png',
+    cols: 4,
+    rows: 4,
+    weight: 1,
+    tags: ['officer']
+  },
+  {
+    id: 'officers5',
+    file: 'officers5.png',
+    cols: 4,
+    rows: 4,
+    weight: 1,
+    tags: ['officer']
+  },
+  {
+    id: 'officers6',
+    file: 'officers6.png',
+    cols: 4,
+    rows: 4,
+    weight: 1,
+    tags: ['officer']
   }
 ];
 
