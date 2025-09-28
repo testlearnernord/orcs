@@ -16,6 +16,10 @@ export interface KeybindState {
   signature: boolean; // E
   reset: boolean; // R
 
+  // Player Mode specific
+  musicToggle: boolean; // M
+  arenaReset: boolean; // F9
+
   // Internal state
   lockOnToggled: boolean;
   lastLockOnState: boolean;
@@ -41,7 +45,9 @@ export class PlayerKeybinds {
     control: 'block',
     alt: 'lockOn',
     e: 'signature',
-    r: 'reset'
+    r: 'reset',
+    m: 'musicToggle',
+    f9: 'arenaReset'
   };
 
   constructor() {
@@ -55,6 +61,8 @@ export class PlayerKeybinds {
       lockOn: false,
       signature: false,
       reset: false,
+      musicToggle: false,
+      arenaReset: false,
       lockOnToggled: false,
       lastLockOnState: false
     };

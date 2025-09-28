@@ -14,6 +14,9 @@ import { ProjectileManager } from '../combat/projectiles';
 import { HealthManager } from '../combat/health';
 import type { OrcArchetype } from '../simulation/archetypes';
 import { SIGNATURE } from '../simulation/archetypes';
+import { PlayerEntity } from './entities/player';
+import { PlaceholderMeadowBiome } from './biomes/placeholderMeadow';
+import { PlayerMusicManager } from '../audio/music';
 
 interface PlayerModeState {
   isInitialized: boolean;
@@ -44,6 +47,9 @@ export const PlayerModeRoot: React.FC = () => {
     arena: TestArena;
     projectiles: ProjectileManager;
     playerHealth: HealthManager;
+    playerEntity: PlayerEntity;
+    biome: PlaceholderMeadowBiome;
+    music: PlayerMusicManager;
   }>();
 
   // Animation frame
@@ -67,6 +73,15 @@ export const PlayerModeRoot: React.FC = () => {
       const arena = new TestArena();
       const projectiles = new ProjectileManager();
       const playerHealth = new HealthManager('player', 100);
+      
+      // Initialize new Player Mode systems
+      const playerEntity = new PlayerEntity({
+        archetype: state.playerArchetype,
+        startPosition: { x: 0, y: 0 },
+        playerId: 'player1'
+      });
+      const biome = new PlaceholderMeadowBiome();
+      const music = new PlayerMusicManager();
 
       systemsRef.current = {
         keybinds,
@@ -75,13 +90,23 @@ export const PlayerModeRoot: React.FC = () => {
         lockOn,
         arena,
         projectiles,
-        playerHealth
+        playerHealth,
+        playerEntity,
+        biome,
+        music
       };
 
       lastFrameTimeRef.current = Date.now();
       setState((prev) => ({ ...prev, isInitialized: true }));
 
       console.log('[PlayerMode] Systems initialized, starting game loop...');
+
+      // Initialize music (with slight delay to ensure user interaction)
+      setTimeout(() => {
+        music.init().catch(error => {
+          console.warn('[PlayerMode] Music initialization failed:', error);
+        });
+      }, 500);
 
       // Start game loop
       const gameLoop = () => {
@@ -110,6 +135,7 @@ export const PlayerModeRoot: React.FC = () => {
       }
       if (systemsRef.current) {
         systemsRef.current.keybinds.dispose();
+        systemsRef.current.music.destroy();
       }
     };
   }, []);
@@ -117,17 +143,41 @@ export const PlayerModeRoot: React.FC = () => {
   const updateGame = (deltaMs: number) => {
     if (!systemsRef.current) return;
 
-    const { keybinds, playerController, camera, lockOn, arena, projectiles } =
+    const { keybinds, playerController, camera, lockOn, arena, projectiles, playerEntity, music } =
       systemsRef.current;
 
     // Update input
     keybinds.update();
     const input = keybinds.getState();
 
+    // Handle Player Mode specific inputs
+    if (input.musicToggle) {
+      music.toggle().catch(error => {
+        console.warn('[PlayerMode] Music toggle failed:', error);
+      });
+    }
+
+    if (input.arenaReset) {
+      // F9 arena reset instead of cycle
+      arena.reset();
+      playerController.reset(arena.getPlayerSpawn());
+      playerEntity.reset(arena.getPlayerSpawn());
+      camera.snapTo(arena.getPlayerSpawn());
+      setState((prev) => ({
+        ...prev,
+        signatureCooldowns: {
+          Archer: 0,
+          Berserker: 0,
+          Trapper: 0
+        }
+      }));
+    }
+
     // Handle reset
     if (input.reset) {
       arena.reset();
       playerController.reset(arena.getPlayerSpawn());
+      playerEntity.reset(arena.getPlayerSpawn());
       camera.snapTo(arena.getPlayerSpawn());
       setState((prev) => ({
         ...prev,
@@ -142,6 +192,10 @@ export const PlayerModeRoot: React.FC = () => {
     // Update player controller
     playerController.update(deltaMs, input);
     const playerState = playerController.getState();
+    const playerActions = playerController.getActions();
+
+    // Update player entity with controller state and actions
+    playerEntity.update(playerState, playerActions);
 
     // Update camera to follow player
     camera.setTarget(playerState.position);
@@ -230,13 +284,14 @@ export const PlayerModeRoot: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const { camera, arena } = systemsRef.current;
+    const { camera, arena, playerEntity, biome } = systemsRef.current;
     const cameraPos = camera.getPosition();
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw biome background instead of solid color
+    biome.render(ctx, cameraPos, { width: canvas.width, height: canvas.height });
 
     // Save context and apply camera transform
     ctx.save();
@@ -245,14 +300,16 @@ export const PlayerModeRoot: React.FC = () => {
       canvas.height / 2 - cameraPos.y * 50
     );
 
-    // Draw arena grid
-    drawGrid(ctx);
-
-    // Draw entities
+    // Draw entities (enemies)
     const entities = arena.getEntities();
     for (const entity of entities) {
-      drawEntity(ctx, entity);
+      if (!entity.isPlayer) { // Don't draw player here, use playerEntity instead
+        drawEntity(ctx, entity);
+      }
     }
+
+    // Draw player entity (replaces the old player drawing)
+    playerEntity.render(ctx);
 
     // Draw projectiles
     const projectiles = systemsRef.current.projectiles.getProjectiles();
@@ -261,26 +318,6 @@ export const PlayerModeRoot: React.FC = () => {
     }
 
     ctx.restore();
-  };
-
-  const drawGrid = (ctx: CanvasRenderingContext2D) => {
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 1;
-
-    // Draw grid lines
-    for (let x = -10; x <= 10; x++) {
-      ctx.beginPath();
-      ctx.moveTo(x * 50, -500);
-      ctx.lineTo(x * 50, 500);
-      ctx.stroke();
-    }
-
-    for (let y = -10; y <= 10; y++) {
-      ctx.beginPath();
-      ctx.moveTo(-500, y * 50);
-      ctx.lineTo(500, y * 50);
-      ctx.stroke();
-    }
   };
 
   const drawEntity = (ctx: CanvasRenderingContext2D, entity: any) => {

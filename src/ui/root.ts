@@ -635,10 +635,14 @@ export class NemesisUI {
   }
 
   private registerHotkeys(): void {
-    // Only register spectate mode hotkeys when not in Free Roam mode
+    // Only register spectate mode hotkeys when not in Free Roam or Player mode
     registerHotkey('e', () => {
       if (this.modeState.mode === 'freeRoam') {
         this.toast.show('Cycle-Hotkey im Free-Roam-Modus deaktiviert.');
+        return;
+      }
+      if (this.modeState.mode === 'player') {
+        this.toast.show('Cycle-Hotkey im Player-Modus deaktiviert. Verwende E für Signature-Moves.');
         return;
       }
       this.triggerCycle();
