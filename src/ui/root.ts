@@ -365,7 +365,7 @@ export class NemesisUI {
         store: this.store,
         onRequestClose: () => this.modeStore.setMode('spectate'),
         onHighlightHostChange: (host) => this.setFreeRoamHighlightHost(host),
-        mapId
+        mapId: mapId || undefined
       })
     );
   }

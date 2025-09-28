@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import type { Officer, WorldState, WarcallKind } from '@sim/types';
 import type { GameStore } from '@state/store';
-import { generateWorldMap, type WorldMap } from '@/map/generator';
+import { generateWorldMap, type WorldMap, type Biome } from '@/map/generator';
 import { findOpenTile, toPercent, type MapCoordinate } from '@/map/navgrid';
 import {
   selectActiveOfficers,
