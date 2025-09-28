@@ -3085,3 +3085,314 @@ button:disabled {
 .memory-text small {
   color: var(--text-muted);
 }
+
+/* ===== NEW CINEMATIC HIGHLIGHT PORTAL STYLES ===== */
+
+.cinematic-highlight-portal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease-in-out;
+  --animation-duration: 2000ms;
+}
+
+.cinematic-highlight-portal.is-visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.cinematic-highlight-portal__backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(13, 17, 23, 0.95));
+  backdrop-filter: blur(4px);
+}
+
+.cinematic-highlight-portal__card {
+  position: relative;
+  background: linear-gradient(135deg, var(--bg-elevated), var(--bg-panel));
+  border: 3px solid var(--border-strong);
+  border-radius: 20px;
+  padding: var(--spacing-lg);
+  min-width: 500px;
+  max-width: 800px;
+  min-height: 300px;
+  display: grid;
+  grid-template-areas: 
+    "icon officers"
+    "content content"
+    "controls controls";
+  grid-template-rows: auto 1fr auto;
+  gap: var(--spacing-lg);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transform: scale(0.8) translateY(50px);
+  transition: all 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cinematic-highlight-portal.is-visible .cinematic-highlight-portal__card {
+  transform: scale(1) translateY(0);
+}
+
+.cinematic-highlight-portal.is-leaving .cinematic-highlight-portal__card {
+  transform: scale(0.9) translateY(-20px);
+  opacity: 0.6;
+}
+
+.cinematic-highlight-portal__icon {
+  grid-area: icon;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cinematic-highlight-portal__main-icon {
+  font-size: 3rem;
+  opacity: 0.9;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+  animation: pulse var(--animation-duration) ease-in-out infinite;
+}
+
+.cinematic-highlight-portal__officers {
+  grid-area: officers;
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.cinematic-highlight-portal__officer-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  min-width: 120px;
+  transition: all 300ms ease;
+}
+
+.cinematic-highlight-portal__officer-card--primary {
+  animation: slideInLeft 600ms ease-out;
+}
+
+.cinematic-highlight-portal__officer-card--secondary {
+  animation: slideInRight 600ms ease-out;
+}
+
+.cinematic-highlight-portal__officer-portrait {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--ally));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.cinematic-highlight-portal__officer-info h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.cinematic-highlight-portal__officer-info span {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.cinematic-highlight-portal__relationship-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: bounceIn 800ms ease-out;
+}
+
+.cinematic-highlight-portal__content {
+  grid-area: content;
+  text-align: center;
+  padding: var(--spacing-md) 0;
+}
+
+.cinematic-highlight-portal__header {
+  margin-bottom: var(--spacing-md);
+}
+
+.cinematic-highlight-portal__cycle {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(56, 189, 248, 0.2);
+  color: var(--accent);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.cinematic-highlight-portal__title {
+  margin: var(--spacing-md) 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 800ms ease-out;
+}
+
+.cinematic-highlight-portal__description {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+  animation: fadeInUp 1000ms ease-out;
+}
+
+.cinematic-highlight-portal__controls {
+  grid-area: controls;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.cinematic-highlight-portal__checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  justify-self: start;
+}
+
+.cinematic-highlight-portal__checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.cinematic-highlight-portal__actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: center;
+}
+
+.cinematic-highlight-portal__button {
+  padding: 10px 20px;
+  border: 2px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.cinematic-highlight-portal__button:hover {
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.cinematic-highlight-portal__button--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.cinematic-highlight-portal__button--primary:hover {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+}
+
+.cinematic-highlight-portal__button--skip-all {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: white;
+}
+
+.cinematic-highlight-portal__button--skip-all:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+/* Animation types */
+.cinematic-highlight-portal__card--tragedy {
+  border-color: var(--danger);
+  box-shadow: 
+    0 12px 40px rgba(238, 102, 102, 0.3),
+    0 0 0 1px rgba(238, 102, 102, 0.2);
+}
+
+.cinematic-highlight-portal__card--celebration {
+  border-color: var(--ally);
+  box-shadow: 
+    0 12px 40px rgba(106, 170, 255, 0.3),
+    0 0 0 1px rgba(106, 170, 255, 0.2);
+}
+
+.cinematic-highlight-portal__card--confrontation {
+  border-color: var(--line-rival);
+  box-shadow: 
+    0 12px 40px rgba(238, 102, 102, 0.3),
+    0 0 0 1px rgba(238, 102, 102, 0.2);
+}
+
+.cinematic-highlight-portal__card--emergence {
+  border-color: var(--accent);
+  box-shadow: 
+    0 12px 40px rgba(56, 189, 248, 0.3),
+    0 0 0 1px rgba(56, 189, 248, 0.2);
+}
+
+/* Cinematic Animations */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  0% { transform: translateX(-100px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  0% { transform: translateX(100px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes bounceIn {
+  0% { transform: translate(-50%, -50%) scale(0); }
+  50% { transform: translate(-50%, -50%) scale(1.2); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes fadeInUp {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
