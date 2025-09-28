@@ -368,6 +368,102 @@ button:disabled {
   gap: var(--spacing-lg);
 }
 
+/* Hierarchical layout styles */
+.hierarchy-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.rank-group__title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.rank-group__icon {
+  font-size: 1.2rem;
+}
+
+.rank-group__count {
+  margin-left: auto;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-muted);
+}
+
+/* Rank-specific styling */
+.rank-group--king .rank-group__title {
+  color: #fbbf24; /* Gold */
+}
+
+.rank-group--king .rank-grid {
+  justify-content: center;
+}
+
+.rank-group--captain .rank-group__title {
+  color: #10b981; /* Green */
+}
+
+.rank-group--scout .rank-group__title {
+  color: #3b82f6; /* Blue */
+}
+
+.rank-group--grunt .rank-group__title {
+  color: var(--text-muted);
+}
+
+/* Update rank grid for fixed layouts */
+.rank-group--king .rank-grid {
+  grid-template-columns: 1fr;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.rank-group--captain .rank-grid {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 960px;
+}
+
+.rank-group--scout .rank-grid {
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 1280px;
+}
+
+.rank-group--grunt .rank-grid {
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
+}
+
+@media (max-width: 1400px) {
+  .rank-group--grunt .rank-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1000px) {
+  .rank-group--captain .rank-grid,
+  .rank-group--scout .rank-grid,
+  .rank-group--grunt .rank-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .rank-group--captain .rank-grid,
+  .rank-group--scout .rank-grid,
+  .rank-group--grunt .rank-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .officer-card {
   display: grid;
   grid-template-columns: 96px 1fr;
@@ -639,6 +735,55 @@ button:disabled {
 .officer-card__status--empty {
   border-style: dashed;
   color: var(--text-muted);
+}
+
+/* Empty slot styles */
+.officer-card--empty {
+  opacity: 0.4;
+  border: 2px dashed rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.3);
+  cursor: default;
+}
+
+.officer-card--empty:hover {
+  opacity: 0.6;
+  border-color: rgba(148, 163, 184, 0.5);
+  transform: none;
+}
+
+.officer-card__avatar--empty {
+  background: rgba(15, 23, 42, 0.5);
+  border: 2px dashed rgba(148, 163, 184, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.officer-card__avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--text-muted);
+}
+
+.officer-card__rank-icon {
+  font-size: 2rem;
+  opacity: 0.6;
+}
+
+.officer-card__traits--empty,
+.officer-card__stats--empty {
+  opacity: 0.7;
+}
+
+.officer-card__empty-message {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: var(--spacing-sm);
+  font-style: italic;
 }
 
 .officer-tooltip {
