@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "vite",
     "dev:player": "vite --open \"/orcs/?mode=player\"",
-    "prebuild": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs",
+    "prebuild": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs && node scripts/copy-maps.mjs",
     "build": "vite build",
-    "postbuild": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs",
+    "postbuild": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs && node scripts/copy-maps.mjs",
     "preview": "vite preview",
     "format:write": "prettier --write .",
     "format": "prettier --write .",
