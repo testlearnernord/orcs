@@ -213,16 +213,29 @@ export class CinematicHighlightPortal {
     highlight: EnhancedHighlight | null,
     options: HighlightDisplayOptions
   ): void {
+    console.log('[CinematicHighlightPortal] update called', {
+      highlight: highlight?.title || 'none',
+      current: this.current?.title || 'none',
+      enabled: options.enabled
+    });
+
     if (highlight === this.current) return;
 
     this.enabledCheckbox.checked = options.enabled;
 
     if (!highlight || !options.enabled) {
+      console.log(
+        '[CinematicHighlightPortal] Hiding portal - no highlight or disabled'
+      );
       this.current = null;
       this.hide();
       return;
     }
 
+    console.log(
+      '[CinematicHighlightPortal] Showing highlight:',
+      highlight.title
+    );
     this.current = highlight;
     this.renderHighlight(highlight);
     this.show();
