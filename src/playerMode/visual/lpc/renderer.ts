@@ -86,7 +86,7 @@ export class LPCRenderer {
     }
 
     // Determine target animation based on state
-    let targetAnimation = this.determineAnimation(state);
+    const targetAnimation = this.determineAnimation(state);
 
     // Check if we need to change animation or direction
     const currentAnim = this.animator.getCurrentAnimation();

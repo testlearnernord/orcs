@@ -238,7 +238,6 @@ export class PlayerSpriteRenderer {
    * Check if currently playing signature animation
    */
   isPlayingSignature(): boolean {
-    const currentFrame = this.lpcRenderer.getCurrentFrame();
     const currentAnimation = this.lpcRenderer.getCurrentAnimation();
     // For non-looping signature animations, check if still playing
     return (
