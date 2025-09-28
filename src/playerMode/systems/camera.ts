@@ -55,7 +55,7 @@ export class CameraController {
     const deltaSeconds = deltaMs / 1000;
 
     // Calculate final target position with lock-on offset
-    let finalTarget = { ...this.state.targetPosition };
+    const finalTarget = { ...this.state.targetPosition };
 
     if (this.state.lockOnTarget) {
       // Add slight offset towards lock-on target

@@ -239,7 +239,7 @@ export class PlayerController {
     }
   }
 
-  private processSignature(input: KeybindState, now: number): void {
+  private processSignature(input: KeybindState, _now: number): void {
     if (input.signature) {
       this.actions.push({
         type: 'signature',

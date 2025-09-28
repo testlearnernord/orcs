@@ -13,7 +13,7 @@ import { TestArena } from './scenes/TestArena';
 import { ProjectileManager } from '../combat/projectiles';
 import { HealthManager } from '../combat/health';
 import type { OrcArchetype } from '../simulation/archetypes';
-import { SIGNATURE, BALANCE } from '../simulation/archetypes';
+import { SIGNATURE } from '../simulation/archetypes';
 
 interface PlayerModeState {
   isInitialized: boolean;
@@ -200,7 +200,7 @@ export const PlayerModeRoot: React.FC = () => {
     }));
   };
 
-  const handleSignatureMove = (data: any) => {
+  const handleSignatureMove = (_data: any) => {
     if (!systemsRef.current) return;
 
     const { playerController } = systemsRef.current;
