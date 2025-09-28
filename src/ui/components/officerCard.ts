@@ -23,7 +23,7 @@ const RELATION_ORDER: RelationshipType[] = ['ALLY', 'RIVAL', 'NEUTRAL'];
 // Redesign: Use German labels and icons as per issue #158
 const RELATION_LABEL: Record<RelationshipType, string> = {
   ALLY: '🤝 Ally',
-  RIVAL: '⚔️ Rivale', 
+  RIVAL: '⚔️ Rivale',
   NEUTRAL: '• Neutral'
 };
 
@@ -227,9 +227,13 @@ export class OfficerCard {
     officer.relationships.forEach((relation) => {
       counts.set(relation.type, (counts.get(relation.type) ?? 0) + 1);
     });
-    
+
     // Add relationship border styling to card (redesign requirement)
-    this.element.classList.remove('has-rival-relation', 'has-ally-relation', 'has-neutral-relation');
+    this.element.classList.remove(
+      'has-rival-relation',
+      'has-ally-relation',
+      'has-neutral-relation'
+    );
     if (counts.get('RIVAL')) {
       this.element.classList.add('has-rival-relation');
     } else if (counts.get('ALLY')) {
@@ -237,7 +241,7 @@ export class OfficerCard {
     } else if (counts.get('NEUTRAL')) {
       this.element.classList.add('has-neutral-relation');
     }
-    
+
     this.footer.innerHTML = '';
     RELATION_ORDER.forEach((type) => {
       const count = counts.get(type);
