@@ -29,17 +29,17 @@ describe('Berserker Sprite Direction Mapping', () => {
     // Test the empirically corrected LPC direction mapping
     // Based on actual berserker sprite behavior:
     // Row 0: UP (correct), Row 1: DOWN, Row 2: RIGHT, Row 3: LEFT
-    
+
     expect(LPC_DIRECTION_ROWS.U).toBe(0); // Up → Row 0 (verified correct)
     expect(LPC_DIRECTION_ROWS.D).toBe(1); // Down → Row 1 (empirically determined)
-    expect(LPC_DIRECTION_ROWS.R).toBe(2); // Right → Row 2 (empirically determined)  
+    expect(LPC_DIRECTION_ROWS.R).toBe(2); // Right → Row 2 (empirically determined)
     expect(LPC_DIRECTION_ROWS.L).toBe(3); // Left → Row 3 (empirically determined)
   });
 
   it('should handle diagonal movement directions correctly', () => {
     // Test diagonal directions map to nearest cardinal
 
-    // Northeast (45°) → Right  
+    // Northeast (45°) → Right
     expect(dirFromAngle(Math.PI / 4)).toBe('R');
 
     // Southeast (135°) → Down
@@ -48,7 +48,7 @@ describe('Berserker Sprite Direction Mapping', () => {
     // Southwest (225°) → Up (maps to 225-315° range)
     expect(dirFromAngle((5 * Math.PI) / 4)).toBe('U');
 
-    // Northwest (315°) → Up  
+    // Northwest (315°) → Up
     expect(dirFromAngle((7 * Math.PI) / 4)).toBe('U');
   });
 });
