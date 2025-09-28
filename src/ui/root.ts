@@ -11,6 +11,7 @@ import type { Highlight } from '@state/cycleDigest';
 import type { GameStore } from '@state/store';
 import type { GameMode, UIModeState, UIModeStore } from '@state/ui/mode';
 import { FreeRoamView } from '@/features/freeRoam/FreeRoamView';
+import { bootstrapPlayerMode } from '@/playerMode';
 import {
   selectWarcallsByStatus,
   statusOf,
@@ -92,6 +93,8 @@ export class NemesisUI {
   private freeRoamContainer: HTMLDivElement | null = null;
   private freeRoamRoot: Root | null = null;
   private freeRoamHighlightHost: HTMLElement | null = null;
+  private playerModeContainer: HTMLDivElement | null = null;
+  private playerModeRoot: Root | null = null;
   private readonly cards = new Map<string, OfficerCard>();
   private readonly rankContainers = new Map<Rank, HTMLElement>();
   private readonly filters = new UIFilterStore();
@@ -290,19 +293,29 @@ export class NemesisUI {
 
   private syncModeLayout(): void {
     const isFreeRoam = this.modeState.mode === 'freeRoam';
+    const isPlayerMode = this.modeState.mode === 'player';
+
     if (this.appRoot) {
-      if (isFreeRoam) {
+      if (isFreeRoam || isPlayerMode) {
         this.appRoot.setAttribute('hidden', 'true');
         this.appRoot.setAttribute('aria-hidden', 'true');
+        this.appRoot.style.display = 'none'; // Force hide with CSS
       } else {
         this.appRoot.removeAttribute('hidden');
         this.appRoot.removeAttribute('aria-hidden');
+        this.appRoot.style.display = ''; // Reset to CSS default
       }
     }
+
     if (isFreeRoam) {
       this.openFreeRoam();
+      this.closePlayerMode();
+    } else if (isPlayerMode) {
+      this.closeFreeRoam();
+      this.openPlayerMode();
     } else {
       this.closeFreeRoam();
+      this.closePlayerMode();
     }
   }
 
@@ -352,6 +365,27 @@ export class NemesisUI {
     }
   }
 
+  private openPlayerMode(): void {
+    if (!this.playerModeContainer) return;
+    if (!this.playerModeRoot) {
+      this.playerModeRoot = createRoot(this.playerModeContainer);
+    }
+    this.playerModeContainer.hidden = false;
+    this.playerModeContainer.removeAttribute('aria-hidden');
+    this.playerModeRoot.render(bootstrapPlayerMode());
+  }
+
+  private closePlayerMode(): void {
+    if (this.playerModeContainer) {
+      this.playerModeContainer.hidden = true;
+      this.playerModeContainer.setAttribute('aria-hidden', 'true');
+    }
+    if (this.playerModeRoot) {
+      this.playerModeRoot.unmount();
+      this.playerModeRoot = null;
+    }
+  }
+
   mount(root: HTMLElement): void {
     this.root = root;
     root.innerHTML = '';
@@ -391,6 +425,23 @@ export class NemesisUI {
       }
     });
     root.appendChild(this.freeRoamContainer);
+
+    // Create player mode container
+    this.playerModeContainer = document.createElement('div');
+    this.playerModeContainer.className = 'player-mode-shell';
+    this.playerModeContainer.hidden = true;
+    this.playerModeContainer.setAttribute('aria-hidden', 'true');
+    this.playerModeContainer.addEventListener('click', (event) => {
+      if (
+        event.target === this.playerModeContainer &&
+        this.modeState.mode === 'player'
+      ) {
+        // Don't auto-close player mode on container click
+        // Player mode has its own UI for exiting
+      }
+    });
+    root.appendChild(this.playerModeContainer);
+
     this.highlightPortal.attach(document.body);
 
     this.ranksEl = app.querySelector('#ranks');
@@ -945,5 +996,6 @@ export class NemesisUI {
     // Clean up other resources
     this.resizeObserver?.disconnect();
     this.freeRoamRoot?.unmount();
+    this.playerModeRoot?.unmount();
   }
 }
