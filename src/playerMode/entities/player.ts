@@ -5,7 +5,10 @@
 import type { Point2D } from '../../combat/hitbox';
 import type { OrcArchetype } from '../../simulation/archetypes';
 import type { PlayerAction, PlayerState } from '../systems/playerController';
-import { PlayerSpriteRenderer, type PlayerSpriteState } from '../visual/playerSprite';
+import {
+  PlayerSpriteRenderer,
+  type PlayerSpriteState
+} from '../visual/playerSprite';
 
 export interface PlayerEntityConfig {
   archetype: OrcArchetype;
@@ -29,7 +32,7 @@ export class PlayerEntity {
 
   constructor(config: PlayerEntityConfig) {
     this.config = config;
-    
+
     this.state = {
       position: { ...config.startPosition },
       rotation: 0,
@@ -61,7 +64,7 @@ export class PlayerEntity {
     let hash = 0;
     for (let i = 0; i < playerId.length; i++) {
       const char = playerId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
 
@@ -91,7 +94,7 @@ export class PlayerEntity {
 
     // Process actions for visual effects
     const now = Date.now();
-    actions.forEach(action => {
+    actions.forEach((action) => {
       if (action.type === 'signature') {
         this.state.isExecutingSignature = true;
         this.state.signatureEndTime = now + this.getSignatureDuration();
@@ -131,10 +134,14 @@ export class PlayerEntity {
    */
   private getSignatureDuration(): number {
     switch (this.state.archetype) {
-      case 'Archer': return 600;  // Volley
-      case 'Berserker': return 800; // Rage Cleave
-      case 'Trapper': return 700;   // Net Trap
-      default: return 500;
+      case 'Archer':
+        return 600; // Volley
+      case 'Berserker':
+        return 800; // Rage Cleave
+      case 'Trapper':
+        return 700; // Net Trap
+      default:
+        return 500;
     }
   }
 
@@ -192,7 +199,7 @@ export class PlayerEntity {
     } else {
       this.state.position = { ...this.config.startPosition };
     }
-    
+
     this.state.rotation = 0;
     this.state.isDashing = false;
     this.state.isBlocking = false;

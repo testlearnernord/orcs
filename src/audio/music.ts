@@ -111,9 +111,10 @@ export class PlayerMusicManager {
       return; // Already crossfading, ignore
     }
 
-    const nextTrackId = this.state.currentTrackId === 'higher_octane' 
-      ? 'cthulthu' 
-      : 'higher_octane';
+    const nextTrackId =
+      this.state.currentTrackId === 'higher_octane'
+        ? 'cthulthu'
+        : 'higher_octane';
 
     await this.crossfade(nextTrackId);
   }
@@ -128,7 +129,9 @@ export class PlayerMusicManager {
 
     const toTrack = this.tracks[toTrackId];
     if (!toTrack) {
-      console.warn(`[PlayerMusic] Cannot crossfade to unknown track: ${toTrackId}`);
+      console.warn(
+        `[PlayerMusic] Cannot crossfade to unknown track: ${toTrackId}`
+      );
       return;
     }
 
@@ -139,7 +142,7 @@ export class PlayerMusicManager {
       this.nextAudio = new Audio(toTrack.url);
       this.nextAudio.loop = true;
       this.nextAudio.volume = 0; // Start silent
-      
+
       // Start playing next track
       await this.nextAudio.play();
 
@@ -161,7 +164,7 @@ export class PlayerMusicManager {
         }
 
         if (i < steps) {
-          await new Promise(resolve => setTimeout(resolve, stepTime));
+          await new Promise((resolve) => setTimeout(resolve, stepTime));
         }
       }
 
@@ -174,7 +177,6 @@ export class PlayerMusicManager {
       this.currentAudio = this.nextAudio;
       this.nextAudio = null;
       this.state.currentTrackId = toTrackId;
-      
     } catch (error) {
       console.warn('[PlayerMusic] Crossfade failed:', error);
       // Fallback to simple track switch

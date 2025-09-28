@@ -31,19 +31,19 @@ export class PlayerSpriteRenderer {
   // Color palettes for different archetypes
   private readonly archetypePalettes = {
     Archer: {
-      primary: '#4a9a4a',   // Green
+      primary: '#4a9a4a', // Green
       secondary: '#2d5a2d', // Dark green
-      accent: '#6bb36b'     // Light green
+      accent: '#6bb36b' // Light green
     },
     Berserker: {
-      primary: '#c44444',   // Red
+      primary: '#c44444', // Red
       secondary: '#7a2a2a', // Dark red
-      accent: '#e66666'     // Light red
+      accent: '#e66666' // Light red
     },
     Trapper: {
-      primary: '#9944aa',   // Purple
+      primary: '#9944aa', // Purple
       secondary: '#5a2a6a', // Dark purple
-      accent: '#bb66cc'     // Light purple
+      accent: '#bb66cc' // Light purple
     }
   };
 
@@ -74,9 +74,24 @@ export class PlayerSpriteRenderer {
       name: 'move',
       frames: [
         { x: 0, y: frameHeight, width: frameWidth, height: frameHeight },
-        { x: frameWidth, y: frameHeight, width: frameWidth, height: frameHeight },
-        { x: frameWidth * 2, y: frameHeight, width: frameWidth, height: frameHeight },
-        { x: frameWidth * 3, y: frameHeight, width: frameWidth, height: frameHeight }
+        {
+          x: frameWidth,
+          y: frameHeight,
+          width: frameWidth,
+          height: frameHeight
+        },
+        {
+          x: frameWidth * 2,
+          y: frameHeight,
+          width: frameWidth,
+          height: frameHeight
+        },
+        {
+          x: frameWidth * 3,
+          y: frameHeight,
+          width: frameWidth,
+          height: frameHeight
+        }
       ],
       frameTime: 150,
       loop: true
@@ -85,7 +100,9 @@ export class PlayerSpriteRenderer {
     // Dash animation (single frame with afterimage effect)
     this.animController.addAnimation({
       name: 'dash',
-      frames: [{ x: 0, y: frameHeight * 2, width: frameWidth, height: frameHeight }],
+      frames: [
+        { x: 0, y: frameHeight * 2, width: frameWidth, height: frameHeight }
+      ],
       frameTime: 200,
       loop: false
     });
@@ -117,7 +134,7 @@ export class PlayerSpriteRenderer {
           width: frameWidth,
           height: frameHeight
         }));
-      
+
       case 'Berserker':
         // Rage Cleave - 8 frames
         return Array.from({ length: 8 }, (_, i) => ({
@@ -126,7 +143,7 @@ export class PlayerSpriteRenderer {
           width: frameWidth,
           height: frameHeight
         }));
-      
+
       case 'Trapper':
         // Net Trap - 7 frames
         return Array.from({ length: 7 }, (_, i) => ({
@@ -135,7 +152,7 @@ export class PlayerSpriteRenderer {
           width: frameWidth,
           height: frameHeight
         }));
-      
+
       default:
         return [{ x: 0, y: baseY, width: frameWidth, height: frameHeight }];
     }
@@ -163,7 +180,7 @@ export class PlayerSpriteRenderer {
 
     // Update animation controller
     this.animController.update();
-    
+
     this.lastState = { ...state };
   }
 
@@ -175,7 +192,7 @@ export class PlayerSpriteRenderer {
     const palette = this.archetypePalettes[this.config.archetype];
 
     ctx.save();
-    
+
     // Transform to player position and rotation
     ctx.translate(position.x * 50, position.y * 50);
     ctx.rotate(rotation);
@@ -205,7 +222,11 @@ export class PlayerSpriteRenderer {
   /**
    * Draw the basic player shape (placeholder for sprite atlas)
    */
-  private drawPlayerShape(ctx: CanvasRenderingContext2D, palette: any, isBlocking: boolean): void {
+  private drawPlayerShape(
+    ctx: CanvasRenderingContext2D,
+    palette: any,
+    isBlocking: boolean
+  ): void {
     // Main body
     ctx.fillStyle = palette.primary;
     ctx.fillRect(-12, -12, 24, 24);
@@ -232,9 +253,12 @@ export class PlayerSpriteRenderer {
   /**
    * Draw small indicator for archetype
    */
-  private drawArchetypeIndicator(ctx: CanvasRenderingContext2D, palette: any): void {
+  private drawArchetypeIndicator(
+    ctx: CanvasRenderingContext2D,
+    palette: any
+  ): void {
     ctx.fillStyle = palette.accent;
-    
+
     switch (this.config.archetype) {
       case 'Archer':
         // Arrow symbol
@@ -246,13 +270,13 @@ export class PlayerSpriteRenderer {
         ctx.closePath();
         ctx.fill();
         break;
-      
+
       case 'Berserker':
         // Axe symbol
         ctx.fillRect(8, -6, 2, 8);
         ctx.fillRect(6, -8, 6, 2);
         break;
-      
+
       case 'Trapper':
         // Net symbol
         for (let x = 0; x < 3; x++) {
@@ -268,8 +292,10 @@ export class PlayerSpriteRenderer {
    * Check if currently playing signature animation
    */
   isPlayingSignature(): boolean {
-    return this.animController.getCurrentAnimation() === 'signature' && 
-           !this.animController.isFinished();
+    return (
+      this.animController.getCurrentAnimation() === 'signature' &&
+      !this.animController.isFinished()
+    );
   }
 
   /**

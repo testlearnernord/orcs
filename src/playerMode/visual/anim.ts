@@ -39,7 +39,9 @@ export class AnimationController {
 
     const animation = this.animations.get(animationName);
     if (!animation) {
-      console.warn(`[AnimationController] Animation not found: ${animationName}`);
+      console.warn(
+        `[AnimationController] Animation not found: ${animationName}`
+      );
       return;
     }
 

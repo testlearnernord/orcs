@@ -73,7 +73,7 @@ export const PlayerModeRoot: React.FC = () => {
       const arena = new TestArena();
       const projectiles = new ProjectileManager();
       const playerHealth = new HealthManager('player', 100);
-      
+
       // Initialize new Player Mode systems
       const playerEntity = new PlayerEntity({
         archetype: state.playerArchetype,
@@ -103,7 +103,7 @@ export const PlayerModeRoot: React.FC = () => {
 
       // Initialize music (with slight delay to ensure user interaction)
       setTimeout(() => {
-        music.init().catch(error => {
+        music.init().catch((error) => {
           console.warn('[PlayerMode] Music initialization failed:', error);
         });
       }, 500);
@@ -143,8 +143,16 @@ export const PlayerModeRoot: React.FC = () => {
   const updateGame = (deltaMs: number) => {
     if (!systemsRef.current) return;
 
-    const { keybinds, playerController, camera, lockOn, arena, projectiles, playerEntity, music } =
-      systemsRef.current;
+    const {
+      keybinds,
+      playerController,
+      camera,
+      lockOn,
+      arena,
+      projectiles,
+      playerEntity,
+      music
+    } = systemsRef.current;
 
     // Update input
     keybinds.update();
@@ -152,7 +160,7 @@ export const PlayerModeRoot: React.FC = () => {
 
     // Handle Player Mode specific inputs
     if (input.musicToggle) {
-      music.toggle().catch(error => {
+      music.toggle().catch((error) => {
         console.warn('[PlayerMode] Music toggle failed:', error);
       });
     }
@@ -291,7 +299,10 @@ export const PlayerModeRoot: React.FC = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw biome background instead of solid color
-    biome.render(ctx, cameraPos, { width: canvas.width, height: canvas.height });
+    biome.render(ctx, cameraPos, {
+      width: canvas.width,
+      height: canvas.height
+    });
 
     // Save context and apply camera transform
     ctx.save();
@@ -303,7 +314,8 @@ export const PlayerModeRoot: React.FC = () => {
     // Draw entities (enemies)
     const entities = arena.getEntities();
     for (const entity of entities) {
-      if (!entity.isPlayer) { // Don't draw player here, use playerEntity instead
+      if (!entity.isPlayer) {
+        // Don't draw player here, use playerEntity instead
         drawEntity(ctx, entity);
       }
     }

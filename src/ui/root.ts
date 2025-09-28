@@ -642,7 +642,9 @@ export class NemesisUI {
         return;
       }
       if (this.modeState.mode === 'player') {
-        this.toast.show('Cycle-Hotkey im Player-Modus deaktiviert. Verwende E für Signature-Moves.');
+        this.toast.show(
+          'Cycle-Hotkey im Player-Modus deaktiviert. Verwende E für Signature-Moves.'
+        );
         return;
       }
       this.triggerCycle();
