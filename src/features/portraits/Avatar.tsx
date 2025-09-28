@@ -261,3 +261,5 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
     />
   );
 };
+
+export default OfficerAvatar;

@@ -3,9 +3,9 @@
  * Consolidates portrait loading, configuration, and display logic
  */
 
-// Re-export from existing locations for now (transition period)
-export * from '../../ui/portraits/config';
-export * from '../../ui/portraits/loader';
+// Re-export from current locations
+export * from './config';
+export * from './loader';
 export { default as OfficerAvatar } from './Avatar';
 
 // Feature types
