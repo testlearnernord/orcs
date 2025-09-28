@@ -13,11 +13,11 @@ export interface GameEvents extends EventMap {
   'state:changed': WorldState;
   'cycle:completed': CycleSummary;
   'cycle:digest': { cycle: number; highlights: Highlight[] };
-  'cycle:newHighlights': { 
-    cycle: number; 
-    previousState: WorldState; 
-    currentState: WorldState; 
-    summary: CycleSummary; 
+  'cycle:newHighlights': {
+    cycle: number;
+    previousState: WorldState;
+    currentState: WorldState;
+    summary: CycleSummary;
   };
   'feed:appended': FeedEntry[];
   'graveyard:changed': Officer[];

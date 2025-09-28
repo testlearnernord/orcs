@@ -58,7 +58,7 @@ export class GameStore {
     }
     this.events.emit('graveyard:changed', this.state.graveyard);
     this.events.emit('state:changed', this.state);
-    
+
     // NEW: Use new highlight system directly with actual state data
     this.events.emit('cycle:newHighlights', {
       cycle: this.state.cycle,
@@ -66,14 +66,14 @@ export class GameStore {
       currentState: this.state,
       summary
     });
-    
+
     // OLD: Keep legacy system for backward compatibility temporarily
     const digest = computeDigest(previous, this.state, summary);
     this.events.emit('cycle:digest', {
       cycle: this.state.cycle,
       highlights: digest
     });
-    
+
     summary.warcallsPlanned.forEach((plan) =>
       this.events.emit('warcall:planned', plan)
     );
