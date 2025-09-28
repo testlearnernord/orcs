@@ -55,7 +55,7 @@ describe('AudioManager', () => {
       expect(state.tracks[1].url).toMatch(/^\/.*audio\/.*\.mp3$/);
 
       // Test that all tracks have valid URLs
-      state.tracks.forEach((track, index) => {
+      state.tracks.forEach((track, _index) => {
         expect(track.url).toMatch(/^\/.*audio\/.*\.mp3$/);
         expect(track.url).toContain('.mp3');
         expect(track.id).toBeTruthy();
