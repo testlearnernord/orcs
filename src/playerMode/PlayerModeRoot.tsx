@@ -2,8 +2,6 @@
  * Root component for Player Mode - main combat sandbox
  */
 
-console.log('[DEBUG] PlayerModeRoot module loading...');
-
 import React, { useEffect, useRef, useState } from 'react';
 import { PlayerHUD } from './ui/HUD';
 import { LockOnMarker } from './ui/LockOnMarker';
@@ -53,9 +51,13 @@ export const PlayerModeRoot: React.FC = () => {
   const lastFrameTimeRef = useRef<number>(0);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    // Use a timeout to ensure the canvas ref is attached
+    const initTimeout = setTimeout(() => {
+      if (!canvasRef.current) {
+        return;
+      }
 
-    console.log('[PlayerMode] Initializing systems...');
+      console.log('[PlayerMode] Initializing systems...');
 
     // Initialize game systems
     const keybinds = new PlayerKeybinds();
@@ -96,14 +98,19 @@ export const PlayerModeRoot: React.FC = () => {
     };
 
     animationRef.current = requestAnimationFrame(gameLoop);
+    }, 100); // Wait 100ms for canvas to be ready
 
     // Cleanup
     return () => {
-      console.log('[PlayerMode] Cleaning up...');
+      if (initTimeout) {
+        clearTimeout(initTimeout);
+      }
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
-      keybinds.dispose();
+      if (systemsRef.current) {
+        systemsRef.current.keybinds.dispose();
+      }
     };
   }, []);
 
@@ -311,7 +318,26 @@ export const PlayerModeRoot: React.FC = () => {
   };
 
   if (!state.isInitialized || !systemsRef.current) {
-    return <div>Loading Player Mode...</div>;
+    return (
+      <>
+        <div>Loading Player Mode...</div>
+        <canvas
+          ref={canvasRef}
+          width={800}
+          height={600}
+          style={{
+            width: '100%',
+            height: '100%',
+            background: '#000',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0
+          }}
+        />
+      </>
+    );
   }
 
   const playerState = systemsRef.current.playerController.getState();
