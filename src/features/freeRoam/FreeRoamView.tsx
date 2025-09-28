@@ -217,8 +217,8 @@ export function FreeRoamView({
     useHandcrafted,
     handcraftedState.map,
     handcraftedState.cycle, // Using cycle as proxy for state changes
-    handcraftedState.playerPosition?.x,
-    handcraftedState.playerPosition?.y,
+    handcraftedState.playerPosition.x,
+    handcraftedState.playerPosition.y,
     legacyState.cycle,
     camera.x,
     camera.y,

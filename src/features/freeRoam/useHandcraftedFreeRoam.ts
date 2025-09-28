@@ -262,6 +262,19 @@ export function useHandcraftedFreeRoam(
   const [idleSeconds, setIdleSeconds] = useState(0);
   const lastInteractionRef = useRef(Date.now());
 
+  // Use refs to avoid dependency loops
+  const playerPositionRef = useRef(playerPosition);
+  const previousOfficersRef = useRef(previousOfficers);
+
+  // Update refs when state changes
+  useEffect(() => {
+    playerPositionRef.current = playerPosition;
+  }, [playerPosition]);
+
+  useEffect(() => {
+    previousOfficersRef.current = previousOfficers;
+  }, [previousOfficers]);
+
   // Load map
   useEffect(() => {
     let cancelled = false;
@@ -303,8 +316,8 @@ export function useHandcraftedFreeRoam(
         world,
         map,
         officerLimit,
-        playerPosition,
-        previousOfficers,
+        playerPositionRef.current,
+        previousOfficersRef.current,
         rng
       );
       setSnapshot(newSnapshot);
@@ -317,15 +330,15 @@ export function useHandcraftedFreeRoam(
       world,
       map,
       officerLimit,
-      playerPosition,
-      previousOfficers,
+      playerPositionRef.current,
+      previousOfficersRef.current,
       rng
     );
     setSnapshot(initialSnapshot);
     setPreviousOfficers(initialSnapshot.officers);
 
     return () => unsubscribe();
-  }, [map, store, officerLimit, playerPosition, rng, previousOfficers]);
+  }, [map, store, officerLimit, playerPosition, rng]);
 
   const moveTo = useCallback(
     (x: number, y: number) => {
