@@ -3,15 +3,15 @@
  */
 
 import { describe, expect, it, beforeEach } from 'vitest';
-import { 
+import {
   LPCAnimator,
-  LPCRenderer, 
+  LPCRenderer,
   LPCCharacterLoader,
   LPC_DIRECTION_ROWS,
   LPC_FRAME_COUNTS,
   LPC_FRAME_TIMING,
   type LPCAnimation,
-  type LPCDirection 
+  type LPCDirection
 } from '../../src/playerMode/visual/lpc';
 
 describe('LPC Animation System', () => {
@@ -19,7 +19,7 @@ describe('LPC Animation System', () => {
     it('should have correct direction row mapping based on berserker test expectations', () => {
       // Based on the empirical mapping from berserker tests
       expect(LPC_DIRECTION_ROWS.U).toBe(0); // Up -> Row 0
-      expect(LPC_DIRECTION_ROWS.D).toBe(1); // Down -> Row 1 
+      expect(LPC_DIRECTION_ROWS.D).toBe(1); // Down -> Row 1
       expect(LPC_DIRECTION_ROWS.R).toBe(2); // Right -> Row 2
       expect(LPC_DIRECTION_ROWS.L).toBe(3); // Left -> Row 3
     });
@@ -55,7 +55,7 @@ describe('LPC Animation System', () => {
 
     it('should start playing an animation', () => {
       animator.play('walk', 'D', true);
-      
+
       const currentAnim = animator.getCurrentAnimation();
       expect(currentAnim).not.toBeNull();
       expect(currentAnim?.animation).toBe('walk');
@@ -65,7 +65,7 @@ describe('LPC Animation System', () => {
 
     it('should generate correct frame coordinates', () => {
       animator.play('walk', 'D', true);
-      
+
       const frame = animator.getCurrentFrame();
       expect(frame).not.toBeNull();
       expect(frame?.col).toBe(0); // First frame
@@ -76,32 +76,32 @@ describe('LPC Animation System', () => {
 
     it('should handle animation looping', () => {
       animator.play('walk', 'D', true);
-      
+
       // Force animation to end by updating with large time gap
       const originalNow = Date.now;
       Date.now = () => originalNow() + 10000; // Add 10 seconds
-      
+
       animator.update();
-      
+
       // Should still be playing (looped)
       expect(animator.isPlaying()).toBe(true);
       expect(animator.isFinished()).toBe(false);
-      
+
       Date.now = originalNow; // Restore original Date.now
     });
 
     it('should handle non-looping animations', () => {
       animator.play('slash', 'D', false);
-      
+
       // Force animation to end
       const originalNow = Date.now;
       Date.now = () => originalNow() + 10000;
-      
+
       animator.update();
-      
+
       // Should be finished (not looped)
       expect(animator.isFinished()).toBe(true);
-      
+
       Date.now = originalNow;
     });
   });
@@ -140,7 +140,7 @@ describe('LPC Animation System', () => {
     it('should validate LPC animation names correctly', () => {
       // Access private method via any for testing
       const isValid = (LPCCharacterLoader as any).isValidLPCAnimation;
-      
+
       expect(isValid('walk')).toBe(true);
       expect(isValid('run')).toBe(true);
       expect(isValid('idle')).toBe(true);
@@ -171,13 +171,13 @@ describe('LPC System Integration', () => {
   it('should have consistent direction mapping with existing berserker system', () => {
     // This ensures our new LPC system is compatible with existing berserker sprite tests
     const directions: LPCDirection[] = ['U', 'D', 'L', 'R'];
-    
+
     for (const dir of directions) {
       const row = LPC_DIRECTION_ROWS[dir];
       expect(row).toBeGreaterThanOrEqual(0);
       expect(row).toBeLessThan(4);
     }
-    
+
     // Specific mapping verification based on berserker test expectations
     expect(LPC_DIRECTION_ROWS.D).toBe(1); // Down -> Row 1 (verified correct in berserker tests)
     expect(LPC_DIRECTION_ROWS.L).toBe(3); // Left -> Row 3 (was correct in original)

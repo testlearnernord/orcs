@@ -1,7 +1,7 @@
 /**
  * Universal LPC Spritesheet Type Definitions
  * Based on the Universal LPC Spritesheet Generator standard
- * 
+ *
  * @see https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/
  */
 
@@ -10,19 +10,19 @@ export type LPCDirection = 'U' | 'L' | 'D' | 'R';
 /**
  * Standard LPC animations as defined by the Universal LPC Generator
  */
-export type LPCAnimation = 
-  | 'walk'      // 9 frames - basic walking animation
-  | 'run'       // 8 frames - running animation  
-  | 'idle'      // 2 frames - idle/breathing animation
-  | 'slash'     // 6 frames - slash attack animation
-  | 'hurt'      // 6 frames - hurt/damage taken animation
+export type LPCAnimation =
+  | 'walk' // 9 frames - basic walking animation
+  | 'run' // 8 frames - running animation
+  | 'idle' // 2 frames - idle/breathing animation
+  | 'slash' // 6 frames - slash attack animation
+  | 'hurt' // 6 frames - hurt/damage taken animation
   | 'spellcast' // 7 frames - magic casting animation
-  | 'thrust'    // 8 frames - thrust attack animation
-  | 'shoot'     // 13 frames - bow/ranged attack animation
-  | 'climb'     // 6 frames - climbing animation
-  | 'jump'      // 5 frames - jumping animation
-  | 'sit'       // 3 frames - sitting animation
-  | 'emote'     // 3 frames - emote/gesture animation
+  | 'thrust' // 8 frames - thrust attack animation
+  | 'shoot' // 13 frames - bow/ranged attack animation
+  | 'climb' // 6 frames - climbing animation
+  | 'jump' // 5 frames - jumping animation
+  | 'sit' // 3 frames - sitting animation
+  | 'emote' // 3 frames - emote/gesture animation
   | 'combat_idle' // 2 frames - combat ready idle
   | 'backslash' // 13 frames - backhand slash
   | 'halfslash'; // 7 frames - half slash
@@ -114,7 +114,7 @@ export const LPC_DIRECTION_ROWS: Record<LPCDirection, number> = {
   U: 0, // Up - Row 0
   D: 1, // Down - Row 1
   R: 2, // Right - Row 2
-  L: 3  // Left - Row 3
+  L: 3 // Left - Row 3
 } as const;
 
 /**

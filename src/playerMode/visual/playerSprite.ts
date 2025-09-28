@@ -4,7 +4,12 @@
  */
 
 import type { OrcArchetype } from '../../simulation/archetypes';
-import { LPCRenderer, type LPCRenderState, type LPCDirection, type LPCAnimation } from './lpc';
+import {
+  LPCRenderer,
+  type LPCRenderState,
+  type LPCDirection,
+  type LPCAnimation
+} from './lpc';
 import { dirFromAngle } from '../systems/orbitMovement';
 
 export interface PlayerSpriteState {
@@ -42,7 +47,7 @@ export class PlayerSpriteRenderer {
       archetype: config.archetype,
       frameSize: config.frameSize || 64
     });
-    
+
     // Start loading sprites asynchronously
     this.loadSprites();
   }
@@ -54,9 +59,14 @@ export class PlayerSpriteRenderer {
     try {
       await this.lpcRenderer.loadSprites();
       this.isLoaded = true;
-      console.log(`[PlayerSpriteRenderer] Successfully loaded ${this.config.archetype} sprites`);
+      console.log(
+        `[PlayerSpriteRenderer] Successfully loaded ${this.config.archetype} sprites`
+      );
     } catch (error) {
-      console.error(`[PlayerSpriteRenderer] Failed to load ${this.config.archetype} sprites:`, error);
+      console.error(
+        `[PlayerSpriteRenderer] Failed to load ${this.config.archetype} sprites:`,
+        error
+      );
       // Fallback to a default state or placeholder
       this.isLoaded = false;
     }
@@ -90,8 +100,18 @@ export class PlayerSpriteRenderer {
    * Render the player sprite to a canvas context
    */
   render(ctx: CanvasRenderingContext2D, state: PlayerSpriteState): void;
-  render(ctx: CanvasRenderingContext2D, x: number, y: number, scale?: number): void;
-  render(ctx: CanvasRenderingContext2D, stateOrX: PlayerSpriteState | number, y?: number, scale: number = 1): void {
+  render(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    scale?: number
+  ): void;
+  render(
+    ctx: CanvasRenderingContext2D,
+    stateOrX: PlayerSpriteState | number,
+    y?: number,
+    scale: number = 1
+  ): void {
     // Handle legacy render(ctx, state) signature
     if (typeof stateOrX === 'object') {
       const state = stateOrX;
@@ -100,7 +120,7 @@ export class PlayerSpriteRenderer {
       this.render(ctx, x, y, scale);
       return;
     }
-    
+
     // Handle new render(ctx, x, y, scale) signature
     const x = stateOrX;
     if (y === undefined) {
@@ -119,7 +139,12 @@ export class PlayerSpriteRenderer {
   /**
    * Render a simple placeholder while sprites are loading
    */
-  private renderPlaceholder(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number): void {
+  private renderPlaceholder(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    scale: number
+  ): void {
     const size = 32 * scale;
     const colors = {
       Archer: '#4a9a4a',
@@ -129,7 +154,7 @@ export class PlayerSpriteRenderer {
 
     ctx.save();
     ctx.fillStyle = colors[this.config.archetype] || '#888888';
-    ctx.fillRect(x - size/2, y - size/2, size, size);
+    ctx.fillRect(x - size / 2, y - size / 2, size, size);
     ctx.fillStyle = '#ffffff';
     ctx.font = `${8 * scale}px monospace`;
     ctx.textAlign = 'center';
@@ -216,9 +241,11 @@ export class PlayerSpriteRenderer {
     const currentFrame = this.lpcRenderer.getCurrentFrame();
     const currentAnimation = this.lpcRenderer.getCurrentAnimation();
     // For non-looping signature animations, check if still playing
-    return currentAnimation?.animation === 'slash' || 
-           currentAnimation?.animation === 'shoot' || 
-           currentAnimation?.animation === 'thrust';
+    return (
+      currentAnimation?.animation === 'slash' ||
+      currentAnimation?.animation === 'shoot' ||
+      currentAnimation?.animation === 'thrust'
+    );
   }
 
   /**

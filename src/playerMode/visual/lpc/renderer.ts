@@ -5,11 +5,11 @@
 
 import { LPCAnimator, type LPCAnimationFrame } from './animator';
 import { LPCCharacterLoader } from './loader';
-import type { 
-  LPCCharacterSprites, 
-  LPCAnimation, 
+import type {
+  LPCCharacterSprites,
+  LPCAnimation,
   LPCDirection,
-  LPCLayer 
+  LPCLayer
 } from './types';
 import type { OrcArchetype } from '../../../simulation/archetypes';
 
@@ -40,7 +40,10 @@ export class LPCRenderer {
 
   constructor(config: LPCRendererConfig) {
     this.config = config;
-    this.animator = new LPCAnimator(config.frameSize || 64, config.frameSize || 64);
+    this.animator = new LPCAnimator(
+      config.frameSize || 64,
+      config.frameSize || 64
+    );
   }
 
   /**
@@ -48,24 +51,27 @@ export class LPCRenderer {
    */
   async loadSprites(): Promise<void> {
     const basePath = this.getArchetypeSpritePath(this.config.archetype);
-    
+
     try {
       this.sprites = await LPCCharacterLoader.loadCharacterSprites(
         this.config.archetype.toLowerCase(),
         basePath,
         ['walk', 'run', 'idle', 'slash', 'hurt'] // Core animations for player mode
       );
-      
+
       // Set frame size based on loaded metadata
       const frameSize = this.sprites.metadata.frameSize;
       this.animator.setFrameSize(frameSize, frameSize);
-      
+
       console.log(`[LPCRenderer] Loaded sprites for ${this.config.archetype}`, {
         animations: Array.from(this.sprites.atlases.keys()),
         frameSize: frameSize
       });
     } catch (error) {
-      console.error(`Failed to load LPC sprites for ${this.config.archetype}:`, error);
+      console.error(
+        `Failed to load LPC sprites for ${this.config.archetype}:`,
+        error
+      );
       throw error;
     }
   }
@@ -81,11 +87,12 @@ export class LPCRenderer {
 
     // Determine target animation based on state
     let targetAnimation = this.determineAnimation(state);
-    
+
     // Check if we need to change animation or direction
     const currentAnim = this.animator.getCurrentAnimation();
-    const animationChanged = !currentAnim || 
-      currentAnim.animation !== targetAnimation || 
+    const animationChanged =
+      !currentAnim ||
+      currentAnim.animation !== targetAnimation ||
       currentAnim.direction !== state.direction;
 
     if (animationChanged) {
@@ -95,22 +102,29 @@ export class LPCRenderer {
 
     // Update animator
     this.animator.update();
-    
+
     this.lastState = { ...state };
   }
 
   /**
    * Render the current frame to a canvas context
    */
-  render(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number = 1): void {
+  render(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    scale: number = 1
+  ): void {
     if (!this.sprites) return;
 
     const frame = this.animator.getCurrentFrame();
     if (!frame) return;
 
     // Get sorted layers by z-position
-    const sortedLayers = [...this.sprites.config.layers].sort((a, b) => a.zPos - b.zPos);
-    
+    const sortedLayers = [...this.sprites.config.layers].sort(
+      (a, b) => a.zPos - b.zPos
+    );
+
     // Render each layer
     for (const layer of sortedLayers) {
       this.renderLayer(ctx, layer, frame, x, y, scale);
@@ -142,29 +156,40 @@ export class LPCRenderer {
     }
 
     ctx.save();
-    
+
     try {
       ctx.drawImage(
         image,
-        frame.x, frame.y, frame.width, frame.height,
-        x - (frame.width * scale) / 2, 
+        frame.x,
+        frame.y,
+        frame.width,
+        frame.height,
+        x - (frame.width * scale) / 2,
         y - (frame.height * scale) / 2,
-        frame.width * scale, 
+        frame.width * scale,
         frame.height * scale
       );
     } catch (error) {
       console.warn(`Failed to render layer ${layer.name}:`, error);
     }
-    
+
     ctx.restore();
   }
 
   /**
    * Check if a layer supports a specific animation
    */
-  private layerSupportsAnimation(layer: LPCLayer, animation: LPCAnimation): boolean {
-    const supportedAnimations = layer.supportedAnimations.split(',').map(s => s.trim());
-    return supportedAnimations.includes(animation) || supportedAnimations.includes('*');
+  private layerSupportsAnimation(
+    layer: LPCLayer,
+    animation: LPCAnimation
+  ): boolean {
+    const supportedAnimations = layer.supportedAnimations
+      .split(',')
+      .map((s) => s.trim());
+    return (
+      supportedAnimations.includes(animation) ||
+      supportedAnimations.includes('*')
+    );
   }
 
   /**
@@ -174,16 +199,16 @@ export class LPCRenderer {
     if (state.isHurt) {
       return 'hurt';
     }
-    
+
     if (state.isAttacking) {
       return 'slash'; // Could be made archetype-specific later
     }
-    
+
     if (state.isMoving) {
       // Use run for higher speeds, walk for normal movement
       return state.speed > 1.5 ? 'run' : 'walk';
     }
-    
+
     return 'idle';
   }
 
@@ -191,7 +216,12 @@ export class LPCRenderer {
    * Determine if an animation should loop
    */
   private shouldLoopAnimation(animation: LPCAnimation): boolean {
-    const nonLoopingAnimations: LPCAnimation[] = ['slash', 'hurt', 'thrust', 'shoot'];
+    const nonLoopingAnimations: LPCAnimation[] = [
+      'slash',
+      'hurt',
+      'thrust',
+      'shoot'
+    ];
     return !nonLoopingAnimations.includes(animation);
   }
 
@@ -222,7 +252,10 @@ export class LPCRenderer {
   /**
    * Get current animation information
    */
-  getCurrentAnimation(): { animation: LPCAnimation; direction: LPCDirection } | null {
+  getCurrentAnimation(): {
+    animation: LPCAnimation;
+    direction: LPCDirection;
+  } | null {
     return this.animator.getCurrentAnimation();
   }
 

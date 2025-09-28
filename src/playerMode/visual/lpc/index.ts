@@ -1,6 +1,6 @@
 /**
  * Universal LPC Sprite System
- * 
+ *
  * Complete implementation of the Universal LPC Spritesheet Generator standard
  * for player mode character rendering with proper layering and animations.
  */

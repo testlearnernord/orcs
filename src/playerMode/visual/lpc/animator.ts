@@ -3,12 +3,12 @@
  * Handles frame-based animations according to LPC standards
  */
 
-import { 
-  LPCAnimation, 
-  LPCDirection, 
-  LPC_DIRECTION_ROWS, 
-  LPC_FRAME_COUNTS, 
-  LPC_FRAME_TIMING 
+import {
+  LPCAnimation,
+  LPCDirection,
+  LPC_DIRECTION_ROWS,
+  LPC_FRAME_COUNTS,
+  LPC_FRAME_TIMING
 } from './types';
 
 export interface LPCAnimationFrame {
@@ -45,7 +45,11 @@ export class LPCAnimator {
   /**
    * Start playing an LPC animation
    */
-  play(animation: LPCAnimation, direction: LPCDirection, loop: boolean = true): void {
+  play(
+    animation: LPCAnimation,
+    direction: LPCDirection,
+    loop: boolean = true
+  ): void {
     this.currentState = {
       animation,
       direction,
@@ -65,14 +69,15 @@ export class LPCAnimator {
     const elapsed = now - this.currentState.startTime;
     const frameTime = LPC_FRAME_TIMING[this.currentState.animation];
     const totalFrames = LPC_FRAME_COUNTS[this.currentState.animation];
-    
+
     const targetFrame = Math.floor(elapsed / frameTime);
-    
+
     if (targetFrame >= totalFrames) {
       if (this.currentState.loop) {
         // Loop back to start
         this.currentState.frame = targetFrame % totalFrames;
-        this.currentState.startTime = now - (elapsed % (frameTime * totalFrames));
+        this.currentState.startTime =
+          now - (elapsed % (frameTime * totalFrames));
       } else {
         // Stay on last frame
         this.currentState.frame = totalFrames - 1;
@@ -90,7 +95,7 @@ export class LPCAnimator {
 
     const row = LPC_DIRECTION_ROWS[this.currentState.direction];
     const col = this.currentState.frame;
-    
+
     return {
       col,
       row,
@@ -107,7 +112,7 @@ export class LPCAnimator {
   isFinished(): boolean {
     if (!this.currentState) return true; // No animation = finished
     if (this.currentState.loop) return false; // Looping animations are never "finished"
-    
+
     const totalFrames = LPC_FRAME_COUNTS[this.currentState.animation];
     return this.currentState.frame >= totalFrames - 1;
   }
@@ -115,9 +120,12 @@ export class LPCAnimator {
   /**
    * Get current animation info
    */
-  getCurrentAnimation(): { animation: LPCAnimation; direction: LPCDirection } | null {
+  getCurrentAnimation(): {
+    animation: LPCAnimation;
+    direction: LPCDirection;
+  } | null {
     if (!this.currentState) return null;
-    
+
     return {
       animation: this.currentState.animation,
       direction: this.currentState.direction

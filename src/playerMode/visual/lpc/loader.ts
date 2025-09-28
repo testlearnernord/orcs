@@ -3,31 +3,36 @@
  * Loads and manages LPC character configurations and sprites
  */
 
-import type { 
-  LPCCharacterConfig, 
-  LPCMetadata, 
-  LPCCharacterSprites, 
+import type {
+  LPCCharacterConfig,
+  LPCMetadata,
+  LPCCharacterSprites,
   LPCAnimation,
-  LPCAnimationAtlas 
+  LPCAnimationAtlas
 } from './types';
 
 /**
  * Loads LPC character data from JSON configuration files
  */
 export class LPCCharacterLoader {
-  
   /**
    * Load character configuration from character.json file
    */
-  static async loadCharacterConfig(configPath: string): Promise<LPCCharacterConfig> {
+  static async loadCharacterConfig(
+    configPath: string
+  ): Promise<LPCCharacterConfig> {
     try {
       const response = await fetch(configPath);
       if (!response.ok) {
-        throw new Error(`Failed to load character config: ${response.statusText}`);
+        throw new Error(
+          `Failed to load character config: ${response.statusText}`
+        );
       }
       return await response.json();
     } catch (error) {
-      throw new Error(`Error loading character config from ${configPath}: ${error}`);
+      throw new Error(
+        `Error loading character config from ${configPath}: ${error}`
+      );
     }
   }
 
@@ -53,7 +58,8 @@ export class LPCCharacterLoader {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error(`Failed to load sprite image: ${imagePath}`));
+      img.onerror = () =>
+        reject(new Error(`Failed to load sprite image: ${imagePath}`));
       img.src = imagePath;
     });
   }
@@ -68,7 +74,7 @@ export class LPCCharacterLoader {
     frameCounts: Record<string, number>
   ): LPCAnimationAtlas {
     const frameCount = frameCounts[animation] || 1;
-    
+
     return {
       url: `${basePath}/${animation}_${frameSize}.png`,
       frameWidth: frameSize,
@@ -112,7 +118,10 @@ export class LPCCharacterLoader {
           atlases.set(animation, atlas);
           images.set(animation, image);
         } catch (error) {
-          console.warn(`Failed to load ${animation} sprite for ${characterId}:`, error);
+          console.warn(
+            `Failed to load ${animation} sprite for ${characterId}:`,
+            error
+          );
           // Continue loading other animations even if one fails
         }
       });
@@ -127,7 +136,9 @@ export class LPCCharacterLoader {
         images
       };
     } catch (error) {
-      throw new Error(`Failed to load character sprites for ${characterId}: ${error}`);
+      throw new Error(
+        `Failed to load character sprites for ${characterId}: ${error}`
+      );
     }
   }
 
@@ -136,7 +147,7 @@ export class LPCCharacterLoader {
    */
   static getSupportedAnimations(metadata: LPCMetadata): LPCAnimation[] {
     const supported: LPCAnimation[] = [];
-    
+
     // Add standard animations that were successfully exported
     const standardAnimations = metadata.standardAnimations.exported;
     for (const anim of standardAnimations) {
@@ -153,8 +164,21 @@ export class LPCCharacterLoader {
    */
   private static isValidLPCAnimation(name: string): name is LPCAnimation {
     const validAnimations: LPCAnimation[] = [
-      'walk', 'run', 'idle', 'slash', 'hurt', 'spellcast', 'thrust', 'shoot',
-      'climb', 'jump', 'sit', 'emote', 'combat_idle', 'backslash', 'halfslash'
+      'walk',
+      'run',
+      'idle',
+      'slash',
+      'hurt',
+      'spellcast',
+      'thrust',
+      'shoot',
+      'climb',
+      'jump',
+      'sit',
+      'emote',
+      'combat_idle',
+      'backslash',
+      'halfslash'
     ];
     return validAnimations.includes(name as LPCAnimation);
   }
