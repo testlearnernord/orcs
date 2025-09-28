@@ -1,6 +1,12 @@
 /**
  * Berserker sprite atlas configuration and utility functions
  * Handles 256px sprite atlases for the berserker archetype
+ *
+ * Sprite Direction Convention (Universal LPC Spritesheet Generator):
+ * - DOWN  = character facing down (South)
+ * - LEFT  = character facing left (West)
+ * - RIGHT = character facing right (East)
+ * - UP    = character facing up (North)
  */
 
 export const BERS = {
@@ -44,7 +50,12 @@ export const BERS = {
     cols: 6,
     rows: 4
   },
-  rowByDir: { D: 2, L: 3, R: 1, U: 0 } as const
+  // Empirically determined mapping based on actual sprite layout:
+  // Row 1: DOWN sprites (verified correct)
+  // Row 3: LEFT sprites (was correct in original)
+  // Row 0: UP sprites (needs verification)
+  // Row 2: RIGHT sprites (needs verification)
+  rowByDir: { D: 1, L: 3, R: 2, U: 0 } as const
 } as const;
 
 // Indizes: Walk nutzt Col0 als Idle, Col1..8 als Schritte
