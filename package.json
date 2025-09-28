@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "vite",
+    "dev:player": "vite --open \"/orcs/?mode=player\"",
+    "prebuild": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs && node scripts/copy-maps.mjs && node scripts/copy-battlesystem.mjs",
+    "build": "vite build",
+    "postbuild": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs && node scripts/copy-maps.mjs && node scripts/copy-battlesystem.mjs",
     "dev": "npm run copy:dev && vite",
     "dev:player": "npm run copy:dev && vite --open \"/orcs/?mode=player\"",
     "copy:dev": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs && node scripts/copy-maps.mjs",
