@@ -132,6 +132,9 @@ export function FreeRoamView({
 
   const [showDebug, setShowDebug] = useState(false);
 
+  // Note: Debug overlay temporarily disabled due to infinite loop issue
+  // TODO: Fix infinite loop and re-enable F2 debug toggle
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -190,16 +193,16 @@ export function FreeRoamView({
           );
         }
 
-        // Draw debug overlay if enabled
-        if (showDebug && handcraftedState.map) {
-          drawDebugCollision(
-            ctx,
-            handcraftedState.map,
-            camera,
-            canvas.width,
-            canvas.height
-          );
-        }
+        // Draw debug overlay if enabled (temporarily disabled)
+        // if (showDebug && handcraftedState.map) {
+        //   drawDebugCollision(
+        //     ctx,
+        //     handcraftedState.map,
+        //     camera,
+        //     canvas.width,
+        //     canvas.height
+        //   );
+        // }
       }
     } else if (
       !useHandcrafted &&
@@ -210,9 +213,21 @@ export function FreeRoamView({
       // Render legacy generated map (only if it's a WorldMap)
       renderWorldMap(canvas, state.map as any);
     }
-  }, [useHandcrafted, handcraftedState.map, state, camera, showDebug]);
+  }, [
+    useHandcrafted,
+    handcraftedState.map,
+    handcraftedState.cycle, // Using cycle as proxy for state changes
+    handcraftedState.playerPosition?.x,
+    handcraftedState.playerPosition?.y,
+    legacyState.cycle,
+    camera.x,
+    camera.y,
+    camera.scale,
+    showDebug // Keep for future use
+  ]);
 
-  // Debug toggle (F2)
+  // Debug toggle (F2) - temporarily disabled due to infinite loop
+  /*
   useEffect(() => {
     if (typeof document === 'undefined') return undefined;
 
@@ -226,6 +241,7 @@ export function FreeRoamView({
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
+  */
 
   useEffect(() => {
     if (typeof document === 'undefined') return undefined;
@@ -638,7 +654,7 @@ export function FreeRoamView({
                 <small>
                   {useHandcrafted ? 'Klicken zum Bewegen' : 'WASD zum Bewegen'}{' '}
                   • ESC zum Verlassen
-                  {useHandcrafted && ' • F2 für Debug-Overlay'}
+                  {/* {useHandcrafted && ' • F2 für Debug-Overlay'} */}
                 </small>
               </p>
             </div>
