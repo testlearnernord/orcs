@@ -3,6 +3,7 @@ import React from 'react';
 import { chooseSetAndIndex } from './mapping';
 import { loadPortraitAtlases, type PortraitAtlasMap } from './portrait-atlas';
 import { PORTRAIT_SET_DEFINITIONS } from '@/ui/portraits/config';
+import { calculatePortraitCrop } from '@/lib/portraitCrop';
 import type { PortraitSet } from './types';
 import type { Rank } from '@/sim/types';
 
@@ -144,43 +145,19 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         if (!availableSets.length)
           throw new Error('No portrait atlases available');
         const { set, col, row } = chooseSetAndIndex(id, availableSets);
-        const cols = Math.max(1, set.cols);
-        const rows = Math.max(1, set.rows);
-
-        // Optimized portrait extraction for 256x256 pixel orc faces
-        // Each orc tile is 256x256px, we need to focus on the upper portion (head/face area)
-
-        // Calculate the actual tile dimensions as percentages of the atlas
-        const tileWidth = 100 / cols;
-        const tileHeight = 100 / rows;
-
-        // Calculate the top-left corner of the specific tile
-        const tileLeft = col * tileWidth;
-        const tileTop = row * tileHeight;
-
-        // For 256x256 orcs, we want to focus on the upper portion of each tile (where the face is)
-        // This crops out the lower body and centers on the head/chest area
-        const faceAreaHeight = 0.7; // Focus on top 70% of the tile for better face coverage
-        const faceAreaWidth = 1.0; // Use full width of the tile
-
-        // Scale factor to enlarge the cropped face area to fill the portrait frame
-        // Since we're only showing 70% of the height, we scale up to fill the frame
-        const scaleFactorX = cols * 100 * (1 / faceAreaWidth); // Remove extra zoom for more predictable sizing
-        const scaleFactorY = rows * 100 * (1 / faceAreaHeight);
-
-        // Position to show the top portion of the tile (where the face is)
-        // backgroundPosition works as: left% top%
-        // We need to adjust the positioning formula to avoid going out of bounds
-        const positionX = tileLeft + tileWidth * 0.5; // Center horizontally within tile
-        const positionY = tileTop + tileHeight * 0.2; // Focus on upper portion (face area) with better centering
+        
+        // Use deterministic portrait cropping with fixed pixel coordinates
+        // This follows the specifications with red frame (exact sprite cut) and 
+        // blue frame (face area visible and centered)
+        const cropData = calculatePortraitCrop(set.id, col, row);
 
         const css: React.CSSProperties = {
           width: size,
           height: size,
           backgroundImage: `url("${set.src}")`,
           backgroundRepeat: 'no-repeat',
-          backgroundSize: `${scaleFactorX}% ${scaleFactorY}%`,
-          backgroundPosition: `${positionX}% ${positionY}%`,
+          backgroundSize: cropData.backgroundSize,
+          backgroundPosition: cropData.backgroundPosition,
           borderRadius: 8,
           // Advanced rendering optimizations for crisp portrait display
           imageRendering: 'crisp-edges' as any,
