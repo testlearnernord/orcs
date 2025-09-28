@@ -20,7 +20,8 @@
     "guard:portraits": "node scripts/guards/assert-no-legacy-portraits.mjs && node scripts/guards/portrait-manifest.mjs",
     "guard:portraits:legacy": "node scripts/guards/assert-no-legacy-portraits.mjs",
     "guard:portraits:manifest": "node scripts/guards/portrait-manifest.mjs",
-    "ci": "npm run guard:portraits && npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
+    "verify:assets": "node scripts/verify-assets.mjs",
+    "ci": "npm run guard:portraits && npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build && npm run verify:assets",
     "predeploy": "npm run build && node scripts/guards/ensure-portrait-dist.mjs",
     "deploy": "npm run build",
     "build:devbase": "vite build --mode development"
