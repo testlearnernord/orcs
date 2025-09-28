@@ -3,11 +3,7 @@
  */
 
 import type { HandMapData, GridCoordinate, PixelCoordinate } from './types';
-import {
-  pixelToGrid,
-  gridToPixel,
-  isValidGridCoord
-} from './types';
+import { pixelToGrid, gridToPixel, isValidGridCoord } from './types';
 import { isBlocked } from './loader';
 
 interface PathNode {
