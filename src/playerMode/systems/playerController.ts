@@ -48,7 +48,7 @@ export class PlayerController {
   private lockOnManager: LockOnManager;
   private lockOnInputHandler: LockOnInputHandler;
   private availableTargets: LockOnTarget[] = [];
-  private baseSpeed = 100; // px/s
+  private baseSpeed = 60; // px/s - reduced for more reasonable walking pace
 
   constructor(startPosition: Point2D = { x: 0, y: 0 }) {
     this.lockOnManager = new LockOnManager();

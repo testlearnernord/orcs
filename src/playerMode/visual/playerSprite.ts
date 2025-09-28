@@ -377,7 +377,14 @@ export class PlayerSpriteRenderer {
     atlas: HTMLImageElement,
     frameIndex: number
   ): void {
-    const cols = 9; // Max cols from any berserker atlas
+    // Determine atlas type and cols based on which atlas is being used
+    let cols = 9; // Default for walk atlas
+    if (atlas === this.berserkerImages.run) {
+      cols = 8;
+    } else if (atlas === this.berserkerImages.slash || atlas === this.berserkerImages.hurt) {
+      cols = 6;
+    }
+    
     const frameWidth = atlas.width / cols;
     const frameHeight = atlas.height / 4; // 4 rows for directions
 
