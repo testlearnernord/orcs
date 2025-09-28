@@ -55,8 +55,8 @@ export interface FreeRoamState extends FreeRoamSnapshot {
 }
 
 export const DEFAULT_IDLE_MS = 60_000;
-export const DEFAULT_MAP_SIZE = 512;
-export const DEFAULT_OFFICER_LIMIT = 20;
+export const DEFAULT_MAP_SIZE = 768; // Larger map for more biome diversity
+export const DEFAULT_OFFICER_LIMIT = 25; // More officers for larger map
 
 function createInitialPlayerPosition(map: WorldMap): PlayerPosition {
   // Start player in center of map

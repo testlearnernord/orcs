@@ -1,14 +1,18 @@
 import type { Biome, WorldMap } from './generator';
 
 export const BIOME_COLORS: Record<Biome, string> = {
-  desert: '#d7a86b',
-  plains: '#5fa463',
-  forest: '#2f6f3b',
-  swamp: '#244836',
-  tundra: '#a9c2d9',
-  ashwastes: '#5b5463',
-  volcano: '#c34632',
-  river: '#3b6fc1'
+  desert: '#e6d190',     // Warm sandy yellow
+  plains: '#7db46c',     // Fresh green
+  forest: '#2d5a3d',     // Deep forest green
+  swamp: '#3d5c4a',      // Murky swamp green
+  tundra: '#b8d4e8',     // Icy blue-white
+  ashwastes: '#6b6270',  // Ashen purple-gray
+  volcano: '#d84632',    // Volcanic red
+  river: '#4a7bc8',      // Clear blue water
+  savanna: '#b5a572',    // Golden grassland
+  beach: '#f4e4a6',      // Sandy beige
+  mountains: '#8b9ba8',  // Stone gray
+  jungle: '#1e4429'      // Dark tropical green
 };
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -48,7 +52,38 @@ export function renderWorldMap(
     const [r, g, b] = hexToRgb(baseColor);
     const height = map.height[i];
     const moisture = map.moisture[i];
-    const shade = clamp01(0.75 + height * 0.3 - moisture * 0.1);
+    const temperature = map.temperature[i];
+    
+    // Enhanced shading based on height, moisture, and temperature
+    let shade = 0.7 + height * 0.4; // Base height shading
+    
+    // Biome-specific adjustments
+    switch (biome) {
+      case 'desert':
+      case 'savanna':
+      case 'beach':
+        shade += temperature * 0.2 - moisture * 0.15; // Bright in heat, darker with moisture
+        break;
+      case 'swamp':
+      case 'jungle':
+        shade -= 0.1 + moisture * 0.1; // Darker, more moisture = darker
+        break;
+      case 'volcano':
+        shade += 0.3 + temperature * 0.2; // Very bright and hot
+        break;
+      case 'tundra':
+      case 'mountains':
+        shade += 0.1 - temperature * 0.2; // Bright snow, darker in warmth
+        break;
+      case 'river':
+        shade = 0.8 + height * 0.1; // Consistent water appearance
+        break;
+      default:
+        shade += (temperature - 0.5) * 0.1; // Slight temperature influence
+    }
+    
+    shade = clamp01(shade);
+    
     const index = i * 4;
     data[index] = Math.round(r * shade);
     data[index + 1] = Math.round(g * shade);
