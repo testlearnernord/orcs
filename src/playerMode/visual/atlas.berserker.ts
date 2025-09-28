@@ -50,12 +50,12 @@ export const BERS = {
     cols: 6,
     rows: 4
   },
-  // Empirically determined mapping based on actual sprite layout:
-  // Row 1: DOWN sprites (verified correct)
-  // Row 3: LEFT sprites (was correct in original)
-  // Row 0: UP sprites (needs verification)
-  // Row 2: RIGHT sprites (needs verification)
-  rowByDir: { D: 1, L: 3, R: 2, U: 0 } as const
+  // Universal LPC Spritesheet Generator standard mapping:
+  // Row 0: DOWN sprites (character facing down/south)
+  // Row 1: LEFT sprites (character facing left/west)
+  // Row 2: RIGHT sprites (character facing right/east)
+  // Row 3: UP sprites (character facing up/north)
+  rowByDir: { D: 0, L: 1, R: 2, U: 3 } as const
 } as const;
 
 // Indizes: Walk nutzt Col0 als Idle, Col1..8 als Schritte
