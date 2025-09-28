@@ -13,11 +13,6 @@
   --friend: #7ad;
   --blood: #a6f;
   --hierarchy: #889;
-  --ring-king: #ffd166;
-  --ring-player: #f4a261;
-  --ring-captain: #8ecae6;
-  --ring-scout: #95d5b2;
-  --ring-grunt: #adb5bd;
   --card-bg: #121821;
   --line-rival: #e66;
   --line-ally: #6af;
@@ -38,38 +33,30 @@
   position: relative;
   display: block;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 16px;
   background-color: rgba(17, 24, 39, 0.4);
   background-repeat: no-repeat;
   background-position: center;
-  border: 2px solid rgba(148, 163, 184, 0.3);
-  transition: border-color 200ms ease;
+  background-size: cover;
 }
 
-/* Rank-based colored borders for officer avatars */
-.officer-avatar[data-rank='king'] {
-  border-color: var(--ring-king);
-  box-shadow: 0 0 8px rgba(255, 209, 102, 0.4);
+/* Modern unified portrait borders - bigger and more prominent */
+.officer-avatar {
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 300ms ease;
 }
 
-.officer-avatar[data-rank='player'] {
-  border-color: var(--ring-player);
-  box-shadow: 0 0 8px rgba(244, 162, 97, 0.32);
-}
-
-.officer-avatar[data-rank='captain'] {
-  border-color: var(--ring-captain);
-  box-shadow: 0 0 8px rgba(142, 202, 230, 0.32);
-}
-
-.officer-avatar[data-rank='scout'] {
-  border-color: var(--ring-scout);
-  box-shadow: 0 0 8px rgba(149, 213, 178, 0.32);
-}
-
-.officer-avatar[data-rank='grunt'] {
-  border-color: var(--ring-grunt);
-  box-shadow: 0 0 8px rgba(173, 181, 189, 0.28);
+.officer-avatar:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .officer-avatar--fallback {
@@ -383,8 +370,6 @@ button:disabled {
 }
 
 .officer-card {
-  --ring-color: var(--ring-grunt);
-  --ring-shadow: rgba(173, 181, 189, 0.3);
   display: grid;
   grid-template-columns: 96px 1fr;
   gap: var(--spacing-lg);
@@ -401,31 +386,6 @@ button:disabled {
     transform 180ms ease,
     box-shadow 200ms ease,
     border-color 200ms ease;
-}
-
-.officer-card[data-rank='king'] {
-  --ring-color: var(--ring-king);
-  --ring-shadow: rgba(255, 209, 102, 0.4);
-}
-
-.officer-card[data-rank='player'] {
-  --ring-color: var(--ring-player);
-  --ring-shadow: rgba(244, 162, 97, 0.32);
-}
-
-.officer-card[data-rank='captain'] {
-  --ring-color: var(--ring-captain);
-  --ring-shadow: rgba(142, 202, 230, 0.32);
-}
-
-.officer-card[data-rank='scout'] {
-  --ring-color: var(--ring-scout);
-  --ring-shadow: rgba(149, 213, 178, 0.32);
-}
-
-.officer-card[data-rank='grunt'] {
-  --ring-color: var(--ring-grunt);
-  --ring-shadow: rgba(173, 181, 189, 0.28);
 }
 
 .officer-card:hover,
@@ -449,7 +409,7 @@ button:disabled {
 @keyframes rankGlow {
   0% {
     box-shadow:
-      0 0 0 2px var(--ring-color),
+      0 0 0 2px rgba(255, 255, 255, 0.6),
       0 0 0 14px rgba(255, 255, 255, 0.08);
   }
   100% {
@@ -461,20 +421,25 @@ button:disabled {
   position: relative;
   width: 96px;
   aspect-ratio: 1;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
   background: none;
+  border: 4px solid rgba(255, 255, 255, 0.2);
   box-shadow:
-    0 0 0 3px var(--ring-color),
-    0 18px 38px var(--ring-shadow);
-  transition: box-shadow 200ms ease;
+    0 0 0 2px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 300ms ease;
 }
 
 .officer-card:hover .officer-card__portrait,
 .officer-card:focus-visible .officer-card__portrait {
+  border-color: rgba(255, 255, 255, 0.4);
   box-shadow:
-    0 0 0 3px var(--ring-color),
-    0 26px 48px var(--ring-shadow);
+    0 0 0 2px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .officer-card__portrait-img {
@@ -538,8 +503,8 @@ button:disabled {
   text-transform: uppercase;
   padding: 4px 12px;
   border-radius: 999px;
-  border: 1px solid var(--ring-color);
-  color: var(--ring-color);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.8);
   background: rgba(18, 27, 42, 0.7);
 }
 
@@ -2526,7 +2491,7 @@ button:disabled {
 .main-menu-title h1 {
   font-size: 4rem;
   font-weight: bold;
-  color: var(--ring-king);
+  color: #ffd166;
   margin: 0 0 3rem 0;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
   letter-spacing: 0.1em;
@@ -2589,11 +2554,11 @@ button:disabled {
 }
 
 .menu-option[data-mode='player'] .option-title {
-  color: var(--ring-player);
+  color: #f4a261;
 }
 
 .menu-option[data-mode='freeRoam'] .option-title {
-  color: var(--ring-scout);
+  color: #95d5b2;
 }
 
 /* Fallback background pattern when no image is available */

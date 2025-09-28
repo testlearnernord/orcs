@@ -147,60 +147,41 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         const cols = Math.max(1, set.cols);
         const rows = Math.max(1, set.rows);
 
-        // Revolutionary portrait extraction system for consistent quality
-        // This approach completely reimagines how we extract and display portraits
+        // Optimized portrait extraction for 256x256 pixel orc faces
+        // Each orc tile is 256x256px, we need to focus on the upper portion (head/face area)
 
         // Calculate the actual tile dimensions as percentages of the atlas
         const tileWidth = 100 / cols;
         const tileHeight = 100 / rows;
 
-        // Calculate precise tile boundaries to avoid edge artifacts from adjacent tiles
+        // Calculate the top-left corner of the specific tile
+        const tileLeft = col * tileWidth;
+        const tileTop = row * tileHeight;
 
-        // Calculate the center position of the specific tile
-        const tileCenterX = col * tileWidth + tileWidth / 2;
-        const tileCenterY = row * tileHeight + tileHeight / 2;
+        // For 256x256 orcs, we want to focus on the upper portion of each tile (where the face is)
+        // This crops out the lower body and centers on the head/chest area
+        const faceAreaHeight = 0.65; // Focus on top 65% of the tile for better face coverage
+        const faceAreaWidth = 1.0; // Use full width of the tile
 
-        // Advanced scaling system for optimal portrait extraction
-        // Scale the atlas appropriately to show more detail while preventing overlap
-        const scaleFactor = 1.8; // 80% larger for better face detail - shows faces instead of body pieces
-        const scaledAtlasWidth = cols * 100 * scaleFactor;
-        const scaledAtlasHeight = rows * 100 * scaleFactor;
+        // Scale factor to enlarge the cropped face area to fill the portrait frame
+        // Since we're only showing 65% of the height, we scale up to fill the frame
+        const scaleFactorX = cols * 100 * (1 / faceAreaWidth) * 1.05; // Slight zoom for better detail
+        const scaleFactorY = rows * 100 * (1 / faceAreaHeight) * 1.05;
 
-        // Calculate positioning to center the tile within the portrait frame
-        // This ensures the face from the specific tile is properly displayed
-        const positionX = tileCenterX * scaleFactor;
-        const positionY = tileCenterY * scaleFactor;
-
-        // Fine-tuning adjustments optimized for 4x4 atlas configuration (officers1-3.png)
-        // These micro-adjustments account for how faces are positioned within tiles
-        let finetuneX = 0;
-        let finetuneY = 0;
-
-        // Vertical fine-tuning based on row position (optimized for 4 rows)
-        // Faces in different rows may be positioned differently within their tiles
-        if (row === 0)
-          finetuneY = -1.2; // Top row faces tend to be lower in their tiles
-        else if (row === 1) finetuneY = -0.4;
-        else if (row === 2) finetuneY = 0.4;
-        else if (row === 3) finetuneY = 1.0; // Bottom row may need upward adjustment
-
-        // Horizontal fine-tuning based on column position (optimized for 4 columns)
-        if (col === 0)
-          finetuneX = 0.8; // Left column faces may be offset right
-        else if (col === 1) finetuneX = 0.3;
-        else if (col === 2) finetuneX = -0.3;
-        else if (col === 3) finetuneX = -0.8; // Right column faces may be offset left
-
-        const finalPositionX = positionX + finetuneX;
-        const finalPositionY = positionY + finetuneY;
+        // Position to show the top portion of the tile (where the face is)
+        // backgroundPosition works as: left% top%
+        const positionX =
+          (tileLeft + tileWidth * 0.5) * (1 / faceAreaWidth) * 1.05; // Center horizontally within tile
+        const positionY =
+          (tileTop + tileHeight * 0.15) * (1 / faceAreaHeight) * 1.05; // Focus on upper portion (face area)
 
         const css: React.CSSProperties = {
           width: size,
           height: size,
           backgroundImage: `url("${set.src}")`,
           backgroundRepeat: 'no-repeat',
-          backgroundSize: `${scaledAtlasWidth}% ${scaledAtlasHeight}%`,
-          backgroundPosition: `${finalPositionX}% ${finalPositionY}%`,
+          backgroundSize: `${scaleFactorX}% ${scaleFactorY}%`,
+          backgroundPosition: `${positionX}% ${positionY}%`,
           borderRadius: 8,
           // Advanced rendering optimizations for crisp portrait display
           imageRendering: 'crisp-edges' as any,
