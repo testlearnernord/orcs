@@ -36,13 +36,17 @@ const PHASE_LABEL: Record<Phase, string> = {
 
 const BIOME_LABEL: Record<Biome, string> = {
   desert: 'Wüste',
-  plains: 'Ebene',
+  plains: 'Wiese',
   forest: 'Wald',
   swamp: 'Sumpf',
-  tundra: 'Tundra',
+  tundra: 'Schnee',
   ashwastes: 'Aschelande',
   volcano: 'Vulkan',
-  river: 'Fluss'
+  river: 'Fluss',
+  savanna: 'Savanne',
+  beach: 'Strand',
+  mountains: 'Berge',
+  jungle: 'Dschungel'
 };
 
 interface FreeRoamViewProps {
@@ -80,8 +84,8 @@ export function FreeRoamView({
 }: FreeRoamViewProps) {
   const idleMs = DEFAULT_IDLE_MS;
 
-  // Use handcrafted map if mapId is provided, otherwise use generated map
-  const useHandcrafted = Boolean(mapId);
+  // Use procedural map by default, handcrafted only if explicitly requested
+  const useHandcrafted = Boolean(mapId && mapId !== 'default');
 
   const legacyState = useFreeRoam(store, {
     mapSize: DEFAULT_MAP_SIZE,
@@ -463,8 +467,16 @@ export function FreeRoamView({
     >
       <header className="free-roam__hud">
         <div className="free-roam__title">
-          <h1 id="free-roam-title">Free Roam (Test)</h1>
-          <p>Erkunde die Nemesis-Simulation direkt auf der Weltkarte.</p>
+          <h1 id="free-roam-title">
+            {useHandcrafted
+              ? 'Free Roam - Handcrafted Map'
+              : 'Free Roam - Diverse Biomes'}
+          </h1>
+          <p>
+            {useHandcrafted
+              ? 'Erkunde eine handgefertigte Karte mit der Nemesis-Simulation.'
+              : 'Erkunde eine prozedural generierte Welt mit vielfältigen Biomen.'}
+          </p>
         </div>
         <div className="free-roam__status">
           <span>Zyklus {state.cycle}</span>
@@ -716,8 +728,15 @@ export function FreeRoamView({
                       )}
                     </div>
                     <div className="free-roam__list-meta">
-                      Position: ({Math.round((officer as any).x)},{' '}
-                      {Math.round((officer as any).y)})
+                      Position: (
+                      {useHandcrafted
+                        ? Math.round((officer as any).x)
+                        : Math.round((officer as any).coordinate?.x ?? 0)}
+                      ,{' '}
+                      {useHandcrafted
+                        ? Math.round((officer as any).y)
+                        : Math.round((officer as any).coordinate?.y ?? 0)}
+                      )
                       {!useHandcrafted && 'coordinate' in officer && (
                         <span>
                           {' '}
