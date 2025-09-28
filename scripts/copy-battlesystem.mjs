@@ -18,10 +18,15 @@ async function checkAndCopy(sourceDir, sourceName) {
     await mkdir(publicTargetDir, { recursive: true });
     await cp(sourceDir, publicTargetDir, { recursive: true, force: true });
 
-    console.log(`Copied ${sourceName} battlesystem assets to docs/ and public/.`);
+    console.log(
+      `Copied ${sourceName} battlesystem assets to docs/ and public/.`
+    );
     return true;
   } catch (error) {
-    console.error(`Failed to copy ${sourceName} battlesystem assets:`, error.message);
+    console.error(
+      `Failed to copy ${sourceName} battlesystem assets:`,
+      error.message
+    );
     return false;
   }
 }

@@ -74,25 +74,31 @@ export class LPCCharacterLoader {
   ): Promise<HTMLImageElement> {
     // Define potential paths in order of preference
     const potentialPaths = [
-      `${basePath}/${animation}_${frameSize}.png`,  // Direct naming: walk_64.png
-      `${basePath}/standard/${animation}.png`,      // Standard subdirectory: standard/walk.png
-      `${basePath}/${animation}.png`                // Simple naming: walk.png
+      `${basePath}/${animation}_${frameSize}.png`, // Direct naming: walk_64.png
+      `${basePath}/standard/${animation}.png`, // Standard subdirectory: standard/walk.png
+      `${basePath}/${animation}.png` // Simple naming: walk.png
     ];
 
     // Try each path until one succeeds
     for (const imagePath of potentialPaths) {
       try {
         const image = await this.loadSpriteImage(imagePath);
-        console.log(`[LPCLoader] Successfully loaded ${animation} from: ${imagePath}`);
+        console.log(
+          `[LPCLoader] Successfully loaded ${animation} from: ${imagePath}`
+        );
         return image;
       } catch (error) {
         // Continue to next path
-        console.debug(`[LPCLoader] Failed to load ${animation} from: ${imagePath}`);
+        console.debug(
+          `[LPCLoader] Failed to load ${animation} from: ${imagePath}`
+        );
       }
     }
 
     // If all paths fail, throw an error
-    throw new Error(`Failed to load sprite image for ${animation}. Tried paths: ${potentialPaths.join(', ')}`);
+    throw new Error(
+      `Failed to load sprite image for ${animation}. Tried paths: ${potentialPaths.join(', ')}`
+    );
   }
 
   /**
