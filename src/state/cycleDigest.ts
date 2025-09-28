@@ -150,40 +150,6 @@ function relationshipHighlights(
   cycle: number
 ): Highlight[] {
   const highlights: Highlight[] = [];
-  const prevBlood = collectRelationshipPairs(prev.officers, 'BLOOD_OATH');
-  const nextBlood = collectRelationshipPairs(next.officers, 'BLOOD_OATH');
-
-  nextBlood.forEach((info, key) => {
-    if (prevBlood.has(key)) return;
-    const [a, b] = info.ids;
-    highlights.push({
-      id: `blood:new:${key}`,
-      icon: '🩸',
-      title: `Blutschwur zwischen ${nameOf(lookup, a)} und ${nameOf(lookup, b)}`,
-      text:
-        info.relation.sinceCycle !== undefined
-          ? `Seit Zyklus ${info.relation.sinceCycle}`
-          : undefined,
-      score: score(3, `blood:new:${key}`),
-      cycle
-    });
-  });
-
-  prevBlood.forEach((info, key) => {
-    if (nextBlood.has(key)) return;
-    const [a, b] = info.ids;
-    highlights.push({
-      id: `blood:end:${key}`,
-      icon: '💔',
-      title: `Blutschwur erloschen: ${nameOf(lookup, a)} & ${nameOf(lookup, b)}`,
-      text:
-        info.relation.expiresAtCycle !== undefined
-          ? `Abgelaufen in Zyklus ${info.relation.expiresAtCycle}`
-          : 'Bindung zerschnitten',
-      score: score(3, `blood:end:${key}`),
-      cycle
-    });
-  });
 
   const prevRival = collectRelationshipPairs(prev.officers, 'RIVAL');
   const nextRival = collectRelationshipPairs(next.officers, 'RIVAL');

@@ -16,8 +16,7 @@
   --card-bg: #121821;
   --line-rival: #e66;
   --line-ally: #6af;
-  --line-friend: #7ad;
-  --line-blood: #a6f;
+  --line-neutral: #888;
   --line-hierarchy: #889;
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -572,7 +571,7 @@ button:disabled {
   height: 100%;
   width: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--line-ally), var(--line-friend));
+  background: linear-gradient(90deg, var(--line-ally), var(--line-neutral));
   transition: width 320ms cubic-bezier(0.4, 0.15, 0.2, 1);
 }
 
@@ -627,19 +626,14 @@ button:disabled {
   color: var(--line-ally);
 }
 
-.officer-card__status--friend {
-  border-color: rgba(122, 221, 237, 0.6);
-  color: var(--line-friend);
-}
-
 .officer-card__status--rival {
   border-color: rgba(238, 102, 102, 0.6);
   color: var(--line-rival);
 }
 
-.officer-card__status--blood {
-  border-color: rgba(170, 102, 255, 0.6);
-  color: var(--line-blood);
+.officer-card__status--neutral {
+  border-color: rgba(136, 136, 136, 0.6);
+  color: var(--line-neutral);
 }
 
 .officer-card__status--empty {
@@ -1157,12 +1151,8 @@ button:disabled {
   color: var(--line-ally);
 }
 
-.relations-tooltip__label[data-type='friend'] {
-  color: var(--line-friend);
-}
-
-.relations-tooltip__label[data-type='bloodoath'] {
-  color: var(--line-blood);
+.relations-tooltip__label[data-type='neutral'] {
+  color: var(--line-neutral);
 }
 
 .relations-tooltip__label[data-type='hierarchy'] {

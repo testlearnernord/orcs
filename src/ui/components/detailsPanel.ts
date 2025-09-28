@@ -11,21 +11,18 @@ export interface DetailsPanelOptions {
 
 const RELATION_ICONS: Record<Relationship['type'], string> = {
   ALLY: '🤝',
-  FRIEND: '🍻',
   RIVAL: '⚔️',
-  BLOOD_OATH: '🩸'
+  NEUTRAL: '•'
 };
 
 function relationLabel(relation: Relationship): string {
   switch (relation.type) {
     case 'ALLY':
       return 'Allianz';
-    case 'FRIEND':
-      return 'Freundschaft';
     case 'RIVAL':
       return 'Rivalität';
-    case 'BLOOD_OATH':
-      return 'Blutschwur';
+    case 'NEUTRAL':
+      return 'Neutral';
     default:
       return relation.type;
   }

@@ -27,9 +27,8 @@ function clamp(value: number, min = 0, max = 1): number {
 }
 
 function hasBloodOathWithKing(officer: Officer, kingId: string): boolean {
-  return officer.relationships.some(
-    (relation) => relation.type === 'BLOOD_OATH' && relation.with === kingId
-  );
+  // No more blood oaths, so always return false
+  return false;
 }
 
 export function createInitialCrownState(rng: RNG): CrownState {
@@ -407,9 +406,7 @@ export function updateCrownState(
   const previousReign = crown.reignCycles;
   crown.reignCycles += 1;
 
-  const bloodOath = king.relationships.some(
-    (relation) => relation.type === 'BLOOD_OATH'
-  );
+  const bloodOath = false; // No more blood oaths
   crown.tributeRate = Math.min(
     TRIBUTE_MAX,
     crown.tributeRate +

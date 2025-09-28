@@ -20,23 +20,20 @@ const STAT_LABEL: Record<StatKey, string> = {
 
 const RELATION_ORDER: RelationshipType[] = [
   'ALLY',
-  'FRIEND',
   'RIVAL',
-  'BLOOD_OATH'
+  'NEUTRAL'
 ];
 
 const RELATION_LABEL: Record<RelationshipType, string> = {
   ALLY: 'ALLY',
-  FRIEND: 'FRIEND',
   RIVAL: 'RIVAL',
-  BLOOD_OATH: 'BLOODOATH'
+  NEUTRAL: 'NEUTRAL'
 };
 
 const RELATION_CLASS: Record<RelationshipType, string> = {
   ALLY: 'ally',
-  FRIEND: 'friend',
   RIVAL: 'rival',
-  BLOOD_OATH: 'blood'
+  NEUTRAL: 'neutral'
 };
 
 type RankSlug = 'king' | 'player' | 'captain' | 'scout' | 'grunt';
