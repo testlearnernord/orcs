@@ -274,16 +274,19 @@ export class PlayerSpriteRenderer {
 
     ctx.save();
 
-    // Transform to player position and rotation
+    // Transform to player position
     ctx.translate(position.x * 50, position.y * 50);
-    ctx.rotate(rotation);
 
     // Handle berserker-specific rendering
     if (this.config.archetype === 'Berserker') {
+      // Don't apply rotation for Berserker - we use directional sprite frames instead
       this.renderBerserkerSprite(ctx, state);
       ctx.restore();
       return;
     }
+
+    // Apply rotation for other archetypes that use rotation-based rendering
+    ctx.rotate(rotation);
 
     // Add dash afterimage effect
     if (isDashing) {
