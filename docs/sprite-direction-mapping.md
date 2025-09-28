@@ -11,30 +11,30 @@ The Universal LPC Spritesheet Generator uses the following **fixed** row layout:
 | Row | Direction | Description |
 |-----|-----------|-------------|
 | 0   | UP        | Character facing up (north) |
-| 1   | LEFT      | Character facing left (west) |
-| 2   | DOWN      | Character facing down (south) |
-| 3   | RIGHT     | Character facing right (east) |
+| 1   | DOWN      | Character facing down (south) |
+| 2   | RIGHT     | Character facing right (east) |
+| 3   | LEFT      | Character facing left (west) |
 
 ### Implementation in Code
 
 When creating atlas configuration for any archetype, use this exact mapping:
 
 ```typescript
-// Universal LPC Spritesheet Generator standard mapping:
+// Berserker sprite atlas mapping based on actual sprite sheet layout:
 // Row 0: UP sprites (character facing up/north)
-// Row 1: LEFT sprites (character facing left/west)
-// Row 2: DOWN sprites (character facing down/south)
-// Row 3: RIGHT sprites (character facing right/east)
-rowByDir: { U: 0, L: 1, D: 2, R: 3 } as const
+// Row 1: DOWN sprites (character facing down/south)
+// Row 2: RIGHT sprites (character facing right/east)
+// Row 3: LEFT sprites (character facing left/west)  
+rowByDir: { U: 0, D: 1, R: 2, L: 3 } as const
 ```
 
 ### WASD Key Mapping
 
 The WASD keys correspond to the following directions in screen coordinates:
 
-- **W Key**: Move up (negative Y) → UP direction (Row 3)
-- **A Key**: Move left (negative X) → LEFT direction (Row 1)  
-- **S Key**: Move down (positive Y) → DOWN direction (Row 0)
+- **W Key**: Move up (negative Y) → UP direction (Row 0)
+- **A Key**: Move left (negative X) → LEFT direction (Row 3)  
+- **S Key**: Move down (positive Y) → DOWN direction (Row 1)
 - **D Key**: Move right (positive X) → RIGHT direction (Row 2)
 
 ### Verification
@@ -42,9 +42,9 @@ The WASD keys correspond to the following directions in screen coordinates:
 Always verify your sprite direction mapping with these tests:
 
 1. **W Key**: Character should face UP (north) - sprite from Row 0
-2. **A Key**: Character should face LEFT (west) - sprite from Row 1
-3. **S Key**: Character should face DOWN (south) - sprite from Row 2
-4. **D Key**: Character should face RIGHT (east) - sprite from Row 3
+2. **A Key**: Character should face LEFT (west) - sprite from Row 3
+3. **S Key**: Character should face DOWN (south) - sprite from Row 1
+4. **D Key**: Character should face RIGHT (east) - sprite from Row 2
 
 ### Historical Note
 
