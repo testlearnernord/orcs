@@ -8,20 +8,23 @@ export interface KeybindState {
   moveDown: boolean;
   moveLeft: boolean;
   moveRight: boolean;
-  
+
   // Combat actions
-  dash: boolean;        // Shift
-  block: boolean;       // Ctrl
-  lockOn: boolean;      // Alt (toggle)
-  signature: boolean;   // E
-  reset: boolean;       // R
-  
+  dash: boolean; // Shift
+  block: boolean; // Ctrl
+  lockOn: boolean; // Alt (toggle)
+  signature: boolean; // E
+  reset: boolean; // R
+
   // Internal state
   lockOnToggled: boolean;
   lastLockOnState: boolean;
 }
 
-export type KeybindCallback = (action: keyof KeybindState, pressed: boolean) => void;
+export type KeybindCallback = (
+  action: keyof KeybindState,
+  pressed: boolean
+) => void;
 
 /**
  * Manager for player input handling
@@ -30,15 +33,15 @@ export class PlayerKeybinds {
   private state: KeybindState;
   private callbacks: KeybindCallback[] = [];
   private keyMap: Record<string, keyof KeybindState> = {
-    'w': 'moveUp',
-    'a': 'moveLeft', 
-    's': 'moveDown',
-    'd': 'moveRight',
-    'shift': 'dash',
-    'control': 'block',
-    'alt': 'lockOn',
-    'e': 'signature',
-    'r': 'reset'
+    w: 'moveUp',
+    a: 'moveLeft',
+    s: 'moveDown',
+    d: 'moveRight',
+    shift: 'dash',
+    control: 'block',
+    alt: 'lockOn',
+    e: 'signature',
+    r: 'reset'
   };
 
   constructor() {
@@ -105,8 +108,12 @@ export class PlayerKeybinds {
    * Check if any movement key is pressed
    */
   isMoving(): boolean {
-    return this.state.moveUp || this.state.moveDown || 
-           this.state.moveLeft || this.state.moveRight;
+    return (
+      this.state.moveUp ||
+      this.state.moveDown ||
+      this.state.moveLeft ||
+      this.state.moveRight
+    );
   }
 
   /**
@@ -151,7 +158,7 @@ export class PlayerKeybinds {
   private handleKeyDown = (event: KeyboardEvent): void => {
     const key = event.key.toLowerCase();
     const action = this.keyMap[key];
-    
+
     if (action && !this.state[action]) {
       this.updateKeyState(action, true);
       event.preventDefault();
@@ -161,7 +168,7 @@ export class PlayerKeybinds {
   private handleKeyUp = (event: KeyboardEvent): void => {
     const key = event.key.toLowerCase();
     const action = this.keyMap[key];
-    
+
     if (action && this.state[action]) {
       this.updateKeyState(action, false);
       event.preventDefault();
@@ -180,7 +187,7 @@ export class PlayerKeybinds {
   private updateKeyState(action: keyof KeybindState, pressed: boolean): void {
     if (this.state[action] !== pressed) {
       this.state[action] = pressed as any;
-      
+
       // Notify callbacks
       for (const callback of this.callbacks) {
         callback(action, pressed);

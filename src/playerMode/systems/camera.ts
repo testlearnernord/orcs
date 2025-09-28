@@ -53,15 +53,19 @@ export class CameraController {
    */
   update(deltaMs: number): void {
     const deltaSeconds = deltaMs / 1000;
-    
+
     // Calculate final target position with lock-on offset
     let finalTarget = { ...this.state.targetPosition };
-    
+
     if (this.state.lockOnTarget) {
       // Add slight offset towards lock-on target
-      const offsetX = (this.state.lockOnTarget.x - this.state.targetPosition.x) * this.state.lockOnStrength;
-      const offsetY = (this.state.lockOnTarget.y - this.state.targetPosition.y) * this.state.lockOnStrength;
-      
+      const offsetX =
+        (this.state.lockOnTarget.x - this.state.targetPosition.x) *
+        this.state.lockOnStrength;
+      const offsetY =
+        (this.state.lockOnTarget.y - this.state.targetPosition.y) *
+        this.state.lockOnStrength;
+
       finalTarget.x += offsetX;
       finalTarget.y += offsetY;
     }

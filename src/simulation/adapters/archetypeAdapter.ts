@@ -24,7 +24,7 @@ export function adaptArchetype(originalArchetype: string): OrcArchetype {
     return 'Archer';
   }
 
-  // Heavy/Berserker types  
+  // Heavy/Berserker types
   if (
     normalized.includes('berserker') ||
     normalized.includes('warrior') ||
@@ -53,9 +53,11 @@ export function adaptArchetype(originalArchetype: string): OrcArchetype {
 
   // Default fallback with dev warning
   if (typeof console !== 'undefined') {
-    console.warn(`[ArchetypeAdapter] Unknown archetype "${originalArchetype}", defaulting to Berserker`);
+    console.warn(
+      `[ArchetypeAdapter] Unknown archetype "${originalArchetype}", defaulting to Berserker`
+    );
   }
-  
+
   return 'Berserker';
 }
 
@@ -65,7 +67,7 @@ export function adaptArchetype(originalArchetype: string): OrcArchetype {
 export function adaptArchetypes<T extends { archetype?: string }>(
   entities: T[]
 ): Array<T & { unifiedArchetype: OrcArchetype }> {
-  return entities.map(entity => ({
+  return entities.map((entity) => ({
     ...entity,
     unifiedArchetype: adaptArchetype(entity.archetype || 'unknown')
   }));
@@ -76,16 +78,36 @@ export function adaptArchetypes<T extends { archetype?: string }>(
  */
 export function getArchetypeMappings(): Record<string, OrcArchetype> {
   const testCases = [
-    'archer', 'bowman', 'marksman', 'sniper', 'hunter', 'ranger',
-    'berserker', 'warrior', 'brute', 'heavy', 'tank', 'guard', 'champion', 'captain',
-    'trapper', 'skirmisher', 'rogue', 'scout', 'assassin', 'utility', 'support',
-    'unknown', 'weird_type', ''
+    'archer',
+    'bowman',
+    'marksman',
+    'sniper',
+    'hunter',
+    'ranger',
+    'berserker',
+    'warrior',
+    'brute',
+    'heavy',
+    'tank',
+    'guard',
+    'champion',
+    'captain',
+    'trapper',
+    'skirmisher',
+    'rogue',
+    'scout',
+    'assassin',
+    'utility',
+    'support',
+    'unknown',
+    'weird_type',
+    ''
   ];
 
   const mappings: Record<string, OrcArchetype> = {};
   for (const testCase of testCases) {
     mappings[testCase] = adaptArchetype(testCase);
   }
-  
+
   return mappings;
 }

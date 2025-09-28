@@ -35,9 +35,9 @@ export class TestArena {
   private currentWave?: ArenaWave;
   private playerSpawn: Point2D = { x: 0, y: 0 };
   private enemySpawns: Point2D[] = [
-    { x: -4, y: -4 },  // Top-left
-    { x: 4, y: -4 },   // Top-right
-    { x: 0, y: 4 }     // Bottom
+    { x: -4, y: -4 }, // Top-left
+    { x: 4, y: -4 }, // Top-right
+    { x: 0, y: 4 } // Bottom
   ];
 
   constructor() {
@@ -55,7 +55,7 @@ export class TestArena {
    * Get alive entities only
    */
   getAliveEntities(): ArenaEntity[] {
-    return this.getEntities().filter(e => e.isAlive);
+    return this.getEntities().filter((e) => e.isAlive);
   }
 
   /**
@@ -69,14 +69,14 @@ export class TestArena {
    * Get player entity
    */
   getPlayer(): ArenaEntity | undefined {
-    return this.getEntities().find(e => e.isPlayer);
+    return this.getEntities().find((e) => e.isPlayer);
   }
 
   /**
    * Get enemy entities
    */
   getEnemies(): ArenaEntity[] {
-    return this.getEntities().filter(e => !e.isPlayer && e.isAlive);
+    return this.getEntities().filter((e) => !e.isPlayer && e.isAlive);
   }
 
   /**
@@ -85,15 +85,15 @@ export class TestArena {
   createPlayer(archetype: OrcArchetype = 'Berserker'): string {
     const id = `player_${this.nextEntityId++}`;
     const stats = ARCHETYPE_STATS[archetype];
-    
+
     const entity: ArenaEntity = {
       id,
       archetype,
       position: { ...this.playerSpawn },
       rotation: 0,
       health: new HealthManager(
-        id, 
-        stats.health, 
+        id,
+        stats.health,
         100, // Max stagger
         (entityId) => this.onEntityDeath(entityId)
       ),
@@ -114,15 +114,15 @@ export class TestArena {
     const id = `enemy_${this.nextEntityId++}`;
     const stats = ARCHETYPE_STATS[archetype];
     const spawn = this.enemySpawns[spawnIndex % this.enemySpawns.length];
-    
+
     const entity: ArenaEntity = {
       id,
       archetype,
       position: { ...spawn },
       rotation: 0,
       health: new HealthManager(
-        id, 
-        stats.health, 
+        id,
+        stats.health,
         80, // Max stagger for enemies
         (entityId) => this.onEntityDeath(entityId)
       ),
@@ -141,7 +141,7 @@ export class TestArena {
    */
   startWave(): void {
     this.clearEnemies();
-    
+
     const entities: ArenaEntity[] = [];
     const startTime = Date.now();
 
@@ -166,11 +166,11 @@ export class TestArena {
    */
   update(deltaMs: number): void {
     const now = Date.now();
-    
+
     // Update all entities
     for (const entity of this.entities.values()) {
       if (!entity.isAlive) continue;
-      
+
       if (!entity.isPlayer) {
         this.updateEnemyAI(entity, deltaMs, now);
       }
@@ -192,10 +192,10 @@ export class TestArena {
     this.entities.clear();
     this.nextEntityId = 0;
     this.currentWave = undefined;
-    
+
     // Create player
     this.createPlayer();
-    
+
     // Start first wave
     this.startWave();
   }
@@ -220,7 +220,7 @@ export class TestArena {
   moveEntity(id: string, position: Point2D, rotation?: number): boolean {
     const entity = this.entities.get(id);
     if (!entity || !entity.isAlive) return false;
-    
+
     entity.position = { ...position };
     if (rotation !== undefined) {
       entity.rotation = rotation;
@@ -236,11 +236,11 @@ export class TestArena {
   }
 
   getEnemySpawns(): Point2D[] {
-    return this.enemySpawns.map(spawn => ({ ...spawn }));
+    return this.enemySpawns.map((spawn) => ({ ...spawn }));
   }
 
   private clearEnemies(): void {
-    const enemies = this.getEntities().filter(e => !e.isPlayer);
+    const enemies = this.getEntities().filter((e) => !e.isPlayer);
     for (const enemy of enemies) {
       this.entities.delete(enemy.id);
     }
@@ -254,7 +254,11 @@ export class TestArena {
     }
   }
 
-  private updateEnemyAI(entity: ArenaEntity, deltaMs: number, now: number): void {
+  private updateEnemyAI(
+    entity: ArenaEntity,
+    deltaMs: number,
+    now: number
+  ): void {
     const player = this.getPlayer();
     if (!player || !player.isAlive) return;
 
@@ -263,13 +267,13 @@ export class TestArena {
       const dx = player.position.x - entity.position.x;
       const dy = player.position.y - entity.position.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      
+
       if (distance > 0.5) {
         // Move towards player
         const moveSpeed = ARCHETYPE_STATS[entity.archetype].speed * 0.5; // Slower than player
         const moveX = (dx / distance) * moveSpeed * (deltaMs / 1000);
         const moveY = (dy / distance) * moveSpeed * (deltaMs / 1000);
-        
+
         entity.position.x += moveX;
         entity.position.y += moveY;
         entity.rotation = Math.atan2(dy, dx);
@@ -277,7 +281,7 @@ export class TestArena {
       } else {
         entity.aiState = 'attacking';
       }
-      
+
       entity.lastAction = now;
     }
   }

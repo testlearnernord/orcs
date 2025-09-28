@@ -58,7 +58,7 @@ export const LockOnMarker: React.FC<LockOnMarkerProps> = ({
     <div style={markerStyles}>
       <div style={ringStyles} />
       <div style={centerStyles} />
-      
+
       <style>{`
         @keyframes lockon-pulse {
           0% {
@@ -99,7 +99,7 @@ export const MultiLockOnMarkers: React.FC<MultiLockOnMarkersProps> = ({
 }) => {
   return (
     <>
-      {targets.map(target => (
+      {targets.map((target) => (
         <LockOnMarker
           key={target.id}
           targetPosition={target.position}

@@ -42,7 +42,7 @@ export class HealthManager {
     this.entityId = entityId;
     this.onDeath = onDeath;
     this.onStagger = onStagger;
-    
+
     this.state = {
       current: maxHealth,
       maximum: maxHealth,
@@ -72,7 +72,9 @@ export class HealthManager {
    * Get stagger percentage (0-1)
    */
   getStaggerPercent(): number {
-    return this.state.maxStagger > 0 ? this.state.stagger / this.state.maxStagger : 0;
+    return this.state.maxStagger > 0
+      ? this.state.stagger / this.state.maxStagger
+      : 0;
   }
 
   /**
@@ -93,7 +95,10 @@ export class HealthManager {
     const actualStagger = Math.max(0, staggerAmount);
 
     this.state.current -= actualDamage;
-    this.state.stagger = Math.min(this.state.maxStagger, this.state.stagger + actualStagger);
+    this.state.stagger = Math.min(
+      this.state.maxStagger,
+      this.state.stagger + actualStagger
+    );
     this.state.lastDamageTime = Date.now();
 
     const wasKilled = this.state.current <= 0;
@@ -105,11 +110,13 @@ export class HealthManager {
       }
     }
 
-    const wasStaggered = !this.state.isStaggered && this.state.stagger >= this.state.maxStagger;
+    const wasStaggered =
+      !this.state.isStaggered && this.state.stagger >= this.state.maxStagger;
     if (wasStaggered) {
       this.state.isStaggered = true;
       // Stagger duration based on excess stagger amount
-      const staggerTime = 800 + Math.min(500, this.state.stagger - this.state.maxStagger);
+      const staggerTime =
+        800 + Math.min(500, this.state.stagger - this.state.maxStagger);
       if (this.onStagger) {
         this.onStagger(this.entityId, staggerTime);
       }
@@ -134,8 +141,11 @@ export class HealthManager {
    */
   heal(amount: number): number {
     if (this.state.isDead) return 0;
-    
-    const actualHeal = Math.max(0, Math.min(amount, this.state.maximum - this.state.current));
+
+    const actualHeal = Math.max(
+      0,
+      Math.min(amount, this.state.maximum - this.state.current)
+    );
     this.state.current += actualHeal;
     return actualHeal;
   }

@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ARCHETYPES, BALANCE, SIGNATURE, ARCHETYPE_STATS } from '../../src/simulation/archetypes';
+import {
+  ARCHETYPES,
+  BALANCE,
+  SIGNATURE,
+  ARCHETYPE_STATS
+} from '../../src/simulation/archetypes';
 import { adaptArchetype } from '../../src/simulation/adapters/archetypeAdapter';
 
 describe('player-mode archetypes system', () => {
@@ -34,13 +39,15 @@ describe('player-mode archetypes system', () => {
 
   it('should adapt unknown archetypes to Berserker with warning', () => {
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    
+
     const result = adaptArchetype('unknown_type');
     expect(result).toBe('Berserker');
     expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Unknown archetype "unknown_type", defaulting to Berserker')
+      expect.stringContaining(
+        'Unknown archetype "unknown_type", defaulting to Berserker'
+      )
     );
-    
+
     consoleSpy.mockRestore();
   });
 

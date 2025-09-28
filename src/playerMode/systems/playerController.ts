@@ -72,10 +72,10 @@ export class PlayerController {
 
     // Update time-based states
     this.updateTimedStates(now);
-    
+
     // Regenerate stamina
     this.updateStamina(deltaMs, now);
-    
+
     // Process input
     this.processMovement(input, deltaSeconds);
     this.processDash(input, now);
@@ -103,15 +103,19 @@ export class PlayerController {
    * Apply block to incoming damage
    */
   applyBlock(damage: number): { blockedDamage: number; staminaCost: number } {
-    if (!this.canBlockAttack({ x: 0, y: 0 })) { // Position check already done
+    if (!this.canBlockAttack({ x: 0, y: 0 })) {
+      // Position check already done
       return { blockedDamage: 0, staminaCost: 0 };
     }
 
-    const staminaCost = Math.max(BALANCE.block.minCost, BALANCE.block.drainPerHit);
+    const staminaCost = Math.max(
+      BALANCE.block.minCost,
+      BALANCE.block.drainPerHit
+    );
     if (this.state.stamina >= staminaCost) {
       this.state.stamina -= staminaCost;
       this.state.lastStaminaUse = Date.now();
-      
+
       // Block reduces damage by 60%
       const blockedDamage = damage * 0.6;
       return { blockedDamage, staminaCost };
@@ -169,20 +173,22 @@ export class PlayerController {
     }
 
     const regenAmount = (BALANCE.staminaRegenPerSec * deltaMs) / 1000;
-    this.state.stamina = Math.min(BALANCE.staminaMax, this.state.stamina + regenAmount);
+    this.state.stamina = Math.min(
+      BALANCE.staminaMax,
+      this.state.stamina + regenAmount
+    );
   }
 
   private processMovement(input: KeybindState, deltaSeconds: number): void {
     const movement = this.getMovementVector(input);
-    
+
     if (movement.x !== 0 || movement.y !== 0) {
       // Update rotation to face movement direction
       this.state.rotation = Math.atan2(movement.y, movement.x);
 
       // Apply movement speed
-      const speed = this.state.isDashing ? 
-        BALANCE.dash.speedMul * 2.5 : 2.5; // Base movement speed
-      
+      const speed = this.state.isDashing ? BALANCE.dash.speedMul * 2.5 : 2.5; // Base movement speed
+
       this.state.position.x += movement.x * speed * deltaSeconds;
       this.state.position.y += movement.y * speed * deltaSeconds;
 
@@ -194,7 +200,11 @@ export class PlayerController {
   }
 
   private processDash(input: KeybindState, now: number): void {
-    if (input.dash && !this.state.isDashing && this.state.stamina >= BALANCE.dash.cost) {
+    if (
+      input.dash &&
+      !this.state.isDashing &&
+      this.state.stamina >= BALANCE.dash.cost
+    ) {
       this.state.stamina -= BALANCE.dash.cost;
       this.state.lastStaminaUse = now;
       this.state.isDashing = true;
@@ -211,8 +221,9 @@ export class PlayerController {
 
   private processBlock(input: KeybindState): void {
     const wasBlocking = this.state.isBlocking;
-    this.state.isBlocking = input.block && this.state.stamina >= BALANCE.block.minCost;
-    
+    this.state.isBlocking =
+      input.block && this.state.stamina >= BALANCE.block.minCost;
+
     if (this.state.isBlocking) {
       this.state.blockDirection = this.state.rotation;
     }
@@ -220,7 +231,10 @@ export class PlayerController {
     if (this.state.isBlocking !== wasBlocking) {
       this.actions.push({
         type: 'block',
-        data: { blocking: this.state.isBlocking, direction: this.state.blockDirection }
+        data: {
+          blocking: this.state.isBlocking,
+          direction: this.state.blockDirection
+        }
       });
     }
   }

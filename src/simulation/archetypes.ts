@@ -3,9 +3,9 @@
  * Defines the three main orc types and their balance values
  */
 
-export type OrcArchetype = "Archer" | "Berserker" | "Trapper";
+export type OrcArchetype = 'Archer' | 'Berserker' | 'Trapper';
 
-export const ARCHETYPES: OrcArchetype[] = ["Archer", "Berserker", "Trapper"];
+export const ARCHETYPES: OrcArchetype[] = ['Archer', 'Berserker', 'Trapper'];
 
 /**
  * Balance constants for all combat mechanics
@@ -37,7 +37,7 @@ export const BALANCE = {
  */
 export const SIGNATURE = {
   Archer: {
-    name: "Volley",
+    name: 'Volley',
     arrows: 5,
     spreadDeg: 16,
     dmgPer: 12,
@@ -47,7 +47,7 @@ export const SIGNATURE = {
   },
 
   Berserker: {
-    name: "Rage Cleave",
+    name: 'Rage Cleave',
     radius: 1.6,
     dmg: 35,
     stagger: 0.8,
@@ -57,7 +57,7 @@ export const SIGNATURE = {
   },
 
   Trapper: {
-    name: "Snap Trap",
+    name: 'Snap Trap',
     placeTimeMs: 200,
     armMs: 150,
     rootMs: 1200,

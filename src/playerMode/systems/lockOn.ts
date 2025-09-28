@@ -47,18 +47,20 @@ export class LockOnController {
    */
   getCurrentTarget(): LockOnTarget | undefined {
     if (!this.state.currentTarget) return undefined;
-    return this.state.targets.find(t => t.id === this.state.currentTarget);
+    return this.state.targets.find((t) => t.id === this.state.currentTarget);
   }
 
   /**
    * Update available targets
    */
   updateTargets(targets: LockOnTarget[]): void {
-    this.state.targets = targets.filter(t => t.isAlive);
-    
+    this.state.targets = targets.filter((t) => t.isAlive);
+
     // Clear current target if it's no longer available
     if (this.state.currentTarget) {
-      const currentExists = this.state.targets.some(t => t.id === this.state.currentTarget);
+      const currentExists = this.state.targets.some(
+        (t) => t.id === this.state.currentTarget
+      );
       if (!currentExists) {
         this.state.currentTarget = undefined;
       }
@@ -93,7 +95,7 @@ export class LockOnController {
       return true;
     }
 
-    const target = this.state.targets.find(t => t.id === targetId);
+    const target = this.state.targets.find((t) => t.id === targetId);
     if (target) {
       this.state.currentTarget = targetId;
       return true;
@@ -139,16 +141,23 @@ export class LockOnController {
   /**
    * Get all valid targets in range for UI display
    */
-  getValidTargets(playerPosition: Point2D, playerRotation: number): LockOnTarget[] {
-    return this.state.targets.filter(target => 
-      this.isTargetInCone(playerPosition, playerRotation, target) &&
-      this.isTargetInRange(playerPosition, target)
+  getValidTargets(
+    playerPosition: Point2D,
+    playerRotation: number
+  ): LockOnTarget[] {
+    return this.state.targets.filter(
+      (target) =>
+        this.isTargetInCone(playerPosition, playerRotation, target) &&
+        this.isTargetInRange(playerPosition, target)
     );
   }
 
-  private findNextTarget(playerPosition: Point2D, playerRotation: number): LockOnTarget | undefined {
+  private findNextTarget(
+    playerPosition: Point2D,
+    playerRotation: number
+  ): LockOnTarget | undefined {
     const validTargets = this.getValidTargets(playerPosition, playerRotation);
-    
+
     if (validTargets.length === 0) return undefined;
 
     // Sort by distance, prefer closest
@@ -161,15 +170,25 @@ export class LockOnController {
     return validTargets[0];
   }
 
-  private isTargetValid(playerPosition: Point2D, target: LockOnTarget): boolean {
+  private isTargetValid(
+    playerPosition: Point2D,
+    target: LockOnTarget
+  ): boolean {
     return target.isAlive && this.isTargetInRange(playerPosition, target);
   }
 
-  private isTargetInRange(playerPosition: Point2D, target: LockOnTarget): boolean {
+  private isTargetInRange(
+    playerPosition: Point2D,
+    target: LockOnTarget
+  ): boolean {
     return distance(playerPosition, target.position) <= this.state.maxRange;
   }
 
-  private isTargetInCone(playerPosition: Point2D, playerRotation: number, target: LockOnTarget): boolean {
+  private isTargetInCone(
+    playerPosition: Point2D,
+    playerRotation: number,
+    target: LockOnTarget
+  ): boolean {
     const targetAngle = angle(playerPosition, target.position);
     return withinArc(playerRotation, targetAngle, this.state.forwardConeAngle);
   }
@@ -185,6 +204,9 @@ export class LockOnController {
    * Set forward cone angle
    */
   setConeAngle(angleRadians: number): void {
-    this.state.forwardConeAngle = Math.max(0.1, Math.min(Math.PI * 2, angleRadians));
+    this.state.forwardConeAngle = Math.max(
+      0.1,
+      Math.min(Math.PI * 2, angleRadians)
+    );
   }
 }

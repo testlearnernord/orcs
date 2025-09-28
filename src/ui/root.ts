@@ -294,7 +294,7 @@ export class NemesisUI {
   private syncModeLayout(): void {
     const isFreeRoam = this.modeState.mode === 'freeRoam';
     const isPlayerMode = this.modeState.mode === 'player';
-    
+
     if (this.appRoot) {
       if (isFreeRoam || isPlayerMode) {
         this.appRoot.setAttribute('hidden', 'true');
@@ -306,7 +306,7 @@ export class NemesisUI {
         this.appRoot.style.display = ''; // Reset to CSS default
       }
     }
-    
+
     if (isFreeRoam) {
       this.openFreeRoam();
       this.closePlayerMode();
@@ -425,7 +425,7 @@ export class NemesisUI {
       }
     });
     root.appendChild(this.freeRoamContainer);
-    
+
     // Create player mode container
     this.playerModeContainer = document.createElement('div');
     this.playerModeContainer.className = 'player-mode-shell';
@@ -441,7 +441,7 @@ export class NemesisUI {
       }
     });
     root.appendChild(this.playerModeContainer);
-    
+
     this.highlightPortal.attach(document.body);
 
     this.ranksEl = app.querySelector('#ranks');

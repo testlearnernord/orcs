@@ -49,7 +49,7 @@ export function circleOverlap(a: Circle, b: Circle): boolean {
   const dx = a.x - b.x;
   const dy = a.y - b.y;
   const distance = Math.sqrt(dx * dx + dy * dy);
-  return distance < (a.radius + b.radius);
+  return distance < a.radius + b.radius;
 }
 
 /**
@@ -58,7 +58,7 @@ export function circleOverlap(a: Circle, b: Circle): boolean {
 export function pointInCircle(point: Point2D, circle: Circle): boolean {
   const dx = point.x - circle.x;
   const dy = point.y - circle.y;
-  return (dx * dx + dy * dy) <= (circle.radius * circle.radius);
+  return dx * dx + dy * dy <= circle.radius * circle.radius;
 }
 
 /**
@@ -80,11 +80,11 @@ export function aabbCircleOverlap(aabb: AABB, circle: Circle): boolean {
   // Find closest point on AABB to circle center
   const closestX = Math.max(aabb.x, Math.min(circle.x, aabb.x + aabb.width));
   const closestY = Math.max(aabb.y, Math.min(circle.y, aabb.y + aabb.height));
-  
+
   // Check if closest point is within circle radius
   const dx = circle.x - closestX;
   const dy = circle.y - closestY;
-  return (dx * dx + dy * dy) <= (circle.radius * circle.radius);
+  return dx * dx + dy * dy <= circle.radius * circle.radius;
 }
 
 /**
@@ -119,15 +119,15 @@ export function normalizeAngle(radians: number): number {
  * Check if target angle is within arc from source direction
  */
 export function withinArc(
-  sourceAngle: number, 
-  targetAngle: number, 
+  sourceAngle: number,
+  targetAngle: number,
   arcRadians: number
 ): boolean {
   const normalizedSource = normalizeAngle(sourceAngle);
   const normalizedTarget = normalizeAngle(targetAngle);
-  
+
   const angleDiff = Math.abs(normalizedTarget - normalizedSource);
-  const minDiff = Math.min(angleDiff, (Math.PI * 2) - angleDiff);
-  
+  const minDiff = Math.min(angleDiff, Math.PI * 2 - angleDiff);
+
   return minDiff <= arcRadians / 2;
 }

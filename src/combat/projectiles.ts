@@ -26,7 +26,10 @@ export interface ProjectileTarget {
   radius: number;
 }
 
-export type ProjectileHitCallback = (projectile: Projectile, target: ProjectileTarget) => void;
+export type ProjectileHitCallback = (
+  projectile: Projectile,
+  target: ProjectileTarget
+) => void;
 
 /**
  * Manager for all projectiles in the combat system
@@ -55,7 +58,7 @@ export class ProjectileManager {
     autoAimTarget?: string
   ): string {
     const id = `projectile_${this.nextId++}`;
-    
+
     // Calculate velocity vector
     const direction = angle(startPos, targetPos);
     const velocity: Point2D = {
@@ -104,8 +107,8 @@ export class ProjectileManager {
     const angleStep = count > 1 ? spreadAngle / (count - 1) : 0;
 
     for (let i = 0; i < count; i++) {
-      const currentAngle = baseDirection - halfSpread + (i * angleStep);
-      
+      const currentAngle = baseDirection - halfSpread + i * angleStep;
+
       // Calculate target position for this projectile
       const projectileTarget: Point2D = {
         x: startPos.x + Math.cos(currentAngle) * 10, // Arbitrary distance for direction
@@ -123,7 +126,7 @@ export class ProjectileManager {
         kind,
         autoAimTarget
       );
-      
+
       projectileIds.push(id);
     }
 
@@ -148,15 +151,21 @@ export class ProjectileManager {
 
       // Apply auto-aim if target exists
       if (projectile.autoAimTarget) {
-        const target = targets.find(t => t.id === projectile.autoAimTarget);
+        const target = targets.find((t) => t.id === projectile.autoAimTarget);
         if (target) {
           const aimStrength = 0.1; // Subtle correction
           const toTarget = angle(projectile.position, target.position);
-          const currentDirection = Math.atan2(projectile.velocity.y, projectile.velocity.x);
-          const speed = Math.sqrt(projectile.velocity.x ** 2 + projectile.velocity.y ** 2);
-          
+          const currentDirection = Math.atan2(
+            projectile.velocity.y,
+            projectile.velocity.x
+          );
+          const speed = Math.sqrt(
+            projectile.velocity.x ** 2 + projectile.velocity.y ** 2
+          );
+
           // Lerp towards target direction
-          const newDirection = currentDirection + (toTarget - currentDirection) * aimStrength;
+          const newDirection =
+            currentDirection + (toTarget - currentDirection) * aimStrength;
           projectile.velocity.x = Math.cos(newDirection) * speed;
           projectile.velocity.y = Math.sin(newDirection) * speed;
         }
@@ -172,7 +181,7 @@ export class ProjectileManager {
         if (target.id === projectile.sourceId) continue; // Don't hit self
 
         const dist = distance(projectile.position, target.position);
-        if (dist <= (target.radius + projectile.size)) {
+        if (dist <= target.radius + projectile.size) {
           // Hit detected
           const hit: Hit = {
             sourceId: projectile.sourceId,
@@ -203,7 +212,7 @@ export class ProjectileManager {
    * Get all active projectiles
    */
   getProjectiles(): Projectile[] {
-    return Array.from(this.projectiles.values()).filter(p => p.isActive);
+    return Array.from(this.projectiles.values()).filter((p) => p.isActive);
   }
 
   /**

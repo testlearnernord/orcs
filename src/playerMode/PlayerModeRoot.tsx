@@ -59,45 +59,45 @@ export const PlayerModeRoot: React.FC = () => {
 
       console.log('[PlayerMode] Initializing systems...');
 
-    // Initialize game systems
-    const keybinds = new PlayerKeybinds();
-    const playerController = new PlayerController({ x: 0, y: 0 });
-    const camera = new CameraController({ x: 0, y: 0 });
-    const lockOn = new LockOnController();
-    const arena = new TestArena();
-    const projectiles = new ProjectileManager();
-    const playerHealth = new HealthManager('player', 100);
+      // Initialize game systems
+      const keybinds = new PlayerKeybinds();
+      const playerController = new PlayerController({ x: 0, y: 0 });
+      const camera = new CameraController({ x: 0, y: 0 });
+      const lockOn = new LockOnController();
+      const arena = new TestArena();
+      const projectiles = new ProjectileManager();
+      const playerHealth = new HealthManager('player', 100);
 
-    systemsRef.current = {
-      keybinds,
-      playerController,
-      camera,
-      lockOn,
-      arena,
-      projectiles,
-      playerHealth
-    };
+      systemsRef.current = {
+        keybinds,
+        playerController,
+        camera,
+        lockOn,
+        arena,
+        projectiles,
+        playerHealth
+      };
 
-    lastFrameTimeRef.current = Date.now();
-    setState(prev => ({ ...prev, isInitialized: true }));
+      lastFrameTimeRef.current = Date.now();
+      setState((prev) => ({ ...prev, isInitialized: true }));
 
-    console.log('[PlayerMode] Systems initialized, starting game loop...');
+      console.log('[PlayerMode] Systems initialized, starting game loop...');
 
-    // Start game loop
-    const gameLoop = () => {
-      const now = Date.now();
-      const deltaMs = now - lastFrameTimeRef.current;
-      
-      if (systemsRef.current && deltaMs > 0) {
-        updateGame(deltaMs);
-        renderGame();
-      }
+      // Start game loop
+      const gameLoop = () => {
+        const now = Date.now();
+        const deltaMs = now - lastFrameTimeRef.current;
 
-      lastFrameTimeRef.current = now;
+        if (systemsRef.current && deltaMs > 0) {
+          updateGame(deltaMs);
+          renderGame();
+        }
+
+        lastFrameTimeRef.current = now;
+        animationRef.current = requestAnimationFrame(gameLoop);
+      };
+
       animationRef.current = requestAnimationFrame(gameLoop);
-    };
-
-    animationRef.current = requestAnimationFrame(gameLoop);
     }, 100); // Wait 100ms for canvas to be ready
 
     // Cleanup
@@ -117,8 +117,9 @@ export const PlayerModeRoot: React.FC = () => {
   const updateGame = (deltaMs: number) => {
     if (!systemsRef.current) return;
 
-    const { keybinds, playerController, camera, lockOn, arena, projectiles } = systemsRef.current;
-    
+    const { keybinds, playerController, camera, lockOn, arena, projectiles } =
+      systemsRef.current;
+
     // Update input
     keybinds.update();
     const input = keybinds.getState();
@@ -128,7 +129,7 @@ export const PlayerModeRoot: React.FC = () => {
       arena.reset();
       playerController.reset(arena.getPlayerSpawn());
       camera.snapTo(arena.getPlayerSpawn());
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         signatureCooldowns: {
           Archer: 0,
@@ -147,18 +148,21 @@ export const PlayerModeRoot: React.FC = () => {
 
     // Update lock-on system
     const enemies = arena.getEnemies();
-    const lockOnTargets = enemies.map(enemy => ({
+    const lockOnTargets = enemies.map((enemy) => ({
       id: enemy.id,
       position: enemy.position,
       isAlive: enemy.isAlive
     }));
-    
+
     lockOn.updateTargets(lockOnTargets);
     lockOn.update(playerState.position);
 
     // Handle lock-on toggle
     if (input.lockOnToggled) {
-      const wasLocked = lockOn.toggleLockOn(playerState.position, playerState.rotation);
+      const wasLocked = lockOn.toggleLockOn(
+        playerState.position,
+        playerState.rotation
+      );
       if (wasLocked) {
         camera.setLockOnTarget(lockOn.getTargetPosition());
       } else {
@@ -177,14 +181,20 @@ export const PlayerModeRoot: React.FC = () => {
     // Update systems
     camera.update(deltaMs);
     arena.update(deltaMs);
-    projectiles.update(deltaMs, lockOnTargets.map(t => ({ ...t, radius: 0.5 })));
+    projectiles.update(
+      deltaMs,
+      lockOnTargets.map((t) => ({ ...t, radius: 0.5 }))
+    );
 
     // Update cooldowns
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       signatureCooldowns: {
         Archer: Math.max(0, prev.signatureCooldowns.Archer - deltaMs / 1000),
-        Berserker: Math.max(0, prev.signatureCooldowns.Berserker - deltaMs / 1000),
+        Berserker: Math.max(
+          0,
+          prev.signatureCooldowns.Berserker - deltaMs / 1000
+        ),
         Trapper: Math.max(0, prev.signatureCooldowns.Trapper - deltaMs / 1000)
       }
     }));
@@ -195,13 +205,13 @@ export const PlayerModeRoot: React.FC = () => {
 
     const { playerController } = systemsRef.current;
     const signatureData = SIGNATURE[state.playerArchetype];
-    
+
     // Check cooldown and stamina
     if (state.signatureCooldowns[state.playerArchetype] > 0) return;
     if (!playerController.consumeStamina(signatureData.staminaCost)) return;
 
     // Set cooldown
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       signatureCooldowns: {
         ...prev.signatureCooldowns,
@@ -230,7 +240,10 @@ export const PlayerModeRoot: React.FC = () => {
 
     // Save context and apply camera transform
     ctx.save();
-    ctx.translate(canvas.width / 2 - cameraPos.x * 50, canvas.height / 2 - cameraPos.y * 50);
+    ctx.translate(
+      canvas.width / 2 - cameraPos.x * 50,
+      canvas.height / 2 - cameraPos.y * 50
+    );
 
     // Draw arena grid
     drawGrid(ctx);
@@ -253,7 +266,7 @@ export const PlayerModeRoot: React.FC = () => {
   const drawGrid = (ctx: CanvasRenderingContext2D) => {
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 1;
-    
+
     // Draw grid lines
     for (let x = -10; x <= 10; x++) {
       ctx.beginPath();
@@ -261,7 +274,7 @@ export const PlayerModeRoot: React.FC = () => {
       ctx.lineTo(x * 50, 500);
       ctx.stroke();
     }
-    
+
     for (let y = -10; y <= 10; y++) {
       ctx.beginPath();
       ctx.moveTo(-500, y * 50);
@@ -273,7 +286,7 @@ export const PlayerModeRoot: React.FC = () => {
   const drawEntity = (ctx: CanvasRenderingContext2D, entity: any) => {
     const x = entity.position.x * 50;
     const y = entity.position.y * 50;
-    
+
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(entity.rotation);
@@ -282,7 +295,7 @@ export const PlayerModeRoot: React.FC = () => {
     if (entity.isPlayer) {
       ctx.fillStyle = '#4a9';
       ctx.fillRect(-15, -15, 30, 30);
-      
+
       // Draw direction indicator
       ctx.fillStyle = '#fff';
       ctx.fillRect(10, -3, 8, 6);
@@ -302,7 +315,8 @@ export const PlayerModeRoot: React.FC = () => {
       const healthPercent = entity.health.getHealthPercent();
       ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
       ctx.fillRect(x - 15, y - 25, 30, 4);
-      ctx.fillStyle = healthPercent > 0.5 ? '#4a4' : healthPercent > 0.2 ? '#aa4' : '#a44';
+      ctx.fillStyle =
+        healthPercent > 0.5 ? '#4a4' : healthPercent > 0.2 ? '#aa4' : '#a44';
       ctx.fillRect(x - 15, y - 25, 30 * healthPercent, 4);
     }
   };
@@ -310,7 +324,7 @@ export const PlayerModeRoot: React.FC = () => {
   const drawProjectile = (ctx: CanvasRenderingContext2D, projectile: any) => {
     const x = projectile.position.x * 50;
     const y = projectile.position.y * 50;
-    
+
     ctx.fillStyle = '#ff6';
     ctx.beginPath();
     ctx.arc(x, y, 3, 0, Math.PI * 2);
@@ -363,7 +377,7 @@ export const PlayerModeRoot: React.FC = () => {
           bottom: 0
         }}
       />
-      
+
       <PlayerHUD
         archetype={state.playerArchetype}
         stamina={playerState.stamina}
@@ -377,7 +391,10 @@ export const PlayerModeRoot: React.FC = () => {
 
       {lockOnState.currentTarget && (
         <LockOnMarker
-          targetPosition={lockOnState.targets.find(t => t.id === lockOnState.currentTarget)?.position ?? { x: 0, y: 0 }}
+          targetPosition={
+            lockOnState.targets.find((t) => t.id === lockOnState.currentTarget)
+              ?.position ?? { x: 0, y: 0 }
+          }
           cameraPosition={cameraPos}
           screenCenter={{ x: 400, y: 300 }}
           isActive={true}

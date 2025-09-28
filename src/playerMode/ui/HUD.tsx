@@ -26,8 +26,11 @@ export const PlayerHUD: React.FC<HUDProps> = ({
 }) => {
   const staminaPercent = (stamina / BALANCE.staminaMax) * 100;
   const signatureData = SIGNATURE[archetype];
-  const cooldownPercent = Math.max(0, (signatureCooldown / signatureData.cooldown) * 100);
-  
+  const cooldownPercent = Math.max(
+    0,
+    (signatureCooldown / signatureData.cooldown) * 100
+  );
+
   const hudStyles: React.CSSProperties = {
     position: 'fixed',
     top: 0,
@@ -53,7 +56,12 @@ export const PlayerHUD: React.FC<HUDProps> = ({
     justifyContent: 'center',
     fontWeight: 'bold',
     fontSize: '16px',
-    background: archetype === 'Archer' ? '#4a9' : archetype === 'Berserker' ? '#c44' : '#94a'
+    background:
+      archetype === 'Archer'
+        ? '#4a9'
+        : archetype === 'Berserker'
+          ? '#c44'
+          : '#94a'
   };
 
   const staminaBarStyles: React.CSSProperties = {
@@ -111,9 +119,7 @@ export const PlayerHUD: React.FC<HUDProps> = ({
     <div style={hudStyles}>
       {/* Archetype Info */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div style={archetypeIconStyles}>
-          {archetype[0]}
-        </div>
+        <div style={archetypeIconStyles}>{archetype[0]}</div>
         <span style={{ fontWeight: 'bold' }}>{archetype}</span>
       </div>
 
@@ -123,16 +129,16 @@ export const PlayerHUD: React.FC<HUDProps> = ({
         <div style={staminaBarStyles}>
           <div style={staminaFillStyles} />
         </div>
-        <div style={{ minWidth: '30px', textAlign: 'right' }}>{Math.round(stamina)}</div>
+        <div style={{ minWidth: '30px', textAlign: 'right' }}>
+          {Math.round(stamina)}
+        </div>
       </div>
 
       {/* Signature Move Cooldown */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <div>{signatureData.name}</div>
         <div style={signatureCooldownStyles}>
-          {cooldownPercent > 0 ? (
-            <div style={cooldownOverlayStyles} />
-          ) : null}
+          {cooldownPercent > 0 ? <div style={cooldownOverlayStyles} /> : null}
           <div style={{ position: 'relative', zIndex: 1 }}>E</div>
         </div>
       </div>
@@ -153,7 +159,8 @@ export const PlayerHUD: React.FC<HUDProps> = ({
 
       {/* Controls Hint */}
       <div style={controlsStyles}>
-        WASD: Move • Shift: Dash • Ctrl: Block • Alt: Lock-on • E: {signatureData.name} • R: Reset
+        WASD: Move • Shift: Dash • Ctrl: Block • Alt: Lock-on • E:{' '}
+        {signatureData.name} • R: Reset
       </div>
     </div>
   );
