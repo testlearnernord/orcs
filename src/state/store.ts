@@ -25,7 +25,7 @@ export class GameStore {
   tick(): CycleSummary {
     const previous = snapshotWorld(this.state);
     const summary = advanceCycle(this.state, this.rng);
-    
+
     // Create a new state reference to ensure UI reactivity
     this.state = {
       ...this.state,
@@ -38,12 +38,17 @@ export class GameStore {
       feed: [...this.state.feed],
       crown: { ...this.state.crown }
     };
-    
+
     // Debug logging for development
-    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debugWorld')) {
-      console.log(`[World] Cycle ${this.state.cycle}, Version ${this.state.version}, Officers: ${this.state.officers.length}, Deaths: ${summary.deaths.length}, Spawns: ${summary.spawns.length}`);
+    if (
+      typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).has('debugWorld')
+    ) {
+      console.log(
+        `[World] Cycle ${this.state.cycle}, Version ${this.state.version}, Officers: ${this.state.officers.length}, Deaths: ${summary.deaths.length}, Spawns: ${summary.spawns.length}`
+      );
     }
-    
+
     this.events.emit('cycle:completed', summary);
     summary.warcallsResolved.forEach((resolution) =>
       this.events.emit('warcall:resolved', resolution)
@@ -68,7 +73,7 @@ export class GameStore {
     const plan = planWarcall(this.state, this.rng, this.state.cycle);
     if (!plan) return undefined;
     enqueuePlannedWarcalls(this.state, [plan]);
-    
+
     // Create a new state reference to ensure UI reactivity
     this.state = {
       ...this.state,
@@ -76,7 +81,7 @@ export class GameStore {
       updatedAt: Date.now(),
       warcalls: [...this.state.warcalls]
     };
-    
+
     this.events.emit('warcall:planned', plan);
     this.events.emit('state:changed', this.state);
     return plan;

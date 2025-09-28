@@ -17,23 +17,23 @@ describe('GameStore Reactivity', () => {
 
     // State reference should be different
     expect(newState).not.toBe(initialState);
-    
+
     // Version should be incremented
     expect(newState.version).toBe(initialVersion + 1);
-    
+
     // Cycle should be incremented
     expect(newState.cycle).toBe(initialCycle + 1);
-    
+
     // updatedAt should be set
     expect(newState.updatedAt).toBeTypeOf('number');
     expect(newState.updatedAt).toBeGreaterThan(0);
-    
+
     // Officers array should be a new reference
     expect(newState.officers).not.toBe(initialState.officers);
-    
+
     // Officers count should remain stable or change based on simulation
     expect(newState.officers.length).toBeGreaterThanOrEqual(15); // Minimum expected officers
-    
+
     // Summary should reflect the changes
     expect(summary.cycle).toBe(newState.cycle);
   });
@@ -70,16 +70,16 @@ describe('GameStore Reactivity', () => {
     if (plan) {
       const newState = store.getState();
       const newWarcallCount = newState.warcalls.length;
-      
+
       // State reference should be different
       expect(newState).not.toBe(initialState);
-      
+
       // Version should be incremented
       expect(newState.version).toBe(initialVersion + 1);
-      
+
       // Warcalls array should be a new reference
       expect(newState.warcalls).not.toBe(initialState.warcalls);
-      
+
       // Should have one more warcall
       expect(newWarcallCount).toBe(initialWarcallCount + 1);
     } else {

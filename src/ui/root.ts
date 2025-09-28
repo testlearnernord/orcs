@@ -206,8 +206,13 @@ export class NemesisUI {
     });
     store.events.on('state:changed', (next) => {
       // Debug logging for development
-      if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debugWorld')) {
-        console.log(`[UI] State changed - Cycle ${next.cycle}, Version ${next.version}, Officers: ${next.officers.length}`);
+      if (
+        typeof window !== 'undefined' &&
+        new URLSearchParams(window.location.search).has('debugWorld')
+      ) {
+        console.log(
+          `[UI] State changed - Cycle ${next.cycle}, Version ${next.version}, Officers: ${next.officers.length}`
+        );
       }
       this.syncOfficerIndex(next.officers);
       this.renderOfficers(next);
