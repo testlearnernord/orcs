@@ -145,9 +145,9 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         if (!availableSets.length)
           throw new Error('No portrait atlases available');
         const { set, col, row } = chooseSetAndIndex(id, availableSets);
-        
+
         // Use deterministic portrait cropping with fixed pixel coordinates
-        // This follows the specifications with red frame (exact sprite cut) and 
+        // This follows the specifications with red frame (exact sprite cut) and
         // blue frame (face area visible and centered)
         const cropData = calculatePortraitCrop(set.id, col, row);
 
