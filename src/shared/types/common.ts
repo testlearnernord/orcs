@@ -98,7 +98,7 @@ export type Timestamp = number;
 export type Duration = number;
 
 // Generic result type for operations that can fail
-export type Result<T, E = AppError> = 
+export type Result<T, E = AppError> =
   | { success: true; data: T }
   | { success: false; error: E };
 

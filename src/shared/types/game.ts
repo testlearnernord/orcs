@@ -20,13 +20,9 @@ export interface Officer {
   deathCycle?: number;
 }
 
-export type OfficerRank = 
-  | 'GRUNT'
-  | 'SCOUT' 
-  | 'CAPTAIN'
-  | 'KING';
+export type OfficerRank = 'GRUNT' | 'SCOUT' | 'CAPTAIN' | 'KING';
 
-export type OrcArchetype = 
+export type OrcArchetype =
   | 'BERSERKER'
   | 'SHAMAN'
   | 'SCOUT'
@@ -51,7 +47,7 @@ export interface RelationshipEvent {
 }
 
 // Warcall types
-export type WarcallType = 
+export type WarcallType =
   | 'HUNT'
   | 'FEAST'
   | 'RAID'
@@ -142,7 +138,7 @@ export interface Location {
   resources?: string[];
 }
 
-export type LocationType = 
+export type LocationType =
   | 'STRONGHOLD'
   | 'VILLAGE'
   | 'WILDERNESS'
@@ -160,7 +156,7 @@ export interface SimulationEvent {
   impact: SimulationImpact[];
 }
 
-export type SimulationEventType = 
+export type SimulationEventType =
   | 'OFFICER_DEATH'
   | 'OFFICER_PROMOTION'
   | 'RELATIONSHIP_FORMED'
@@ -173,7 +169,11 @@ export type SimulationEventType =
   | 'ALLIANCE_FORMED';
 
 export interface SimulationImpact {
-  type: 'STAT_CHANGE' | 'RELATIONSHIP_CHANGE' | 'INVENTORY_CHANGE' | 'LOCATION_CHANGE';
+  type:
+    | 'STAT_CHANGE'
+    | 'RELATIONSHIP_CHANGE'
+    | 'INVENTORY_CHANGE'
+    | 'LOCATION_CHANGE';
   target: EntityId;
   field: string;
   oldValue: unknown;

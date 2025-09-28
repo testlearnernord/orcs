@@ -7,7 +7,9 @@ const rootAudioDir = 'audio';
 const srcAudioDir = 'src/assets/audio';
 
 // Determine target based on NODE_ENV or if docs exists
-const isProduction = process.env.NODE_ENV === 'production' || process.env.BUILD_MODE === 'production';
+const isProduction =
+  process.env.NODE_ENV === 'production' ||
+  process.env.BUILD_MODE === 'production';
 const targetDir = isProduction ? 'docs/audio' : 'public/audio';
 
 async function checkAndCopy(sourceDir, sourceName) {

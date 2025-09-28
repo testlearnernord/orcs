@@ -6,8 +6,12 @@ const localPortraitsDir = 'local-portraits';
 const srcPortraitsDir = 'src/assets/orcs/portraits';
 
 // Determine target based on NODE_ENV or if docs exists
-const isProduction = process.env.NODE_ENV === 'production' || process.env.BUILD_MODE === 'production';
-const targetDir = isProduction ? 'docs/assets/orcs/portraits' : 'public/assets/orcs/portraits';
+const isProduction =
+  process.env.NODE_ENV === 'production' ||
+  process.env.BUILD_MODE === 'production';
+const targetDir = isProduction
+  ? 'docs/assets/orcs/portraits'
+  : 'public/assets/orcs/portraits';
 
 async function checkAndCopy(sourceDir, sourceName) {
   try {

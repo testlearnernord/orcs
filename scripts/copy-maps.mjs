@@ -5,7 +5,9 @@ import { constants } from 'node:fs';
 const srcMapsDir = 'src/assets/maps';
 
 // Determine target based on NODE_ENV or if docs exists
-const isProduction = process.env.NODE_ENV === 'production' || process.env.BUILD_MODE === 'production';
+const isProduction =
+  process.env.NODE_ENV === 'production' ||
+  process.env.BUILD_MODE === 'production';
 const targetDir = isProduction ? 'docs/assets/maps' : 'public/assets/maps';
 
 async function copyMaps() {

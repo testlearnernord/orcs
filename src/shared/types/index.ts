@@ -7,7 +7,7 @@ export * from './common';
 export * from './game';
 
 // Type utilities for convenience
-export type { 
+export type {
   // From common.ts
   EntityId,
   CycleId,
@@ -35,7 +35,7 @@ export type {
   Duration,
   Result,
   ViewportInfo,
-  
+
   // From game.ts
   Officer,
   OfficerRank,
@@ -56,5 +56,5 @@ export type {
   SimulationEvent,
   SimulationEventType,
   SimulationImpact,
-  BalanceConfig,
+  BalanceConfig
 } from './game';

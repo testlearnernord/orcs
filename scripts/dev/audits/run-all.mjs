@@ -13,37 +13,49 @@ const root = process.cwd();
 
 async function runAllAudits() {
   console.log('🚀 Running all audit scripts...\n');
-  
+
   const startTime = Date.now();
-  
+
   try {
     // Run all audits
     console.log('1️⃣ Running imports audit...');
     const importsResult = await auditImports();
-    
+
     console.log('\n2️⃣ Running assets audit...');
     const assetsResult = await auditAssets();
-    
+
     console.log('\n3️⃣ Running duplicates audit...');
     const duplicatesResult = await auditDuplicates();
-    
+
     // Generate summary report
     const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-    const summaryReport = generateSummaryReport(importsResult, assetsResult, duplicatesResult, duration);
-    
+    const summaryReport = generateSummaryReport(
+      importsResult,
+      assetsResult,
+      duplicatesResult,
+      duration
+    );
+
     const summaryPath = join(root, 'reports', 'audit-summary.md');
     await writeFile(summaryPath, summaryReport, 'utf-8');
-    
+
     console.log(`\n✅ All audits complete! Summary written to ${summaryPath}`);
     console.log(`⏱️  Total time: ${duration}s`);
-    
+
     // Print quick summary to console
     console.log('\n📊 Quick Summary:');
-    console.log(`   • Unreferenced files: ${importsResult.unreferencedFiles.length}`);
-    console.log(`   • Unreferenced assets: ${assetsResult.unreferencedAssets.length}`);
-    console.log(`   • Exact duplicate groups: ${duplicatesResult.exactDuplicates.length}`);
-    console.log(`   • Potential space savings: ${formatFileSize(assetsResult.totalUnreferencedSize + duplicatesResult.potentialSavings)}`);
-    
+    console.log(
+      `   • Unreferenced files: ${importsResult.unreferencedFiles.length}`
+    );
+    console.log(
+      `   • Unreferenced assets: ${assetsResult.unreferencedAssets.length}`
+    );
+    console.log(
+      `   • Exact duplicate groups: ${duplicatesResult.exactDuplicates.length}`
+    );
+    console.log(
+      `   • Potential space savings: ${formatFileSize(assetsResult.totalUnreferencedSize + duplicatesResult.potentialSavings)}`
+    );
   } catch (error) {
     console.error('❌ Audit run failed:', error);
     process.exit(1);
@@ -56,9 +68,14 @@ function formatFileSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
-function generateSummaryReport(importsResult, assetsResult, duplicatesResult, duration) {
+function generateSummaryReport(
+  importsResult,
+  assetsResult,
+  duplicatesResult,
+  duration
+) {
   const timestamp = new Date().toISOString();
-  
+
   return `# Audit Summary Report
 
 Generated: ${timestamp}  
@@ -93,23 +110,31 @@ This report summarizes the findings from all audit scripts run on the codebase.
 ## Priority Actions
 
 ### 🔴 High Priority
-${assetsResult.unreferencedAssets.length > 0 || duplicatesResult.exactDuplicates.length > 0
-  ? `- Review and remove ${assetsResult.unreferencedAssets.length} unreferenced assets
+${
+  assetsResult.unreferencedAssets.length > 0 ||
+  duplicatesResult.exactDuplicates.length > 0
+    ? `- Review and remove ${assetsResult.unreferencedAssets.length} unreferenced assets
 - Consolidate ${duplicatesResult.exactDuplicates.length} exact duplicate file groups
 - Potential bundle size reduction: ${formatFileSize(assetsResult.totalUnreferencedSize + duplicatesResult.potentialSavings)}`
-  : '- No high-priority cleanup items found'}
+    : '- No high-priority cleanup items found'
+}
 
 ### 🟡 Medium Priority
-${importsResult.unreferencedFiles.length > 0 || duplicatesResult.sizeDuplicates.length > 0
-  ? `- Review ${importsResult.unreferencedFiles.length} unreferenced source files
+${
+  importsResult.unreferencedFiles.length > 0 ||
+  duplicatesResult.sizeDuplicates.length > 0
+    ? `- Review ${importsResult.unreferencedFiles.length} unreferenced source files
 - Investigate ${duplicatesResult.sizeDuplicates.length} size duplicate groups
 - Consider name standardization for ${duplicatesResult.nameDuplicates.length} name duplicate groups`
-  : '- No medium-priority cleanup items found'}
+    : '- No medium-priority cleanup items found'
+}
 
 ### 🟢 Low Priority
-${duplicatesResult.similarNames.length > 0
-  ? `- Review ${duplicatesResult.similarNames.length} similar name pairs for consistency`
-  : '- No low-priority cleanup items found'}
+${
+  duplicatesResult.similarNames.length > 0
+    ? `- Review ${duplicatesResult.similarNames.length} similar name pairs for consistency`
+    : '- No low-priority cleanup items found'
+}
 
 ## Detailed Reports
 

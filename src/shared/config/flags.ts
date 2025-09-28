@@ -8,27 +8,27 @@ interface FeatureFlags {
   DEV_OVERLAY: boolean;
   DEV_DEBUG_TOOLS: boolean;
   DEV_PERFORMANCE_MONITORING: boolean;
-  
+
   // Game mode features
   PLAYER_MODE_ENABLED: boolean;
   SPECTATE_MODE_ENABLED: boolean;
   FREE_ROAM_ENABLED: boolean;
-  
+
   // Simulation features
   ENHANCED_AI_LOGIC: boolean;
   ADVANCED_RELATIONSHIPS: boolean;
   WARCALL_SYSTEM: boolean;
-  
+
   // Combat features
   LOCK_ON_SYSTEM: boolean;
   SIGNATURE_MOVES: boolean;
   ADVANCED_PHYSICS: boolean;
-  
+
   // Audio/Visual features
   AUDIO_ENABLED: boolean;
   PORTRAIT_ATLASES: boolean;
   SPRITE_ANIMATIONS: boolean;
-  
+
   // Performance features
   LAZY_LOADING: boolean;
   CODE_SPLITTING: boolean;
@@ -41,17 +41,17 @@ interface FeatureFlags {
 const getEnvironmentFlags = (): Partial<FeatureFlags> => {
   const isDev = import.meta.env.DEV;
   const isProduction = import.meta.env.PROD;
-  
+
   return {
     // Dev features only in development
     DEV_OVERLAY: isDev,
     DEV_DEBUG_TOOLS: isDev,
     DEV_PERFORMANCE_MONITORING: isDev,
-    
+
     // Performance features enabled by default in production
     LAZY_LOADING: isProduction,
     CODE_SPLITTING: isProduction,
-    BUNDLE_ANALYSIS: isDev,
+    BUNDLE_ANALYSIS: isDev
   };
 };
 
@@ -61,21 +61,21 @@ const getEnvironmentFlags = (): Partial<FeatureFlags> => {
  */
 const getUrlFlags = (): Partial<FeatureFlags> => {
   if (typeof window === 'undefined') return {};
-  
+
   const urlParams = new URLSearchParams(window.location.search);
   const flagsParam = urlParams.get('flags');
-  
+
   if (!flagsParam) return {};
-  
+
   const flags: Partial<FeatureFlags> = {};
-  
-  flagsParam.split(',').forEach(flag => {
+
+  flagsParam.split(',').forEach((flag) => {
     const [key, value] = flag.split(':');
     if (key && value && key in DEFAULT_FLAGS) {
       flags[key as keyof FeatureFlags] = value.toLowerCase() === 'true';
     }
   });
-  
+
   return flags;
 };
 
@@ -84,7 +84,7 @@ const getUrlFlags = (): Partial<FeatureFlags> => {
  */
 const getStorageFlags = (): Partial<FeatureFlags> => {
   if (typeof localStorage === 'undefined') return {};
-  
+
   try {
     const stored = localStorage.getItem('orcs:feature-flags');
     return stored ? JSON.parse(stored) : {};
@@ -101,31 +101,31 @@ const DEFAULT_FLAGS: FeatureFlags = {
   DEV_OVERLAY: false,
   DEV_DEBUG_TOOLS: false,
   DEV_PERFORMANCE_MONITORING: false,
-  
+
   // Game mode features - all enabled by default
   PLAYER_MODE_ENABLED: true,
   SPECTATE_MODE_ENABLED: true,
   FREE_ROAM_ENABLED: true,
-  
+
   // Simulation features - all enabled
   ENHANCED_AI_LOGIC: true,
   ADVANCED_RELATIONSHIPS: true,
   WARCALL_SYSTEM: true,
-  
+
   // Combat features - all enabled
   LOCK_ON_SYSTEM: true,
   SIGNATURE_MOVES: true,
   ADVANCED_PHYSICS: true,
-  
+
   // Audio/Visual features - all enabled
   AUDIO_ENABLED: true,
   PORTRAIT_ATLASES: true,
   SPRITE_ANIMATIONS: true,
-  
+
   // Performance features
   LAZY_LOADING: false,
   CODE_SPLITTING: false,
-  BUNDLE_ANALYSIS: false,
+  BUNDLE_ANALYSIS: false
 };
 
 /**
@@ -139,7 +139,7 @@ export const FLAGS: FeatureFlags = {
   ...DEFAULT_FLAGS,
   ...getEnvironmentFlags(),
   ...getStorageFlags(),
-  ...getUrlFlags(),
+  ...getUrlFlags()
 };
 
 /**
@@ -152,12 +152,17 @@ export const isFeatureEnabled = (flag: keyof FeatureFlags): boolean => {
 /**
  * Utility function to set feature flags at runtime (dev only)
  */
-export const setFeatureFlag = (flag: keyof FeatureFlags, enabled: boolean): void => {
+export const setFeatureFlag = (
+  flag: keyof FeatureFlags,
+  enabled: boolean
+): void => {
   if (!FLAGS.DEV_DEBUG_TOOLS) {
-    console.warn('Feature flag modification only available in development mode');
+    console.warn(
+      'Feature flag modification only available in development mode'
+    );
     return;
   }
-  
+
   try {
     const stored = getStorageFlags();
     const updated = { ...stored, [flag]: enabled };
@@ -176,7 +181,7 @@ export const resetFeatureFlags = (): void => {
     console.warn('Feature flag reset only available in development mode');
     return;
   }
-  
+
   try {
     localStorage.removeItem('orcs:feature-flags');
     console.log('Feature flags reset. Reload to apply.');
@@ -190,7 +195,7 @@ export const resetFeatureFlags = (): void => {
  */
 export const debugFlags = (): void => {
   if (!FLAGS.DEV_DEBUG_TOOLS) return;
-  
+
   console.table(FLAGS);
 };
 
@@ -200,6 +205,6 @@ if (FLAGS.DEV_DEBUG_TOOLS && typeof window !== 'undefined') {
     flags: FLAGS,
     setFlag: setFeatureFlag,
     resetFlags: resetFeatureFlags,
-    debugFlags,
+    debugFlags
   };
 }

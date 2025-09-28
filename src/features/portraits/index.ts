@@ -20,5 +20,5 @@ export const DEFAULT_PORTRAIT_CONFIG: PortraitFeatureConfig = {
   enabled: true,
   preloadAllAtlases: false,
   fallbackToRemote: true,
-  cacheAtlases: true,
+  cacheAtlases: true
 };
