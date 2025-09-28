@@ -44,6 +44,13 @@ export class PlayerEntity {
       iframeEndTime: 0,
       lastStaminaUse: 0,
       blockDirection: 0,
+      // New properties
+      motion: 'idle',
+      direction: 'D',
+      isLockedOn: false,
+      speed: 0,
+      walkPhase: 0,
+      // Entity-specific properties
       archetype: config.archetype,
       isExecutingSignature: false,
       signatureEndTime: 0

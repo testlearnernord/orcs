@@ -8,7 +8,6 @@ import { LockOnMarker } from './ui/LockOnMarker';
 import { PlayerKeybinds } from './input/keybinds';
 import { PlayerController } from './systems/playerController';
 import { CameraController } from './systems/camera';
-import { LockOnController } from './systems/lockOn';
 import { TestArena } from './scenes/TestArena';
 import { ProjectileManager } from '../combat/projectiles';
 import { HealthManager } from '../combat/health';
@@ -43,7 +42,6 @@ export const PlayerModeRoot: React.FC = () => {
     keybinds: PlayerKeybinds;
     playerController: PlayerController;
     camera: CameraController;
-    lockOn: LockOnController;
     arena: TestArena;
     projectiles: ProjectileManager;
     playerHealth: HealthManager;
@@ -69,7 +67,6 @@ export const PlayerModeRoot: React.FC = () => {
       const keybinds = new PlayerKeybinds();
       const playerController = new PlayerController({ x: 0, y: 0 });
       const camera = new CameraController({ x: 0, y: 0 });
-      const lockOn = new LockOnController();
       const arena = new TestArena();
       const projectiles = new ProjectileManager();
       const playerHealth = new HealthManager('player', 100);
@@ -87,7 +84,6 @@ export const PlayerModeRoot: React.FC = () => {
         keybinds,
         playerController,
         camera,
-        lockOn,
         arena,
         projectiles,
         playerHealth,
@@ -147,7 +143,6 @@ export const PlayerModeRoot: React.FC = () => {
       keybinds,
       playerController,
       camera,
-      lockOn,
       arena,
       projectiles,
       playerEntity,
@@ -197,6 +192,16 @@ export const PlayerModeRoot: React.FC = () => {
       }));
     }
 
+    // Update player controller with available targets for lock-on
+    const enemies = arena.getEnemies();
+    const lockOnTargets = enemies.map((enemy) => ({
+      id: enemy.id,
+      pos: enemy.position,
+      alive: enemy.isAlive
+    }));
+
+    playerController.setAvailableTargets(lockOnTargets);
+
     // Update player controller
     playerController.update(deltaMs, input);
     const playerState = playerController.getState();
@@ -205,36 +210,19 @@ export const PlayerModeRoot: React.FC = () => {
     // Update player entity with controller state and actions
     playerEntity.update(playerState, playerActions);
 
-    // Update camera to follow player
+    // Update camera to follow player with lock-on support
     camera.setTarget(playerState.position);
 
-    // Update lock-on system
-    const enemies = arena.getEnemies();
-    const lockOnTargets = enemies.map((enemy) => ({
-      id: enemy.id,
-      position: enemy.position,
-      isAlive: enemy.isAlive
-    }));
-
-    lockOn.updateTargets(lockOnTargets);
-    lockOn.update(playerState.position);
-
-    // Handle lock-on toggle
-    if (input.lockOnToggled) {
-      const wasLocked = lockOn.toggleLockOn(
-        playerState.position,
-        playerState.rotation
-      );
-      if (wasLocked) {
-        camera.setLockOnTarget(lockOn.getTargetPosition());
-      } else {
-        camera.setLockOnTarget(undefined);
-      }
+    // Set camera lock-on target if active
+    const currentLockTarget = playerController.getCurrentLockOnTarget();
+    if (currentLockTarget) {
+      camera.setLockOnTarget(currentLockTarget.pos);
+    } else {
+      camera.setLockOnTarget(undefined);
     }
 
-    // Process player actions
-    const actions = playerController.getActions();
-    for (const action of actions) {
+    // Process player actions (removed duplicate getActions call)
+    for (const action of playerActions) {
       if (action.type === 'signature') {
         handleSignatureMove(action.data);
       }
@@ -245,7 +233,7 @@ export const PlayerModeRoot: React.FC = () => {
     arena.update(deltaMs);
     projectiles.update(
       deltaMs,
-      lockOnTargets.map((t) => ({ ...t, radius: 0.5 }))
+      lockOnTargets.map((t) => ({ ...t, position: t.pos, radius: 0.5 }))
     );
 
     // Update cooldowns
@@ -404,7 +392,8 @@ export const PlayerModeRoot: React.FC = () => {
   }
 
   const playerState = systemsRef.current.playerController.getState();
-  const lockOnState = systemsRef.current.lockOn.getState();
+  const currentLockTarget =
+    systemsRef.current.playerController.getCurrentLockOnTarget();
   const cameraPos = systemsRef.current.camera.getPosition();
   const arena = systemsRef.current.arena;
   const enemies = arena.getEnemies();
@@ -431,19 +420,16 @@ export const PlayerModeRoot: React.FC = () => {
         archetype={state.playerArchetype}
         stamina={playerState.stamina}
         signatureCooldown={state.signatureCooldowns[state.playerArchetype]}
-        isLockingOn={lockOnState.currentTarget !== undefined}
+        isLockingOn={playerState.isLockedOn}
         waveInfo={{
           current: 1,
           enemiesLeft: enemies.length
         }}
       />
 
-      {lockOnState.currentTarget && (
+      {currentLockTarget && (
         <LockOnMarker
-          targetPosition={
-            lockOnState.targets.find((t) => t.id === lockOnState.currentTarget)
-              ?.position ?? { x: 0, y: 0 }
-          }
+          targetPosition={currentLockTarget.pos}
           cameraPosition={cameraPos}
           screenCenter={{ x: 400, y: 300 }}
           isActive={true}
