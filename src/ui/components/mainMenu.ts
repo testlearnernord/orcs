@@ -4,6 +4,7 @@
  */
 
 import { AudioManager } from '@ui/audio/manager';
+import { FLAGS } from '@state/flags';
 
 export type MenuMode = 'spectate' | 'player' | 'freeRoam';
 
@@ -68,9 +69,9 @@ export class MainMenu {
               <span class="option-title">SPECTATE</span>
               <span class="option-description">Beobachte die Orc-Hierarchie</span>
             </button>
-            <button class="menu-option menu-option-disabled" data-mode="player" disabled>
+            <button class="menu-option${FLAGS.PLAYER_MODE ? '' : ' menu-option-disabled'}" data-mode="player"${FLAGS.PLAYER_MODE ? '' : ' disabled'}>
               <span class="option-title">PLAYER</span>
-              <span class="option-description">Nicht verfügbar</span>
+              <span class="option-description">${FLAGS.PLAYER_MODE ? 'Kampf-Sandbox' : 'Nicht verfügbar'}</span>
             </button>
             <button class="menu-option" data-mode="freeRoam">
               <span class="option-title">FREE ROAM</span>
