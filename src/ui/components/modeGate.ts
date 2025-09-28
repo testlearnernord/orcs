@@ -49,7 +49,7 @@ export class ModeGate {
             FLAGS.PLAYER_MODE ? '' : 'class="is-disabled" disabled'
           }>
             <span class="mode-gate__mode">Player</span>
-            <span class="mode-gate__hint">Coming soon</span>
+            <span class="mode-gate__hint">${FLAGS.PLAYER_MODE ? 'Kampf-Sandbox bereit' : 'Coming soon'}</span>
           </button>
         </div>
         <footer>
