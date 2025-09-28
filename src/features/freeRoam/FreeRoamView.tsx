@@ -210,7 +210,17 @@ export function FreeRoamView({
       // Render legacy generated map (only if it's a WorldMap)
       renderWorldMap(canvas, state.map as any);
     }
-  }, [useHandcrafted, handcraftedState.map, state, camera, showDebug]);
+  }, [
+    useHandcrafted,
+    handcraftedState.map,
+    handcraftedState.officers,
+    handcraftedState.playerPosition,
+    handcraftedState.cycle,
+    legacyState.map,
+    legacyState.cycle,
+    camera,
+    showDebug
+  ]);
 
   // Debug toggle (F2)
   useEffect(() => {

@@ -3,6 +3,7 @@
  */
 
 import type { HandMapMeta, HandMapData } from './types';
+import { mapAssetPath } from '@/lib/paths';
 
 /**
  * Load an image from a URL
@@ -107,14 +108,12 @@ export function canStandPx(map: HandMapData, px: number, py: number): boolean {
  * Load a handcrafted map by ID
  */
 export async function loadHandMap(mapId: string): Promise<HandMapData> {
-  const basePath = `/orcs/assets/maps/${mapId}`;
-
   try {
-    // Load all assets in parallel
+    // Load all assets in parallel using base URL-safe paths
     const [meta, terrain, collision] = await Promise.all([
-      loadJson<HandMapMeta>(`${basePath}/meta.json`),
-      loadImage(`${basePath}/terrain.png`),
-      loadImage(`${basePath}/collision.png`)
+      loadJson<HandMapMeta>(mapAssetPath(mapId, 'meta.json')),
+      loadImage(mapAssetPath(mapId, 'terrain.png')),
+      loadImage(mapAssetPath(mapId, 'collision.png'))
     ]);
 
     // Validate meta data
