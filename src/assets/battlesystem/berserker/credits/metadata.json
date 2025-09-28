@@ -22,9 +22,7 @@
     "failed": []
   },
   "customAnimations": {
-    "exported": [
-      "slash_oversize"
-    ],
+    "exported": ["slash_oversize"],
     "failed": []
   },
   "frameSize": 64,
