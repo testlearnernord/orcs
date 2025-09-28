@@ -12,6 +12,53 @@ pnpm dev # startet http://localhost:5173
 
 Taste **E**: führt einen Simulations-Cycle aus und loggt Ereignisse in die Konsole.
 
+## Game Modi
+
+- **Spectate Mode**: `?mode=spectate` - Standardmodus zum Beobachten der Simulation
+- **Player Mode**: `?mode=player` - Direktes Spielen als Offizier (experimentell)
+- **Free-Roam Mode**: `?mode=freeRoam&map=gogouds-manor` - Erkunde handgefertigte Karten
+
+### Free-Roam Handcrafted Maps
+
+Der Free-Roam Modus unterstützt handgefertigte Karten mit folgender Struktur:
+
+```
+src/assets/maps/{map-id}/
+├── terrain.png     # Hintergrundkarte (Grafik)
+├── collision.png   # Kollisionsmaske (schwarz/transparent = blockiert, weiß = begehbar)
+└── meta.json       # Konfiguration (Spawns, POIs, Kamera-Einstellungen)
+```
+
+#### Hand-Maps erstellen
+
+1. **Gleiche Pixelgröße**: `terrain.png` und `collision.png` müssen identische Abmessungen haben
+2. **32px Tile-Raster**: Verwende ein 32-Pixel-Raster für optimale Kollisionserkennung
+3. **Kollisionsmaske**:
+   - Schwarz (RGB < 50) oder transparent (Alpha = 0) = blockiert
+   - Weiß oder helle Farben = begehbar
+4. **meta.json** Beispiel:
+   ```json
+   {
+     "name": "Deine Karte",
+     "pixelSize": { "width": 2048, "height": 1536 },
+     "tileSize": 32,
+     "camera": { "minZoom": 0.75, "maxZoom": 1.75, "startZoom": 1.05 },
+     "spawns": {
+       "player": { "x": 1024, "y": 768 },
+       "officers": [{ "x": 500, "y": 400 }]
+     },
+     "pois": [{ "id": "landmark", "x": 1200, "y": 600, "label": "Landmark" }]
+   }
+   ```
+
+#### Controls im Free-Roam
+
+- **Klick**: Bewege Spieler zum angeklickten Punkt (mit A\* Pathfinding)
+- **F2**: Debug-Overlay ein/ausschalten (zeigt Kollisionsflächen)
+- **ESC**: Zurück zum Hauptmenü
+- **Mausrad**: Zoom
+- **Drag**: Kamera bewegen
+
 ## CI & Format
 
 PRs müssen `npm run format:check` (führt `prettier --check` aus) bestehen; bei lokalen Änderungen `npm run format:write` ausführen. Der GitHub-Pages-Build landet direkt in `docs/`; aktualisiere die Dateien nur, wenn du den veröffentlichten Stand ändern möchtest.
