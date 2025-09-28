@@ -1,35 +1,28 @@
 # Asset Analysis Report
 
-Generated: 2025-09-28T18:10:02.445Z
+Generated: 2025-09-28T18:15:54.905Z
 
 ## Summary
 
-- **Total assets analyzed**: 79
-- **Referenced assets**: 57
-- **Unreferenced assets**: 22
-- **Total size of unreferenced assets**: 508.0KB
+- **Total assets analyzed**: 43
+- **Referenced assets**: 28
+- **Unreferenced assets**: 15
+- **Total size of unreferenced assets**: 353.8KB
 
 ## Unreferenced Assets
 
 - `src/assets/battlesystem/berserker/custom/slash_oversize.png` (58.0KB)
 - `docs/assets/index-CsZOiD4F.css` (45.2KB)
 - `src/assets/battlesystem/berserker/standard/shoot.png` (39.8KB)
-- `src/assets/battlesystem/berserker/standard/walk.png` (39.4KB)
-- `docs/assets/walk_256-gY2dYguS.png` (39.4KB)
-- `src/assets/battlesystem/berserker/standard/backslash.png` (31.9KB)
+- `docs/assets/walk-gY2dYguS.png` (39.4KB)
 - `src/assets/battlesystem/berserker/standard/thrust.png` (28.4KB)
 - `src/assets/battlesystem/berserker/standard/spellcast.png` (26.1KB)
-- `src/assets/battlesystem/berserker/standard/slash.png` (25.3KB)
-- `docs/assets/slash_256-DaUljt2p.png` (25.3KB)
-- `src/assets/battlesystem/berserker/standard/run.png` (24.3KB)
-- `docs/assets/run_256-DfO1hb7q.png` (24.3KB)
+- `docs/assets/slash-DaUljt2p.png` (25.3KB)
+- `docs/assets/run-DfO1hb7q.png` (24.3KB)
 - `src/assets/battlesystem/berserker/standard/jump.png` (17.9KB)
-- `src/assets/battlesystem/berserker/standard/halfslash.png` (17.4KB)
 - `src/assets/battlesystem/berserker/standard/emote.png` (11.3KB)
 - `src/assets/battlesystem/berserker/standard/sit.png` (10.1KB)
-- `src/assets/battlesystem/berserker/standard/hurt.png` (8.2KB)
-- `docs/assets/hurt_256-DWSyd-5N.png` (8.2KB)
-- `src/assets/battlesystem/berserker/idle_256.png` (7.7KB)
+- `docs/assets/hurt-DWSyd-5N.png` (8.2KB)
 - `src/assets/battlesystem/berserker/standard/idle.png` (7.7KB)
 - `src/assets/battlesystem/berserker/standard/combat_idle.png` (7.2KB)
 - `src/assets/battlesystem/berserker/standard/climb.png` (5.0KB)
@@ -38,20 +31,20 @@ Generated: 2025-09-28T18:10:02.445Z
 
 
 ### By Directory
-- **src/**: 17 files
+- **src/**: 10 files
 - **docs/**: 5 files
 
 ### By File Type
-- **.png**: 21 files
+- **.png**: 14 files
 - **.css**: 1 files
 
 
 ## Recommendations
 
-- Review the 22 unreferenced assets above
+- Review the 15 unreferenced assets above
 - Verify if they are truly unused (some may be loaded dynamically)
 - Consider removing confirmed unused assets to reduce bundle size
-- Potential space savings: 508.0KB
+- Potential space savings: 353.8KB
 - Pay special attention to large files that could significantly reduce bundle size
 
 ## Notes

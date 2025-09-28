@@ -1,7 +1,7 @@
 # Audit Summary Report
 
-Generated: 2025-09-28T18:10:02.850Z  
-Duration: 0.5s
+Generated: 2025-09-28T18:15:55.141Z  
+Duration: 0.3s
 
 ## Overview
 
@@ -13,36 +13,36 @@ This report summarizes the findings from all audit scripts run on the codebase.
 |--------|-------|-------|
 | **Total source files** | 130 | TS/TSX/JS files analyzed |
 | **Unreferenced files** | 67 | Files not imported anywhere |
-| **Total assets** | 79 | Images, audio, fonts, etc. |
-| **Unreferenced assets** | 22 | Assets with no usage found |
-| **Exact duplicate groups** | 28 | Identical files (same hash) |
+| **Total assets** | 43 | Images, audio, fonts, etc. |
+| **Unreferenced assets** | 15 | Assets with no usage found |
+| **Exact duplicate groups** | 6 | Identical files (same hash) |
 | **Size duplicate groups** | 1 | Same size, different content |
-| **Name duplicate groups** | 26 | Same name, different locations |
+| **Name duplicate groups** | 10 | Same name, different locations |
 
 ## Cleanup Potential
 
 | Category | Potential Savings | Priority |
 |----------|------------------|----------|
-| **Unreferenced assets** | 508.0KB | High |
-| **Exact duplicates** | 87.7MB | High |
+| **Unreferenced assets** | 353.8KB | High |
+| **Exact duplicates** | 1.8MB | High |
 | **Unreferenced code files** | 67 files | Medium |
 
-**Total potential savings**: 88.2MB
+**Total potential savings**: 2.1MB
 
 ## Priority Actions
 
 ### 🔴 High Priority
-- Review and remove 22 unreferenced assets
-- Consolidate 28 exact duplicate file groups
-- Potential bundle size reduction: 88.2MB
+- Review and remove 15 unreferenced assets
+- Consolidate 6 exact duplicate file groups
+- Potential bundle size reduction: 2.1MB
 
 ### 🟡 Medium Priority
 - Review 67 unreferenced source files
 - Investigate 1 size duplicate groups
-- Consider name standardization for 26 name duplicate groups
+- Consider name standardization for 10 name duplicate groups
 
 ### 🟢 Low Priority
-- Review 240 similar name pairs for consistency
+- Review 39 similar name pairs for consistency
 
 ## Detailed Reports
 
