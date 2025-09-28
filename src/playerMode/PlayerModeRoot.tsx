@@ -220,8 +220,6 @@ export const PlayerModeRoot: React.FC = () => {
     } else {
       camera.setLockOnTarget(undefined);
     }
-        camera.setLockOnTarget(undefined);
-    }
 
     // Process player actions (removed duplicate getActions call)
     for (const action of playerActions) {
@@ -235,7 +233,7 @@ export const PlayerModeRoot: React.FC = () => {
     arena.update(deltaMs);
     projectiles.update(
       deltaMs,
-      lockOnTargets.map((t) => ({ ...t, radius: 0.5 }))
+      lockOnTargets.map((t) => ({ ...t, position: t.pos, radius: 0.5 }))
     );
 
     // Update cooldowns
