@@ -1,0 +1,185 @@
+/**
+ * LPC Character Loader
+ * Loads and manages LPC character configurations and sprites
+ */
+
+import type {
+  LPCCharacterConfig,
+  LPCMetadata,
+  LPCCharacterSprites,
+  LPCAnimation,
+  LPCAnimationAtlas
+} from './types';
+
+/**
+ * Loads LPC character data from JSON configuration files
+ */
+export class LPCCharacterLoader {
+  /**
+   * Load character configuration from character.json file
+   */
+  static async loadCharacterConfig(
+    configPath: string
+  ): Promise<LPCCharacterConfig> {
+    try {
+      const response = await fetch(configPath);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to load character config: ${response.statusText}`
+        );
+      }
+      return await response.json();
+    } catch (error) {
+      throw new Error(
+        `Error loading character config from ${configPath}: ${error}`
+      );
+    }
+  }
+
+  /**
+   * Load metadata from metadata.json file
+   */
+  static async loadMetadata(metadataPath: string): Promise<LPCMetadata> {
+    try {
+      const response = await fetch(metadataPath);
+      if (!response.ok) {
+        throw new Error(`Failed to load metadata: ${response.statusText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      throw new Error(`Error loading metadata from ${metadataPath}: ${error}`);
+    }
+  }
+
+  /**
+   * Load sprite image for a specific animation
+   */
+  static async loadSpriteImage(imagePath: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () =>
+        reject(new Error(`Failed to load sprite image: ${imagePath}`));
+      img.src = imagePath;
+    });
+  }
+
+  /**
+   * Create atlas configuration for an animation based on metadata
+   */
+  static createAnimationAtlas(
+    animation: LPCAnimation,
+    basePath: string,
+    frameSize: number,
+    frameCounts: Record<string, number>
+  ): LPCAnimationAtlas {
+    const frameCount = frameCounts[animation] || 1;
+
+    return {
+      url: `${basePath}/${animation}_${frameSize}.png`,
+      frameWidth: frameSize,
+      frameHeight: frameSize,
+      cols: frameCount,
+      rows: 4, // Standard LPC: 4 directions
+      frameCount
+    };
+  }
+
+  /**
+   * Load complete character sprite set with all animations
+   */
+  static async loadCharacterSprites(
+    characterId: string,
+    basePath: string,
+    animations: LPCAnimation[] = ['walk', 'run', 'idle', 'slash', 'hurt']
+  ): Promise<LPCCharacterSprites> {
+    try {
+      // Load configuration files
+      const [config, metadata] = await Promise.all([
+        this.loadCharacterConfig(`${basePath}/character.json`),
+        this.loadMetadata(`${basePath}/credits/metadata.json`)
+      ]);
+
+      // Create atlas configurations
+      const atlases = new Map<LPCAnimation, LPCAnimationAtlas>();
+      const images = new Map<LPCAnimation, HTMLImageElement>();
+
+      // Load each animation's sprite sheet
+      const loadPromises = animations.map(async (animation) => {
+        const atlas = this.createAnimationAtlas(
+          animation,
+          basePath,
+          metadata.frameSize,
+          metadata.frameCounts
+        );
+
+        try {
+          const image = await this.loadSpriteImage(atlas.url);
+          atlases.set(animation, atlas);
+          images.set(animation, image);
+        } catch (error) {
+          console.warn(
+            `Failed to load ${animation} sprite for ${characterId}:`,
+            error
+          );
+          // Continue loading other animations even if one fails
+        }
+      });
+
+      await Promise.all(loadPromises);
+
+      return {
+        characterId,
+        config,
+        metadata,
+        atlases,
+        images
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to load character sprites for ${characterId}: ${error}`
+      );
+    }
+  }
+
+  /**
+   * Get supported animations for a character based on metadata
+   */
+  static getSupportedAnimations(metadata: LPCMetadata): LPCAnimation[] {
+    const supported: LPCAnimation[] = [];
+
+    // Add standard animations that were successfully exported
+    const standardAnimations = metadata.standardAnimations.exported;
+    for (const anim of standardAnimations) {
+      if (this.isValidLPCAnimation(anim)) {
+        supported.push(anim as LPCAnimation);
+      }
+    }
+
+    return supported;
+  }
+
+  /**
+   * Validate if a string is a valid LPC animation name
+   */
+  private static isValidLPCAnimation(name: string): name is LPCAnimation {
+    const validAnimations: LPCAnimation[] = [
+      'walk',
+      'run',
+      'idle',
+      'slash',
+      'hurt',
+      'spellcast',
+      'thrust',
+      'shoot',
+      'climb',
+      'jump',
+      'sit',
+      'emote',
+      'combat_idle',
+      'backslash',
+      'halfslash'
+    ];
+    return validAnimations.includes(name as LPCAnimation);
+  }
+}
