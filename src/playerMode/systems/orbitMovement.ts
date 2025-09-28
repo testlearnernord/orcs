@@ -73,13 +73,19 @@ export function inputToOrbitValues(input: {
 export function dirFromAngle(rad: number): 'L' | 'R' | 'U' | 'D' {
   const a = (rad + Math.PI * 2) % (Math.PI * 2);
 
+  console.log(`[dirFromAngle] Input: ${rad} radians (${(rad * 180 / Math.PI).toFixed(1)}°), Normalized: ${a} radians (${(a * 180 / Math.PI).toFixed(1)}°)`);
+
   if (a > (Math.PI * 3) / 4 && a <= (Math.PI * 5) / 4) {
+    console.log(`[dirFromAngle] → LEFT`);
     return 'L'; // Left (180°)
   } else if (a > (Math.PI * 1) / 4 && a <= (Math.PI * 3) / 4) {
+    console.log(`[dirFromAngle] → DOWN`);
     return 'D'; // Down (90°) - positive Y in screen coordinates
   } else if (a > (Math.PI * 7) / 4 || a <= (Math.PI * 1) / 4) {
+    console.log(`[dirFromAngle] → RIGHT`);
     return 'R'; // Right (0°)
   } else {
+    console.log(`[dirFromAngle] → UP`);
     return 'U'; // Up (270°) - negative Y in screen coordinates
   }
 }

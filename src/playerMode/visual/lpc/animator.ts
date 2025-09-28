@@ -96,6 +96,8 @@ export class LPCAnimator {
     const row = LPC_DIRECTION_ROWS[this.currentState.direction];
     const col = this.currentState.frame;
 
+    console.log(`[LPCAnimator] Direction: ${this.currentState.direction}, Row: ${row}, Col: ${col}, Animation: ${this.currentState.animation}`);
+
     return {
       col,
       row,
