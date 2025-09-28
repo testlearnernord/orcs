@@ -1,3 +1,33 @@
+## [0.8.2] - 2025-01-27
+
+### Added
+
+- **Player Mode Combat Sandbox**: Interactive combat system accessible via `?mode=player`
+- Three unified orc archetypes: Archer, Berserker, Trapper with unique signature moves
+- Real-time combat with movement (WASD), dash (Shift), block (Ctrl), lock-on (Alt), and signature moves (E)
+- Stamina system with regeneration delays and action costs
+- Test Arena with basic enemy AI and wave mechanics
+- Combat systems: hitbox detection, health management, projectiles, and stagger
+- Player controller with 8-directional movement, dash i-frames, and directional blocking
+- Lock-on system for targeting enemies within forward cone
+- Player Mode HUD showing stamina, cooldowns, archetype info, and controls
+- Archetype adapter for mapping existing data to unified combat system
+- `npm run dev:player` and `npm run test:player` scripts
+- Comprehensive documentation in `docs/PLAYER_MODE.md`
+
+### Changed
+
+- Enabled `PLAYER_MODE` feature flag
+- UI root system extended to support Player Mode alongside Spectate and Free Roam modes
+- Spectate and Free Roam modes remain unchanged and fully functional
+
+### Technical
+
+- Modular player mode architecture under `src/playerMode/`
+- Combat systems in `src/combat/` for hitbox, health, and projectiles
+- Simulation layer with unified archetypes in `src/simulation/`
+- No breaking changes to existing systems or APIs
+
 ## [0.8.1] - 2025-09-22
 
 ### Added

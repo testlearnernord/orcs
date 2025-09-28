@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:player": "vite --open \"/orcs/?mode=player\"",
     "prebuild": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs",
     "build": "vite build",
     "postbuild": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs",
@@ -14,6 +15,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:player": "vitest run -t \"player-mode\"",
     "lint": "eslint .",
     "guard:portraits": "node scripts/guards/assert-no-legacy-portraits.mjs && node scripts/guards/portrait-manifest.mjs",
     "guard:portraits:legacy": "node scripts/guards/assert-no-legacy-portraits.mjs",
