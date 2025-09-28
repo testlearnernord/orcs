@@ -29,7 +29,7 @@ export class EmptySlot {
       König: 'König',
       Spieler: 'Spieler',
       Captain: 'Captain',
-      Späher: 'Späher', 
+      Späher: 'Späher',
       Grunzer: 'Grunzer'
     };
 

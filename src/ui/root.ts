@@ -894,11 +894,11 @@ export class NemesisUI {
     // Render each rank with fixed slots
     RANK_ORDER.forEach((rank) => {
       if (rank === 'Spieler') return; // Skip Spieler rank
-      
+
       const maxSlots = RANK_QUOTAS[rank];
       const officers = visible.filter((officer) => officer.rank === rank);
       const container = this.rankContainers.get(rank);
-      
+
       if (!container) return;
       const grid = container.querySelector('.rank-grid') as HTMLElement | null;
       if (!grid) return;
@@ -941,14 +941,14 @@ export class NemesisUI {
               });
             }
           }
-          
+
           // Clean up any existing empty slot
           const existingEmptySlot = this.emptySlots.get(slotKey);
           if (existingEmptySlot) {
             existingEmptySlot.destroy();
             this.emptySlots.delete(slotKey);
           }
-          
+
           grid.appendChild(card.element);
         } else {
           // Render empty slot
@@ -959,18 +959,22 @@ export class NemesisUI {
               slotIndex,
               onClick: () => {
                 // Show tooltip about promotion requirements
-                this.toast.show(`Rang ${rank}: Slot ${slotIndex + 1} wartet auf Beförderung`);
+                this.toast.show(
+                  `Rang ${rank}: Slot ${slotIndex + 1} wartet auf Beförderung`
+                );
               }
             });
             this.emptySlots.set(slotKey, emptySlot);
           }
-          
+
           grid.appendChild(emptySlot.element);
         }
       }
 
       // Update the count display
-      const countElement = container.querySelector(`[data-rank-count="${rank}"]`);
+      const countElement = container.querySelector(
+        `[data-rank-count="${rank}"]`
+      );
       if (countElement) {
         countElement.textContent = `${officers.length}/${maxSlots}`;
       }
@@ -1001,23 +1005,23 @@ export class NemesisUI {
   private createHierarchyStructure(rankList: HTMLElement): void {
     // Clear existing content
     rankList.innerHTML = '';
-    
+
     // Create hierarchy container
     this.hierarchyContainer = document.createElement('div');
     this.hierarchyContainer.className = 'hierarchy-container';
-    
+
     // Create rank containers in hierarchical order
     RANK_ORDER.forEach((rank) => {
       if (rank === 'Spieler') return; // Skip Spieler rank
-      
+
       const container = document.createElement('div');
       container.className = 'rank-group';
       container.dataset.rank = rank;
-      
+
       // Add rank-specific styling classes
       const rankClass = this.getRankStyleClass(rank);
       container.classList.add(`rank-group--${rankClass}`);
-      
+
       container.innerHTML = `
         <h3 class="rank-group__title">
           <span class="rank-group__icon">${this.getRankIcon(rank)}</span>
@@ -1026,13 +1030,13 @@ export class NemesisUI {
         </h3>
         <div class="rank-grid"></div>
       `;
-      
+
       this.rankContainers.set(rank, container);
       if (this.hierarchyContainer) {
         this.hierarchyContainer.appendChild(container);
       }
     });
-    
+
     if (this.hierarchyContainer) {
       rankList.appendChild(this.hierarchyContainer);
     }
@@ -1042,7 +1046,7 @@ export class NemesisUI {
     const classes: Record<Rank, string> = {
       König: 'king',
       Spieler: 'player',
-      Captain: 'captain', 
+      Captain: 'captain',
       Späher: 'scout',
       Grunzer: 'grunt'
     };

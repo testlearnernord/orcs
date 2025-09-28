@@ -18,11 +18,7 @@ const STAT_LABEL: Record<StatKey, string> = {
   stolz: 'Stolz'
 };
 
-const RELATION_ORDER: RelationshipType[] = [
-  'ALLY',
-  'RIVAL',
-  'NEUTRAL'
-];
+const RELATION_ORDER: RelationshipType[] = ['ALLY', 'RIVAL', 'NEUTRAL'];
 
 const RELATION_LABEL: Record<RelationshipType, string> = {
   ALLY: 'ALLY',

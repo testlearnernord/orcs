@@ -1,11 +1,7 @@
 import type { Officer } from '@sim/types';
 import { bezierD, edgeAnchors } from '@ui/overlay/anchors';
 
-export type OverlayRelationType =
-  | 'ally'
-  | 'rival'
-  | 'neutral'
-  | 'hierarchy';
+export type OverlayRelationType = 'ally' | 'rival' | 'neutral' | 'hierarchy';
 
 export interface RelationEdge {
   id: string;
