@@ -68,17 +68,18 @@ export function inputToOrbitValues(input: {
 
 /**
  * Direction quantization for facing the target
+ * Maps screen coordinates to sprite directions correctly
  */
 export function dirFromAngle(rad: number): 'L' | 'R' | 'U' | 'D' {
   const a = (rad + Math.PI * 2) % (Math.PI * 2);
 
   if (a > (Math.PI * 3) / 4 && a <= (Math.PI * 5) / 4) {
-    return 'L'; // Left
-  } else if (a > (Math.PI * 5) / 4 && a <= (Math.PI * 7) / 4) {
-    return 'D'; // Down
+    return 'L'; // Left (180°)
+  } else if (a > (Math.PI * 1) / 4 && a <= (Math.PI * 3) / 4) {
+    return 'D'; // Down (90°) - positive Y in screen coordinates
   } else if (a > (Math.PI * 7) / 4 || a <= (Math.PI * 1) / 4) {
-    return 'R'; // Right
+    return 'R'; // Right (0°)
   } else {
-    return 'U'; // Up
+    return 'U'; // Up (270°) - negative Y in screen coordinates
   }
 }
