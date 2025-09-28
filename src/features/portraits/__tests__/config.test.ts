@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PORTRAIT_SET_DEFINITIONS } from '@/ui/portraits/config';
+import { PORTRAIT_SET_DEFINITIONS } from '../config';
 
 describe('Portrait Configuration', () => {
   it('should have 6 officer portrait sheets', () => {

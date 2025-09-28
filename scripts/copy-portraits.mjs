@@ -4,22 +4,24 @@ import { constants } from 'node:fs';
 
 const localPortraitsDir = 'local-portraits';
 const srcPortraitsDir = 'src/assets/orcs/portraits';
-const targetDir = 'docs/assets/orcs/portraits';
-const publicTargetDir = 'public/assets/orcs/portraits';
+
+// Determine target based on NODE_ENV or if docs exists
+const isProduction =
+  process.env.NODE_ENV === 'production' ||
+  process.env.BUILD_MODE === 'production';
+const targetDir = isProduction
+  ? 'docs/assets/orcs/portraits'
+  : 'public/assets/orcs/portraits';
 
 async function checkAndCopy(sourceDir, sourceName) {
   try {
     await access(sourceDir, constants.R_OK);
 
-    // Copy to docs for production build
+    // Copy to single target based on environment
     await mkdir(targetDir, { recursive: true });
     await cp(sourceDir, targetDir, { recursive: true, force: true });
 
-    // Copy to public for development server
-    await mkdir(publicTargetDir, { recursive: true });
-    await cp(sourceDir, publicTargetDir, { recursive: true, force: true });
-
-    console.log(`Copied ${sourceName} portraits to docs/ and public/.`);
+    console.log(`Copied ${sourceName} portraits to ${targetDir}.`);
     return true;
   } catch (error) {
     return false;

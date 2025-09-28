@@ -2,7 +2,7 @@ import React from 'react';
 
 import { chooseSetAndIndex } from './mapping';
 import { loadPortraitAtlases, type PortraitAtlasMap } from './portrait-atlas';
-import { PORTRAIT_SET_DEFINITIONS } from '@/ui/portraits/config';
+import { PORTRAIT_SET_DEFINITIONS } from './config';
 import { calculatePortraitCrop } from '@/lib/portraitCrop';
 import type { PortraitSet } from './types';
 import type { Rank } from '@/sim/types';
@@ -261,3 +261,5 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
     />
   );
 };
+
+export default OfficerAvatar;

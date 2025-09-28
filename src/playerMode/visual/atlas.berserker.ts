@@ -15,7 +15,7 @@
 export const BERS = {
   walk: {
     url: new URL(
-      '../../assets/battlesystem/berserker/walk_256.png',
+      '../../assets/battlesystem/berserker/standard/walk.png',
       import.meta.url
     ).toString(),
     w: 256,
@@ -25,7 +25,7 @@ export const BERS = {
   },
   run: {
     url: new URL(
-      '../../assets/battlesystem/berserker/run_256.png',
+      '../../assets/battlesystem/berserker/standard/run.png',
       import.meta.url
     ).toString(),
     w: 256,
@@ -35,7 +35,7 @@ export const BERS = {
   },
   slash: {
     url: new URL(
-      '../../assets/battlesystem/berserker/slash_256.png',
+      '../../assets/battlesystem/berserker/standard/slash.png',
       import.meta.url
     ).toString(),
     w: 256,
@@ -45,7 +45,7 @@ export const BERS = {
   },
   hurt: {
     url: new URL(
-      '../../assets/battlesystem/berserker/hurt_256.png',
+      '../../assets/battlesystem/berserker/standard/hurt.png',
       import.meta.url
     ).toString(),
     w: 256,
