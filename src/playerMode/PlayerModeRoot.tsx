@@ -2,6 +2,8 @@
  * Root component for Player Mode - main combat sandbox
  */
 
+console.log('[DEBUG] PlayerModeRoot module loading...');
+
 import React, { useEffect, useRef, useState } from 'react';
 import { PlayerHUD } from './ui/HUD';
 import { LockOnMarker } from './ui/LockOnMarker';
@@ -48,9 +50,12 @@ export const PlayerModeRoot: React.FC = () => {
 
   // Animation frame
   const animationRef = useRef<number>();
+  const lastFrameTimeRef = useRef<number>(0);
 
   useEffect(() => {
     if (!canvasRef.current) return;
+
+    console.log('[PlayerMode] Initializing systems...');
 
     // Initialize game systems
     const keybinds = new PlayerKeybinds();
@@ -71,19 +76,22 @@ export const PlayerModeRoot: React.FC = () => {
       playerHealth
     };
 
-    setState(prev => ({ ...prev, isInitialized: true, lastFrameTime: Date.now() }));
+    lastFrameTimeRef.current = Date.now();
+    setState(prev => ({ ...prev, isInitialized: true }));
+
+    console.log('[PlayerMode] Systems initialized, starting game loop...');
 
     // Start game loop
     const gameLoop = () => {
       const now = Date.now();
-      const deltaMs = now - state.lastFrameTime;
+      const deltaMs = now - lastFrameTimeRef.current;
       
       if (systemsRef.current && deltaMs > 0) {
         updateGame(deltaMs);
         renderGame();
       }
 
-      setState(prev => ({ ...prev, lastFrameTime: now }));
+      lastFrameTimeRef.current = now;
       animationRef.current = requestAnimationFrame(gameLoop);
     };
 
@@ -91,6 +99,7 @@ export const PlayerModeRoot: React.FC = () => {
 
     // Cleanup
     return () => {
+      console.log('[PlayerMode] Cleaning up...');
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }

@@ -299,9 +299,11 @@ export class NemesisUI {
       if (isFreeRoam || isPlayerMode) {
         this.appRoot.setAttribute('hidden', 'true');
         this.appRoot.setAttribute('aria-hidden', 'true');
+        this.appRoot.style.display = 'none'; // Force hide with CSS
       } else {
         this.appRoot.removeAttribute('hidden');
         this.appRoot.removeAttribute('aria-hidden');
+        this.appRoot.style.display = ''; // Reset to CSS default
       }
     }
     
