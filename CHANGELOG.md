@@ -1,3 +1,34 @@
+## [0.8.4] - 2025-01-28
+
+### Added
+
+- **feat(freeRoam): Handcrafted Map Support (Gogoud's Manor)**: Complete implementation of handcrafted maps for Free-Roam mode
+- URL parameter support: `?mode=freeRoam&map=gogouds-manor` (default: gogouds-manor)
+- **Map Asset System**: Load terrain.png, collision.png, and meta.json from `/assets/maps/{mapId}/`
+- **Collision Grid Generation**: Convert collision.png to tile-based blocked array using alpha/RGB analysis
+- **A* Pathfinding**: 4-directional pathfinding with pixel-to-grid coordinate conversion
+- **Terrain Renderer**: Custom canvas rendering for terrain.png with camera/zoom support
+- **Debug Overlay**: F2 key toggles collision visualization (red semi-transparent areas)
+- **Click Movement**: Click-to-move with collision-aware pathfinding
+- **POI System**: Points of Interest with labels from meta.json
+- **Officer AI**: Officers spawn at designated points and move using pathfinding
+
+### Technical
+
+- New modules: `src/features/freeRoam/hmap/` (types, loader, pathfinding, renderer)
+- `useHandcraftedFreeRoam` hook for state management
+- Dual-mode FreeRoamView supporting both generated and handcrafted maps
+- Unit tests for map loading and grid generation
+- TypeScript types for HandMapMeta, HandMapData, and coordinate systems
+
+### Controls
+
+- **Click**: Move player to clicked position (with A* pathfinding)
+- **F2**: Toggle debug collision overlay
+- **ESC**: Return to main menu
+- **Mouse wheel**: Zoom in/out
+- **Drag**: Pan camera
+
 ## [0.8.3] - 2025-01-27
 
 ### Fixed
