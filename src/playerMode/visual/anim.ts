@@ -1,5 +1,9 @@
 /**
- * Simple animation helper for player sprites
+ * @deprecated This animation controller is deprecated. Use the LPC Animation System instead.
+ * @see src/playerMode/visual/lpc/animator.ts for the new LPC-compliant animation system
+ * 
+ * Legacy simple animation helper for player sprites
+ * This file remains for backwards compatibility but will be removed in a future version.
  */
 
 export interface AnimationFrame {

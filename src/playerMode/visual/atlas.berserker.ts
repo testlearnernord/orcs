@@ -1,7 +1,10 @@
 /**
- * Berserker sprite atlas configuration and utility functions
- * Handles 256px sprite atlases for the berserker archetype
- *
+ * @deprecated This file is deprecated. Use the Universal LPC Sprite System instead.
+ * @see src/playerMode/visual/lpc/ for the new LPC-compliant sprite system
+ * 
+ * Legacy berserker sprite atlas configuration and utility functions
+ * This file remains for backwards compatibility but will be removed in a future version.
+ * 
  * Sprite Direction Convention (Universal LPC Spritesheet Generator):
  * - DOWN  = character facing down (South)
  * - LEFT  = character facing left (West)
