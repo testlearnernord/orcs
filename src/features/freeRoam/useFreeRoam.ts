@@ -40,6 +40,31 @@ interface FreeRoamSnapshot {
   officers: PositionedOfficer[];
   playerPosition: PlayerPosition;
   dynamicWarcalls: PositionedWarcall[]; // AI-generated warcalls
+  pois?: ProceduralPOI[]; // Procedural Points of Interest
+}
+
+interface ProceduralWarcall {
+  id: string;
+  cycleAnnounced: number;
+  resolveOn: number;
+  initiator: string;
+  participants: string[];
+  location: string;
+  baseDifficulty: number;
+  kind: WarcallKind;
+  risk: number;
+  rewardHint: string;
+  phase: 'prep' | 'travel' | 'event' | 'resolution';
+  breakdown?: any;
+  coordinate: MapCoordinate;
+}
+
+interface ProceduralPOI {
+  id: string;
+  name: string;
+  coordinate: MapCoordinate;
+  biome: string;
+  type: 'landmark' | 'ruin' | 'camp' | 'shrine' | 'resource';
 }
 
 export interface UseFreeRoamOptions {
@@ -106,12 +131,79 @@ function moveTowards(
   return { x: newX, y: newY, index, biome: from.biome };
 }
 
+function generateProceduralPOIs(map: WorldMap, rng: RNG): ProceduralPOI[] {
+  const pois: ProceduralPOI[] = [];
+  const poiNames: Record<Biome, string[]> = {
+    desert: ['Wüsten-Oase', 'Sandstein-Ruinen', 'Karawanen-Stopp', 'Skorpion-Höhle'],
+    plains: ['Grüne Hügel', 'Windmühle', 'Bauernhof', 'Alte Steinbrücke'],
+    forest: ['Wald-Lichtung', 'Druiden-Hain', 'Jäger-Hütte', 'Verwunschener Baum'],
+    swamp: ['Sumpf-Insel', 'Irrlichter-Pfad', 'Morast-Tempel', 'Hexen-Hütte'],
+    tundra: ['Eisiger Gipfel', 'Gletscher-Spalte', 'Eskimo-Lager', 'Frostiger Schrein'],
+    ashwastes: ['Verbrannte Erde', 'Asche-Dünen', 'Lava-Becken', 'Geisterstadt'],
+    volcano: ['Feuerschlund', 'Lava-Röhre', 'Obsidian-Klippe', 'Feuer-Schrein'],
+    river: ['Flussbiegung', 'Steinige Furt', 'Fischer-Dock', 'Wasserfall'],
+    savanna: ['Affenbrotbaum', 'Löwen-Felsen', 'Stammeslager', 'Wasserloch'],
+    beach: ['Leuchtturm', 'Schiffswrack', 'Muschelbank', 'Piraten-Versteck'],
+    mountains: ['Berggipfel', 'Adlerhorst', 'Kristall-Höhle', 'Zwergmine'],
+    jungle: ['Tempel-Ruinen', 'Schlangen-Nest', 'Affen-Domäne', 'Lianen-Brücke']
+  };
+
+  const biomeGroups: { [key: string]: Biome[] } = {
+    rare: ['volcano', 'ashwastes'],
+    uncommon: ['tundra', 'beach', 'jungle'],
+    common: ['desert', 'forest', 'swamp', 'mountains', 'savanna'],
+    basic: ['plains', 'river']
+  };
+
+  // Generate 8-12 POIs across different biomes
+  const targetPOIs = rng.int(8, 12);
+  const attempts = targetPOIs * 3; // Multiple attempts to find good locations
+
+  for (let attempt = 0; attempt < attempts && pois.length < targetPOIs; attempt++) {
+    const x = rng.int(0, map.size - 1);
+    const y = rng.int(0, map.size - 1);
+    const index = y * map.size + x;
+    const biome = map.tiles[index];
+    const height = map.height[index];
+    
+    // Skip if too close to existing POIs
+    const tooClose = pois.some(poi => {
+      const dx = poi.coordinate.x - x;
+      const dy = poi.coordinate.y - y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance < 50; // Minimum distance between POIs
+    });
+    
+    if (tooClose) continue;
+
+    // Prefer interesting locations (higher elevations, biome edges)
+    const interestScore = height + (Math.abs(height - 0.5) * 0.5);
+    if (rng.next() > interestScore * 1.2) continue;
+
+    const names = poiNames[biome];
+    if (names && names.length > 0) {
+      const name = rng.pick(names);
+      const types: ProceduralPOI['type'][] = ['landmark', 'ruin', 'camp', 'shrine', 'resource'];
+      
+      pois.push({
+        id: `poi_${biome}_${x}_${y}`,
+        name,
+        coordinate: { x, y, index, biome },
+        biome: biome,
+        type: rng.pick(types)
+      });
+    }
+  }
+
+  return pois;
+}
+
 function generateRandomWarcall(
   rng: RNG,
   map: WorldMap,
   cycle: number,
   occupied: Set<number>
-) {
+): ProceduralWarcall {
   const warcallTypes: WarcallKind[] = [
     'Hunt',
     'Ambush',

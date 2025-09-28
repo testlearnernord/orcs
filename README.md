@@ -16,11 +16,37 @@ Taste **E**: führt einen Simulations-Cycle aus und loggt Ereignisse in die Kons
 
 - **Spectate Mode**: `?mode=spectate` - Standardmodus zum Beobachten der Simulation
 - **Player Mode**: `?mode=player` - Direktes Spielen als Offizier (experimentell)
-- **Free-Roam Mode**: `?mode=freeRoam&map=gogouds-manor` - Erkunde handgefertigte Karten
+- **Free-Roam Mode**: `?mode=freeRoam` - Erkunde eine prozedural generierte Welt mit vielfältigen Biomen
+  - **Procedurally Generated**: Standard - diverse Biome-Welten (Wüste, Wiese, Wald, Sumpf, Schnee, Savanne, Strand, Berge, Dschungel, Vulkan, Aschelande, Flüsse)
+  - **Handcrafted Maps**: `?mode=freeRoam&map=mapname` - Erkunde handgefertigte Karten
+
+### Free-Roam Diverse Biomes (Default)
+
+Der Free-Roam Modus generiert standardmäßig eine vielfältige Welt mit 12 verschiedenen Biomen:
+
+- **Wüste** (Desert) - Trockene, sandige Gebiete
+- **Wiese** (Plains) - Grüne Grasländer  
+- **Wald** (Forest) - Dichte Waldgebiete
+- **Sumpf** (Swamp) - Feuchte Moorlandschaften
+- **Schnee** (Tundra) - Gefrorene, eisige Regionen
+- **Savanne** (Savanna) - Afrikanische Graslandschaften
+- **Strand** (Beach) - Küstengebiete
+- **Berge** (Mountains) - Hochgebirgsregionen
+- **Dschungel** (Jungle) - Tropische Regenwälder
+- **Vulkan** (Volcano) - Aktive Vulkangebiete
+- **Aschelande** (Ashwastes) - Verbrannte Ödländer
+- **Flüsse** (Rivers) - Wasserwege und Seen
+
+**Features:**
+- Dynamische Offiziersbewegung mit KI-Verhalten
+- Prozedural generierte Warcalls
+- Echtzeit-Biomenwechsel
+- WASD-Steuerung für Spielerbewegung
+- 768x768 große Karten mit 25 Offizieren
 
 ### Free-Roam Handcrafted Maps
 
-Der Free-Roam Modus unterstützt handgefertigte Karten mit folgender Struktur:
+Der Free-Roam Modus unterstützt auch handgefertigte Karten mit folgender Struktur:
 
 ```
 src/assets/maps/{map-id}/
