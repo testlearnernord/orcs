@@ -17,7 +17,10 @@
       "@sim/*": ["src/sim/*"],
       "@ui/*": ["src/ui/*"],
       "@state/*": ["src/state/*"],
-      "@core/*": ["src/core/*"]
+      "@core/*": ["src/core/*"],
+      "@shared/*": ["src/shared/*"],
+      "@features/*": ["src/features/*"],
+      "@app/*": ["src/app/*"]
     }
   },
   "include": ["src", "vite.config.ts", "vitest.config.ts"]
