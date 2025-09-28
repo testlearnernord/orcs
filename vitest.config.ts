@@ -17,7 +17,10 @@ export default defineConfig({
       '@sim': resolve(__dirname, './src/sim'),
       '@ui': resolve(__dirname, './src/ui'),
       '@state': resolve(__dirname, './src/state'),
-      '@core': resolve(__dirname, './src/core')
+      '@core': resolve(__dirname, './src/core'),
+      '@shared': resolve(__dirname, './src/shared'),
+      '@features': resolve(__dirname, './src/features'),
+      '@app': resolve(__dirname, './src/app')
     }
   }
 });
