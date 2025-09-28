@@ -189,7 +189,8 @@ export class NemesisUI {
     // NEW: Listen to new highlight system events
     this.highlightSystem.on('highlight:shown', (highlight) => {
       const state = this.highlightSystem.getState();
-      this.cinematicPortal.update(state.showing, state.options);
+      console.log('[UI] highlight:shown event received', { highlight: highlight.title, stateShowing: state.showing?.title || 'none' });
+      this.cinematicPortal.update(highlight, state.options);
       this.renderDigestHistory(state.history);
     });
 
@@ -259,6 +260,7 @@ export class NemesisUI {
 
     // NEW: Use new highlight system directly
     store.events.on('cycle:newHighlights', ({ cycle, previousState, currentState, summary }) => {
+      console.log('[UI] cycle:newHighlights event received', { cycle, hasSpawns: !!summary.spawns?.length, hasDeaths: !!summary.deaths?.length });
       // Generate highlights using new modular system
       this.highlightSystem.processcycle(previousState, currentState, summary);
     });

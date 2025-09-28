@@ -87,6 +87,8 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
     next: WorldState,
     summary?: CycleSummary
   ): void {
+    console.log('[HighlightSystem] processcycle called', { enabled: this.state.options.enabled, summaryExists: !!summary });
+    
     if (!this.state.options.enabled) return;
 
     const allHighlights: EnhancedHighlight[] = [];
@@ -94,6 +96,7 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
     // Generate highlights from all modules
     this.modules.forEach((module) => {
       const highlights = module.generate(prev, next, summary);
+      console.log(`[HighlightSystem] Module ${module.type} generated ${highlights.length} highlights`);
       const filteredHighlights = highlights.filter((highlight) =>
         module.shouldShow
           ? module.shouldShow(highlight, this.state.options)
@@ -102,6 +105,7 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
       allHighlights.push(...filteredHighlights);
     });
 
+    console.log(`[HighlightSystem] Total highlights generated: ${allHighlights.length}`);
     if (allHighlights.length === 0) return;
 
     // Sort by priority (lower number = higher priority) then by ID for consistency
@@ -115,13 +119,17 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
     // Trim to max queue size
     const trimmedHighlights = sortedHighlights.slice(0, this.MAX_QUEUE);
     if (sortedHighlights.length > this.MAX_QUEUE) {
-      const overflow = sortedHighlights.slice(this.MAX_QUEUE);
-      trimmedHighlights.push(
-        this.createOverflowHighlight(overflow, next.cycle)
+      console.log(`[HighlightSystem] Trimmed ${sortedHighlights.length - this.MAX_QUEUE} highlights due to queue limit`);
+      // Add overflow highlight
+      const overflowHighlight = this.createOverflowHighlight(
+        sortedHighlights.slice(this.MAX_QUEUE),
+        summary?.cycle || 0
       );
+      trimmedHighlights.push(overflowHighlight);
     }
 
-    this.enqueueHighlights(trimmedHighlights, next.cycle);
+    console.log(`[HighlightSystem] Enqueueing ${trimmedHighlights.length} highlights`);
+    this.enqueueHighlights(trimmedHighlights, summary?.cycle || 0);
   }
 
   /**
@@ -160,6 +168,7 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
     highlights: EnhancedHighlight[],
     cycle: number
   ): void {
+    console.log(`[HighlightSystem] enqueueHighlights called with ${highlights.length} highlights`);
     const newQueue = [...this.state.queue, ...highlights];
     const newHistory = [highlights, ...this.state.history].slice(
       0,
@@ -172,9 +181,12 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
     // Auto-advance if nothing is currently showing
     if (!showing && queue.length > 0) {
       [showing, ...queue] = queue;
+      console.log('[HighlightSystem] Auto-advancing to first highlight:', showing.title);
       this.emit('highlight:shown', showing);
     }
 
+    console.log(`[HighlightSystem] Updated state - queue: ${queue.length}, showing: ${showing?.title || 'none'}`);
+    
     this.updateState({
       queue,
       showing,
@@ -182,6 +194,7 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
     });
 
     this.emit('highlights:queued', { cycle, highlights });
+    console.log(`[HighlightSystem] Emitted highlights:queued event for cycle ${cycle}`);
   }
 
   /**
