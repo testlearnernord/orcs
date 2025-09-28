@@ -44,6 +44,7 @@ export class PlayerSpriteRenderer {
 
   // Walk animation state for distance-coupled animation
   private walkPhase = 0;
+  private lastUpdateTime = 0;
 
   // Color palettes for different archetypes
   private readonly archetypePalettes = {
@@ -247,11 +248,15 @@ export class PlayerSpriteRenderer {
    * Update berserker animation with distance-coupled walk cycle
    */
   private updateBerserkerAnimation(state: PlayerSpriteState): void {
-    const deltaTime =
-      Date.now() - (this.lastState.position ? Date.now() : Date.now());
+    const now = Date.now();
+    if (this.lastUpdateTime === 0) {
+      this.lastUpdateTime = now;
+    }
+    const deltaTime = now - this.lastUpdateTime;
+    this.lastUpdateTime = now;
 
     // Update walk phase based on speed for distance-coupled animation
-    if (state.isMoving && state.speed) {
+    if (state.isMoving && state.speed && deltaTime > 0) {
       this.walkPhase =
         (this.walkPhase + (state.speed * deltaTime) / (40 * 8)) % 1;
     }
@@ -269,16 +274,19 @@ export class PlayerSpriteRenderer {
 
     ctx.save();
 
-    // Transform to player position and rotation
+    // Transform to player position
     ctx.translate(position.x * 50, position.y * 50);
-    ctx.rotate(rotation);
 
     // Handle berserker-specific rendering
     if (this.config.archetype === 'Berserker') {
+      // Don't apply rotation for Berserker - we use directional sprite frames instead
       this.renderBerserkerSprite(ctx, state);
       ctx.restore();
       return;
     }
+
+    // Apply rotation for other archetypes that use rotation-based rendering
+    ctx.rotate(rotation);
 
     // Add dash afterimage effect
     if (isDashing) {
