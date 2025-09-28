@@ -156,6 +156,28 @@ button {
     transform 120ms ease;
 }
 
+/* Prominent Next Cycle button as per redesign requirements */
+button[data-action='cycle'] {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border-color: #065f46;
+  color: white;
+  font-weight: 700;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  box-shadow:
+    0 2px 8px rgba(16, 185, 129, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+button[data-action='cycle']:hover,
+button[data-action='cycle']:focus-visible {
+  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 12px rgba(16, 185, 129, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
 button:hover,
 button:focus-visible {
   background: #1b2435;
@@ -339,6 +361,36 @@ button:disabled {
   background: rgba(15, 23, 42, 0.98);
 }
 
+/* Neutral relations toggle as per redesign (issue #158) */
+.neutral-relations-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-left: var(--spacing-md);
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.neutral-relations-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.neutral-counter {
+  color: #888888;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.neutral-relations-toggle input[type='checkbox'] {
+  margin: 0;
+  cursor: pointer;
+}
+
 .rank-list {
   display: flex;
   flex-direction: column;
@@ -346,8 +398,9 @@ button:disabled {
   padding-bottom: var(--spacing-lg);
 }
 
+/* Show empty rank groups as per redesign requirements - they should display empty slots */
 .rank-group.is-empty {
-  display: none;
+  opacity: 0.6;
 }
 
 .rank-group {
@@ -462,6 +515,82 @@ button:disabled {
   .rank-group--grunt .rank-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Relationship border indicators as per redesign (issue #158) */
+.officer-card.has-rival-relation {
+  border-left: 4px solid #ee6666; /* Red for rivals */
+  box-shadow:
+    0 0 0 1px rgba(238, 102, 102, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.officer-card.has-ally-relation {
+  border-left: 4px solid #10b981; /* Green for allies */
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.officer-card.has-neutral-relation {
+  border-left: 4px solid #888888; /* Gray for neutral */
+  box-shadow:
+    0 0 0 1px rgba(136, 136, 136, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Rank-specific officer card styling as per redesign (issue #158) */
+.officer-card[data-rank='king'] {
+  background: linear-gradient(
+    145deg,
+    rgba(251, 191, 36, 0.1),
+    rgba(245, 158, 11, 0.05)
+  );
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.officer-card[data-rank='king'] .officer-card__header h3 {
+  color: #fbbf24; /* Gold */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.officer-card[data-rank='captain'] {
+  background: linear-gradient(
+    145deg,
+    rgba(16, 185, 129, 0.1),
+    rgba(5, 150, 105, 0.05)
+  );
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.officer-card[data-rank='captain'] .officer-card__header h3 {
+  color: #10b981; /* Green/Silver */
+}
+
+.officer-card[data-rank='scout'] {
+  background: linear-gradient(
+    145deg,
+    rgba(59, 130, 246, 0.1),
+    rgba(37, 99, 235, 0.05)
+  );
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.officer-card[data-rank='scout'] .officer-card__header h3 {
+  color: #3b82f6; /* Blue */
+}
+
+.officer-card[data-rank='grunt'] {
+  background: linear-gradient(
+    145deg,
+    rgba(148, 163, 184, 0.1),
+    rgba(100, 116, 139, 0.05)
+  );
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.officer-card[data-rank='grunt'] .officer-card__header h3 {
+  color: var(--text-muted); /* Grey */
 }
 
 .officer-card {

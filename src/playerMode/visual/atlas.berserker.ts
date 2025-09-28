@@ -44,7 +44,7 @@ export const BERS = {
     cols: 6,
     rows: 4
   },
-  rowByDir: { D: 0, L: 1, R: 2, U: 3 } as const
+  rowByDir: { D: 2, L: 3, R: 1, U: 0 } as const
 } as const;
 
 // Indizes: Walk nutzt Col0 als Idle, Col1..8 als Schritte

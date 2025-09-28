@@ -26,27 +26,27 @@ describe('Berserker Sprite Direction Mapping', () => {
   });
 
   it('should map directions to correct sprite atlas rows', () => {
-    // Test that our rowByDir mapping matches LPC standard
+    // Test that our rowByDir mapping matches the actual berserker sprite atlas layout
     const { rowByDir } = BERS;
 
-    expect(rowByDir.D).toBe(0); // Down → Row 0 (South)
-    expect(rowByDir.L).toBe(1); // Left → Row 1 (West)
-    expect(rowByDir.R).toBe(2); // Right → Row 2 (East)
-    expect(rowByDir.U).toBe(3); // Up → Row 3 (North)
+    expect(rowByDir.D).toBe(2); // Down → Row 2
+    expect(rowByDir.L).toBe(3); // Left → Row 3
+    expect(rowByDir.R).toBe(1); // Right → Row 1
+    expect(rowByDir.U).toBe(0); // Up → Row 0
   });
 
   it('should generate correct frame indices for walking', () => {
-    // Test walk frame calculation
-    expect(idxWalk('D', 'idle')).toBe(0); // Down idle → Row 0, Col 0
-    expect(idxWalk('L', 'idle')).toBe(9); // Left idle → Row 1, Col 0 (1*9 + 0)
-    expect(idxWalk('R', 'idle')).toBe(18); // Right idle → Row 2, Col 0 (2*9 + 0)
-    expect(idxWalk('U', 'idle')).toBe(27); // Up idle → Row 3, Col 0 (3*9 + 0)
+    // Test walk frame calculation with corrected row mapping
+    expect(idxWalk('D', 'idle')).toBe(18); // Down idle → Row 2, Col 0 (2*9 + 0)
+    expect(idxWalk('L', 'idle')).toBe(27); // Left idle → Row 3, Col 0 (3*9 + 0)
+    expect(idxWalk('R', 'idle')).toBe(9); // Right idle → Row 1, Col 0 (1*9 + 0)
+    expect(idxWalk('U', 'idle')).toBe(0); // Up idle → Row 0, Col 0 (0*9 + 0)
 
     // Test walk frame 1
-    expect(idxWalk('D', 1)).toBe(1); // Down walk frame 1 → Row 0, Col 1
-    expect(idxWalk('L', 1)).toBe(10); // Left walk frame 1 → Row 1, Col 1
-    expect(idxWalk('R', 1)).toBe(19); // Right walk frame 1 → Row 2, Col 1
-    expect(idxWalk('U', 1)).toBe(28); // Up walk frame 1 → Row 3, Col 1
+    expect(idxWalk('D', 1)).toBe(19); // Down walk frame 1 → Row 2, Col 1
+    expect(idxWalk('L', 1)).toBe(28); // Left walk frame 1 → Row 3, Col 1
+    expect(idxWalk('R', 1)).toBe(10); // Right walk frame 1 → Row 1, Col 1
+    expect(idxWalk('U', 1)).toBe(1); // Up walk frame 1 → Row 0, Col 1
   });
 
   it('should handle diagonal movement directions correctly', () => {
