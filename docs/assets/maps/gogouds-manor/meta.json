@@ -1,0 +1,63 @@
+{
+  "name": "Gogoud's Manor",
+  "pixelSize": {
+    "width": 2048,
+    "height": 1536
+  },
+  "tileSize": 32,
+  "camera": {
+    "minZoom": 0.75,
+    "maxZoom": 1.75,
+    "startZoom": 1.05
+  },
+  "spawns": {
+    "player": {
+      "x": 983,
+      "y": 768
+    },
+    "officers": [
+      {
+        "x": 573,
+        "y": 460
+      },
+      {
+        "x": 1474,
+        "y": 337
+      },
+      {
+        "x": 819,
+        "y": 1198
+      },
+      {
+        "x": 1269,
+        "y": 890
+      }
+    ]
+  },
+  "pois": [
+    {
+      "id": "north-pass",
+      "x": 1638,
+      "y": 230,
+      "label": "North Pass"
+    },
+    {
+      "id": "old-bridge",
+      "x": 573,
+      "y": 952,
+      "label": "Alte Brücke"
+    },
+    {
+      "id": "wolfwood",
+      "x": 1024,
+      "y": 537,
+      "label": "Wolfwood"
+    },
+    {
+      "id": "ember-ridge",
+      "x": 1351,
+      "y": 798,
+      "label": "Ember Ridge"
+    }
+  ]
+}
