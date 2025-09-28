@@ -40,6 +40,8 @@ export class OfficerDeathModule implements HighlightModule {
         icon: '⚰️',
         title,
         description,
+        score: this.priority + Math.random() * 0.1, // Add jitter for sorting
+        text: description, // Legacy compatibility
         primaryOfficer: officer,
         animationType: 'tragedy' as const,
         duration: 3000 // 3 seconds for dramatic effect

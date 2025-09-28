@@ -138,6 +138,10 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
       description: count === 1 
         ? 'Ein weiteres Ereignis wurde protokolliert.' 
         : `${count} weitere Ereignisse wurden protokolliert.`,
+      score: 10 + Math.random() * 0.1,
+      text: count === 1 
+        ? 'Ein weiteres Ereignis wurde protokolliert.' 
+        : `${count} weitere Ereignisse wurden protokolliert.`,
       animationType: 'emergence',
       duration: 1000
     };

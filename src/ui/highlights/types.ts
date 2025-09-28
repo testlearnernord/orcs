@@ -6,13 +6,17 @@ import type { Officer, CycleSummary, WorldState } from '@sim/types';
 export interface EnhancedHighlight {
   id: string;
   type: HighlightType;
-  priority: number; // Lower number = higher priority
+  priority: number; // Lower number = higher priority 
   cycle: number;
   
   // Basic display
   icon: string;
   title: string;
   description?: string;
+  
+  // Legacy compatibility
+  score: number; // For backward compatibility with renderDigestHistory
+  text?: string; // For backward compatibility
   
   // Cinematic data for officer confrontations and visualizations
   primaryOfficer?: Officer;

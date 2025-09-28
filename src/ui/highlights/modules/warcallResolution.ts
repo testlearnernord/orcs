@@ -52,6 +52,8 @@ export class WarcallResolutionModule implements HighlightModule {
         icon,
         title,
         description,
+        score: this.priority + Math.random() * 0.1,
+        text: description,
         primaryOfficer: initiator,
         secondaryOfficer: participants.find(p => p.id !== initiator?.id),
         animationType: resolution.success ? 'celebration' : 'confrontation',

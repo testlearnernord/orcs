@@ -31,6 +31,8 @@ export class NewGruntsModule implements HighlightModule {
         icon: '✨',
         title,
         description,
+        score: this.priority + Math.random() * 0.1,
+        text: description,
         primaryOfficer: officer,
         animationType: 'emergence',
         duration: 1500

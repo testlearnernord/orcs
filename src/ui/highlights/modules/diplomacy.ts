@@ -42,6 +42,8 @@ export class DiplomacyModule implements HighlightModule {
         icon: '⚔️',
         title: `Neue Rivalität entflammt`,
         description: `${officerA?.name || a} und ${officerB?.name || b} werden zu erbitterten Rivalen`,
+        score: this.priority + Math.random() * 0.1,
+        text: `${officerA?.name || a} und ${officerB?.name || b} werden zu erbitterten Rivalen`,
         primaryOfficer: officerA,
         secondaryOfficer: officerB,
         relationshipChange: {
@@ -68,6 +70,8 @@ export class DiplomacyModule implements HighlightModule {
         icon: '🤝',
         title: `Rivalität beigelegt`,
         description: `${officerA?.name || a} und ${officerB?.name || b} beenden ihren Konflikt`,
+        score: this.priority + Math.random() * 0.1,
+        text: `${officerA?.name || a} und ${officerB?.name || b} beenden ihren Konflikt`,
         primaryOfficer: officerA,
         secondaryOfficer: officerB,
         relationshipChange: {
