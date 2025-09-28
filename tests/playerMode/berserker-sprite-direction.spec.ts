@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { dirFromAngle } from '../../src/playerMode/systems/orbitMovement';
-import { idxWalk, BERS } from '../../src/playerMode/visual/atlas.berserker';
+import { LPC_DIRECTION_ROWS } from '../../src/playerMode/visual/lpc/types';
 
 describe('Berserker Sprite Direction Mapping', () => {
   it('should map movement angles to correct directions', () => {
@@ -25,31 +25,15 @@ describe('Berserker Sprite Direction Mapping', () => {
     expect(dirFromAngle((3 * Math.PI) / 2)).toBe('U'); // Also 270°
   });
 
-  it('should map directions to correct sprite atlas rows', () => {
-    // Test that our rowByDir mapping matches the actual berserker sprite atlas layout
-    // Empirically determined mapping based on actual sprite behavior:
-    // Row 0: UP, Row 1: DOWN, Row 2: RIGHT, Row 3: LEFT
-    const { rowByDir } = BERS;
+  it('should map directions to correct LPC sprite atlas rows', () => {
+    // Test the empirically corrected LPC direction mapping
+    // Based on actual berserker sprite behavior:
+    // Row 0: UP (correct), Row 1: DOWN, Row 2: RIGHT, Row 3: LEFT
 
-    expect(rowByDir.D).toBe(1); // Down → Row 1 (verified correct)
-    expect(rowByDir.L).toBe(3); // Left → Row 3 (was correct in original)
-    expect(rowByDir.R).toBe(2); // Right → Row 2 (empirically determined)
-    expect(rowByDir.U).toBe(0); // Up → Row 0 (empirically determined)
-  });
-
-  it('should generate correct frame indices for walking', () => {
-    // Test walk frame calculation with empirically determined mapping
-    // Row 0=UP, Row 1=DOWN, Row 2=RIGHT, Row 3=LEFT
-    expect(idxWalk('D', 'idle')).toBe(9); // Down idle → Row 1, Col 0 (1*9 + 0)
-    expect(idxWalk('L', 'idle')).toBe(27); // Left idle → Row 3, Col 0 (3*9 + 0)
-    expect(idxWalk('R', 'idle')).toBe(18); // Right idle → Row 2, Col 0 (2*9 + 0)
-    expect(idxWalk('U', 'idle')).toBe(0); // Up idle → Row 0, Col 0 (0*9 + 0)
-
-    // Test walk frame 1
-    expect(idxWalk('D', 1)).toBe(10); // Down walk frame 1 → Row 1, Col 1
-    expect(idxWalk('L', 1)).toBe(28); // Left walk frame 1 → Row 3, Col 1
-    expect(idxWalk('R', 1)).toBe(19); // Right walk frame 1 → Row 2, Col 1
-    expect(idxWalk('U', 1)).toBe(1); // Up walk frame 1 → Row 0, Col 1
+    expect(LPC_DIRECTION_ROWS.U).toBe(0); // Up → Row 0 (verified correct)
+    expect(LPC_DIRECTION_ROWS.D).toBe(1); // Down → Row 1 (empirically determined)
+    expect(LPC_DIRECTION_ROWS.R).toBe(2); // Right → Row 2 (empirically determined)
+    expect(LPC_DIRECTION_ROWS.L).toBe(3); // Left → Row 3 (empirically determined)
   });
 
   it('should handle diagonal movement directions correctly', () => {
@@ -61,7 +45,7 @@ describe('Berserker Sprite Direction Mapping', () => {
     // Southeast (135°) → Down
     expect(dirFromAngle((3 * Math.PI) / 4)).toBe('D');
 
-    // Southwest (225°) → Up (closest to 270°)
+    // Southwest (225°) → Up (maps to 225-315° range)
     expect(dirFromAngle((5 * Math.PI) / 4)).toBe('U');
 
     // Northwest (315°) → Up

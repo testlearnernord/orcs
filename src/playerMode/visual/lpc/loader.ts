@@ -73,10 +73,11 @@ export class LPCCharacterLoader {
     frameSize: number
   ): Promise<HTMLImageElement> {
     // Define potential paths in order of preference
+    // For berserker, prioritize standard/ directory which exists
     const potentialPaths = [
-      `${basePath}/${animation}_${frameSize}.png`, // Direct naming: walk_64.png
-      `${basePath}/standard/${animation}.png`, // Standard subdirectory: standard/walk.png
-      `${basePath}/${animation}.png` // Simple naming: walk.png
+      `${basePath}/standard/${animation}.png`, // Standard subdirectory: standard/walk.png (berserker)
+      `${basePath}/${animation}.png`, // Simple naming: walk.png
+      `${basePath}/${animation}_${frameSize}.png` // Direct naming: walk_64.png (last to avoid 404s)
     ];
 
     // Try each path until one succeeds
