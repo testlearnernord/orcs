@@ -11,9 +11,8 @@ export type SortMode =
 export interface UIFilters {
   loyalToKing?: boolean;
   rivalsOfKing?: boolean;
-  friendships?: boolean;
   rivalries?: boolean;
-  bloodoaths?: boolean;
+  neutralRelations?: boolean;
   lowBravery?: boolean;
   highGreed?: boolean;
   promotionCandidates?: boolean;

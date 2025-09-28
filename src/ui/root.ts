@@ -67,9 +67,8 @@ const RELATIONS_OVERLAY_ENABLED = true;
 const FILTER_DEFINITIONS: { key: FilterKey; label: string }[] = [
   { key: 'loyalToKing', label: 'Loyal zum König' },
   { key: 'rivalsOfKing', label: 'Rivale des Königs' },
-  { key: 'friendships', label: 'Freundschaften' },
   { key: 'rivalries', label: 'Rivalitäten' },
-  { key: 'bloodoaths', label: 'Blutschwüre aktiv' },
+  { key: 'neutralRelations', label: 'Neutrale Beziehungen' },
   { key: 'lowBravery', label: 'Niedriger Mut' },
   { key: 'highGreed', label: 'Hohe Gier' },
   { key: 'promotionCandidates', label: 'Aufstiegskandidaten' },

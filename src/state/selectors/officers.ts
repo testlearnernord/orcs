@@ -92,7 +92,9 @@ function applyOfficerFilters(
     if (filters.rivalries && !officerHasRelation(officer, 'RIVAL')) {
       return false;
     }
-    // Remove friendships and bloodoaths filters since those relationship types no longer exist
+    if (filters.neutralRelations && !officerHasRelation(officer, 'NEUTRAL')) {
+      return false;
+    }
     if (filters.lowBravery && officer.personality.tapferkeit > 0.3) {
       return false;
     }
@@ -167,16 +169,18 @@ export function lensMaskForFilters(
   const mask = new Set<OverlayRelationType>();
   let constrained = false;
 
-  // Remove friendships and bloodoaths since they no longer exist
   if (filters.rivalries) {
     mask.add('rival');
+    constrained = true;
+  }
+  if (filters.neutralRelations) {
+    mask.add('neutral');
     constrained = true;
   }
   if (filters.rivalsOfKing) {
     mask.add('rival');
     constrained = true;
   }
-  // Remove bloodoaths filter since it no longer exists
   if (filters.coupRisk) {
     mask.add('rival');
     constrained = true;
