@@ -25,7 +25,7 @@ Taste **E**: führt einen Simulations-Cycle aus und loggt Ereignisse in die Kons
 Der Free-Roam Modus generiert standardmäßig eine vielfältige Welt mit 12 verschiedenen Biomen:
 
 - **Wüste** (Desert) - Trockene, sandige Gebiete
-- **Wiese** (Plains) - Grüne Grasländer  
+- **Wiese** (Plains) - Grüne Grasländer
 - **Wald** (Forest) - Dichte Waldgebiete
 - **Sumpf** (Swamp) - Feuchte Moorlandschaften
 - **Schnee** (Tundra) - Gefrorene, eisige Regionen
@@ -38,6 +38,7 @@ Der Free-Roam Modus generiert standardmäßig eine vielfältige Welt mit 12 vers
 - **Flüsse** (Rivers) - Wasserwege und Seen
 
 **Features:**
+
 - Dynamische Offiziersbewegung mit KI-Verhalten
 - Prozedural generierte Warcalls
 - Echtzeit-Biomenwechsel

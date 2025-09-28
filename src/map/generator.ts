@@ -2,7 +2,7 @@ import { RNG } from '@sim/rng';
 
 export type Biome =
   | 'desert' // Wüste
-  | 'plains' // Wiese  
+  | 'plains' // Wiese
   | 'forest' // Wald
   | 'swamp' // Sumpf
   | 'tundra' // Schnee
@@ -122,7 +122,7 @@ function resolveBiome(
   // High altitude biomes
   if (height > 0.92 && temperature > 0.6) return 'volcano';
   if (height > 0.85) return temperature < 0.4 ? 'tundra' : 'mountains';
-  
+
   // Cold regions
   if (temperature < 0.2) {
     if (height > 0.6) return 'tundra';
@@ -157,13 +157,13 @@ function resolveBiome(
   if (moisture > 0.7 && height < 0.5) return 'swamp';
   if (moisture > 0.6) return 'forest';
   if (height > 0.75) return 'mountains';
-  
+
   return 'plains';
 }
 
 export function generateWorldMap(seed: string, size: number = 512): WorldMap {
   const baseSeed = `${seed}:enhanced-free-roam-map`;
-  
+
   // Generate height with multiple octaves for more interesting terrain
   const heightField = buildField(baseSeed, size, [
     { scale: 4, weight: 0.4 },
@@ -171,14 +171,14 @@ export function generateWorldMap(seed: string, size: number = 512): WorldMap {
     { scale: 16, weight: 0.2 },
     { scale: 32, weight: 0.1 }
   ]);
-  
+
   // More varied moisture patterns
   const moistureNoise = buildField(`${baseSeed}:moisture`, size, [
     { scale: 6, weight: 0.5 },
     { scale: 12, weight: 0.3 },
     { scale: 24, weight: 0.2 }
   ]);
-  
+
   // Temperature with latitude influence and local variations
   const temperatureNoise = buildField(`${baseSeed}:temperature`, size, [
     { scale: 8, weight: 0.4 },
@@ -194,31 +194,29 @@ export function generateWorldMap(seed: string, size: number = 512): WorldMap {
     const lat = y / (size - 1 || 1);
     // Create more dramatic latitude temperature gradient
     const latitudeFactor = Math.pow(lat, 1.2);
-    
+
     for (let x = 0; x < size; x += 1) {
       const index = y * size + x;
       const height = heightField[index];
-      
+
       // Enhanced moisture calculation with height influence
       const moistureValue = clamp(
-        moistureNoise[index] * 0.7 + 
-        (1 - height) * 0.3 + 
-        // Coastal moisture bonus
-        (height < 0.3 ? 0.2 : 0),
+        moistureNoise[index] * 0.7 +
+          (1 - height) * 0.3 +
+          // Coastal moisture bonus
+          (height < 0.3 ? 0.2 : 0),
         0,
         1
       );
-      
+
       // Enhanced temperature with altitude cooling
       const altitudeCooling = Math.max(0, height - 0.5) * 0.4;
       const temperatureValue = clamp(
-        latitudeFactor * 0.6 + 
-        temperatureNoise[index] * 0.4 - 
-        altitudeCooling,
+        latitudeFactor * 0.6 + temperatureNoise[index] * 0.4 - altitudeCooling,
         0,
         1
       );
-      
+
       moisture[index] = moistureValue;
       temperature[index] = temperatureValue;
       tiles[index] = resolveBiome(height, moistureValue, temperatureValue);

@@ -468,11 +468,13 @@ export function FreeRoamView({
       <header className="free-roam__hud">
         <div className="free-roam__title">
           <h1 id="free-roam-title">
-            {useHandcrafted ? 'Free Roam - Handcrafted Map' : 'Free Roam - Diverse Biomes'}
+            {useHandcrafted
+              ? 'Free Roam - Handcrafted Map'
+              : 'Free Roam - Diverse Biomes'}
           </h1>
           <p>
-            {useHandcrafted 
-              ? 'Erkunde eine handgefertigte Karte mit der Nemesis-Simulation.' 
+            {useHandcrafted
+              ? 'Erkunde eine handgefertigte Karte mit der Nemesis-Simulation.'
               : 'Erkunde eine prozedural generierte Welt mit vielfältigen Biomen.'}
           </p>
         </div>
@@ -727,14 +729,14 @@ export function FreeRoamView({
                     </div>
                     <div className="free-roam__list-meta">
                       Position: (
-                      {useHandcrafted 
+                      {useHandcrafted
                         ? Math.round((officer as any).x)
-                        : Math.round((officer as any).coordinate?.x ?? 0)
-                      },{' '}
-                      {useHandcrafted 
+                        : Math.round((officer as any).coordinate?.x ?? 0)}
+                      ,{' '}
+                      {useHandcrafted
                         ? Math.round((officer as any).y)
-                        : Math.round((officer as any).coordinate?.y ?? 0)
-                      })
+                        : Math.round((officer as any).coordinate?.y ?? 0)}
+                      )
                       {!useHandcrafted && 'coordinate' in officer && (
                         <span>
                           {' '}

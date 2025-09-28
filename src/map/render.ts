@@ -1,18 +1,18 @@
 import type { Biome, WorldMap } from './generator';
 
 export const BIOME_COLORS: Record<Biome, string> = {
-  desert: '#e6d190',     // Warm sandy yellow
-  plains: '#7db46c',     // Fresh green
-  forest: '#2d5a3d',     // Deep forest green
-  swamp: '#3d5c4a',      // Murky swamp green
-  tundra: '#b8d4e8',     // Icy blue-white
-  ashwastes: '#6b6270',  // Ashen purple-gray
-  volcano: '#d84632',    // Volcanic red
-  river: '#4a7bc8',      // Clear blue water
-  savanna: '#b5a572',    // Golden grassland
-  beach: '#f4e4a6',      // Sandy beige
-  mountains: '#8b9ba8',  // Stone gray
-  jungle: '#1e4429'      // Dark tropical green
+  desert: '#e6d190', // Warm sandy yellow
+  plains: '#7db46c', // Fresh green
+  forest: '#2d5a3d', // Deep forest green
+  swamp: '#3d5c4a', // Murky swamp green
+  tundra: '#b8d4e8', // Icy blue-white
+  ashwastes: '#6b6270', // Ashen purple-gray
+  volcano: '#d84632', // Volcanic red
+  river: '#4a7bc8', // Clear blue water
+  savanna: '#b5a572', // Golden grassland
+  beach: '#f4e4a6', // Sandy beige
+  mountains: '#8b9ba8', // Stone gray
+  jungle: '#1e4429' // Dark tropical green
 };
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -53,10 +53,10 @@ export function renderWorldMap(
     const height = map.height[i];
     const moisture = map.moisture[i];
     const temperature = map.temperature[i];
-    
+
     // Enhanced shading based on height, moisture, and temperature
     let shade = 0.7 + height * 0.4; // Base height shading
-    
+
     // Biome-specific adjustments
     switch (biome) {
       case 'desert':
@@ -81,9 +81,9 @@ export function renderWorldMap(
       default:
         shade += (temperature - 0.5) * 0.1; // Slight temperature influence
     }
-    
+
     shade = clamp01(shade);
-    
+
     const index = i * 4;
     data[index] = Math.round(r * shade);
     data[index + 1] = Math.round(g * shade);

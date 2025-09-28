@@ -134,12 +134,32 @@ function moveTowards(
 function generateProceduralPOIs(map: WorldMap, rng: RNG): ProceduralPOI[] {
   const pois: ProceduralPOI[] = [];
   const poiNames: Record<Biome, string[]> = {
-    desert: ['Wüsten-Oase', 'Sandstein-Ruinen', 'Karawanen-Stopp', 'Skorpion-Höhle'],
+    desert: [
+      'Wüsten-Oase',
+      'Sandstein-Ruinen',
+      'Karawanen-Stopp',
+      'Skorpion-Höhle'
+    ],
     plains: ['Grüne Hügel', 'Windmühle', 'Bauernhof', 'Alte Steinbrücke'],
-    forest: ['Wald-Lichtung', 'Druiden-Hain', 'Jäger-Hütte', 'Verwunschener Baum'],
+    forest: [
+      'Wald-Lichtung',
+      'Druiden-Hain',
+      'Jäger-Hütte',
+      'Verwunschener Baum'
+    ],
     swamp: ['Sumpf-Insel', 'Irrlichter-Pfad', 'Morast-Tempel', 'Hexen-Hütte'],
-    tundra: ['Eisiger Gipfel', 'Gletscher-Spalte', 'Eskimo-Lager', 'Frostiger Schrein'],
-    ashwastes: ['Verbrannte Erde', 'Asche-Dünen', 'Lava-Becken', 'Geisterstadt'],
+    tundra: [
+      'Eisiger Gipfel',
+      'Gletscher-Spalte',
+      'Eskimo-Lager',
+      'Frostiger Schrein'
+    ],
+    ashwastes: [
+      'Verbrannte Erde',
+      'Asche-Dünen',
+      'Lava-Becken',
+      'Geisterstadt'
+    ],
     volcano: ['Feuerschlund', 'Lava-Röhre', 'Obsidian-Klippe', 'Feuer-Schrein'],
     river: ['Flussbiegung', 'Steinige Furt', 'Fischer-Dock', 'Wasserfall'],
     savanna: ['Affenbrotbaum', 'Löwen-Felsen', 'Stammeslager', 'Wasserloch'],
@@ -159,32 +179,42 @@ function generateProceduralPOIs(map: WorldMap, rng: RNG): ProceduralPOI[] {
   const targetPOIs = rng.int(8, 12);
   const attempts = targetPOIs * 3; // Multiple attempts to find good locations
 
-  for (let attempt = 0; attempt < attempts && pois.length < targetPOIs; attempt++) {
+  for (
+    let attempt = 0;
+    attempt < attempts && pois.length < targetPOIs;
+    attempt++
+  ) {
     const x = rng.int(0, map.size - 1);
     const y = rng.int(0, map.size - 1);
     const index = y * map.size + x;
     const biome = map.tiles[index];
     const height = map.height[index];
-    
+
     // Skip if too close to existing POIs
-    const tooClose = pois.some(poi => {
+    const tooClose = pois.some((poi) => {
       const dx = poi.coordinate.x - x;
       const dy = poi.coordinate.y - y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       return distance < 50; // Minimum distance between POIs
     });
-    
+
     if (tooClose) continue;
 
     // Prefer interesting locations (higher elevations, biome edges)
-    const interestScore = height + (Math.abs(height - 0.5) * 0.5);
+    const interestScore = height + Math.abs(height - 0.5) * 0.5;
     if (rng.next() > interestScore * 1.2) continue;
 
     const names = poiNames[biome];
     if (names && names.length > 0) {
       const name = rng.pick(names);
-      const types: ProceduralPOI['type'][] = ['landmark', 'ruin', 'camp', 'shrine', 'resource'];
-      
+      const types: ProceduralPOI['type'][] = [
+        'landmark',
+        'ruin',
+        'camp',
+        'shrine',
+        'resource'
+      ];
+
       pois.push({
         id: `poi_${biome}_${x}_${y}`,
         name,
