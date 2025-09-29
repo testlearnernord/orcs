@@ -150,7 +150,9 @@ export class LPCCharacterLoader {
       const atlases = new Map<LPCAnimation, LPCAnimationAtlas>();
       const images = new Map<LPCAnimation, HTMLImageElement>();
 
-      // Load each animation's sprite sheet
+      console.log(`[LPCLoader] Loading composited sprites for ${characterId} (${config.layers.length} layers in character.json)`);
+
+      // Load each animation's sprite sheet using composited files
       const loadPromises = animations.map(async (animation) => {
         const atlas = this.createAnimationAtlas(
           animation,
@@ -167,6 +169,7 @@ export class LPCCharacterLoader {
           );
           atlases.set(animation, atlas);
           images.set(animation, image);
+          console.log(`[LPCLoader] Successfully loaded ${animation} sprite`);
         } catch (error) {
           console.warn(
             `Failed to load ${animation} sprite for ${characterId}:`,

@@ -48,7 +48,7 @@ export class PlayerController {
   private lockOnManager: LockOnManager;
   private lockOnInputHandler: LockOnInputHandler;
   private availableTargets: LockOnTarget[] = [];
-  private baseSpeed = 45; // px/s - reasonable walking pace for Berserker (0.9 speed archetype)
+  private baseSpeed = 80; // px/s - reduced from 45 to slow down character movement
 
   constructor(startPosition: Point2D = { x: 0, y: 0 }) {
     this.lockOnManager = new LockOnManager();
