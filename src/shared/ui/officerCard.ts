@@ -7,15 +7,16 @@ export interface OfficerCardOptions {
   onOfficerClick?: (officer: Officer) => void; // New click handler for details panel
 }
 
-type StatKey = 'str' | 'dex' | 'int' | 'hp';
+type StatKey = 'str' | 'dex' | 'int' | 'hp' | 'exp';
 
-const STATS: StatKey[] = ['str', 'dex', 'int', 'hp'];
+const STATS: StatKey[] = ['str', 'dex', 'int', 'hp', 'exp'];
 
 const STAT_LABEL: Record<StatKey, string> = {
   str: 'Stärke',
   dex: 'Geschick',
   int: 'Intelligenz',
-  hp: 'Lebenspunkte'
+  hp: 'Lebenspunkte',
+  exp: 'Erfahrung'
 };
 
 const RELATION_ORDER: RelationshipType[] = ['ALLY', 'RIVAL'];
@@ -235,25 +236,76 @@ export class OfficerCard {
     return descriptions[trait] || 'Unbekannte Eigenschaft';
   }
 
+  /**
+   * Calculate experience required for a specific level
+   */
+  private getExpForLevel(level: number): number {
+    // Simple exponential formula: level^2 * 100
+    return level * level * 100;
+  }
+
+  /**
+   * Calculate current experience and progress for an officer
+   */
+  private getExpInfo(officer: Officer): { currentExp: number; nextLevelExp: number; progress: number; displayText: string } {
+    const currentLevel = officer.stats.level;
+    const currentLevelExp = this.getExpForLevel(currentLevel);
+    const nextLevelExp = this.getExpForLevel(currentLevel + 1);
+    
+    // Simulate current exp based on level with some randomness
+    // Use officer ID as seed for consistent "random" exp within the level
+    const seed = parseInt(officer.id.split('_')[2] || '0', 10);
+    const expRange = nextLevelExp - currentLevelExp;
+    const currentExp = currentLevelExp + ((seed % 100) / 100) * expRange * 0.8; // 0-80% progress
+    
+    const progress = ((currentExp - currentLevelExp) / expRange) * 100;
+    const displayText = `${Math.floor(currentExp)}/${nextLevelExp}`;
+    
+    return {
+      currentExp: Math.floor(currentExp),
+      nextLevelExp,
+      progress: Math.max(0, Math.min(100, progress)),
+      displayText
+    };
+  }
+
   private updateStats(officer: Officer, previous: Officer): void {
     STATS.forEach((key) => {
-      const value = officer.stats[key];
-      const previousValue = previous.stats[key];
       const fill = this.statBars.get(key);
       const text = this.statValues.get(key);
       if (!fill || !text) return;
 
-      // For HP, show as HP/MaxHP, for others show raw value
       let displayValue: string;
       let percent: string;
+      let delta = 0;
 
-      if (key === 'hp') {
+      if (key === 'exp') {
+        // Handle EXP stat specially
+        const expInfo = this.getExpInfo(officer);
+        const prevExpInfo = this.getExpInfo(previous);
+        
+        displayValue = expInfo.displayText;
+        percent = `${expInfo.progress}%`;
+        delta = expInfo.currentExp - prevExpInfo.currentExp;
+        
+        // Level up detection - if level increased, show full progress
+        if (officer.stats.level > previous.stats.level) {
+          percent = '100%';
+          delta = expInfo.nextLevelExp - prevExpInfo.currentExp; // Show large exp gain
+        }
+      } else if (key === 'hp') {
+        const value = officer.stats[key];
+        const previousValue = previous.stats[key];
         displayValue = `${value}/${officer.stats.maxHp}`;
         percent = `${Math.round((value / officer.stats.maxHp) * 100)}%`;
+        delta = value - previousValue;
       } else {
+        const value = officer.stats[key];
+        const previousValue = previous.stats[key];
         displayValue = value.toString();
         // Scale other stats to percentage (assuming max around 100)
         percent = `${Math.min(100, Math.round((value / 100) * 100))}%`;
+        delta = value - previousValue;
       }
 
       if (!fill.style.width) {
@@ -267,7 +319,6 @@ export class OfficerCard {
         });
       }
 
-      const delta = value - previousValue;
       text.textContent = displayValue;
       text.dataset.delta =
         delta !== 0 ? (delta > 0 ? `+${delta}` : delta.toString()) : '';

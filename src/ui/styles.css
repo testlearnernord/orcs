@@ -820,6 +820,16 @@ button:disabled {
   filter: brightness(1.2);
 }
 
+/* EXP bar specific styling */
+.officer-card__stat:has(.officer-card__stat-label:contains("Erfahrung")) .officer-card__stat-fill {
+  background: linear-gradient(90deg, #fbbf24, #f59e0b, #d97706);
+}
+
+/* Alternative selector for EXP bar using nth-child (since :has() may not be supported) */
+.officer-card__stat:nth-child(5) .officer-card__stat-fill {
+  background: linear-gradient(90deg, #fbbf24, #f59e0b, #d97706);
+}
+
 .officer-card__stat-value {
   font-variant-numeric: tabular-nums;
   font-size: 0.78rem;
