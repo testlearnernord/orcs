@@ -2244,7 +2244,7 @@ button:disabled {
 .free-roam__marker--player .free-roam__marker-icon {
   background: rgba(16, 185, 129, 0.95);
   border: 2px solid rgba(16, 185, 129, 0.3);
-  font-size: 1.1rem;
+  font-size: 1.3rem; /* Increased from 1.1rem */
   animation: playerPulse 2s infinite;
 }
 
@@ -2305,8 +2305,8 @@ button:disabled {
 }
 
 .free-roam__marker-icon {
-  width: 34px;
-  height: 34px;
+  width: 42px; /* Increased from 34px */
+  height: 42px; /* Increased from 34px */
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -2400,6 +2400,114 @@ button:disabled {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.85rem;
+}
+
+/* Interaction Popup */
+.free-roam__interaction-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.free-roam__interaction-popup {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 400px;
+  min-width: 320px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.free-roam__interaction-popup h3 {
+  margin: 0 0 16px 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.free-roam__interaction-name {
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.free-roam__interaction-distance {
+  margin: 0 0 20px 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.free-roam__interaction-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.free-roam__interaction-btn {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms ease;
+  text-align: left;
+}
+
+.free-roam__interaction-btn--primary {
+  background: var(--accent);
+  color: white;
+}
+
+.free-roam__interaction-btn--primary:hover {
+  background: #2563eb;
+}
+
+.free-roam__interaction-btn--success {
+  background: #059669;
+  color: white;
+}
+
+.free-roam__interaction-btn--success:hover {
+  background: #047857;
+}
+
+.free-roam__interaction-btn--danger {
+  background: var(--danger);
+  color: white;
+}
+
+.free-roam__interaction-btn--danger:hover {
+  background: #dc2626;
+}
+
+.free-roam__interaction-btn--secondary {
+  background: var(--bg-panel);
+  color: var(--text-muted);
+  border: 1px solid var(--border-soft);
+}
+
+.free-roam__interaction-btn--secondary:hover {
+  background: var(--border-soft);
+  color: var(--text-primary);
+}
+
+.free-roam__interaction-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-align: center;
 }
 
 /* Audio Controls */

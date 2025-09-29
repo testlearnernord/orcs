@@ -7,25 +7,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GameStore } from '@state/store';
 import type { Phase } from '@state/selectors/warcalls';
 import Portrait from '@/ui/Portrait';
-import { renderWorldMap } from '@/map/render';
 import {
-  useHandcraftedFreeRoam,
-  type HandcraftedFreeRoamState
-} from './useHandcraftedFreeRoam';
-import {
-  drawTerrain,
-  drawDebugCollision,
-  drawPOILabels,
-  drawOfficerIcons,
-  drawPlayer
-} from './hmap/renderer';
-import type { Biome } from '@/map/generator';
-import {
+  useSomaiaFreeRoam,
   DEFAULT_IDLE_MS,
-  DEFAULT_OFFICER_LIMIT,
-  DEFAULT_MAP_SIZE,
-  useFreeRoam
-} from './useFreeRoam';
+  DEFAULT_OFFICER_LIMIT
+} from './useSomaiaFreeRoam';
 
 const PHASE_LABEL: Record<Phase, string> = {
   prep: 'Vorbereitung',
@@ -34,26 +20,10 @@ const PHASE_LABEL: Record<Phase, string> = {
   resolution: 'Auflösung'
 };
 
-const BIOME_LABEL: Record<Biome, string> = {
-  desert: 'Wüste',
-  plains: 'Wiese',
-  forest: 'Wald',
-  swamp: 'Sumpf',
-  tundra: 'Schnee',
-  ashwastes: 'Aschelande',
-  volcano: 'Vulkan',
-  river: 'Fluss',
-  savanna: 'Savanne',
-  beach: 'Strand',
-  mountains: 'Berge',
-  jungle: 'Dschungel'
-};
-
 interface FreeRoamViewProps {
   store: GameStore;
   onRequestClose: () => void;
   onHighlightHostChange?: (element: HTMLElement | null) => void;
-  mapId?: string;
 }
 
 interface CameraState {
@@ -79,31 +49,14 @@ function formatIdleCountdown(idleMs: number, idleSeconds: number): number {
 export function FreeRoamView({
   store,
   onRequestClose,
-  onHighlightHostChange,
-  mapId
+  onHighlightHostChange
 }: FreeRoamViewProps) {
   const idleMs = DEFAULT_IDLE_MS;
 
-  // Use procedural map by default, handcrafted only if explicitly requested
-  const useHandcrafted = Boolean(mapId && mapId !== 'default');
-
-  const legacyState = useFreeRoam(store, {
-    mapSize: DEFAULT_MAP_SIZE,
+  const state = useSomaiaFreeRoam(store, {
     officerLimit: DEFAULT_OFFICER_LIMIT,
     idleMs
   });
-
-  const handcraftedState = useHandcraftedFreeRoam(
-    store,
-    mapId || 'gogouds-manor',
-    {
-      officerLimit: DEFAULT_OFFICER_LIMIT,
-      idleMs
-    }
-  );
-
-  // Choose the appropriate state based on whether we're using handcrafted maps
-  const state = useHandcrafted ? handcraftedState : legacyState;
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -125,16 +78,85 @@ export function FreeRoamView({
     isDragging: false
   });
 
-  // Initialize camera based on map type
+  // Initialize camera for Somaia map
   const [camera, setCamera] = useState<CameraState>(() => {
-    if (useHandcrafted && !handcraftedState.loading && handcraftedState.map) {
-      const reset = handcraftedState.resetCamera();
-      return reset;
+    if (state.map) {
+      return state.resetCamera();
     }
     return { scale: 1, x: 0, y: 0 };
   });
 
   const [showDebug, setShowDebug] = useState(false);
+  const [showInteractionPopup, setShowInteractionPopup] = useState(false);
+  const [selectedInteraction, setSelectedInteraction] = useState<any>(null);
+
+  // Show interaction popup when near officer or warcall
+  useEffect(() => {
+    if ('nearbyInteractions' in state) {
+      const typedState = state as typeof state & {
+        nearbyInteractions: Array<{
+          type: 'officer' | 'warcall';
+          id: string;
+          name: string;
+          distance: number;
+          data: any;
+        }>;
+      };
+      if (typedState.nearbyInteractions.length > 0 && !showInteractionPopup) {
+        // Auto-show popup for closest interaction
+        const closest = typedState.nearbyInteractions[0];
+        setSelectedInteraction(closest);
+        setShowInteractionPopup(true);
+      } else if (
+        typedState.nearbyInteractions.length === 0 &&
+        showInteractionPopup
+      ) {
+        setShowInteractionPopup(false);
+        setSelectedInteraction(null);
+      }
+    }
+  }, [state, showInteractionPopup]);
+
+  const handleInteractionAction = useCallback(
+    (action: string) => {
+      if (!selectedInteraction) return;
+
+      if (selectedInteraction.type === 'warcall') {
+        switch (action) {
+          case 'details':
+            // TODO: Show warcall details modal
+            console.log('Show warcall details:', selectedInteraction.data);
+            break;
+          case 'join':
+            // TODO: Join warcall
+            console.log('Join warcall:', selectedInteraction.data);
+            store.tick(); // Advance cycle
+            break;
+          case 'ignore':
+            setShowInteractionPopup(false);
+            setSelectedInteraction(null);
+            break;
+        }
+      } else if (selectedInteraction.type === 'officer') {
+        switch (action) {
+          case 'talk':
+            // TODO: Open dialog
+            console.log('Talk to officer:', selectedInteraction.data);
+            break;
+          case 'attack':
+            // TODO: Initiate combat (not implemented yet)
+            console.log('Attack officer:', selectedInteraction.data);
+            store.tick(); // Advance cycle
+            break;
+          case 'ignore':
+            setShowInteractionPopup(false);
+            setSelectedInteraction(null);
+            break;
+        }
+      }
+    },
+    [selectedInteraction, store]
+  );
 
   // Note: Debug overlay temporarily disabled due to infinite loop issue
   // TODO: Fix infinite loop and re-enable F2 debug toggle
@@ -143,91 +165,86 @@ export function FreeRoamView({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    if (useHandcrafted && handcraftedState.map) {
-      // Render handcrafted map
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw terrain
-      drawTerrain(
-        ctx,
-        handcraftedState.map,
-        camera,
-        canvas.width,
-        canvas.height
+    if (state.loading) {
+      // Show loading state
+      ctx.fillStyle = '#333';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'white';
+      ctx.font = '24px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Loading Somaia...', canvas.width / 2, canvas.height / 2);
+      return;
+    }
+
+    if (state.error) {
+      // Show error state
+      ctx.fillStyle = '#333';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ff6b6b';
+      ctx.font = '18px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        'Error loading map:',
+        canvas.width / 2,
+        canvas.height / 2 - 20
       );
+      ctx.fillText(state.error, canvas.width / 2, canvas.height / 2 + 20);
+      return;
+    }
 
-      // Draw officers
-      if (useHandcrafted) {
-        const handcraftedState = state as HandcraftedFreeRoamState;
-        const officerIcons = handcraftedState.officers.map((officer) => ({
-          x: officer.x,
-          y: officer.y,
-          name: officer.name
-        }));
-        drawOfficerIcons(
-          ctx,
-          officerIcons,
-          camera,
-          canvas.width,
-          canvas.height
+    if (state.map) {
+      // Apply camera transform
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(camera.scale, camera.scale);
+      ctx.translate(-camera.x, -camera.y);
+
+      // Draw Somaia world map background
+      ctx.fillStyle = '#2c5aa0'; // Ocean blue
+      ctx.fillRect(0, 0, state.map.pixelSize.width, state.map.pixelSize.height);
+
+      // Draw countries
+      for (const country of state.map.countries) {
+        ctx.fillStyle = country.active ? country.color : '#666666';
+        ctx.globalAlpha = country.active ? 0.7 : 0.3;
+        ctx.fillRect(
+          country.region.x,
+          country.region.y,
+          country.region.width,
+          country.region.height
         );
-
-        // Draw player
-        drawPlayer(
-          ctx,
-          handcraftedState.playerPosition.x,
-          handcraftedState.playerPosition.y,
-          camera,
-          canvas.width,
-          canvas.height
-        );
-
-        // Draw POI labels
-        if (handcraftedState.map) {
-          drawPOILabels(
-            ctx,
-            handcraftedState.map,
-            camera,
-            canvas.width,
-            canvas.height
-          );
-        }
-
-        // Draw debug overlay if enabled (temporarily disabled)
-        // if (showDebug && handcraftedState.map) {
-        //   drawDebugCollision(
-        //     ctx,
-        //     handcraftedState.map,
-        //     camera,
-        //     canvas.width,
-        //     canvas.height
-        //   );
-        // }
       }
-    } else if (
-      !useHandcrafted &&
-      'map' in state &&
-      state.map &&
-      'tiles' in state.map
-    ) {
-      // Render legacy generated map (only if it's a WorldMap)
-      renderWorldMap(canvas, state.map as any);
+
+      // Draw biomes
+      ctx.globalAlpha = 0.8;
+      for (const [biomeName, biome] of Object.entries(state.map.biomes)) {
+        let color = '#90EE90'; // Default green for forests/plains
+        if (biomeName === 'ocean') color = '#1e40af';
+        if (biomeName === 'mountains') color = '#78716c';
+
+        ctx.fillStyle = color;
+        for (const region of biome.regions) {
+          ctx.fillRect(region.x, region.y, region.width, region.height);
+        }
+      }
+
+      ctx.globalAlpha = 1.0;
+      ctx.restore();
     }
   }, [
-    useHandcrafted,
-    handcraftedState.map,
-    handcraftedState.cycle, // Using cycle as proxy for state changes
-    handcraftedState.playerPosition.x,
-    handcraftedState.playerPosition.y,
-    legacyState.cycle,
+    state.loading,
+    state.error,
+    state.map,
+    state.cycle,
     camera.x,
     camera.y,
-    camera.scale,
-    showDebug // Keep for future use
+    camera.scale
   ]);
 
   // Debug toggle (F2) - temporarily disabled due to infinite loop
@@ -273,12 +290,40 @@ export function FreeRoamView({
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onRequestClose();
+        if (showInteractionPopup) {
+          setShowInteractionPopup(false);
+          setSelectedInteraction(null);
+        } else {
+          onRequestClose();
+        }
         return;
       }
 
-      // WASD movement controls (only for legacy maps)
-      if (!useHandcrafted && 'movePlayer' in state) {
+      // Interaction keys when popup is shown
+      if (showInteractionPopup && selectedInteraction) {
+        switch (event.key) {
+          case '1':
+            event.preventDefault();
+            handleInteractionAction(
+              selectedInteraction.type === 'warcall' ? 'details' : 'talk'
+            );
+            break;
+          case '2':
+            event.preventDefault();
+            handleInteractionAction(
+              selectedInteraction.type === 'warcall' ? 'join' : 'attack'
+            );
+            break;
+          case '3':
+            event.preventDefault();
+            handleInteractionAction('ignore');
+            break;
+        }
+        return;
+      }
+
+      // WASD movement controls
+      if ('movePlayer' in state) {
         switch (event.key.toLowerCase()) {
           case 'w':
             event.preventDefault();
@@ -301,7 +346,13 @@ export function FreeRoamView({
     };
     window.addEventListener('keydown', handleKeydown);
     return () => window.removeEventListener('keydown', handleKeydown);
-  }, [onRequestClose, useHandcrafted, state]);
+  }, [
+    onRequestClose,
+    state,
+    showInteractionPopup,
+    selectedInteraction,
+    handleInteractionAction
+  ]);
 
   const secondsUntilCycle = useMemo(
     () => formatIdleCountdown(idleMs, state.idleSeconds),
@@ -313,13 +364,13 @@ export function FreeRoamView({
   }, [store]);
 
   const handleResetCamera = useCallback(() => {
-    if (useHandcrafted && 'resetCamera' in state) {
+    if (state.map) {
       const reset = state.resetCamera();
       setCamera(reset);
     } else {
       setCamera({ scale: 1, x: 0, y: 0 });
     }
-  }, [useHandcrafted, state]);
+  }, [state]);
 
   const handlePointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -408,34 +459,6 @@ export function FreeRoamView({
     });
   }, []);
 
-  const handleCanvasClick = useCallback(
-    (event: ReactMouseEvent<HTMLCanvasElement>) => {
-      // Only handle clicks for handcrafted maps
-      if (!useHandcrafted || !('moveTo' in state) || !state.map) return;
-
-      // Prevent click if we were dragging
-      if (pointerState.current.isDragging) return;
-
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const rect = canvas.getBoundingClientRect();
-      const clientX = event.clientX - rect.left;
-      const clientY = event.clientY - rect.top;
-
-      // Convert screen coordinates to world coordinates
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-
-      const worldX = camera.x + (clientX - centerX) / camera.scale;
-      const worldY = camera.y + (clientY - centerY) / camera.scale;
-
-      // Move player to clicked position
-      state.moveTo(worldX, worldY);
-    },
-    [useHandcrafted, state, camera]
-  );
-
   const handleBackdropClick = useCallback(
     (event: ReactMouseEvent<HTMLDivElement>) => {
       if (event.target !== event.currentTarget) return;
@@ -467,15 +490,13 @@ export function FreeRoamView({
     >
       <header className="free-roam__hud">
         <div className="free-roam__title">
-          <h1 id="free-roam-title">
-            {useHandcrafted
-              ? 'Free Roam - Handcrafted Map'
-              : 'Free Roam - Diverse Biomes'}
-          </h1>
+          <h1 id="free-roam-title">Free Roam - Somaia</h1>
           <p>
-            {useHandcrafted
-              ? 'Erkunde eine handgefertigte Karte mit der Nemesis-Simulation.'
-              : 'Erkunde eine prozedural generierte Welt mit vielfältigen Biomen.'}
+            Erkunde die Welt von Somaia. Aktuell in{' '}
+            {state.currentCountry === 'grumthak'
+              ? "Grum'thak"
+              : 'unbekanntem Gebiet'}
+            .
           </p>
         </div>
         <div className="free-roam__status">
@@ -506,135 +527,52 @@ export function FreeRoamView({
           onWheel={handleWheel}
         >
           <div className="free-roam__viewport" style={viewportStyle}>
-            <canvas
-              ref={canvasRef}
-              className="free-roam__canvas"
-              onClick={handleCanvasClick}
-            />
+            <canvas ref={canvasRef} className="free-roam__canvas" />
             <div className="free-roam__overlay">
-              {/* Conditional rendering based on map type */}
-              {useHandcrafted ? (
-                // Handcrafted map rendering
+              {/* Somaia map rendering with pixel-based positioning */}
+              {state.map && (
                 <>
                   {/* Player position marker */}
                   <div
                     className="free-roam__marker free-roam__marker--player"
                     style={{
-                      left: `${(state as HandcraftedFreeRoamState).playerPosition.x}px`,
-                      top: `${(state as HandcraftedFreeRoamState).playerPosition.y}px`,
-                      transform: 'translate(-50%, -50%)'
+                      left: `${(state.playerPosition.x / state.map.pixelSize.width) * 100}%`,
+                      top: `${(state.playerPosition.y / state.map.pixelSize.height) * 100}%`
                     }}
-                    title={`Spieler (${Math.round((state as HandcraftedFreeRoamState).playerPosition.x)}, ${Math.round((state as HandcraftedFreeRoamState).playerPosition.y)})`}
+                    title={`Spieler in ${state.currentCountry === 'grumthak' ? "Grum'thak" : 'Unbekannt'} (${state.playerPosition.x}, ${state.playerPosition.y})`}
                   >
                     <span className="free-roam__marker-icon">🎯</span>
                   </div>
 
-                  {/* Officers */}
-                  {(state as HandcraftedFreeRoamState).officers.map(
-                    (officer) => (
-                      <div
-                        key={officer.id}
-                        className={`free-roam__marker free-roam__marker--officer free-roam__marker--officer-${officer.state}`}
-                        style={{
-                          left: `${officer.x}px`,
-                          top: `${officer.y}px`,
-                          transform: 'translate(-50%, -50%)'
-                        }}
-                        title={`${officer.name} • ${officer.state.toUpperCase()}`}
-                      >
-                        <Portrait
-                          officer={
-                            { id: officer.id, name: officer.name } as any
-                          }
-                          size={24}
-                        />
-                      </div>
-                    )
-                  )}
-
                   {/* Warcalls */}
-                  {(state as HandcraftedFreeRoamState).warcalls.map(
-                    (warcall) => (
-                      <div
-                        key={warcall.id}
-                        className={`free-roam__marker free-roam__marker--warcall free-roam__marker--${warcall.phase}`}
-                        style={{
-                          left: `${warcall.x}px`,
-                          top: `${warcall.y}px`,
-                          transform: 'translate(-50%, -50%)'
-                        }}
-                        title={`${warcall.kind} — ${warcall.rewardHint}`}
-                      >
-                        <span className="free-roam__marker-icon">⚔️</span>
-                      </div>
-                    )
-                  )}
-                </>
-              ) : (
-                // Legacy generated map rendering
-                <>
-                  {/* Player position marker */}
-                  {'playerPosition' in state &&
-                    'xPercent' in state.playerPosition && (
-                      <div
-                        className="free-roam__marker free-roam__marker--player"
-                        style={{
-                          left: `${state.playerPosition.xPercent}%`,
-                          top: `${state.playerPosition.yPercent}%`
-                        }}
-                        title={`Spieler • ${(state.playerPosition as any).coordinate?.biome ? BIOME_LABEL[(state.playerPosition as any).coordinate.biome as keyof typeof BIOME_LABEL] : ''} (${state.playerPosition.x}, ${state.playerPosition.y})`}
-                      >
-                        <span className="free-roam__marker-icon">🎯</span>
-                      </div>
-                    )}
+                  {state.warcalls.map((entry: any) => (
+                    <div
+                      key={entry.warcall.id}
+                      className={`free-roam__marker free-roam__marker--warcall free-roam__marker--${entry.warcall.phase}`}
+                      style={{
+                        left: `${state.map ? (entry.x / state.map.pixelSize.width) * 100 : 50}%`,
+                        top: `${state.map ? (entry.y / state.map.pixelSize.height) * 100 : 50}%`
+                      }}
+                      title={`${entry.warcall.kind} — ${entry.warcall.location || "Grum'thak"}`}
+                    >
+                      <span className="free-roam__marker-icon">⚔️</span>
+                    </div>
+                  ))}
 
-                  {/* Official warcalls */}
-                  {'warcalls' in state &&
-                    state.warcalls.map((entry: any) => (
-                      <div
-                        key={entry.warcall.id}
-                        className={`free-roam__marker free-roam__marker--warcall free-roam__marker--${entry.warcall.phase}`}
-                        style={{
-                          left: `${entry.xPercent}%`,
-                          top: `${entry.yPercent}%`
-                        }}
-                        title={`${entry.warcall.kind} — ${entry.warcall.location}`}
-                      >
-                        <span className="free-roam__marker-icon">⚔️</span>
-                      </div>
-                    ))}
-
-                  {/* Dynamic AI-generated warcalls */}
-                  {'dynamicWarcalls' in state &&
-                    state.dynamicWarcalls.map((entry: any) => (
-                      <div
-                        key={entry.warcall.id}
-                        className="free-roam__marker free-roam__marker--dynamic-warcall"
-                        style={{
-                          left: `${entry.xPercent}%`,
-                          top: `${entry.yPercent}%`
-                        }}
-                        title={`[AI] ${entry.warcall.kind} — ${entry.warcall.location}`}
-                      >
-                        <span className="free-roam__marker-icon">🗡️</span>
-                      </div>
-                    ))}
-
-                  {/* Officers with AI state indicators */}
-                  {'officers' in state &&
-                    state.officers.map((entry: any) => (
-                      <div
-                        key={entry.officer.id}
-                        className={`free-roam__marker free-roam__marker--officer free-roam__marker--officer-${entry.state}`}
-                        style={{
-                          left: `${entry.xPercent}%`,
-                          top: `${entry.yPercent}%`
-                        }}
-                        title={`${entry.officer.name} • ${entry.coordinate?.biome ? BIOME_LABEL[entry.coordinate.biome as keyof typeof BIOME_LABEL] : ''} • ${entry.state.toUpperCase()}`}
-                      >
-                        <Portrait officer={entry.officer} size={24} />
-                      </div>
-                    ))}
+                  {/* Officers with enhanced portraits */}
+                  {state.officers.map((entry: any) => (
+                    <div
+                      key={entry.officer.id}
+                      className={`free-roam__marker free-roam__marker--officer free-roam__marker--officer-${entry.state}`}
+                      style={{
+                        left: `${state.map ? (entry.x / state.map.pixelSize.width) * 100 : 50}%`,
+                        top: `${state.map ? (entry.y / state.map.pixelSize.height) * 100 : 50}%`
+                      }}
+                      title={`${entry.officer.name} in Grum'thak • ${entry.state.toUpperCase()}`}
+                    >
+                      <Portrait officer={entry.officer} size={28} />
+                    </div>
+                  ))}
                 </>
               )}
             </div>
@@ -649,24 +587,15 @@ export function FreeRoamView({
                 <strong>Position:</strong> ({Math.round(state.playerPosition.x)}
                 , {Math.round(state.playerPosition.y)})
               </p>
-              {!useHandcrafted &&
-                'playerPosition' in state &&
-                'coordinate' in state.playerPosition && (
-                  <p>
-                    <strong>Biom:</strong>{' '}
-                    {(state.playerPosition as any).coordinate?.biome
-                      ? BIOME_LABEL[
-                          (state.playerPosition as any).coordinate
-                            .biome as keyof typeof BIOME_LABEL
-                        ]
-                      : ''}
-                  </p>
-                )}
+              <p>
+                <strong>Land:</strong>{' '}
+                {state.currentCountry === 'grumthak'
+                  ? "Grum'thak"
+                  : 'Unbekannt'}
+              </p>
               <p className="free-roam__controls">
                 <small>
-                  {useHandcrafted ? 'Klicken zum Bewegen' : 'WASD zum Bewegen'}{' '}
-                  • ESC zum Verlassen
-                  {/* {useHandcrafted && ' • F2 für Debug-Overlay'} */}
+                  WASD zum Bewegen • Klicken für Interaktion • ESC zum Verlassen
                 </small>
               </p>
             </div>
@@ -678,18 +607,11 @@ export function FreeRoamView({
             ) : (
               <ul className="free-roam__list">
                 {state.warcalls.map((warcall, index) => (
-                  <li
-                    key={useHandcrafted ? (warcall as any).id : `${index}`}
-                    className="free-roam__list-item"
-                  >
+                  <li key={`${index}`} className="free-roam__list-item">
                     <div className="free-roam__list-title">
                       <strong>{(warcall as any).kind}</strong>
-                      {useHandcrafted ? (
-                        <span> • {(warcall as any).rewardHint}</span>
-                      ) : (
-                        'location' in warcall && (
-                          <span> • {(warcall as any).location}</span>
-                        )
+                      {'location' in warcall && (
+                        <span> • {(warcall as any).location}</span>
                       )}
                     </div>
                     <div className="free-roam__list-meta">
@@ -714,10 +636,7 @@ export function FreeRoamView({
             ) : (
               <ul className="free-roam__list">
                 {state.officers.map((officer, index) => (
-                  <li
-                    key={useHandcrafted ? (officer as any).id : `${index}`}
-                    className="free-roam__list-item"
-                  >
+                  <li key={`${index}`} className="free-roam__list-item">
                     <div className="free-roam__list-title">
                       <strong>{(officer as any).name}</strong>
                       {(officer as any).state !== 'idle' && (
@@ -728,27 +647,8 @@ export function FreeRoamView({
                       )}
                     </div>
                     <div className="free-roam__list-meta">
-                      Position: (
-                      {useHandcrafted
-                        ? Math.round((officer as any).x)
-                        : Math.round((officer as any).coordinate?.x ?? 0)}
-                      ,{' '}
-                      {useHandcrafted
-                        ? Math.round((officer as any).y)
-                        : Math.round((officer as any).coordinate?.y ?? 0)}
-                      )
-                      {!useHandcrafted && 'coordinate' in officer && (
-                        <span>
-                          {' '}
-                          •{' '}
-                          {(officer as any).coordinate?.biome
-                            ? BIOME_LABEL[
-                                (officer as any).coordinate
-                                  .biome as keyof typeof BIOME_LABEL
-                              ]
-                            : ''}
-                        </span>
-                      )}
+                      Position: ({Math.round((officer as any).x ?? 0)},{' '}
+                      {Math.round((officer as any).y ?? 0)}) • Grum'thak
                     </div>
                   </li>
                 ))}
@@ -757,6 +657,81 @@ export function FreeRoamView({
           </section>
         </aside>
       </div>
+
+      {/* Interaction Popup */}
+      {showInteractionPopup && selectedInteraction && (
+        <div className="free-roam__interaction-overlay">
+          <div className="free-roam__interaction-popup">
+            <h3>
+              {selectedInteraction.type === 'warcall'
+                ? '⚔️ Warcall'
+                : '👤 Offizier'}
+            </h3>
+            <p className="free-roam__interaction-name">
+              <strong>{selectedInteraction.name}</strong>
+            </p>
+            <p className="free-roam__interaction-distance">
+              Entfernung: {Math.round(selectedInteraction.distance)} Einheiten
+            </p>
+
+            <div className="free-roam__interaction-actions">
+              {selectedInteraction.type === 'warcall' ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleInteractionAction('details')}
+                    className="free-roam__interaction-btn free-roam__interaction-btn--primary"
+                  >
+                    [1] Details ansehen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInteractionAction('join')}
+                    className="free-roam__interaction-btn free-roam__interaction-btn--success"
+                  >
+                    [2] Warcall beitreten
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInteractionAction('ignore')}
+                    className="free-roam__interaction-btn free-roam__interaction-btn--secondary"
+                  >
+                    [3] Ignorieren
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleInteractionAction('talk')}
+                    className="free-roam__interaction-btn free-roam__interaction-btn--primary"
+                  >
+                    [1] Reden
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInteractionAction('attack')}
+                    className="free-roam__interaction-btn free-roam__interaction-btn--danger"
+                  >
+                    [2] Angreifen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInteractionAction('ignore')}
+                    className="free-roam__interaction-btn free-roam__interaction-btn--secondary"
+                  >
+                    [3] Ignorieren
+                  </button>
+                </>
+              )}
+            </div>
+
+            <p className="free-roam__interaction-hint">
+              <small>Verwende Tasten 1-3 oder ESC zum Schließen</small>
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
