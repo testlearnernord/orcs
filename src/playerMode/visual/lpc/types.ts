@@ -114,7 +114,7 @@ export const LPC_DIRECTION_ROWS: Record<LPCDirection, number> = {
   U: 0, // Up - Row 0 (North-facing sprites) ✓ verified correct
   L: 1, // Left - Row 1 (West-facing sprites) - corrected to match berserker sprites
   D: 2, // Down - Row 2 (South-facing sprites) - corrected to match berserker sprites
-  R: 3  // Right - Row 3 (East-facing sprites) - corrected to match berserker sprites
+  R: 3 // Right - Row 3 (East-facing sprites) - corrected to match berserker sprites
 } as const;
 
 /**

@@ -161,7 +161,7 @@ export class PlayerEntity {
     const x = this.state.position.x * 50; // 50 pixels per world unit
     const y = this.state.position.y * 50;
     const scale = 1.0; // Base scale
-    
+
     this.spriteRenderer.render(ctx, x, y, scale);
   }
 
