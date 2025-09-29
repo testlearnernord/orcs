@@ -153,7 +153,13 @@ describe('selectVisibleOfficers', () => {
       ...baseFilters
     });
     // All officers should be visible since filters were removed
-    expect(result.map((o) => o.id)).toEqual(['king', 'risk', 'steady', 'ally', 'low']);
+    expect(result.map((o) => o.id)).toEqual([
+      'king',
+      'risk',
+      'steady',
+      'ally',
+      'low'
+    ]);
   });
 });
 
