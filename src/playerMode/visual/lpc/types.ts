@@ -107,14 +107,14 @@ export interface LPCCharacterSprites {
 
 /**
  * Standard LPC sprite sheet row mapping for directions
- * Based on empirical testing with actual berserker sprites:
- * Row 0: UP (North), Row 1: DOWN (South), Row 2: RIGHT (East), Row 3: LEFT (West)
+ * Based on actual berserker sprite layout (matches legacy atlas.berserker.ts):
+ * Row 0: UP (North), Row 1: LEFT (West), Row 2: DOWN (South), Row 3: RIGHT (East)
  */
 export const LPC_DIRECTION_ROWS: Record<LPCDirection, number> = {
   U: 0, // Up - Row 0 (North-facing sprites) ✓ verified correct
-  L: 3, // Left - Row 3 (West-facing sprites) - empirically determined
-  D: 1, // Down - Row 1 (South-facing sprites) - empirically determined
-  R: 2 // Right - Row 2 (East-facing sprites) - empirically determined
+  L: 1, // Left - Row 1 (West-facing sprites) - corrected to match berserker sprites
+  D: 2, // Down - Row 2 (South-facing sprites) - corrected to match berserker sprites
+  R: 3  // Right - Row 3 (East-facing sprites) - corrected to match berserker sprites
 } as const;
 
 /**

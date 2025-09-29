@@ -16,13 +16,13 @@ import {
 
 describe('LPC Animation System', () => {
   describe('LPC Constants', () => {
-    it('should have correct direction row mapping based on empirical berserker sprite layout', () => {
-      // Empirically determined mapping based on actual berserker sprite behavior
-      // This deviates from the Universal LPC standard but matches the actual sprite files
+    it('should have correct direction row mapping based on actual berserker sprite layout', () => {
+      // Corrected mapping based on actual berserker sprite layout (matches legacy atlas.berserker.ts)
+      // Row 0: UP, Row 1: LEFT, Row 2: DOWN, Row 3: RIGHT
       expect(LPC_DIRECTION_ROWS.U).toBe(0); // Up -> Row 0 (verified correct)
-      expect(LPC_DIRECTION_ROWS.L).toBe(3); // Left -> Row 3 (empirically determined)
-      expect(LPC_DIRECTION_ROWS.D).toBe(1); // Down -> Row 1 (empirically determined)
-      expect(LPC_DIRECTION_ROWS.R).toBe(2); // Right -> Row 2 (empirically determined)
+      expect(LPC_DIRECTION_ROWS.L).toBe(1); // Left -> Row 1 (corrected to match berserker sprites)
+      expect(LPC_DIRECTION_ROWS.D).toBe(2); // Down -> Row 2 (corrected to match berserker sprites)
+      expect(LPC_DIRECTION_ROWS.R).toBe(3); // Right -> Row 3 (corrected to match berserker sprites)
     });
 
     it('should have standard frame counts for LPC animations', () => {
@@ -179,10 +179,10 @@ describe('LPC System Integration', () => {
       expect(row).toBeLessThan(4);
     }
 
-    // Specific mapping verification based on empirical testing with berserker sprites
+    // Specific mapping verification based on actual berserker sprite layout
     expect(LPC_DIRECTION_ROWS.U).toBe(0); // Up -> Row 0 (verified correct)
-    expect(LPC_DIRECTION_ROWS.L).toBe(3); // Left -> Row 3 (empirically determined)
-    expect(LPC_DIRECTION_ROWS.D).toBe(1); // Down -> Row 1 (empirically determined)
-    expect(LPC_DIRECTION_ROWS.R).toBe(2); // Right -> Row 2 (empirically determined)
+    expect(LPC_DIRECTION_ROWS.L).toBe(1); // Left -> Row 1 (corrected to match berserker sprites)
+    expect(LPC_DIRECTION_ROWS.D).toBe(2); // Down -> Row 2 (corrected to match berserker sprites)
+    expect(LPC_DIRECTION_ROWS.R).toBe(3); // Right -> Row 3 (corrected to match berserker sprites)
   });
 });
