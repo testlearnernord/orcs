@@ -2305,7 +2305,7 @@ button:disabled {
 }
 
 .free-roam__marker-icon {
-  width: 42px;  /* Increased from 34px */
+  width: 42px; /* Increased from 34px */
   height: 42px; /* Increased from 34px */
   border-radius: 50%;
   display: inline-flex;

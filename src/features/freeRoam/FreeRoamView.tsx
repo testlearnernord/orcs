@@ -99,8 +99,8 @@ export function FreeRoamView({
 
   // Initialize camera for procedural map
   const [camera, setCamera] = useState<CameraState>(() => ({
-    scale: 1, 
-    x: 0, 
+    scale: 1,
+    x: 0,
     y: 0
   }));
 
@@ -116,50 +116,56 @@ export function FreeRoamView({
         const closest = state.nearbyInteractions[0];
         setSelectedInteraction(closest);
         setShowInteractionPopup(true);
-      } else if (state.nearbyInteractions.length === 0 && showInteractionPopup) {
+      } else if (
+        state.nearbyInteractions.length === 0 &&
+        showInteractionPopup
+      ) {
         setShowInteractionPopup(false);
         setSelectedInteraction(null);
       }
     }
   }, [state, showInteractionPopup]);
 
-  const handleInteractionAction = useCallback((action: string) => {
-    if (!selectedInteraction) return;
-    
-    if (selectedInteraction.type === 'warcall') {
-      switch (action) {
-        case 'details':
-          // TODO: Show warcall details modal
-          console.log('Show warcall details:', selectedInteraction.data);
-          break;
-        case 'join':
-          // TODO: Join warcall
-          console.log('Join warcall:', selectedInteraction.data);
-          store.tick(); // Advance cycle
-          break;
-        case 'ignore':
-          setShowInteractionPopup(false);
-          setSelectedInteraction(null);
-          break;
+  const handleInteractionAction = useCallback(
+    (action: string) => {
+      if (!selectedInteraction) return;
+
+      if (selectedInteraction.type === 'warcall') {
+        switch (action) {
+          case 'details':
+            // TODO: Show warcall details modal
+            console.log('Show warcall details:', selectedInteraction.data);
+            break;
+          case 'join':
+            // TODO: Join warcall
+            console.log('Join warcall:', selectedInteraction.data);
+            store.tick(); // Advance cycle
+            break;
+          case 'ignore':
+            setShowInteractionPopup(false);
+            setSelectedInteraction(null);
+            break;
+        }
+      } else if (selectedInteraction.type === 'officer') {
+        switch (action) {
+          case 'talk':
+            // TODO: Open dialog
+            console.log('Talk to officer:', selectedInteraction.data);
+            break;
+          case 'attack':
+            // TODO: Initiate combat (not implemented yet)
+            console.log('Attack officer:', selectedInteraction.data);
+            store.tick(); // Advance cycle
+            break;
+          case 'ignore':
+            setShowInteractionPopup(false);
+            setSelectedInteraction(null);
+            break;
+        }
       }
-    } else if (selectedInteraction.type === 'officer') {
-      switch (action) {
-        case 'talk':
-          // TODO: Open dialog
-          console.log('Talk to officer:', selectedInteraction.data);
-          break;
-        case 'attack':
-          // TODO: Initiate combat (not implemented yet)
-          console.log('Attack officer:', selectedInteraction.data);
-          store.tick(); // Advance cycle
-          break;
-        case 'ignore':
-          setShowInteractionPopup(false);
-          setSelectedInteraction(null);
-          break;
-      }
-    }
-  }, [selectedInteraction, store]);
+    },
+    [selectedInteraction, store]
+  );
 
   // Note: Debug overlay temporarily disabled due to infinite loop issue
   // TODO: Fix infinite loop and re-enable F2 debug toggle
@@ -281,7 +287,13 @@ export function FreeRoamView({
     };
     window.addEventListener('keydown', handleKeydown);
     return () => window.removeEventListener('keydown', handleKeydown);
-  }, [onRequestClose, state, showInteractionPopup, selectedInteraction, handleInteractionAction]);
+  }, [
+    onRequestClose,
+    state,
+    showInteractionPopup,
+    selectedInteraction,
+    handleInteractionAction
+  ]);
 
   const secondsUntilCycle = useMemo(
     () => formatIdleCountdown(idleMs, state.idleSeconds),
@@ -383,7 +395,6 @@ export function FreeRoamView({
     });
   }, []);
 
-
   const handleBackdropClick = useCallback(
     (event: ReactMouseEvent<HTMLDivElement>) => {
       if (event.target !== event.currentTarget) return;
@@ -415,11 +426,10 @@ export function FreeRoamView({
     >
       <header className="free-roam__hud">
         <div className="free-roam__title">
-          <h1 id="free-roam-title">
-            Free Roam - Unique Orc Realm
-          </h1>
+          <h1 id="free-roam-title">Free Roam - Unique Orc Realm</h1>
           <p>
-            Erkunde eine einzigartige, statische Welt mit vielfältigen Biomen, POIs und Kollisionssystem.
+            Erkunde eine einzigartige, statische Welt mit vielfältigen Biomen,
+            POIs und Kollisionssystem.
           </p>
         </div>
         <div className="free-roam__status">
@@ -450,10 +460,7 @@ export function FreeRoamView({
           onWheel={handleWheel}
         >
           <div className="free-roam__viewport" style={viewportStyle}>
-            <canvas
-              ref={canvasRef}
-              className="free-roam__canvas"
-            />
+            <canvas ref={canvasRef} className="free-roam__canvas" />
             <div className="free-roam__overlay">
               {/* Enhanced procedural map rendering with larger icons */}
               <>
@@ -545,9 +552,7 @@ export function FreeRoamView({
                   </p>
                 )}
               <p className="free-roam__controls">
-                <small>
-                  WASD zum Bewegen • ESC zum Verlassen
-                </small>
+                <small>WASD zum Bewegen • ESC zum Verlassen</small>
               </p>
             </div>
           </section>
@@ -558,10 +563,7 @@ export function FreeRoamView({
             ) : (
               <ul className="free-roam__list">
                 {state.warcalls.map((warcall, index) => (
-                  <li
-                    key={`${index}`}
-                    className="free-roam__list-item"
-                  >
+                  <li key={`${index}`} className="free-roam__list-item">
                     <div className="free-roam__list-title">
                       <strong>{(warcall as any).kind}</strong>
                       {'location' in warcall && (
@@ -590,10 +592,7 @@ export function FreeRoamView({
             ) : (
               <ul className="free-roam__list">
                 {state.officers.map((officer, index) => (
-                  <li
-                    key={`${index}`}
-                    className="free-roam__list-item"
-                  >
+                  <li key={`${index}`} className="free-roam__list-item">
                     <div className="free-roam__list-title">
                       <strong>{(officer as any).name}</strong>
                       {(officer as any).state !== 'idle' && (
@@ -605,10 +604,8 @@ export function FreeRoamView({
                     </div>
                     <div className="free-roam__list-meta">
                       Position: (
-                      {Math.round((officer as any).coordinate?.x ?? 0)}
-                      ,{' '}
-                      {Math.round((officer as any).coordinate?.y ?? 0)}
-                      )
+                      {Math.round((officer as any).coordinate?.x ?? 0)},{' '}
+                      {Math.round((officer as any).coordinate?.y ?? 0)})
                       {'coordinate' in officer && (
                         <span>
                           {' '}
@@ -629,13 +626,15 @@ export function FreeRoamView({
           </section>
         </aside>
       </div>
-      
+
       {/* Interaction Popup */}
       {showInteractionPopup && selectedInteraction && (
         <div className="free-roam__interaction-overlay">
           <div className="free-roam__interaction-popup">
             <h3>
-              {selectedInteraction.type === 'warcall' ? '⚔️ Warcall' : '👤 Offizier'}
+              {selectedInteraction.type === 'warcall'
+                ? '⚔️ Warcall'
+                : '👤 Offizier'}
             </h3>
             <p className="free-roam__interaction-name">
               <strong>{selectedInteraction.name}</strong>
@@ -643,7 +642,7 @@ export function FreeRoamView({
             <p className="free-roam__interaction-distance">
               Entfernung: {Math.round(selectedInteraction.distance)} Einheiten
             </p>
-            
+
             <div className="free-roam__interaction-actions">
               {selectedInteraction.type === 'warcall' ? (
                 <>
@@ -695,7 +694,7 @@ export function FreeRoamView({
                 </>
               )}
             </div>
-            
+
             <p className="free-roam__interaction-hint">
               <small>Verwende Tasten 1-3 oder ESC zum Schließen</small>
             </p>

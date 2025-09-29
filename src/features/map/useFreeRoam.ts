@@ -137,7 +137,7 @@ function moveTowards(
 
   const index = newY * mapSize + newX;
   const biome = map.tiles[index] ?? 'plains';
-  
+
   // Collision detection - officers also can't move through blocked terrain
   const blockedBiomes: Biome[] = ['river', 'mountains', 'volcano'];
   if (blockedBiomes.includes(biome)) {
@@ -438,7 +438,7 @@ export function useFreeRoam(
 
   const map = useMemo(() => {
     // Use a fixed seed to create the same unique, beautiful map every time
-    const fixedSeed = "UniqueOrcRealm2024";
+    const fixedSeed = 'UniqueOrcRealm2024';
     return generateWorldMap(fixedSeed, mapSize);
   }, [mapSize]);
 
@@ -501,7 +501,7 @@ export function useFreeRoam(
 
         const index = newY * map.size + newX;
         const biome = map.tiles[index] ?? 'plains';
-        
+
         // Collision detection - block movement into impassable terrain
         const blockedBiomes: Biome[] = ['river', 'mountains', 'volcano'];
         if (blockedBiomes.includes(biome)) {
@@ -655,9 +655,9 @@ export function useFreeRoam(
       distance: number;
       data: PositionedOfficer | PositionedWarcall;
     }> = [];
-    
+
     const playerPos = playerPosition;
-    
+
     // Check officers
     for (const officerEntry of snapshot.officers) {
       const dist = distance(playerPos.coordinate, officerEntry.coordinate);
@@ -671,7 +671,7 @@ export function useFreeRoam(
         });
       }
     }
-    
+
     // Check warcalls
     for (const warcallEntry of snapshot.warcalls) {
       const dist = distance(playerPos.coordinate, warcallEntry.coordinate);
@@ -685,7 +685,7 @@ export function useFreeRoam(
         });
       }
     }
-    
+
     // Check dynamic warcalls
     for (const warcallEntry of snapshot.dynamicWarcalls) {
       const dist = distance(playerPos.coordinate, warcallEntry.coordinate);
@@ -699,9 +699,14 @@ export function useFreeRoam(
         });
       }
     }
-    
+
     return interactions.sort((a, b) => a.distance - b.distance);
-  }, [playerPosition, snapshot.officers, snapshot.warcalls, snapshot.dynamicWarcalls]);
+  }, [
+    playerPosition,
+    snapshot.officers,
+    snapshot.warcalls,
+    snapshot.dynamicWarcalls
+  ]);
 
   return {
     map,
