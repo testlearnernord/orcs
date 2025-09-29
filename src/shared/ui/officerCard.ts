@@ -170,19 +170,69 @@ export class OfficerCard {
 
   private updateTraits(officer: Officer): void {
     this.traitContainer.innerHTML = '';
-    if (officer.traits.length === 0) {
+    
+    // Filter out archetype traits from display (they're shown separately as "Archer", "Trapper", etc.)
+    const displayTraits = officer.traits.filter(trait => 
+      trait !== 'Archer' && trait !== 'Trapper'
+    );
+    
+    if (displayTraits.length === 0) {
       const empty = document.createElement('span');
       empty.className = 'officer-card__trait officer-card__trait--muted';
       empty.textContent = 'Keine Merkmale';
       this.traitContainer.appendChild(empty);
       return;
     }
-    officer.traits.forEach((trait) => {
+    
+    displayTraits.forEach((trait) => {
+      // Skip hidden traits like 'Geheimnisvoll'
+      if (trait === 'Geheimnisvoll') return;
+      
       const chip = document.createElement('span');
       chip.className = 'officer-card__trait';
       chip.textContent = trait;
+      
+      // Add tooltip with trait description
+      chip.title = this.getTraitDescription(trait);
+      
+      // Add special styling for different trait types
+      if (['Robust', 'Weich', 'lange Beine', 'kurze Beine'].includes(trait)) {
+        chip.classList.add('officer-card__trait--physical');
+      } else if (['Nobel', 'Primitiv', 'Freundlich', 'Unfreundlich'].includes(trait)) {
+        chip.classList.add('officer-card__trait--social');
+      } else if (['Dumm', 'Schlau', 'Weise'].includes(trait)) {
+        chip.classList.add('officer-card__trait--mental');
+      } else if (['Guter Schütze', 'Schlechter Schütze', 'Axtexperte', 'Zweihandtölpel', 'Jäger', 'Fliegenfänger'].includes(trait)) {
+        chip.classList.add('officer-card__trait--combat');
+      }
+      
       this.traitContainer.appendChild(chip);
     });
+  }
+  
+  private getTraitDescription(trait: string): string {
+    const descriptions: Record<string, string> = {
+      'Robust': '+5% Lebenspunkte',
+      'Weich': '-5% Lebenspunkte',
+      'lange Beine': '+10% Weltkarten-Geschwindigkeit, +5% Kampf-Geschwindigkeit',
+      'kurze Beine': '-10% Weltkarten-Geschwindigkeit, -5% Kampf-Geschwindigkeit',
+      'Nobel': '+15% Merit, andere Offiziere sind loyaler',
+      'Primitiv': '-15% Merit, andere Offiziere sind unloyaler',
+      'Freundlich': 'Geht gerne Allianzen ein, ist loyaler',
+      'Unfreundlich': 'Geht gerne Rivalitäten ein, ist unloyaler',
+      'Dumm': '-25% Erfahrungsgewinn',
+      'Schlau': '+25% Erfahrungsgewinn',
+      'Weise': 'Mehr Attributpunkte bei Stufenaufstieg',
+      'Verräter': 'Verrät andere für eigenen Vorteil',
+      'Guter Schütze': '+25% Fernkampf-Schaden (nur Bogenschützen)',
+      'Schlechter Schütze': '-25% Fernkampf-Schaden (nur Bogenschützen)',
+      'Axtexperte': '+25% Zweihand-Schaden (nur Berserker)',
+      'Zweihandtölpel': '-25% Zweihand-Schaden (nur Berserker)',
+      'Jäger': '+25% Fallen-Schaden (nur Fallensteller)',
+      'Fliegenfänger': '-25% Fallen-Schaden (nur Fallensteller)'
+    };
+    
+    return descriptions[trait] || 'Unbekannte Eigenschaft';
   }
 
   private updateStats(officer: Officer, previous: Officer): void {
