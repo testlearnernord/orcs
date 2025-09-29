@@ -98,7 +98,7 @@ export type WarcallKind =
   | 'Diplomatie'
   | 'Thronschlacht';
 
-export type WarcallPhase = 'prep' | 'travel' | 'event' | 'resolution';
+export type WarcallPhase = 'START' | 'ENDE';
 
 export interface WarcallPlan {
   id: string;

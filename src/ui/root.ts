@@ -1206,7 +1206,7 @@ export class NemesisUI {
       participants,
       currentCycle: state.cycle,
       resolution,
-      phase: 'resolution',
+      phase: 'ENDE',
       status: 'done'
     };
     this.completedWarcalls = [entry, ...this.completedWarcalls].slice(
