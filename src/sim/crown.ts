@@ -18,9 +18,8 @@ const BLOOD_OATH_TRIBUTE_BONUS = 0.01;
 const BASE_PRESSURE_GAIN = 0.001;
 const SHAKY_PRESSURE_GAIN = 0.005;
 const CRISIS_PRESSURE_GAIN = 0.015;
-const DECAY_TAPFERKEIT = 0.0015;
+// Legacy constants removed - no longer needed with new officer system
 const DECAY_LOYALITAET = 0.0005;
-const DECAY_STOLZ = 0.0005;
 
 function clamp(value: number, min = 0, max = 1): number {
   return Math.max(min, Math.min(max, value));
