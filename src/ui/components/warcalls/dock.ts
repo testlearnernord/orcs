@@ -150,14 +150,10 @@ export class WarcallsDock {
         : 'Abgeschlossen: Scheitern';
     }
     switch (entry.phase) {
-      case 'prep':
-        return 'Vorbereitung';
-      case 'travel':
-        return 'Anreise';
-      case 'event':
-        return 'Ereignis';
-      case 'resolution':
-        return 'Auflösung';
+      case 'START':
+        return 'Start';
+      case 'ENDE':
+        return 'Ende';
       default:
         return entry.phase;
     }

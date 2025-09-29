@@ -29,7 +29,7 @@ export interface OfficerMood {
 
 export type OfficerStatus = 'ALIVE' | 'DEAD';
 
-export type RelationshipType = 'ALLY' | 'RIVAL' | 'NEUTRAL';
+export type RelationshipType = 'ALLY' | 'RIVAL';
 
 export interface Relationship {
   with: OrcId;
@@ -98,7 +98,7 @@ export type WarcallKind =
   | 'Diplomatie'
   | 'Thronschlacht';
 
-export type WarcallPhase = 'prep' | 'travel' | 'event' | 'resolution';
+export type WarcallPhase = 'START' | 'ENDE';
 
 export interface WarcallPlan {
   id: string;

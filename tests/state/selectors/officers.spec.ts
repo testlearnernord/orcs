@@ -169,7 +169,6 @@ describe('lensMaskForFilters', () => {
     expect(Array.from(mask).sort()).toEqual([
       'ally',
       'hierarchy',
-      'neutral',
       'rival'
     ]);
   });
@@ -183,7 +182,6 @@ describe('lensMaskForFilters', () => {
     expect(Array.from(mask).sort()).toEqual([
       'ally',
       'hierarchy',
-      'neutral',
       'rival'
     ]);
   });
@@ -197,7 +195,7 @@ describe('selectVisibleEdges', () => {
   ];
 
   const edges: RelationEdge[] = [
-    { id: 'ab', fromId: 'a', toId: 'b', type: 'neutral', strength: 0.6 },
+    { id: 'ab', fromId: 'a', toId: 'b', type: 'ally', strength: 0.6 },
     { id: 'bc', fromId: 'b', toId: 'c', type: 'rival', strength: 0.8 },
     { id: 'ad', fromId: 'a', toId: 'd', type: 'ally', strength: 0.4 }
   ];

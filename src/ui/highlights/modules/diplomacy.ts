@@ -56,7 +56,7 @@ export class DiplomacyModule implements HighlightModule {
         primaryOfficer: officerA,
         secondaryOfficer: officerB,
         relationshipChange: {
-          before: 'neutral',
+          before: 'none',
           after: 'rival'
         },
         animationType: 'confrontation',
@@ -85,7 +85,7 @@ export class DiplomacyModule implements HighlightModule {
         secondaryOfficer: officerB,
         relationshipChange: {
           before: 'rival',
-          after: 'neutral'
+          after: 'none'
         },
         animationType: 'celebration',
         duration: 2000

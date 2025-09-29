@@ -8,19 +8,17 @@ export interface WarcallWithPhase extends WarcallPlan {
 }
 
 export function phaseOf(plan: WarcallPlan, currentCycle: number): Phase {
-  if (plan.resolveOn <= currentCycle) return 'event';
-  const remaining = plan.resolveOn - currentCycle;
-  if (remaining === 1) return 'travel';
-  return 'prep';
+  if (plan.resolveOn <= currentCycle) return 'ENDE';
+  return 'START';
 }
 
 export function statusOf(warcall: {
   phase: Phase;
   participants?: string[];
 }): Status {
-  if (warcall.phase === 'resolution') return 'done';
+  if (warcall.phase === 'ENDE') return 'done';
   if (
-    warcall.phase === 'prep' &&
+    warcall.phase === 'START' &&
     (!warcall.participants || warcall.participants.length === 0)
   ) {
     return 'pending';
