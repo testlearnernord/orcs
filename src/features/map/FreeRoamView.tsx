@@ -496,8 +496,8 @@ export function FreeRoamView({
             {useHandcrafted && handcraftedState.map
               ? `Free Roam - ${handcraftedState.map.meta.name}`
               : useHandcrafted
-              ? 'Free Roam - Loading...'
-              : 'Free Roam - Diverse Biomes'}
+                ? 'Free Roam - Loading...'
+                : 'Free Roam - Diverse Biomes'}
           </h1>
           <p>
             {useHandcrafted
