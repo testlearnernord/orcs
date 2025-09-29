@@ -140,7 +140,7 @@ export function drawOfficerIcons(
     // Draw officer icon (increased size for better visibility)
     ctx.fillStyle = '#4a90e2';
     ctx.beginPath();
-    ctx.arc(officer.x, officer.y, 16, 0, Math.PI * 2);
+    ctx.arc(officer.x, officer.y, 20, 0, Math.PI * 2); // Increased from 16 to 20
     ctx.fill();
 
     // Draw border
@@ -149,7 +149,7 @@ export function drawOfficerIcons(
     ctx.stroke();
 
     // Draw name label
-    ctx.font = '12px sans-serif';
+    ctx.font = '14px sans-serif'; // Increased from 12px to 14px
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
 
@@ -193,7 +193,7 @@ export function drawPlayer(
   // Draw player icon (increased size for better visibility)
   ctx.fillStyle = '#e74c3c';
   ctx.beginPath();
-  ctx.arc(playerX, playerY, 18, 0, Math.PI * 2);
+  ctx.arc(playerX, playerY, 24, 0, Math.PI * 2); // Increased from 18 to 24
   ctx.fill();
 
   // Draw border
@@ -204,7 +204,7 @@ export function drawPlayer(
   // Draw inner dot
   ctx.fillStyle = 'white';
   ctx.beginPath();
-  ctx.arc(playerX, playerY, 5, 0, Math.PI * 2);
+  ctx.arc(playerX, playerY, 6, 0, Math.PI * 2); // Increased from 5 to 6
   ctx.fill();
 
   ctx.restore();

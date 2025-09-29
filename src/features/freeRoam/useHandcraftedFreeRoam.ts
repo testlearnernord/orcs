@@ -57,7 +57,15 @@ export interface HandcraftedFreeRoamState extends HandcraftedFreeRoamSnapshot {
   error: string | null;
   playerPosition: PlayerPosition;
   moveTo: (x: number, y: number) => void;
+  movePlayerDirection: (direction: 'up' | 'down' | 'left' | 'right') => void;
   resetCamera: () => { x: number; y: number; scale: number };
+  nearbyInteractions: Array<{
+    type: 'officer' | 'warcall';
+    id: string;
+    name: string;
+    distance: number;
+    data: PositionedOfficer | PositionedWarcall;
+  }>;
 }
 
 export const DEFAULT_IDLE_MS = 60_000;
@@ -262,6 +270,52 @@ export function useHandcraftedFreeRoam(
   const [idleSeconds, setIdleSeconds] = useState(0);
   const lastInteractionRef = useRef(Date.now());
 
+  // Compute nearby interactions based on player position
+  const nearbyInteractions = useMemo(() => {
+    if (!map) return [];
+    
+    const INTERACTION_DISTANCE = 60; // Pixels
+    const interactions: Array<{
+      type: 'officer' | 'warcall';
+      id: string;
+      name: string;
+      distance: number;
+      data: PositionedOfficer | PositionedWarcall;
+    }> = [];
+    
+    const playerPos = playerPositionRef.current;
+    
+    // Check officers
+    for (const officer of snapshot.officers) {
+      const dist = distance(playerPos, { x: officer.x, y: officer.y });
+      if (dist <= INTERACTION_DISTANCE) {
+        interactions.push({
+          type: 'officer',
+          id: officer.id,
+          name: officer.name,
+          distance: dist,
+          data: officer
+        });
+      }
+    }
+    
+    // Check warcalls
+    for (const warcall of snapshot.warcalls) {
+      const dist = distance(playerPos, { x: warcall.x, y: warcall.y });
+      if (dist <= INTERACTION_DISTANCE) {
+        interactions.push({
+          type: 'warcall',
+          id: warcall.id,
+          name: `${warcall.kind} - ${warcall.rewardHint}`,
+          distance: dist,
+          data: warcall
+        });
+      }
+    }
+    
+    return interactions.sort((a, b) => a.distance - b.distance);
+  }, [map, snapshot.officers, snapshot.warcalls, playerPosition]);
+
   // Use refs to avoid dependency loops
   const playerPositionRef = useRef(playerPosition);
   const previousOfficersRef = useRef(previousOfficers);
@@ -349,9 +403,61 @@ export function useHandcraftedFreeRoam(
         setPlayerPosition({ x: walkable.px, y: walkable.py });
         lastInteractionRef.current = Date.now();
         setIdleSeconds(0);
+        
+        // Trigger cycle advancement when player moves significantly
+        const currentPos = playerPositionRef.current;
+        const moveDistance = Math.sqrt(
+          (walkable.px - currentPos.x) ** 2 + (walkable.py - currentPos.y) ** 2
+        );
+        
+        // If moving more than 50 pixels, consider advancing cycle
+        if (moveDistance > 50) {
+          store.tick();
+        }
       }
     },
-    [map]
+    [map, store]
+  );
+
+  const movePlayerDirection = useCallback(
+    (direction: 'up' | 'down' | 'left' | 'right') => {
+      if (!map) return;
+
+      const stepSize = 20; // Pixels to move per step
+      const currentPos = playerPositionRef.current;
+      let newX = currentPos.x;
+      let newY = currentPos.y;
+
+      switch (direction) {
+        case 'up':
+          newY -= stepSize;
+          break;
+        case 'down':
+          newY += stepSize;
+          break;
+        case 'left':
+          newX -= stepSize;
+          break;
+        case 'right':
+          newX += stepSize;
+          break;
+      }
+
+      // Check collision and find nearest walkable position
+      const walkable = findNearestWalkablePosition(map, newX, newY, 3);
+      if (walkable && 
+          (walkable.px !== currentPos.x || walkable.py !== currentPos.y)) {
+        setPlayerPosition({ x: walkable.px, y: walkable.py });
+        lastInteractionRef.current = Date.now();
+        setIdleSeconds(0);
+        
+        // Auto-advance cycle occasionally when moving with WASD
+        if (Math.random() < 0.05) { // 5% chance per move
+          store.tick();
+        }
+      }
+    },
+    [map, store]
   );
 
   const resetCamera = useCallback(() => {
@@ -363,6 +469,63 @@ export function useHandcraftedFreeRoam(
       scale: map.meta.camera.startZoom
     };
   }, [map]);
+
+  // Officer movement simulation timer
+  useEffect(() => {
+    if (!map || typeof window === 'undefined') return undefined;
+    
+    const interval = window.setInterval(() => {
+      // Update officer positions every 2 seconds
+      const currentOfficers = previousOfficersRef.current;
+      const updatedOfficers = currentOfficers.map(officer => {
+        // AI Logic: Move towards target or find new target
+        let { x, y, target, state } = officer;
+        
+        if (target) {
+          const dist = distance({ x, y }, target);
+          if (dist > map.meta.tileSize / 2) { // More sensitive movement
+            const newPos = moveTowards({ x, y }, target, map);
+            x = newPos.x;
+            y = newPos.y;
+            state = 'moving';
+          } else {
+            // Reached target
+            target = undefined;
+            state = 'idle';
+          }
+        } else {
+          // No target, find one occasionally
+          if (rng.next() < 0.15) { // Increased chance to move
+            // Try to move to a random POI or spawn point
+            const targets = [
+              ...map.meta.pois.map((poi) => ({ x: poi.x, y: poi.y })),
+              ...map.meta.spawns.officers
+            ];
+            if (targets.length > 0) {
+              target = rng.pick(targets);
+              state = 'idle'; // Will start moving next update
+            }
+          }
+        }
+        
+        return { ...officer, x, y, target, state };
+      });
+      
+      // Only update if officers actually moved
+      const hasMovement = updatedOfficers.some((officer, index) => 
+        officer.x !== currentOfficers[index]?.x || 
+        officer.y !== currentOfficers[index]?.y ||
+        officer.state !== currentOfficers[index]?.state
+      );
+      
+      if (hasMovement) {
+        setPreviousOfficers(updatedOfficers);
+        setSnapshot(prev => ({ ...prev, officers: updatedOfficers }));
+      }
+    }, 2000); // Update every 2 seconds
+    
+    return () => window.clearInterval(interval);
+  }, [map, rng]);
 
   // Idle timer
   useEffect(() => {
@@ -389,8 +552,10 @@ export function useHandcraftedFreeRoam(
     error,
     idleSeconds,
     moveTo,
+    movePlayerDirection,
     resetCamera,
     playerPosition,
+    nearbyInteractions,
     ...snapshot
   };
 }
