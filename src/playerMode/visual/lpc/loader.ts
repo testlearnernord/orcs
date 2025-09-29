@@ -65,20 +65,25 @@ export class LPCCharacterLoader {
   }
 
   /**
-   * Try loading an image from multiple potential paths
+   * Try loading an image from multiple potential paths with smarter fallback logic
    */
   static async loadSpriteImageWithFallbacks(
     basePath: string,
     animation: LPCAnimation,
     frameSize: number
   ): Promise<HTMLImageElement> {
-    // Define potential paths in order of preference
-    // For berserker, prioritize standard/ directory which exists
-    const potentialPaths = [
-      `${basePath}/standard/${animation}.png`, // Standard subdirectory: standard/walk.png (berserker)
-      `${basePath}/${animation}.png`, // Simple naming: walk.png
-      `${basePath}/${animation}_${frameSize}.png` // Direct naming: walk_64.png (last to avoid 404s)
-    ];
+    // For berserker archetype, prioritize standard/ directory which we know exists
+    // Order paths by likelihood of success to minimize 404s
+    const potentialPaths = basePath.includes('berserker')
+      ? [
+          `${basePath}/standard/${animation}.png`, // Standard subdirectory: standard/walk.png (berserker - high priority)
+          `${basePath}/${animation}.png` // Simple naming: walk.png (fallback)
+        ]
+      : [
+          `${basePath}/${animation}.png`, // Simple naming: walk.png (other archetypes)
+          `${basePath}/standard/${animation}.png`, // Standard subdirectory fallback
+          `${basePath}/${animation}_${frameSize}.png` // Direct naming with size
+        ];
 
     // Try each path until one succeeds
     for (const imagePath of potentialPaths) {
@@ -89,7 +94,7 @@ export class LPCCharacterLoader {
         );
         return image;
       } catch (error) {
-        // Continue to next path
+        // Only log debug message to reduce console noise
         console.debug(
           `[LPCLoader] Failed to load ${animation} from: ${imagePath}`
         );
