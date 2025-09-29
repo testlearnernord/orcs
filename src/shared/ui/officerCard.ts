@@ -294,7 +294,7 @@ export class OfficerCard {
     }
     
     // Rank-based experience scaling
-    const rankMultipliers = {
+    const rankMultipliers: Partial<Record<Officer['rank'], number>> = {
       'König': 1.5,
       'Captain': 1.3,
       'Späher': 1.1,

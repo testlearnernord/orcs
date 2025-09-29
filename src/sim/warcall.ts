@@ -7,6 +7,7 @@ import type {
   Officer,
   OrcId,
   WarcallBreakdown,
+  WarcallKind,
   WarcallPlan,
   WarcallResolution,
   WorldState
