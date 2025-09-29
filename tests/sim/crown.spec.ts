@@ -4,13 +4,6 @@ import { updateCrownState, computeReignPressure } from '@sim/crown';
 import type { CrownState, FeedEntry, Officer, WorldState } from '@sim/types';
 import { RNG } from '@sim/rng';
 
-const basePersonality = {
-  gier: 0.3,
-  tapferkeit: 0.5,
-  loyalitaet: 0.4,
-  stolz: 0.4
-};
-
 function officer(
   partial: Partial<Officer> & {
     id: string;
@@ -20,13 +13,24 @@ function officer(
 ): Officer {
   return {
     merit: 40,
-    level: 5,
     traits: [],
     relationships: [],
     status: 'ALIVE',
     cycleJoined: 0,
     memories: [],
-    personality: { ...basePersonality },
+    stats: {
+      potential: 'Normal',
+      level: 5,
+      hp: 100,
+      maxHp: 100,
+      str: 50,
+      dex: 50,
+      int: 50
+    },
+    mood: {
+      loyalitaet: partial.rank === 'König' ? undefined : 40,
+      ambition: 'Möchte stärker werden'
+    },
     stableId: partial.stableId ?? partial.id,
     ...partial
   };
@@ -62,19 +66,14 @@ describe('crown systems', () => {
       id: 'r1',
       name: 'Rauk',
       rank: 'Captain',
-      personality: { gier: 0.7, tapferkeit: 0.82, loyalitaet: 0.1, stolz: 0.3 },
+      mood: { loyalitaet: 10, ambition: 'Möchte König werden' },
       relationships: [{ with: 'king', type: 'RIVAL', sinceCycle: 10 }]
     });
     const supporter = officer({
       id: 'r2',
       name: 'Snegg',
       rank: 'Späher',
-      personality: {
-        gier: 0.6,
-        tapferkeit: 0.74,
-        loyalitaet: 0.18,
-        stolz: 0.25
-      }
+      mood: { loyalitaet: 18, ambition: 'Möchte dem König dienen' }
     });
 
     const state: WorldState = {

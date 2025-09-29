@@ -6,19 +6,28 @@ import type { Officer } from '@sim/types';
 // Mock officer for testing
 const mockOfficer: Officer = {
   id: 'test-officer',
+  stableId: 'test-officer',
   name: 'Test Officer',
-  level: 1,
   rank: 'Captain',
-  status: 'ACTIVE',
-  personality: {
-    gier: 0.5,
-    tapferkeit: 0.7,
-    loyalitaet: 0.3,
-    stolz: 0.6
+  status: 'ALIVE',
+  stats: {
+    potential: 'Normal',
+    level: 1,
+    hp: 100,
+    maxHp: 100,
+    str: 50,
+    dex: 70,
+    int: 30
   },
-  traits: ['brave'],
+  mood: {
+    loyalitaet: 60,
+    ambition: 'Möchte stärker werden'
+  },
+  traits: ['Berserker'],
   relationships: [],
-  memories: []
+  memories: [],
+  merit: 100,
+  cycleJoined: 1
 };
 
 describe('OfficerTooltip CTRL key behavior', () => {

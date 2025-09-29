@@ -15,17 +15,21 @@ function makeOfficer(overrides: Partial<Officer> & { id: string }): Officer {
     stableId: overrides.stableId ?? overrides.id,
     name: overrides.name ?? `Officer ${overrides.id}`,
     rank: overrides.rank ?? 'Captain',
-    level: overrides.level ?? 5,
     merit: overrides.merit ?? 0.5,
     traits: overrides.traits ?? [],
-    personality:
-      overrides.personality ??
-      ({
-        gier: 0.5,
-        tapferkeit: 0.5,
-        loyalitaet: 0.5,
-        stolz: 0.5
-      } as Officer['personality']),
+    stats: overrides.stats ?? {
+      potential: 'Normal',
+      level: 5,
+      hp: 100,
+      maxHp: 100,
+      str: 50,
+      dex: 50,
+      int: 50
+    },
+    mood: overrides.mood ?? {
+      loyalitaet: overrides.rank === 'König' ? undefined : 50,
+      ambition: 'Möchte stärker werden'
+    },
     relationships: overrides.relationships ?? [],
     status: overrides.status ?? 'ALIVE',
     cycleJoined: overrides.cycleJoined ?? 0,
@@ -60,32 +64,32 @@ function makeState(overrides: Partial<WorldState> = {}): WorldState {
 const baseFilters: UIFilters = { sortBy: 'merit' };
 
 describe('selectVisibleOfficers', () => {
-  it('keeps only loyal officers while retaining the king', () => {
+  it('returns all officers since filters were removed', () => {
     const king = makeOfficer({
       id: 'king',
       rank: 'König',
-      personality: { gier: 0.2, tapferkeit: 0.6, loyalitaet: 0.9, stolz: 0.5 }
+      mood: { ambition: 'Möchte herrschen' } // König has no loyalty
     });
     const loyal = makeOfficer({
       id: 'a',
-      personality: { gier: 0.3, tapferkeit: 0.6, loyalitaet: 0.8, stolz: 0.4 }
+      mood: { loyalitaet: 80, ambition: 'Möchte dem König dienen' }
     });
     const disloyal = makeOfficer({
       id: 'b',
-      personality: { gier: 0.4, tapferkeit: 0.6, loyalitaet: 0.4, stolz: 0.4 }
+      mood: { loyalitaet: 20, ambition: 'Möchte rebellieren' }
     });
     const state = makeState({
       officers: [king, loyal, disloyal],
       kingId: king.id
     });
     const result = selectVisibleOfficers(state, {
-      ...baseFilters,
-      loyalToKing: true
+      ...baseFilters
     });
-    expect(result.map((o) => o.id)).toEqual(['king', 'a']);
+    // All officers should be visible since filters were removed
+    expect(result.map((o) => o.id)).toEqual(['king', 'a', 'b']);
   });
 
-  it('filters rivals of the king', () => {
+  it('returns all officers including rivals since filters were removed', () => {
     const king = makeOfficer({ id: 'king', rank: 'König' });
     const rival = makeOfficer({
       id: 'r',
@@ -97,13 +101,13 @@ describe('selectVisibleOfficers', () => {
       kingId: king.id
     });
     const result = selectVisibleOfficers(state, {
-      ...baseFilters,
-      rivalsOfKing: true
+      ...baseFilters
     });
-    expect(result.map((o) => o.id)).toEqual(['king', 'r']);
+    // All officers should be visible since filters were removed
+    expect(result.map((o) => o.id)).toEqual(['king', 'r', 'n']);
   });
 
-  it('picks promotion candidates per rank', () => {
+  it('returns all officers since promotion candidate filtering was removed', () => {
     const king = makeOfficer({ id: 'king', rank: 'König', merit: 1 });
     const captainA = makeOfficer({ id: 'c1', merit: 0.9 });
     const captainB = makeOfficer({ id: 'c2', merit: 0.6 });
@@ -114,30 +118,30 @@ describe('selectVisibleOfficers', () => {
       kingId: king.id
     });
     const result = selectVisibleOfficers(state, {
-      ...baseFilters,
-      promotionCandidates: true
+      ...baseFilters
     });
-    expect(result.map((o) => o.id)).toEqual(['king', 'c1', 's1']);
+    // All officers should be visible since filters were removed
+    expect(result.map((o) => o.id)).toEqual(['king', 'c1', 's1', 'c2', 's2']);
   });
 
-  it('identifies coup risks by rivalry, loyalty and merit', () => {
+  it('returns all officers since coup risk filtering was removed', () => {
     const king = makeOfficer({ id: 'king', rank: 'König', merit: 0.95 });
     const highRisk = makeOfficer({
       id: 'risk',
       merit: 0.82,
-      personality: { gier: 0.4, tapferkeit: 0.6, loyalitaet: 0.2, stolz: 0.5 },
+      mood: { loyalitaet: 20, ambition: 'Möchte König werden' },
       relationships: [{ with: 'king', type: 'RIVAL', sinceCycle: 2 }]
     });
     const lowMerit = makeOfficer({
       id: 'low',
       merit: 0.4,
-      personality: { gier: 0.5, tapferkeit: 0.5, loyalitaet: 0.25, stolz: 0.5 },
+      mood: { loyalitaet: 25, ambition: 'Möchte rebellieren' },
       relationships: [{ with: 'king', type: 'RIVAL', sinceCycle: 3 }]
     });
     const rivalButLoyal = makeOfficer({
       id: 'steady',
       merit: 0.7,
-      personality: { gier: 0.4, tapferkeit: 0.6, loyalitaet: 0.45, stolz: 0.6 },
+      mood: { loyalitaet: 45, ambition: 'Möchte stärker werden' },
       relationships: [{ with: 'king', type: 'RIVAL', sinceCycle: 4 }]
     });
     const ally = makeOfficer({ id: 'ally', merit: 0.6 });
@@ -146,10 +150,10 @@ describe('selectVisibleOfficers', () => {
       kingId: king.id
     });
     const result = selectVisibleOfficers(state, {
-      ...baseFilters,
-      coupRisk: true
+      ...baseFilters
     });
-    expect(result.map((o) => o.id)).toEqual(['king', 'risk']);
+    // All officers should be visible since filters were removed
+    expect(result.map((o) => o.id)).toEqual(['king', 'risk', 'steady', 'ally', 'low']);
   });
 });
 
@@ -168,9 +172,14 @@ describe('lensMaskForFilters', () => {
     // Test skipped because friendships filter was removed with FRIEND relationship type
   });
 
-  it('enables hierarchy focus for loyal-to-king filter', () => {
-    const mask = lensMaskForFilters({ ...baseFilters, loyalToKing: true });
-    expect(Array.from(mask).sort()).toEqual(['ally', 'hierarchy']);
+  it('returns all relation types since filters were removed', () => {
+    const mask = lensMaskForFilters({ ...baseFilters });
+    expect(Array.from(mask).sort()).toEqual([
+      'ally',
+      'hierarchy',
+      'neutral',
+      'rival'
+    ]);
   });
 });
 
@@ -191,11 +200,11 @@ describe('selectVisibleEdges', () => {
     // Test skipped because friendships filter was removed
   });
 
-  it('excludes edges that point to hidden officers', () => {
+  it('includes all edges between visible officers since filters were removed', () => {
     const filtered = selectVisibleEdges(visibleOfficers, edges, {
-      ...baseFilters,
-      rivalries: true
+      ...baseFilters
     });
-    expect(filtered).toEqual([edges[1]]);
+    // Since filters were removed, all edges between visible officers should be included
+    expect(filtered).toEqual([edges[0], edges[1]]); // ab and bc edges (ad excluded because d is not visible)
   });
 });
