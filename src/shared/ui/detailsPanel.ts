@@ -33,22 +33,11 @@ function formatStat(value: number): string {
 }
 
 function deriveArchetype(officer: Officer): string {
-  const { personality } = officer;
-  const dominant = Object.entries(personality).sort(
-    (a, b) => b[1] - a[1]
-  )[0]?.[0];
-  switch (dominant) {
-    case 'tapferkeit':
-      return 'Frontkrieger';
-    case 'gier':
-      return 'Plünderer';
-    case 'loyalitaet':
-      return 'Bannerträger';
-    case 'stolz':
-      return 'Championsgeist';
-    default:
-      return 'Unbekannt';
+  // Use primary trait (archetype) directly
+  if (officer.traits.length > 0) {
+    return officer.traits[0]; // Berserker, Archer, or Trapper
   }
+  return 'Unbekannt';
 }
 
 function deriveTitle(officer: Officer): string {
@@ -186,27 +175,40 @@ export class DetailsPanel {
     this.detailsContent.innerHTML = `
       <div class="details-header">
         <h3>${officer.name}</h3>
-        <span class="details-subtitle">Lv ${officer.level} • ${title} • ${archetype}</span>
+        <span class="details-subtitle">Lv ${officer.stats.level} • ${title} • ${archetype}</span>
         <div class="details-traits">${traits}</div>
       </div>
       <div class="details-stats">
-        <h4>Persönlichkeit</h4>
+        <h4>Attribute</h4>
         <div class="stats-grid">
           <div class="stat-item">
-            <span class="stat-label">Gier</span>
-            <span class="stat-value">${formatStat(officer.personality.gier)}</span>
+            <span class="stat-label">Potential</span>
+            <span class="stat-value">${officer.stats.potential}</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">Tapferkeit</span>
-            <span class="stat-value">${formatStat(officer.personality.tapferkeit)}</span>
+            <span class="stat-label">Lebenspunkte</span>
+            <span class="stat-value">${officer.stats.hp}/${officer.stats.maxHp}</span>
           </div>
+          <div class="stat-item">
+            <span class="stat-label">Stärke</span>
+            <span class="stat-value">${officer.stats.str}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Geschicklichkeit</span>
+            <span class="stat-value">${officer.stats.dex}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Intelligenz</span>
+            <span class="stat-value">${officer.stats.int}</span>
+          </div>
+          ${officer.mood.loyalitaet !== undefined ? `
           <div class="stat-item">
             <span class="stat-label">Loyalität</span>
-            <span class="stat-value">${formatStat(officer.personality.loyalitaet)}</span>
-          </div>
+            <span class="stat-value">${Math.round(officer.mood.loyalitaet)}%</span>
+          </div>` : ''}
           <div class="stat-item">
-            <span class="stat-label">Stolz</span>
-            <span class="stat-value">${formatStat(officer.personality.stolz)}</span>
+            <span class="stat-label">Ambition</span>
+            <span class="stat-value">${officer.mood.ambition}</span>
           </div>
         </div>
       </div>

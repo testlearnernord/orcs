@@ -7,15 +7,15 @@ export interface OfficerCardOptions {
   onOfficerClick?: (officer: Officer) => void; // New click handler for details panel
 }
 
-type StatKey = keyof Officer['personality'];
+type StatKey = 'str' | 'dex' | 'int' | 'hp';
 
-const STATS: StatKey[] = ['gier', 'tapferkeit', 'loyalitaet', 'stolz'];
+const STATS: StatKey[] = ['str', 'dex', 'int', 'hp'];
 
 const STAT_LABEL: Record<StatKey, string> = {
-  gier: 'Gier',
-  tapferkeit: 'Tapferkeit',
-  loyalitaet: 'Loyalität',
-  stolz: 'Stolz'
+  str: 'Stärke',
+  dex: 'Geschick',
+  int: 'Intelligenz',
+  hp: 'Lebenspunkte'
 };
 
 const RELATION_ORDER: RelationshipType[] = ['ALLY', 'RIVAL', 'NEUTRAL'];
@@ -165,7 +165,7 @@ export class OfficerCard {
 
   private updateMeta(officer: Officer): void {
     this.nameEl.textContent = officer.name;
-    this.levelBadge.textContent = `Lv. ${officer.level}`;
+    this.levelBadge.textContent = `Lv. ${officer.stats.level}`;
     this.meritBadge.textContent = `Merit ${Math.round(officer.merit)}`;
     this.cycleBadge.textContent = `Zyklus ${officer.cycleJoined}`;
   }
@@ -189,12 +189,25 @@ export class OfficerCard {
 
   private updateStats(officer: Officer, previous: Officer): void {
     STATS.forEach((key) => {
-      const value = officer.personality[key];
-      const previousValue = previous.personality[key];
+      const value = officer.stats[key];
+      const previousValue = previous.stats[key];
       const fill = this.statBars.get(key);
       const text = this.statValues.get(key);
       if (!fill || !text) return;
-      const percent = `${Math.round(value * 100)}%`;
+      
+      // For HP, show as HP/MaxHP, for others show raw value
+      let displayValue: string;
+      let percent: string;
+      
+      if (key === 'hp') {
+        displayValue = `${value}/${officer.stats.maxHp}`;
+        percent = `${Math.round((value / officer.stats.maxHp) * 100)}%`;
+      } else {
+        displayValue = value.toString();
+        // Scale other stats to percentage (assuming max around 100)
+        percent = `${Math.min(100, Math.round((value / 100) * 100))}%`;
+      }
+      
       if (!fill.style.width) {
         fill.style.width = percent;
       } else {
@@ -205,18 +218,19 @@ export class OfficerCard {
           fill.addEventListener('transitionend', handle, { once: true });
         });
       }
+      
       const delta = value - previousValue;
-      text.textContent = value.toFixed(2);
+      text.textContent = displayValue;
       text.dataset.delta =
         delta !== 0
           ? delta > 0
-            ? `+${delta.toFixed(2)}`
-            : delta.toFixed(2)
+            ? `+${delta}`
+            : delta.toString()
           : '';
       text.classList.remove('is-up', 'is-down');
-      if (delta > 0.01) {
+      if (delta > 0) {
         text.classList.add('is-up');
-      } else if (delta < -0.01) {
+      } else if (delta < 0) {
         text.classList.add('is-down');
       }
     });

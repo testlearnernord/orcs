@@ -36,22 +36,11 @@ function formatStat(value: number): string {
 }
 
 function deriveArchetype(officer: Officer): string {
-  const { personality } = officer;
-  const dominant = Object.entries(personality).sort(
-    (a, b) => b[1] - a[1]
-  )[0]?.[0];
-  switch (dominant) {
-    case 'tapferkeit':
-      return 'Frontkrieger';
-    case 'gier':
-      return 'Plünderer';
-    case 'loyalitaet':
-      return 'Bannerträger';
-    case 'stolz':
-      return 'Championsgeist';
-    default:
-      return 'Unbekannt';
+  // Use primary trait (archetype) directly
+  if (officer.traits.length > 0) {
+    return officer.traits[0]; // Berserker, Archer, or Trapper
   }
+  return 'Unbekannt';
 }
 
 function deriveTitle(officer: Officer): string {
@@ -166,21 +155,18 @@ export class OfficerTooltip {
       <header>
         <div class="tooltip-heading">
           <h2>${officer.name}</h2>
-          <span class="sub">Lv ${officer.level} • ${title}</span>
+          <span class="sub">Lv ${officer.stats.level} • ${title}</span>
           <span class="archetype">${archetype}</span>
         </div>
         <div class="tooltip-traits">${traits}</div>
       </header>
       <section class="tooltip-stats">
         <dl>
-          <div><dt>Gier</dt><dd>${formatStat(officer.personality.gier)}</dd></div>
-          <div><dt>Tapferkeit</dt><dd>${formatStat(
-            officer.personality.tapferkeit
-          )}</dd></div>
-          <div><dt>Loyalität</dt><dd>${formatStat(
-            officer.personality.loyalitaet
-          )}</dd></div>
-          <div><dt>Stolz</dt><dd>${formatStat(officer.personality.stolz)}</dd></div>
+          <div><dt>STR</dt><dd>${officer.stats.str}</dd></div>
+          <div><dt>DEX</dt><dd>${officer.stats.dex}</dd></div>
+          <div><dt>INT</dt><dd>${officer.stats.int}</dd></div>
+          <div><dt>HP</dt><dd>${officer.stats.hp}/${officer.stats.maxHp}</dd></div>
+          ${officer.mood.loyalitaet !== undefined ? `<div><dt>Loyalität</dt><dd>${Math.round(officer.mood.loyalitaet)}%</dd></div>` : ''}
         </dl>
       </section>
       <section class="tooltip-relations-section">
