@@ -277,8 +277,9 @@ export function FreeRoamView({
         return;
       }
 
-      // WASD movement controls (only for legacy maps)
+      // WASD movement controls
       if (!useHandcrafted && 'movePlayer' in state) {
+        // Legacy procedural map movement
         switch (event.key.toLowerCase()) {
           case 'w':
             event.preventDefault();
@@ -295,6 +296,30 @@ export function FreeRoamView({
           case 'd':
             event.preventDefault();
             state.movePlayer('right');
+            break;
+        }
+      } else if (useHandcrafted && 'moveTo' in state && state.map) {
+        // Handcrafted map movement with collision detection
+        const currentX = (state as HandcraftedFreeRoamState).playerPosition.x;
+        const currentY = (state as HandcraftedFreeRoamState).playerPosition.y;
+        const moveSpeed = 8; // Pixels per keypress
+
+        switch (event.key.toLowerCase()) {
+          case 'w':
+            event.preventDefault();
+            state.moveTo(currentX, currentY - moveSpeed);
+            break;
+          case 's':
+            event.preventDefault();
+            state.moveTo(currentX, currentY + moveSpeed);
+            break;
+          case 'a':
+            event.preventDefault();
+            state.moveTo(currentX - moveSpeed, currentY);
+            break;
+          case 'd':
+            event.preventDefault();
+            state.moveTo(currentX + moveSpeed, currentY);
             break;
         }
       }
@@ -468,8 +493,10 @@ export function FreeRoamView({
       <header className="free-roam__hud">
         <div className="free-roam__title">
           <h1 id="free-roam-title">
-            {useHandcrafted
-              ? 'Free Roam - Handcrafted Map'
+            {useHandcrafted && handcraftedState.map
+              ? `Free Roam - ${handcraftedState.map.meta.name}`
+              : useHandcrafted
+              ? 'Free Roam - Loading...'
               : 'Free Roam - Diverse Biomes'}
           </h1>
           <p>
