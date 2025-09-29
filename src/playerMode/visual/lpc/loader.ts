@@ -73,11 +73,11 @@ export class LPCCharacterLoader {
     animation: LPCAnimation,
     frameSize: number
   ): Promise<HTMLImageElement> {
-    // For berserker archetype, prioritize standard/ directory which we know exists
-    // Order paths by likelihood of success to minimize 404s
+    // For berserker archetype, prioritize standard/ directory which now contains armored sprites
+    // The sprites have been replaced with properly armored versions
     const potentialPaths = basePath.includes('berserker')
       ? [
-          `${basePath}/standard/${animation}.png`, // Standard subdirectory: standard/walk.png (berserker - high priority)
+          `${basePath}/standard/${animation}.png`, // Standard subdirectory: standard/walk.png (now contains ARMORED berserker!)
           `${basePath}/${animation}.png` // Simple naming: walk.png (fallback)
         ]
       : [
