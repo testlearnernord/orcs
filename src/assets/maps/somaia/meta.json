@@ -9,7 +9,7 @@
   "tileSize": 32,
   "camera": {
     "minZoom": 0.25,
-    "maxZoom": 2.0,
+    "maxZoom": 2,
     "startZoom": 0.5
   },
   "countries": [
@@ -115,29 +115,69 @@
   "biomes": {
     "ocean": {
       "regions": [
-        {"x": 0, "y": 0, "width": 49, "height": 1536},
-        {"x": 450, "y": 0, "width": 150, "height": 200},
-        {"x": 0, "y": 500, "width": 600, "height": 300}
+        {
+          "x": 0,
+          "y": 0,
+          "width": 49,
+          "height": 1536
+        },
+        {
+          "x": 450,
+          "y": 0,
+          "width": 150,
+          "height": 200
+        },
+        {
+          "x": 0,
+          "y": 500,
+          "width": 600,
+          "height": 300
+        }
       ],
       "blocked": true
     },
     "mountains": {
       "regions": [
-        {"x": 1050, "y": 100, "width": 150, "height": 200},
-        {"x": 700, "y": 400, "width": 400, "height": 100}
+        {
+          "x": 1050,
+          "y": 100,
+          "width": 150,
+          "height": 200
+        },
+        {
+          "x": 700,
+          "y": 400,
+          "width": 400,
+          "height": 100
+        }
       ],
       "blocked": true
     },
     "forests": {
       "regions": [
-        {"x": 100, "y": 250, "width": 200, "height": 150},
-        {"x": 800, "y": 200, "width": 250, "height": 180}
+        {
+          "x": 100,
+          "y": 250,
+          "width": 200,
+          "height": 150
+        },
+        {
+          "x": 800,
+          "y": 200,
+          "width": 250,
+          "height": 180
+        }
       ],
       "blocked": false
     },
     "plains": {
       "regions": [
-        {"x": 50, "y": 200, "width": 400, "height": 300}
+        {
+          "x": 50,
+          "y": 200,
+          "width": 400,
+          "height": 300
+        }
       ],
       "blocked": false
     }
