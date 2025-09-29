@@ -130,7 +130,10 @@ export type WarcallKind =
   | 'Duel'
   | 'Monsterjagd'
   | 'Diplomatie'
-  | 'Thronschlacht';
+  | 'Thronschlacht'
+  | 'Infiltration'    // New: Stealth mission with hidden antagonist
+  | 'Eroberung'       // New: Territory conquest requiring multiple archetypes
+  | 'Sabotage';       // New: Disruption mission with betrayal mechanics
 
 export type WarcallPhase = 'START' | 'ENDE';
 

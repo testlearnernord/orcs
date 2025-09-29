@@ -246,27 +246,63 @@ export class OfficerCard {
 
   /**
    * Calculate current experience and progress for an officer
+   * Now based on actual gameplay events rather than random values
    */
   private getExpInfo(officer: Officer): { currentExp: number; nextLevelExp: number; progress: number; displayText: string } {
     const currentLevel = officer.stats.level;
     const currentLevelExp = this.getExpForLevel(currentLevel);
     const nextLevelExp = this.getExpForLevel(currentLevel + 1);
     
-    // Simulate current exp based on level with some randomness
-    // Use officer ID as seed for consistent "random" exp within the level
-    const seed = parseInt(officer.id.split('_')[2] || '0', 10);
-    const expRange = nextLevelExp - currentLevelExp;
-    const currentExp = currentLevelExp + ((seed % 100) / 100) * expRange * 0.8; // 0-80% progress
+    // Calculate actual experience based on gameplay metrics
+    const baseExp = currentLevelExp;
+    const bonusExp = this.calculateBonusExp(officer);
+    const currentExp = baseExp + bonusExp;
     
-    const progress = ((currentExp - currentLevelExp) / expRange) * 100;
+    const expRange = nextLevelExp - currentLevelExp;
+    const progress = Math.min(100, ((currentExp - currentLevelExp) / expRange) * 100);
     const displayText = `${Math.floor(currentExp)}/${nextLevelExp}`;
     
     return {
       currentExp: Math.floor(currentExp),
       nextLevelExp,
-      progress: Math.max(0, Math.min(100, progress)),
+      progress: Math.max(0, progress),
       displayText
     };
+  }
+
+  /**
+   * Calculate bonus experience based on officer performance and traits
+   */
+  private calculateBonusExp(officer: Officer): number {
+    let bonusExp = 0;
+    
+    // Base experience from merit (successful actions earn both merit and exp)
+    bonusExp += Math.floor(officer.merit * 0.8); // 80% of merit becomes exp
+    
+    // Level-based progression bonus
+    bonusExp += (officer.stats.level - 1) * 150;
+    
+    // Trait-based experience modifiers
+    if (officer.traits.includes('Schlau')) {
+      bonusExp *= 1.25; // +25% exp for smart officers
+    }
+    if (officer.traits.includes('Dumm')) {
+      bonusExp *= 0.75; // -25% exp for dumb officers
+    }
+    if (officer.traits.includes('Weise')) {
+      bonusExp *= 1.1; // +10% exp for wise officers
+    }
+    
+    // Rank-based experience scaling
+    const rankMultipliers = {
+      'König': 1.5,
+      'Captain': 1.3,
+      'Späher': 1.1,
+      'Grunzer': 1.0
+    };
+    bonusExp *= rankMultipliers[officer.rank] || 1.0;
+    
+    return Math.floor(bonusExp);
   }
 
   private updateStats(officer: Officer, previous: Officer): void {
