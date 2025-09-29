@@ -44,8 +44,7 @@ export const TRAIT_COMBAT_WEIGHTS: Record<Trait, number> = {
 
 export const RELATIONSHIP_BONUS = {
   ALLY: 0.35,
-  RIVAL: -0.45,
-  NEUTRAL: 0.0
+  RIVAL: -0.45
 } as const;
 
 export const BLOOD_OATH_DURATION = 10;

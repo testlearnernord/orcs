@@ -239,8 +239,7 @@ export class OfficerCard {
     // Add relationship border styling to card (redesign requirement)
     this.element.classList.remove(
       'has-rival-relation',
-      'has-ally-relation',
-      'has-neutral-relation'
+      'has-ally-relation'
     );
     if (counts.get('RIVAL')) {
       this.element.classList.add('has-rival-relation');
@@ -257,12 +256,7 @@ export class OfficerCard {
       pill.textContent = `${RELATION_LABEL[type]} · ${count}`;
       this.footer.appendChild(pill);
     });
-    if (this.footer.childElementCount === 0) {
-      const empty = document.createElement('span');
-      empty.className = 'officer-card__status officer-card__status--empty';
-      empty.textContent = 'Keine Bindungen';
-      this.footer.appendChild(empty);
-    }
+    // Remove "Keine Bindungen" text completely as per requirements
   }
 
   captureBounds(): void {

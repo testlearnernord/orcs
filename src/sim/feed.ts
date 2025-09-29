@@ -118,12 +118,11 @@ export function createRelationshipEntry(
   cycle: number,
   actor: Officer,
   target: Officer,
-  type: 'ALLY' | 'RIVAL' | 'NEUTRAL'
+  type: 'ALLY' | 'RIVAL'
 ): FeedEntry {
-  const verbs: Record<'ALLY' | 'RIVAL' | 'NEUTRAL', string[]> = {
+  const verbs: Record<'ALLY' | 'RIVAL', string[]> = {
     ALLY: ['schmiedet', 'besiegelt', 'formt'],
-    RIVAL: ['reizt', 'verhöhnt', 'verletzt'],
-    NEUTRAL: ['begegnet', 'spricht mit', 'betrachtet']
+    RIVAL: ['reizt', 'verhöhnt', 'verletzt']
   };
   const templates = verbs[type].map(
     (verb) => `${actor.name} ${verb} ${target.name}.`
