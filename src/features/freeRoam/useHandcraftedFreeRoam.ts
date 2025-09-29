@@ -270,6 +270,19 @@ export function useHandcraftedFreeRoam(
   const [idleSeconds, setIdleSeconds] = useState(0);
   const lastInteractionRef = useRef(Date.now());
 
+  // Use refs to avoid dependency loops
+  const playerPositionRef = useRef(playerPosition);
+  const previousOfficersRef = useRef(previousOfficers);
+
+  // Update refs when state changes
+  useEffect(() => {
+    playerPositionRef.current = playerPosition;
+  }, [playerPosition]);
+
+  useEffect(() => {
+    previousOfficersRef.current = previousOfficers;
+  }, [previousOfficers]);
+
   // Compute nearby interactions based on player position
   const nearbyInteractions = useMemo(() => {
     if (!map) return [];
@@ -315,19 +328,6 @@ export function useHandcraftedFreeRoam(
     
     return interactions.sort((a, b) => a.distance - b.distance);
   }, [map, snapshot.officers, snapshot.warcalls, playerPosition]);
-
-  // Use refs to avoid dependency loops
-  const playerPositionRef = useRef(playerPosition);
-  const previousOfficersRef = useRef(previousOfficers);
-
-  // Update refs when state changes
-  useEffect(() => {
-    playerPositionRef.current = playerPosition;
-  }, [playerPosition]);
-
-  useEffect(() => {
-    previousOfficersRef.current = previousOfficers;
-  }, [previousOfficers]);
 
   // Load map
   useEffect(() => {
