@@ -26,14 +26,14 @@ describe('Berserker Sprite Direction Mapping', () => {
   });
 
   it('should map directions to correct LPC sprite atlas rows', () => {
-    // Test the empirically corrected LPC direction mapping
-    // Based on actual berserker sprite behavior:
-    // Row 0: UP (correct), Row 1: DOWN, Row 2: RIGHT, Row 3: LEFT
+    // Test the corrected LPC direction mapping
+    // Based on actual berserker sprite layout (matches legacy atlas.berserker.ts):
+    // Row 0: UP, Row 1: LEFT, Row 2: DOWN, Row 3: RIGHT
 
     expect(LPC_DIRECTION_ROWS.U).toBe(0); // Up → Row 0 (verified correct)
-    expect(LPC_DIRECTION_ROWS.D).toBe(1); // Down → Row 1 (empirically determined)
-    expect(LPC_DIRECTION_ROWS.R).toBe(2); // Right → Row 2 (empirically determined)
-    expect(LPC_DIRECTION_ROWS.L).toBe(3); // Left → Row 3 (empirically determined)
+    expect(LPC_DIRECTION_ROWS.L).toBe(1); // Left → Row 1 (corrected to match berserker sprites)
+    expect(LPC_DIRECTION_ROWS.D).toBe(2); // Down → Row 2 (corrected to match berserker sprites)
+    expect(LPC_DIRECTION_ROWS.R).toBe(3); // Right → Row 3 (corrected to match berserker sprites)
   });
 
   it('should handle diagonal movement directions correctly', () => {
