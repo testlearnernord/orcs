@@ -1,0 +1,171 @@
+{
+  "name": "Somaia",
+  "version": "2025-09-29-16-09",
+  "type": "world-map",
+  "pixelSize": {
+    "width": 2048,
+    "height": 1536
+  },
+  "tileSize": 32,
+  "camera": {
+    "minZoom": 0.25,
+    "maxZoom": 2.0,
+    "startZoom": 0.5
+  },
+  "countries": [
+    {
+      "id": "grumthak",
+      "name": "GRUM'THAK",
+      "displayName": "Grum'thak",
+      "description": "Die westliche Insel, Heimat unserer ersten Abenteuer",
+      "region": {
+        "x": 50,
+        "y": 200,
+        "width": 400,
+        "height": 300
+      },
+      "active": true,
+      "color": "#4a90e2"
+    },
+    {
+      "id": "drakzhar",
+      "name": "DRAKZHAR",
+      "displayName": "Drakzhar",
+      "description": "Das nördliche Königreich der Drachen",
+      "region": {
+        "x": 600,
+        "y": 100,
+        "width": 450,
+        "height": 250
+      },
+      "active": false,
+      "color": "#d32f2f"
+    },
+    {
+      "id": "urmorgul",
+      "name": "UR-MORGUL",
+      "displayName": "Ur-Morgul",
+      "description": "Die dunklen Länder im Osten",
+      "region": {
+        "x": 1200,
+        "y": 300,
+        "width": 500,
+        "height": 400
+      },
+      "active": false,
+      "color": "#7b1fa2"
+    },
+    {
+      "id": "zargothra",
+      "name": "ZARGOTH-RA",
+      "displayName": "Zargoth-Ra",
+      "description": "Die südlichen Wüstenreiche",
+      "region": {
+        "x": 500,
+        "y": 800,
+        "width": 600,
+        "height": 350
+      },
+      "active": false,
+      "color": "#f57c00"
+    },
+    {
+      "id": "khurmazok",
+      "name": "KHUR-MAZOK",
+      "displayName": "Khur-Mazok",
+      "description": "Die zentralen Berglande",
+      "region": {
+        "x": 700,
+        "y": 400,
+        "width": 400,
+        "height": 300
+      },
+      "active": false,
+      "color": "#388e3c"
+    }
+  ],
+  "spawns": {
+    "player": {
+      "x": 250,
+      "y": 350
+    },
+    "officers": [
+      {
+        "x": 200,
+        "y": 300
+      },
+      {
+        "x": 300,
+        "y": 400
+      },
+      {
+        "x": 150,
+        "y": 350
+      },
+      {
+        "x": 350,
+        "y": 320
+      },
+      {
+        "x": 280,
+        "y": 450
+      }
+    ]
+  },
+  "biomes": {
+    "ocean": {
+      "regions": [
+        {"x": 0, "y": 0, "width": 49, "height": 1536},
+        {"x": 450, "y": 0, "width": 150, "height": 200},
+        {"x": 0, "y": 500, "width": 600, "height": 300}
+      ],
+      "blocked": true
+    },
+    "mountains": {
+      "regions": [
+        {"x": 1050, "y": 100, "width": 150, "height": 200},
+        {"x": 700, "y": 400, "width": 400, "height": 100}
+      ],
+      "blocked": true
+    },
+    "forests": {
+      "regions": [
+        {"x": 100, "y": 250, "width": 200, "height": 150},
+        {"x": 800, "y": 200, "width": 250, "height": 180}
+      ],
+      "blocked": false
+    },
+    "plains": {
+      "regions": [
+        {"x": 50, "y": 200, "width": 400, "height": 300}
+      ],
+      "blocked": false
+    }
+  },
+  "pois": [
+    {
+      "id": "grumthak-capital",
+      "x": 250,
+      "y": 350,
+      "label": "Grum'thak-Stadt"
+    },
+    {
+      "id": "old-harbor",
+      "x": 100,
+      "y": 280,
+      "label": "Alter Hafen"
+    },
+    {
+      "id": "westwatch",
+      "x": 70,
+      "y": 220,
+      "label": "Westwacht"
+    },
+    {
+      "id": "ironwood",
+      "x": 180,
+      "y": 300,
+      "label": "Eisenwald"
+    }
+  ]
+}
