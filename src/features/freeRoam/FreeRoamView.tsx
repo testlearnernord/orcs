@@ -105,6 +105,61 @@ export function FreeRoamView({
   }));
 
   const [showDebug, setShowDebug] = useState(false);
+  const [showInteractionPopup, setShowInteractionPopup] = useState(false);
+  const [selectedInteraction, setSelectedInteraction] = useState<any>(null);
+
+  // Show interaction popup when near officer or warcall
+  useEffect(() => {
+    if ('nearbyInteractions' in state) {
+      if (state.nearbyInteractions.length > 0 && !showInteractionPopup) {
+        // Auto-show popup for closest interaction
+        const closest = state.nearbyInteractions[0];
+        setSelectedInteraction(closest);
+        setShowInteractionPopup(true);
+      } else if (state.nearbyInteractions.length === 0 && showInteractionPopup) {
+        setShowInteractionPopup(false);
+        setSelectedInteraction(null);
+      }
+    }
+  }, [state, showInteractionPopup]);
+
+  const handleInteractionAction = useCallback((action: string) => {
+    if (!selectedInteraction) return;
+    
+    if (selectedInteraction.type === 'warcall') {
+      switch (action) {
+        case 'details':
+          // TODO: Show warcall details modal
+          console.log('Show warcall details:', selectedInteraction.data);
+          break;
+        case 'join':
+          // TODO: Join warcall
+          console.log('Join warcall:', selectedInteraction.data);
+          store.tick(); // Advance cycle
+          break;
+        case 'ignore':
+          setShowInteractionPopup(false);
+          setSelectedInteraction(null);
+          break;
+      }
+    } else if (selectedInteraction.type === 'officer') {
+      switch (action) {
+        case 'talk':
+          // TODO: Open dialog
+          console.log('Talk to officer:', selectedInteraction.data);
+          break;
+        case 'attack':
+          // TODO: Initiate combat (not implemented yet)
+          console.log('Attack officer:', selectedInteraction.data);
+          store.tick(); // Advance cycle
+          break;
+        case 'ignore':
+          setShowInteractionPopup(false);
+          setSelectedInteraction(null);
+          break;
+      }
+    }
+  }, [selectedInteraction, store]);
 
   // Note: Debug overlay temporarily disabled due to infinite loop issue
   // TODO: Fix infinite loop and re-enable F2 debug toggle
@@ -170,7 +225,35 @@ export function FreeRoamView({
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onRequestClose();
+        if (showInteractionPopup) {
+          setShowInteractionPopup(false);
+          setSelectedInteraction(null);
+        } else {
+          onRequestClose();
+        }
+        return;
+      }
+
+      // Interaction keys when popup is shown
+      if (showInteractionPopup && selectedInteraction) {
+        switch (event.key) {
+          case '1':
+            event.preventDefault();
+            handleInteractionAction(
+              selectedInteraction.type === 'warcall' ? 'details' : 'talk'
+            );
+            break;
+          case '2':
+            event.preventDefault();
+            handleInteractionAction(
+              selectedInteraction.type === 'warcall' ? 'join' : 'attack'
+            );
+            break;
+          case '3':
+            event.preventDefault();
+            handleInteractionAction('ignore');
+            break;
+        }
         return;
       }
 
@@ -198,7 +281,7 @@ export function FreeRoamView({
     };
     window.addEventListener('keydown', handleKeydown);
     return () => window.removeEventListener('keydown', handleKeydown);
-  }, [onRequestClose, state]);
+  }, [onRequestClose, state, showInteractionPopup, selectedInteraction, handleInteractionAction]);
 
   const secondsUntilCycle = useMemo(
     () => formatIdleCountdown(idleMs, state.idleSeconds),
@@ -546,6 +629,79 @@ export function FreeRoamView({
           </section>
         </aside>
       </div>
+      
+      {/* Interaction Popup */}
+      {showInteractionPopup && selectedInteraction && (
+        <div className="free-roam__interaction-overlay">
+          <div className="free-roam__interaction-popup">
+            <h3>
+              {selectedInteraction.type === 'warcall' ? '⚔️ Warcall' : '👤 Offizier'}
+            </h3>
+            <p className="free-roam__interaction-name">
+              <strong>{selectedInteraction.name}</strong>
+            </p>
+            <p className="free-roam__interaction-distance">
+              Entfernung: {Math.round(selectedInteraction.distance)} Einheiten
+            </p>
+            
+            <div className="free-roam__interaction-actions">
+              {selectedInteraction.type === 'warcall' ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleInteractionAction('details')}
+                    className="free-roam__interaction-btn free-roam__interaction-btn--primary"
+                  >
+                    [1] Details ansehen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInteractionAction('join')}
+                    className="free-roam__interaction-btn free-roam__interaction-btn--success"
+                  >
+                    [2] Warcall beitreten
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInteractionAction('ignore')}
+                    className="free-roam__interaction-btn free-roam__interaction-btn--secondary"
+                  >
+                    [3] Ignorieren
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleInteractionAction('talk')}
+                    className="free-roam__interaction-btn free-roam__interaction-btn--primary"
+                  >
+                    [1] Reden
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInteractionAction('attack')}
+                    className="free-roam__interaction-btn free-roam__interaction-btn--danger"
+                  >
+                    [2] Angreifen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInteractionAction('ignore')}
+                    className="free-roam__interaction-btn free-roam__interaction-btn--secondary"
+                  >
+                    [3] Ignorieren
+                  </button>
+                </>
+              )}
+            </div>
+            
+            <p className="free-roam__interaction-hint">
+              <small>Verwende Tasten 1-3 oder ESC zum Schließen</small>
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

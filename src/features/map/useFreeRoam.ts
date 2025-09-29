@@ -77,6 +77,13 @@ export interface FreeRoamState extends FreeRoamSnapshot {
   map: WorldMap;
   idleSeconds: number;
   movePlayer: (direction: 'up' | 'down' | 'left' | 'right') => void;
+  nearbyInteractions: Array<{
+    type: 'officer' | 'warcall';
+    id: string;
+    name: string;
+    distance: number;
+    data: PositionedOfficer | PositionedWarcall;
+  }>;
 }
 
 export const DEFAULT_IDLE_MS = 60_000;
@@ -638,10 +645,69 @@ export function useFreeRoam(
     return () => window.clearInterval(interval);
   }, [store, idleMs]);
 
+  // Compute nearby interactions based on player position
+  const nearbyInteractions = useMemo(() => {
+    const INTERACTION_DISTANCE = 50; // Grid units for interaction
+    const interactions: Array<{
+      type: 'officer' | 'warcall';
+      id: string;
+      name: string;
+      distance: number;
+      data: PositionedOfficer | PositionedWarcall;
+    }> = [];
+    
+    const playerPos = playerPosition;
+    
+    // Check officers
+    for (const officerEntry of snapshot.officers) {
+      const dist = distance(playerPos.coordinate, officerEntry.coordinate);
+      if (dist <= INTERACTION_DISTANCE) {
+        interactions.push({
+          type: 'officer',
+          id: officerEntry.officer.id,
+          name: officerEntry.officer.name,
+          distance: dist,
+          data: officerEntry
+        });
+      }
+    }
+    
+    // Check warcalls
+    for (const warcallEntry of snapshot.warcalls) {
+      const dist = distance(playerPos.coordinate, warcallEntry.coordinate);
+      if (dist <= INTERACTION_DISTANCE) {
+        interactions.push({
+          type: 'warcall',
+          id: warcallEntry.warcall.id,
+          name: `${warcallEntry.warcall.kind}`,
+          distance: dist,
+          data: warcallEntry
+        });
+      }
+    }
+    
+    // Check dynamic warcalls
+    for (const warcallEntry of snapshot.dynamicWarcalls) {
+      const dist = distance(playerPos.coordinate, warcallEntry.coordinate);
+      if (dist <= INTERACTION_DISTANCE) {
+        interactions.push({
+          type: 'warcall',
+          id: warcallEntry.warcall.id,
+          name: `[AI] ${warcallEntry.warcall.kind}`,
+          distance: dist,
+          data: warcallEntry
+        });
+      }
+    }
+    
+    return interactions.sort((a, b) => a.distance - b.distance);
+  }, [playerPosition, snapshot.officers, snapshot.warcalls, snapshot.dynamicWarcalls]);
+
   return {
     map,
     idleSeconds,
     movePlayer,
+    nearbyInteractions,
     ...snapshot
   };
 }
