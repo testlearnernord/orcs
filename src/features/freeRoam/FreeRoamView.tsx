@@ -7,35 +7,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GameStore } from '@state/store';
 import type { Phase } from '@state/selectors/warcalls';
 import Portrait from '@/ui/Portrait';
-import { renderWorldMap } from '@/map/render';
-import type { Biome } from '@/map/generator';
 import {
+  useSomaiaFreeRoam,
   DEFAULT_IDLE_MS,
-  DEFAULT_OFFICER_LIMIT,
-  DEFAULT_MAP_SIZE,
-  useFreeRoam
-} from './useFreeRoam';
+  DEFAULT_OFFICER_LIMIT
+} from './useSomaiaFreeRoam';
 
 const PHASE_LABEL: Record<Phase, string> = {
   prep: 'Vorbereitung',
   travel: 'Auf dem Weg',
   event: 'Ereignis',
   resolution: 'Auflösung'
-};
-
-const BIOME_LABEL: Record<Biome, string> = {
-  desert: 'Wüste',
-  plains: 'Wiese',
-  forest: 'Wald',
-  swamp: 'Sumpf',
-  tundra: 'Schnee',
-  ashwastes: 'Aschelande',
-  volcano: 'Vulkan',
-  river: 'Fluss',
-  savanna: 'Savanne',
-  beach: 'Strand',
-  mountains: 'Berge',
-  jungle: 'Dschungel'
 };
 
 interface FreeRoamViewProps {
@@ -71,8 +53,7 @@ export function FreeRoamView({
 }: FreeRoamViewProps) {
   const idleMs = DEFAULT_IDLE_MS;
 
-  const state = useFreeRoam(store, {
-    mapSize: DEFAULT_MAP_SIZE,
+  const state = useSomaiaFreeRoam(store, {
     officerLimit: DEFAULT_OFFICER_LIMIT,
     idleMs
   });
@@ -97,12 +78,13 @@ export function FreeRoamView({
     isDragging: false
   });
 
-  // Initialize camera for procedural map
-  const [camera, setCamera] = useState<CameraState>(() => ({
-    scale: 1,
-    x: 0,
-    y: 0
-  }));
+  // Initialize camera for Somaia map
+  const [camera, setCamera] = useState<CameraState>(() => {
+    if (state.map) {
+      return state.resetCamera();
+    }
+    return { scale: 1, x: 0, y: 0 };
+  });
 
   const [showDebug, setShowDebug] = useState(false);
   const [showInteractionPopup, setShowInteractionPopup] = useState(false);
@@ -111,13 +93,22 @@ export function FreeRoamView({
   // Show interaction popup when near officer or warcall
   useEffect(() => {
     if ('nearbyInteractions' in state) {
-      if (state.nearbyInteractions.length > 0 && !showInteractionPopup) {
+      const typedState = state as typeof state & {
+        nearbyInteractions: Array<{
+          type: 'officer' | 'warcall';
+          id: string;
+          name: string;
+          distance: number;
+          data: any;
+        }>;
+      };
+      if (typedState.nearbyInteractions.length > 0 && !showInteractionPopup) {
         // Auto-show popup for closest interaction
-        const closest = state.nearbyInteractions[0];
+        const closest = typedState.nearbyInteractions[0];
         setSelectedInteraction(closest);
         setShowInteractionPopup(true);
       } else if (
-        state.nearbyInteractions.length === 0 &&
+        typedState.nearbyInteractions.length === 0 &&
         showInteractionPopup
       ) {
         setShowInteractionPopup(false);
@@ -174,18 +165,86 @@ export function FreeRoamView({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Render the unique static procedural map
-    if ('map' in state && state.map && 'tiles' in state.map) {
-      renderWorldMap(canvas, state.map as any);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (state.loading) {
+      // Show loading state
+      ctx.fillStyle = '#333';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'white';
+      ctx.font = '24px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Loading Somaia...', canvas.width / 2, canvas.height / 2);
+      return;
+    }
+
+    if (state.error) {
+      // Show error state
+      ctx.fillStyle = '#333';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ff6b6b';
+      ctx.font = '18px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        'Error loading map:',
+        canvas.width / 2,
+        canvas.height / 2 - 20
+      );
+      ctx.fillText(state.error, canvas.width / 2, canvas.height / 2 + 20);
+      return;
+    }
+
+    if (state.map) {
+      // Apply camera transform
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(camera.scale, camera.scale);
+      ctx.translate(-camera.x, -camera.y);
+
+      // Draw Somaia world map background
+      ctx.fillStyle = '#2c5aa0'; // Ocean blue
+      ctx.fillRect(0, 0, state.map.pixelSize.width, state.map.pixelSize.height);
+
+      // Draw countries
+      for (const country of state.map.countries) {
+        ctx.fillStyle = country.active ? country.color : '#666666';
+        ctx.globalAlpha = country.active ? 0.7 : 0.3;
+        ctx.fillRect(
+          country.region.x,
+          country.region.y,
+          country.region.width,
+          country.region.height
+        );
+      }
+
+      // Draw biomes
+      ctx.globalAlpha = 0.8;
+      for (const [biomeName, biome] of Object.entries(state.map.biomes)) {
+        let color = '#90EE90'; // Default green for forests/plains
+        if (biomeName === 'ocean') color = '#1e40af';
+        if (biomeName === 'mountains') color = '#78716c';
+
+        ctx.fillStyle = color;
+        for (const region of biome.regions) {
+          ctx.fillRect(region.x, region.y, region.width, region.height);
+        }
+      }
+
+      ctx.globalAlpha = 1.0;
+      ctx.restore();
     }
   }, [
+    state.loading,
+    state.error,
+    state.map,
     state.cycle,
-    state.playerPosition.x,
-    state.playerPosition.y,
     camera.x,
     camera.y,
-    camera.scale,
-    showDebug
+    camera.scale
   ]);
 
   // Debug toggle (F2) - temporarily disabled due to infinite loop
@@ -305,8 +364,13 @@ export function FreeRoamView({
   }, [store]);
 
   const handleResetCamera = useCallback(() => {
-    setCamera({ scale: 1, x: 0, y: 0 });
-  }, []);
+    if (state.map) {
+      const reset = state.resetCamera();
+      setCamera(reset);
+    } else {
+      setCamera({ scale: 1, x: 0, y: 0 });
+    }
+  }, [state]);
 
   const handlePointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -426,10 +490,13 @@ export function FreeRoamView({
     >
       <header className="free-roam__hud">
         <div className="free-roam__title">
-          <h1 id="free-roam-title">Free Roam - Unique Orc Realm</h1>
+          <h1 id="free-roam-title">Free Roam - Somaia</h1>
           <p>
-            Erkunde eine einzigartige, statische Welt mit vielfältigen Biomen,
-            POIs und Kollisionssystem.
+            Erkunde die Welt von Somaia. Aktuell in{' '}
+            {state.currentCountry === 'grumthak'
+              ? "Grum'thak"
+              : 'unbekanntem Gebiet'}
+            .
           </p>
         </div>
         <div className="free-roam__status">
@@ -462,71 +529,52 @@ export function FreeRoamView({
           <div className="free-roam__viewport" style={viewportStyle}>
             <canvas ref={canvasRef} className="free-roam__canvas" />
             <div className="free-roam__overlay">
-              {/* Enhanced procedural map rendering with larger icons */}
-              <>
-                {/* Player position marker */}
-                {'playerPosition' in state &&
-                  'xPercent' in state.playerPosition && (
-                    <div
-                      className="free-roam__marker free-roam__marker--player"
-                      style={{
-                        left: `${state.playerPosition.xPercent}%`,
-                        top: `${state.playerPosition.yPercent}%`
-                      }}
-                      title={`Spieler • ${(state.playerPosition as any).coordinate?.biome ? BIOME_LABEL[(state.playerPosition as any).coordinate.biome as keyof typeof BIOME_LABEL] : ''} (${state.playerPosition.x}, ${state.playerPosition.y})`}
-                    >
-                      <span className="free-roam__marker-icon">🎯</span>
-                    </div>
-                  )}
+              {/* Somaia map rendering with pixel-based positioning */}
+              {state.map && (
+                <>
+                  {/* Player position marker */}
+                  <div
+                    className="free-roam__marker free-roam__marker--player"
+                    style={{
+                      left: `${(state.playerPosition.x / state.map.pixelSize.width) * 100}%`,
+                      top: `${(state.playerPosition.y / state.map.pixelSize.height) * 100}%`
+                    }}
+                    title={`Spieler in ${state.currentCountry === 'grumthak' ? "Grum'thak" : 'Unbekannt'} (${state.playerPosition.x}, ${state.playerPosition.y})`}
+                  >
+                    <span className="free-roam__marker-icon">🎯</span>
+                  </div>
 
-                {/* Official warcalls */}
-                {'warcalls' in state &&
-                  state.warcalls.map((entry: any) => (
+                  {/* Warcalls */}
+                  {state.warcalls.map((entry: any) => (
                     <div
                       key={entry.warcall.id}
                       className={`free-roam__marker free-roam__marker--warcall free-roam__marker--${entry.warcall.phase}`}
                       style={{
-                        left: `${entry.xPercent}%`,
-                        top: `${entry.yPercent}%`
+                        left: `${(entry.x / state.map.pixelSize.width) * 100}%`,
+                        top: `${(entry.y / state.map.pixelSize.height) * 100}%`
                       }}
-                      title={`${entry.warcall.kind} — ${entry.warcall.location}`}
+                      title={`${entry.warcall.kind} — ${entry.warcall.location || "Grum'thak"}`}
                     >
                       <span className="free-roam__marker-icon">⚔️</span>
                     </div>
                   ))}
 
-                {/* Dynamic AI-generated warcalls */}
-                {'dynamicWarcalls' in state &&
-                  state.dynamicWarcalls.map((entry: any) => (
-                    <div
-                      key={entry.warcall.id}
-                      className="free-roam__marker free-roam__marker--dynamic-warcall"
-                      style={{
-                        left: `${entry.xPercent}%`,
-                        top: `${entry.yPercent}%`
-                      }}
-                      title={`[AI] ${entry.warcall.kind} — ${entry.warcall.location}`}
-                    >
-                      <span className="free-roam__marker-icon">🗡️</span>
-                    </div>
-                  ))}
-
-                {/* Officers with AI state indicators and enhanced portraits */}
-                {'officers' in state &&
-                  state.officers.map((entry: any) => (
+                  {/* Officers with enhanced portraits */}
+                  {state.officers.map((entry: any) => (
                     <div
                       key={entry.officer.id}
                       className={`free-roam__marker free-roam__marker--officer free-roam__marker--officer-${entry.state}`}
                       style={{
-                        left: `${entry.xPercent}%`,
-                        top: `${entry.yPercent}%`
+                        left: `${(entry.x / state.map.pixelSize.width) * 100}%`,
+                        top: `${(entry.y / state.map.pixelSize.height) * 100}%`
                       }}
-                      title={`${entry.officer.name} • ${entry.coordinate?.biome ? BIOME_LABEL[entry.coordinate.biome as keyof typeof BIOME_LABEL] : ''} • ${entry.state.toUpperCase()}`}
+                      title={`${entry.officer.name} in Grum'thak • ${entry.state.toUpperCase()}`}
                     >
                       <Portrait officer={entry.officer} size={28} />
                     </div>
                   ))}
-              </>
+                </>
+              )}
             </div>
           </div>
           <div ref={highlightHostRef} className="free-roam__highlight-host" />
@@ -539,20 +587,16 @@ export function FreeRoamView({
                 <strong>Position:</strong> ({Math.round(state.playerPosition.x)}
                 , {Math.round(state.playerPosition.y)})
               </p>
-              {'playerPosition' in state &&
-                'coordinate' in state.playerPosition && (
-                  <p>
-                    <strong>Biom:</strong>{' '}
-                    {(state.playerPosition as any).coordinate?.biome
-                      ? BIOME_LABEL[
-                          (state.playerPosition as any).coordinate
-                            .biome as keyof typeof BIOME_LABEL
-                        ]
-                      : ''}
-                  </p>
-                )}
+              <p>
+                <strong>Land:</strong>{' '}
+                {state.currentCountry === 'grumthak'
+                  ? "Grum'thak"
+                  : 'Unbekannt'}
+              </p>
               <p className="free-roam__controls">
-                <small>WASD zum Bewegen • ESC zum Verlassen</small>
+                <small>
+                  WASD zum Bewegen • Klicken für Interaktion • ESC zum Verlassen
+                </small>
               </p>
             </div>
           </section>
@@ -603,21 +647,8 @@ export function FreeRoamView({
                       )}
                     </div>
                     <div className="free-roam__list-meta">
-                      Position: (
-                      {Math.round((officer as any).coordinate?.x ?? 0)},{' '}
-                      {Math.round((officer as any).coordinate?.y ?? 0)})
-                      {'coordinate' in officer && (
-                        <span>
-                          {' '}
-                          •{' '}
-                          {(officer as any).coordinate?.biome
-                            ? BIOME_LABEL[
-                                (officer as any).coordinate
-                                  .biome as keyof typeof BIOME_LABEL
-                              ]
-                            : ''}
-                        </span>
-                      )}
+                      Position: ({Math.round((officer as any).x ?? 0)},{' '}
+                      {Math.round((officer as any).y ?? 0)}) • Grum'thak
                     </div>
                   </li>
                 ))}
