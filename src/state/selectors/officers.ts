@@ -57,7 +57,7 @@ function computeCoupRisk(officers: Officer[], kingId: string): Set<string> {
   const risky = officers.filter(
     (officer) =>
       officerHasRelationWith(officer, 'RIVAL', kingId) &&
-      officer.personality.loyalitaet < 0.35 &&
+      (officer.mood.loyalitaet ?? 50) < 35 &&
       officer.merit >= threshold
   );
   return new Set(risky.map((officer) => officer.id));
@@ -68,50 +68,8 @@ function applyOfficerFilters(
   filters: UIFilters,
   officers: Officer[]
 ): Officer[] {
-  const promotionCandidates = filters.promotionCandidates
-    ? computePromotionCandidates(state.officers)
-    : null;
-  const coupRisks = filters.coupRisk
-    ? computeCoupRisk(state.officers, state.kingId)
-    : null;
-  return officers.filter((officer) => {
-    if (
-      filters.loyalToKing &&
-      officer.personality.loyalitaet < 0.7 &&
-      officer.id !== state.kingId
-    ) {
-      return false;
-    }
-    if (
-      filters.rivalsOfKing &&
-      officer.id !== state.kingId &&
-      !officerHasRelationWith(officer, 'RIVAL', state.kingId)
-    ) {
-      return false;
-    }
-    if (filters.rivalries && !officerHasRelation(officer, 'RIVAL')) {
-      return false;
-    }
-    if (filters.neutralRelations && !officerHasRelation(officer, 'NEUTRAL')) {
-      return false;
-    }
-    if (filters.lowBravery && officer.personality.tapferkeit > 0.3) {
-      return false;
-    }
-    if (filters.highGreed && officer.personality.gier < 0.7) {
-      return false;
-    }
-    if (
-      filters.promotionCandidates &&
-      !(promotionCandidates?.has(officer.id) ?? false)
-    ) {
-      return false;
-    }
-    if (filters.coupRisk && !(coupRisks?.has(officer.id) ?? false)) {
-      return false;
-    }
-    return true;
-  });
+  // No filters applied anymore - return all officers
+  return officers;
 }
 
 function sortOfficers(
@@ -126,22 +84,7 @@ function sortOfficers(
   return [...officers].sort((a, b) => {
     switch (sortBy) {
       case 'level':
-        return b.level - a.level;
-      case 'loyalToKing':
-        return b.personality.loyalitaet - a.personality.loyalitaet;
-      case 'relations':
-        return b.relationships.length - a.relationships.length;
-      case 'recentChange': {
-        const recent = (officer: Officer) => {
-          for (let i = officer.memories.length - 1; i >= 0; i -= 1) {
-            if (officer.memories[i].category === 'WARCALL') {
-              return officer.memories[i].cycle;
-            }
-          }
-          return -1;
-        };
-        return recent(b) - recent(a);
-      }
+        return b.stats.level - a.stats.level;
       case 'merit':
       default:
         return b.merit - a.merit;
@@ -166,36 +109,9 @@ export function selectVisibleOfficers(
 export function lensMaskForFilters(
   filters: UIFilters
 ): Set<OverlayRelationType> {
+  // No filters anymore, so show all relation types
   const mask = new Set<OverlayRelationType>();
-  let constrained = false;
-
-  if (filters.rivalries) {
-    mask.add('rival');
-    constrained = true;
-  }
-  if (filters.neutralRelations) {
-    mask.add('neutral');
-    constrained = true;
-  }
-  if (filters.rivalsOfKing) {
-    mask.add('rival');
-    constrained = true;
-  }
-  if (filters.coupRisk) {
-    mask.add('rival');
-    constrained = true;
-  }
-
-  if (filters.loyalToKing || filters.promotionCandidates) {
-    mask.add('ally');
-    mask.add('hierarchy');
-    constrained = true;
-  }
-
-  if (!constrained) {
-    ALL_RELATION_TYPES.forEach((type) => mask.add(type));
-  }
-
+  ALL_RELATION_TYPES.forEach((type) => mask.add(type));
   return mask;
 }
 

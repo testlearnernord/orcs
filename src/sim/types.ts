@@ -1,20 +1,30 @@
 export type OrcId = string;
 
-export type Trait =
-  | 'Feigling'
-  | 'Berserker'
-  | 'Hinterhältig'
-  | 'Trinkfest'
-  | 'Tierjäger'
-  | 'Intrigant';
+export type Trait = 'Berserker' | 'Archer' | 'Trapper';
 
 export type Rank = 'König' | 'Spieler' | 'Captain' | 'Späher' | 'Grunzer';
 
-export interface Personality {
-  gier: number;
-  tapferkeit: number;
-  loyalitaet: number;
-  stolz: number;
+export type PotentialRating =
+  | 'Unbrauchbar' // rot - red
+  | 'Dumm' // orange
+  | 'Normal' // weiß - white
+  | 'Fähig' // grün - green
+  | 'Überdurchschnittlich' // blau - blue
+  | 'Genie'; // lila - purple
+
+export interface OfficerStats {
+  potential: PotentialRating;
+  level: number;
+  hp: number;
+  maxHp: number;
+  str: number; // Stärke - wichtig für Berserker
+  dex: number; // Geschicklichkeit - wichtig für Archer
+  int: number; // Intelligenz - wichtig für Trapper
+}
+
+export interface OfficerMood {
+  loyalitaet?: number; // Loyalität zum König (König hat keinen Wert)
+  ambition: string; // Mittelfristiges Ziel/Verhalten
 }
 
 export type OfficerStatus = 'ALIVE' | 'DEAD';
@@ -46,10 +56,10 @@ export interface Officer {
   stableId: string;
   name: string;
   rank: Rank;
-  level: number;
   merit: number;
   traits: Trait[];
-  personality: Personality;
+  stats: OfficerStats;
+  mood: OfficerMood;
   relationships: Relationship[];
   status: OfficerStatus;
   cycleJoined: number;
