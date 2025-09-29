@@ -22,16 +22,15 @@ describe('warcall selectors', () => {
   };
 
   it('derives phases relative to the current cycle', () => {
-    expect(phaseOf(basePlan, 3)).toBe('prep');
-    expect(phaseOf({ ...basePlan, resolveOn: 4 }, 3)).toBe('travel');
-    expect(phaseOf({ ...basePlan, resolveOn: 2 }, 3)).toBe('event');
+    expect(phaseOf(basePlan, 3)).toBe('START');
+    expect(phaseOf({ ...basePlan, resolveOn: 4 }, 3)).toBe('START');
+    expect(phaseOf({ ...basePlan, resolveOn: 2 }, 3)).toBe('ENDE');
   });
 
   it('assigns statuses based on phase and participant availability', () => {
-    expect(statusOf({ phase: 'resolution', participants: [] })).toBe('done');
-    expect(statusOf({ phase: 'prep', participants: [] })).toBe('pending');
-    expect(statusOf({ phase: 'prep', participants: ['x'] })).toBe('active');
-    expect(statusOf({ phase: 'travel', participants: ['x'] })).toBe('active');
+    expect(statusOf({ phase: 'ENDE', participants: [] })).toBe('done');
+    expect(statusOf({ phase: 'START', participants: [] })).toBe('pending');
+    expect(statusOf({ phase: 'START', participants: ['x'] })).toBe('active');
   });
 
   it('filters warcalls by derived status', () => {
@@ -61,13 +60,13 @@ describe('warcall selectors', () => {
     const pending = selectWarcallsByStatus(state, 'pending');
     expect(pending).toHaveLength(1);
     expect(pending[0].id).toBe('w2');
-    expect(pending[0].phase).toBe('prep');
+    expect(pending[0].phase).toBe('START');
 
     const active = selectWarcallsByStatus(state, 'active');
-    expect(active.map((plan) => plan.id)).toEqual(['w1', 'w3']);
+    expect(active.map((plan) => plan.id)).toEqual(['w1']);
 
     const resolved = withPhase({ ...basePlan, resolveOn: 2 }, state.cycle);
-    expect(resolved.phase).toBe('event');
-    expect(statusOf(resolved)).toBe('active');
+    expect(resolved.phase).toBe('ENDE');
+    expect(statusOf(resolved)).toBe('done');
   });
 });

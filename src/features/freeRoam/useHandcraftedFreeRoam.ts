@@ -21,7 +21,7 @@ export interface PositionedWarcall {
   kind: WarcallKind;
   risk: number;
   rewardHint: string;
-  phase: 'prep' | 'travel' | 'event' | 'resolution';
+  phase: 'START' | 'ENDE';
   breakdown?: any;
 }
 

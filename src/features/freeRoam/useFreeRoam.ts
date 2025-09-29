@@ -54,7 +54,7 @@ interface ProceduralWarcall {
   kind: WarcallKind;
   risk: number;
   rewardHint: string;
-  phase: 'prep' | 'travel' | 'event' | 'resolution';
+  phase: 'START' | 'ENDE';
   breakdown?: any;
   coordinate: MapCoordinate;
 }
@@ -266,7 +266,7 @@ function generateRandomWarcall(
     kind: rng.pick(warcallTypes),
     risk: rng.next(),
     rewardHint: 'Mysterious treasure',
-    phase: 'prep' as const,
+    phase: 'START' as const,
     breakdown: undefined,
     coordinate
   };
