@@ -121,19 +121,20 @@ export class PlayerEntity {
       isDashing: this.state.isDashing,
       isBlocking: this.state.isBlocking,
       isMoving: this.isMoving(controllerState),
-      isExecutingSignature: this.state.isExecutingSignature
+      isExecutingSignature: this.state.isExecutingSignature,
+      speed: controllerState.speed,
+      walkPhase: controllerState.walkPhase
     };
 
     this.spriteRenderer.update(spriteState);
   }
 
   /**
-   * Check if player is moving based on position changes
+   * Check if player is moving based on speed
    */
-  private isMoving(_controllerState: PlayerState): boolean {
-    // Simple movement detection - in a real implementation,
-    // this would track velocity or position changes
-    return false; // Placeholder - will be set by external movement detection
+  private isMoving(controllerState: PlayerState): boolean {
+    // Player is moving if speed is greater than 0
+    return controllerState.speed > 0;
   }
 
   /**
@@ -156,17 +157,12 @@ export class PlayerEntity {
    * Render the player entity
    */
   render(ctx: CanvasRenderingContext2D): void {
-    const spriteState: PlayerSpriteState = {
-      archetype: this.state.archetype,
-      position: this.state.position,
-      rotation: this.state.rotation,
-      isDashing: this.state.isDashing,
-      isBlocking: this.state.isBlocking,
-      isMoving: false, // Will be determined by movement system
-      isExecutingSignature: this.state.isExecutingSignature
-    };
-
-    this.spriteRenderer.render(ctx, spriteState);
+    // Use world coordinates - convert position to screen pixels
+    const x = this.state.position.x * 50; // 50 pixels per world unit
+    const y = this.state.position.y * 50;
+    const scale = 1.0; // Base scale
+    
+    this.spriteRenderer.render(ctx, x, y, scale);
   }
 
   /**
