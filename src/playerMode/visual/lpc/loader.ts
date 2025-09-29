@@ -10,6 +10,7 @@ import type {
   LPCAnimation,
   LPCAnimationAtlas
 } from './types';
+import { LPCLayerCompositor } from './layerCompositor';
 
 /**
  * Loads LPC character data from JSON configuration files
@@ -152,32 +153,38 @@ export class LPCCharacterLoader {
 
       console.log(`[LPCLoader] Loading composited sprites for ${characterId} (${config.layers.length} layers in character.json)`);
 
-      // Load each animation's sprite sheet using composited files
-      const loadPromises = animations.map(async (animation) => {
-        const atlas = this.createAnimationAtlas(
-          animation,
-          basePath,
-          metadata.frameSize,
-          metadata.frameCounts
-        );
+      // For berserker, the Universal LPC generator has already created pre-composited sprites
+      // in the /standard/ directory that include all armor layers. Use these directly.
+      console.log(`[LPCLoader] Using pre-composited sprites for ${characterId} (${config.layers.length} layers already composited)`);
+      
+      // Use standard single-file loading for all characters
 
-        try {
-          const image = await this.loadSpriteImageWithFallbacks(
-            basePath,
+      // Use standard single-file loading for all characters
+      const loadPromises = animations.map(async (animation) => {
+          const atlas = this.createAnimationAtlas(
             animation,
-            metadata.frameSize
+            basePath,
+            metadata.frameSize,
+            metadata.frameCounts
           );
-          atlases.set(animation, atlas);
-          images.set(animation, image);
-          console.log(`[LPCLoader] Successfully loaded ${animation} sprite`);
-        } catch (error) {
-          console.warn(
-            `Failed to load ${animation} sprite for ${characterId}:`,
-            error
-          );
-          // Continue loading other animations even if one fails
-        }
-      });
+
+          try {
+            const image = await this.loadSpriteImageWithFallbacks(
+              basePath,
+              animation,
+              metadata.frameSize
+            );
+            atlases.set(animation, atlas);
+            images.set(animation, image);
+            console.log(`[LPCLoader] Successfully loaded ${animation} sprite`);
+          } catch (error) {
+            console.warn(
+              `Failed to load ${animation} sprite for ${characterId}:`,
+              error
+            );
+            // Continue loading other animations even if one fails
+          }
+        });
 
       await Promise.all(loadPromises);
 
