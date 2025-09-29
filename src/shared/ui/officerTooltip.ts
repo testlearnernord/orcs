@@ -33,11 +33,14 @@ function formatStat(value: number): string {
 }
 
 function deriveArchetype(officer: Officer): string {
-  // Use primary trait (archetype) directly, or default for those without traits
-  if (officer.traits.length > 0) {
-    return officer.traits[0]; // Archer or Trapper
+  // Use primary trait to derive archetype, or default to Berserker
+  if (officer.traits.includes('Archer')) {
+    return 'Archer';
   }
-  return 'Krieger'; // Default for officers without specific traits (former Berserkers)
+  if (officer.traits.includes('Trapper')) {
+    return 'Trapper';
+  }
+  return 'Berserker'; // Default archetype for officers without specific archetype traits
 }
 
 function deriveTitle(officer: Officer): string {
@@ -47,11 +50,11 @@ function deriveTitle(officer: Officer): string {
     case 'Spieler':
       return 'Kriegsrat';
     case 'Captain':
-      return 'Klingenführer';
+      return 'Kapitän';
     case 'Späher':
-      return 'Schattenauge';
+      return 'Späher';
     default:
-      return 'Grubenläufer';
+      return 'Grunzer';
   }
 }
 
