@@ -30,22 +30,27 @@ export class LPCLayerCompositor {
    */
   private getLayersForAnimation(animation: LPCAnimation): CompositeLayerInfo[] {
     return this.config.layers
-      .filter(layer => layer.supportedAnimations.includes(animation))
+      .filter((layer) => layer.supportedAnimations.includes(animation))
       .sort((a, b) => a.zPos - b.zPos); // Sort by z-position (bottom to top)
   }
 
   /**
    * Composite all relevant layers for an animation into a single sprite sheet
    */
-  async compositeAnimation(animation: LPCAnimation, frameSize: number = 64): Promise<HTMLImageElement> {
+  async compositeAnimation(
+    animation: LPCAnimation,
+    frameSize: number = 64
+  ): Promise<HTMLImageElement> {
     const layers = this.getLayersForAnimation(animation);
-    
+
     if (layers.length === 0) {
       throw new Error(`No layers found supporting animation: ${animation}`);
     }
 
-    console.log(`[LayerCompositor] Compositing ${layers.length} layers for ${animation}:`, 
-      layers.map(l => `${l.name} (z:${l.zPos})`));
+    console.log(
+      `[LayerCompositor] Compositing ${layers.length} layers for ${animation}:`,
+      layers.map((l) => `${l.name} (z:${l.zPos})`)
+    );
 
     // Calculate canvas dimensions based on standard LPC format
     const cols = this.getFrameCountForAnimation(animation);
@@ -63,28 +68,36 @@ export class LPCLayerCompositor {
     for (const layer of layers) {
       try {
         // Try to load individual layer sprite file
-        const layerImage = await this.loadLayerSprite(layer, animation, frameSize);
-        
+        const layerImage = await this.loadLayerSprite(
+          layer,
+          animation,
+          frameSize
+        );
+
         // Draw layer onto canvas
         ctx.drawImage(layerImage, 0, 0);
         console.log(`[LayerCompositor] Added layer: ${layer.name}`);
       } catch (error) {
-        console.warn(`[LayerCompositor] Failed to load layer ${layer.name}:`, error);
+        console.warn(
+          `[LayerCompositor] Failed to load layer ${layer.name}:`,
+          error
+        );
         // Continue with other layers even if one fails
       }
     }
 
     // Convert canvas to image
     return new Promise((resolve, reject) => {
-      canvas.toBlob(blob => {
+      canvas.toBlob((blob) => {
         if (!blob) {
           reject(new Error('Failed to create composited image blob'));
           return;
         }
-        
+
         const img = new Image();
         img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error('Failed to load composited image'));
+        img.onerror = () =>
+          reject(new Error('Failed to load composited image'));
         img.src = URL.createObjectURL(blob);
       });
     });
@@ -93,17 +106,21 @@ export class LPCLayerCompositor {
   /**
    * Load sprite image for a specific layer and animation
    */
-  private async loadLayerSprite(layer: CompositeLayerInfo, animation: LPCAnimation, frameSize: number): Promise<HTMLImageElement> {
+  private async loadLayerSprite(
+    layer: CompositeLayerInfo,
+    animation: LPCAnimation,
+    frameSize: number
+  ): Promise<HTMLImageElement> {
     // For now, try to find individual layer files in the Universal LPC structure
     // If not found, fall back to composited files
-    
+
     const potentialPaths = [
       // Try Universal LPC structure first
       `${this.basePath}/${layer.fileName.replace('.png', '')}/${animation}.png`,
-      
+
       // Try standard directory structure
       `${this.basePath}/layers/${layer.name.toLowerCase()}/${animation}.png`,
-      
+
       // Fall back to composited standard files if individual layers don't exist
       `${this.basePath}/standard/${animation}.png`
     ];
@@ -116,7 +133,9 @@ export class LPCLayerCompositor {
       }
     }
 
-    throw new Error(`Could not load layer sprite for ${layer.name}/${animation}`);
+    throw new Error(
+      `Could not load layer sprite for ${layer.name}/${animation}`
+    );
   }
 
   /**
@@ -138,7 +157,7 @@ export class LPCLayerCompositor {
     // Standard LPC frame counts
     const frameCounts: Record<LPCAnimation, number> = {
       walk: 9,
-      run: 8, 
+      run: 8,
       idle: 1,
       slash: 6,
       hurt: 6,
@@ -153,7 +172,7 @@ export class LPCLayerCompositor {
       backslash: 6,
       halfslash: 3
     };
-    
+
     return frameCounts[animation] || 1;
   }
 
