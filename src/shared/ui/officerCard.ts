@@ -7,15 +7,16 @@ export interface OfficerCardOptions {
   onOfficerClick?: (officer: Officer) => void; // New click handler for details panel
 }
 
-type StatKey = 'str' | 'dex' | 'int' | 'hp';
+type StatKey = 'str' | 'dex' | 'int' | 'hp' | 'exp';
 
-const STATS: StatKey[] = ['str', 'dex', 'int', 'hp'];
+const STATS: StatKey[] = ['str', 'dex', 'int', 'hp', 'exp'];
 
 const STAT_LABEL: Record<StatKey, string> = {
   str: 'Stärke',
   dex: 'Geschick',
   int: 'Intelligenz',
-  hp: 'Lebenspunkte'
+  hp: 'Lebenspunkte',
+  exp: 'Erfahrung'
 };
 
 const RELATION_ORDER: RelationshipType[] = ['ALLY', 'RIVAL'];
@@ -170,40 +171,177 @@ export class OfficerCard {
 
   private updateTraits(officer: Officer): void {
     this.traitContainer.innerHTML = '';
-    if (officer.traits.length === 0) {
+    
+    // Filter out archetype traits from display (they're shown separately as "Archer", "Trapper", etc.)
+    const displayTraits = officer.traits.filter(trait => 
+      trait !== 'Archer' && trait !== 'Trapper'
+    );
+    
+    if (displayTraits.length === 0) {
       const empty = document.createElement('span');
       empty.className = 'officer-card__trait officer-card__trait--muted';
       empty.textContent = 'Keine Merkmale';
       this.traitContainer.appendChild(empty);
       return;
     }
-    officer.traits.forEach((trait) => {
+    
+    displayTraits.forEach((trait) => {
+      // Skip hidden traits like 'Geheimnisvoll'
+      if (trait === 'Geheimnisvoll') return;
+      
       const chip = document.createElement('span');
       chip.className = 'officer-card__trait';
       chip.textContent = trait;
+      
+      // Add tooltip with trait description
+      chip.title = this.getTraitDescription(trait);
+      
+      // Add special styling for different trait types
+      if (['Robust', 'Weich', 'lange Beine', 'kurze Beine'].includes(trait)) {
+        chip.classList.add('officer-card__trait--physical');
+      } else if (['Nobel', 'Primitiv', 'Freundlich', 'Unfreundlich'].includes(trait)) {
+        chip.classList.add('officer-card__trait--social');
+      } else if (['Dumm', 'Schlau', 'Weise'].includes(trait)) {
+        chip.classList.add('officer-card__trait--mental');
+      } else if (['Guter Schütze', 'Schlechter Schütze', 'Axtexperte', 'Zweihandtölpel', 'Jäger', 'Fliegenfänger'].includes(trait)) {
+        chip.classList.add('officer-card__trait--combat');
+      }
+      
       this.traitContainer.appendChild(chip);
     });
+  }
+  
+  private getTraitDescription(trait: string): string {
+    const descriptions: Record<string, string> = {
+      'Robust': '+5% Lebenspunkte',
+      'Weich': '-5% Lebenspunkte',
+      'lange Beine': '+10% Weltkarten-Geschwindigkeit, +5% Kampf-Geschwindigkeit',
+      'kurze Beine': '-10% Weltkarten-Geschwindigkeit, -5% Kampf-Geschwindigkeit',
+      'Nobel': '+15% Merit, andere Offiziere sind loyaler',
+      'Primitiv': '-15% Merit, andere Offiziere sind unloyaler',
+      'Freundlich': 'Geht gerne Allianzen ein, ist loyaler',
+      'Unfreundlich': 'Geht gerne Rivalitäten ein, ist unloyaler',
+      'Dumm': '-25% Erfahrungsgewinn',
+      'Schlau': '+25% Erfahrungsgewinn',
+      'Weise': 'Mehr Attributpunkte bei Stufenaufstieg',
+      'Verräter': 'Verrät andere für eigenen Vorteil',
+      'Guter Schütze': '+25% Fernkampf-Schaden (nur Bogenschützen)',
+      'Schlechter Schütze': '-25% Fernkampf-Schaden (nur Bogenschützen)',
+      'Axtexperte': '+25% Zweihand-Schaden (nur Berserker)',
+      'Zweihandtölpel': '-25% Zweihand-Schaden (nur Berserker)',
+      'Jäger': '+25% Fallen-Schaden (nur Fallensteller)',
+      'Fliegenfänger': '-25% Fallen-Schaden (nur Fallensteller)'
+    };
+    
+    return descriptions[trait] || 'Unbekannte Eigenschaft';
+  }
+
+  /**
+   * Calculate experience required for a specific level
+   */
+  private getExpForLevel(level: number): number {
+    // Simple exponential formula: level^2 * 100
+    return level * level * 100;
+  }
+
+  /**
+   * Calculate current experience and progress for an officer
+   * Now based on actual gameplay events rather than random values
+   */
+  private getExpInfo(officer: Officer): { currentExp: number; nextLevelExp: number; progress: number; displayText: string } {
+    const currentLevel = officer.stats.level;
+    const currentLevelExp = this.getExpForLevel(currentLevel);
+    const nextLevelExp = this.getExpForLevel(currentLevel + 1);
+    
+    // Calculate actual experience based on gameplay metrics
+    const baseExp = currentLevelExp;
+    const bonusExp = this.calculateBonusExp(officer);
+    const currentExp = baseExp + bonusExp;
+    
+    const expRange = nextLevelExp - currentLevelExp;
+    const progress = Math.min(100, ((currentExp - currentLevelExp) / expRange) * 100);
+    const displayText = `${Math.floor(currentExp)}/${nextLevelExp}`;
+    
+    return {
+      currentExp: Math.floor(currentExp),
+      nextLevelExp,
+      progress: Math.max(0, progress),
+      displayText
+    };
+  }
+
+  /**
+   * Calculate bonus experience based on officer performance and traits
+   */
+  private calculateBonusExp(officer: Officer): number {
+    let bonusExp = 0;
+    
+    // Base experience from merit (successful actions earn both merit and exp)
+    bonusExp += Math.floor(officer.merit * 0.8); // 80% of merit becomes exp
+    
+    // Level-based progression bonus
+    bonusExp += (officer.stats.level - 1) * 150;
+    
+    // Trait-based experience modifiers
+    if (officer.traits.includes('Schlau')) {
+      bonusExp *= 1.25; // +25% exp for smart officers
+    }
+    if (officer.traits.includes('Dumm')) {
+      bonusExp *= 0.75; // -25% exp for dumb officers
+    }
+    if (officer.traits.includes('Weise')) {
+      bonusExp *= 1.1; // +10% exp for wise officers
+    }
+    
+    // Rank-based experience scaling
+    const rankMultipliers = {
+      'König': 1.5,
+      'Captain': 1.3,
+      'Späher': 1.1,
+      'Grunzer': 1.0
+    };
+    bonusExp *= rankMultipliers[officer.rank] || 1.0;
+    
+    return Math.floor(bonusExp);
   }
 
   private updateStats(officer: Officer, previous: Officer): void {
     STATS.forEach((key) => {
-      const value = officer.stats[key];
-      const previousValue = previous.stats[key];
       const fill = this.statBars.get(key);
       const text = this.statValues.get(key);
       if (!fill || !text) return;
 
-      // For HP, show as HP/MaxHP, for others show raw value
       let displayValue: string;
       let percent: string;
+      let delta = 0;
 
-      if (key === 'hp') {
+      if (key === 'exp') {
+        // Handle EXP stat specially
+        const expInfo = this.getExpInfo(officer);
+        const prevExpInfo = this.getExpInfo(previous);
+        
+        displayValue = expInfo.displayText;
+        percent = `${expInfo.progress}%`;
+        delta = expInfo.currentExp - prevExpInfo.currentExp;
+        
+        // Level up detection - if level increased, show full progress
+        if (officer.stats.level > previous.stats.level) {
+          percent = '100%';
+          delta = expInfo.nextLevelExp - prevExpInfo.currentExp; // Show large exp gain
+        }
+      } else if (key === 'hp') {
+        const value = officer.stats[key];
+        const previousValue = previous.stats[key];
         displayValue = `${value}/${officer.stats.maxHp}`;
         percent = `${Math.round((value / officer.stats.maxHp) * 100)}%`;
+        delta = value - previousValue;
       } else {
+        const value = officer.stats[key];
+        const previousValue = previous.stats[key];
         displayValue = value.toString();
         // Scale other stats to percentage (assuming max around 100)
         percent = `${Math.min(100, Math.round((value / 100) * 100))}%`;
+        delta = value - previousValue;
       }
 
       if (!fill.style.width) {
@@ -217,7 +355,6 @@ export class OfficerCard {
         });
       }
 
-      const delta = value - previousValue;
       text.textContent = displayValue;
       text.dataset.delta =
         delta !== 0 ? (delta > 0 ? `+${delta}` : delta.toString()) : '';

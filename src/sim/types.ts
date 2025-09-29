@@ -1,6 +1,40 @@
 export type OrcId = string;
 
-export type Trait = 'Archer' | 'Trapper';
+// Modern trait system - independent from archetypes
+export type Trait = 
+  // Archetype traits (determine combat style)
+  | 'Archer' 
+  | 'Trapper'
+  // Berserker is default when no archetype trait is present
+  
+  // Physical traits
+  | 'Robust' // 5% mehr HP *
+  | 'Weich' // -5% HP
+  | 'lange Beine' // 10% mehr Worldmap Speed / 5% mehr PLAYER Mode Speed
+  | 'kurze Beine' // -10% Worldmap Speed / -5% weniger PLAYER mode Speed
+  
+  // Social traits
+  | 'Nobel' // Erhält 15% mehr MERIT, andere Offiziere sind eher loyal *
+  | 'Primitiv' // Erhält 15% weniger Merit, andere Offiziere sind eher disloyal *
+  | 'Freundlich' // Geht gerne Allianzen ein, ist eher Loyal
+  | 'Unfreundlich' // Geht gerne Rivalitäten ein, ist eher unloyal *
+  | 'Geheimnisvoll' // Verhält sich geheimnisvoll, sehr ambitioniert (für Spieler nicht sichtbar)
+  
+  // Mental traits
+  | 'Dumm' // Sammelt 25% weniger Erfahrung
+  | 'Schlau' // Sammelt 25% mehr erfahrung
+  | 'Weise' // Erhält mehr Attributpunkte bei Stufenaufstieg *
+  | 'Verräter' // Verrät alles und jeden
+  
+  // Combat specialization traits (archetype-specific)
+  | 'Guter Schütze' // 25% mehr Range Schaden - ARCHER Only *
+  | 'Schlechter Schütze' // 25% weniger Range Schaden - ARCHER only
+  | 'Axtexperte' // 25% mehr 2 Hand Schaden - Berserker only *
+  | 'Zweihandtölpel' // 25% weniger 2 Hand Schaden - Berserker only
+  | 'Jäger' // 25% mehr Schaden mit der Trap - TRAPPER ONLY *
+  | 'Fliegenfänger'; // 25% weniger SChaden mit der Trap - TRAPPER ONLY
+
+// Traits marked with * can be acquired during gameplay through cycles, warcalls, etc.
 
 export type Rank = 'König' | 'Spieler' | 'Captain' | 'Späher' | 'Grunzer';
 
@@ -96,7 +130,10 @@ export type WarcallKind =
   | 'Duel'
   | 'Monsterjagd'
   | 'Diplomatie'
-  | 'Thronschlacht';
+  | 'Thronschlacht'
+  | 'Infiltration'    // New: Stealth mission with hidden antagonist
+  | 'Eroberung'       // New: Territory conquest requiring multiple archetypes
+  | 'Sabotage';       // New: Disruption mission with betrayal mechanics
 
 export type WarcallPhase = 'START' | 'ENDE';
 
