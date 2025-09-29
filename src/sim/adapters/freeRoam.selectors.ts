@@ -14,7 +14,7 @@ function sortOfficersByMerit(officers: Officer[]): Officer[] {
   return [...officers].sort(
     (a, b) =>
       b.merit - a.merit ||
-      b.level - a.level ||
+      b.stats.level - a.stats.level ||
       a.name.localeCompare(b.name, 'de-DE')
   );
 }

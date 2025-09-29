@@ -37,12 +37,9 @@ export const PROMOTION_THRESHOLDS: Record<
 };
 
 export const TRAIT_COMBAT_WEIGHTS: Record<Trait, number> = {
-  Feigling: -0.4,
   Berserker: 0.45,
-  Hinterhältig: 0.3,
-  Trinkfest: 0.15,
-  Tierjäger: 0.2,
-  Intrigant: 0.25
+  Archer: 0.35,
+  Trapper: 0.25
 };
 
 export const RELATIONSHIP_BONUS = {

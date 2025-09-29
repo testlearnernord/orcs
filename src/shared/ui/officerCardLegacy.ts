@@ -8,15 +8,15 @@ export interface OfficerCardLegacyOptions {
   onOpenDetails?: (officer: Officer) => void;
 }
 
-type StatKey = keyof Officer['personality'];
+type StatKey = 'str' | 'dex' | 'int' | 'hp';
 
-const STATS: StatKey[] = ['gier', 'tapferkeit', 'loyalitaet', 'stolz'];
+const STATS: StatKey[] = ['str', 'dex', 'int', 'hp'];
 
 const STAT_LABEL: Record<StatKey, string> = {
-  gier: 'Gier',
-  tapferkeit: 'Tapferkeit',
-  loyalitaet: 'Loyalität',
-  stolz: 'Stolz'
+  str: 'Stärke',
+  dex: 'Geschick',
+  int: 'Intelligenz',
+  hp: 'Lebenspunkte'
 };
 
 export class OfficerCardLegacy {
@@ -155,11 +155,24 @@ export class OfficerCardLegacy {
 
   private updateStats(officer: Officer, previous: Officer): void {
     STATS.forEach((key) => {
-      const value = officer.personality[key];
+      const value = officer.stats[key];
       const fill = this.statBars.get(key);
       const text = this.statValues.get(key);
       if (!fill || !text) return;
-      const percent = `${Math.round(value * 100)}%`;
+
+      // For HP, show as HP/MaxHP, for others show raw value
+      let displayValue: string;
+      let percent: string;
+
+      if (key === 'hp') {
+        displayValue = `${value}/${officer.stats.maxHp}`;
+        percent = `${Math.round((value / officer.stats.maxHp) * 100)}%`;
+      } else {
+        displayValue = value.toString();
+        // Scale other stats to percentage (assuming max around 100)
+        percent = `${Math.min(100, Math.round((value / 100) * 100))}%`;
+      }
+
       if (!fill.style.width) {
         fill.style.width = percent;
       } else {
@@ -174,10 +187,10 @@ export class OfficerCardLegacy {
           );
         });
       }
-      const previousValue = previous.personality[key];
+      const previousValue = previous.stats[key];
       const delta = value - previousValue;
-      text.textContent = value.toFixed(2);
-      text.dataset.delta = delta !== 0 ? delta.toFixed(2) : '';
+      text.textContent = displayValue;
+      text.dataset.delta = delta !== 0 ? delta.toString() : '';
       text.classList.remove('is-up', 'is-down');
       if (delta > 0.01) {
         text.classList.add('is-up');
@@ -218,7 +231,7 @@ export class OfficerCardLegacy {
       title: officer.name
     });
     this.subtitle.textContent = `${officer.rank} • Merit ${Math.round(officer.merit)}`;
-    this.levelBadge.textContent = `Level ${officer.level}`;
+    this.levelBadge.textContent = `Level ${officer.stats.level}`;
     this.meritBadge.textContent = `Zyklus ${officer.cycleJoined}`;
     this.updateBadges(officer);
     this.updateStats(officer, previous);

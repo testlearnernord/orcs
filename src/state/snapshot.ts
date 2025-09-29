@@ -8,7 +8,8 @@ function cloneOfficer(officer: Officer): Officer {
   return {
     ...officer,
     traits: [...officer.traits],
-    personality: { ...officer.personality },
+    stats: { ...officer.stats },
+    mood: { ...officer.mood },
     relationships: officer.relationships.map((relation) => ({ ...relation })),
     memories: officer.memories.map((memory) => ({ ...memory }))
   };

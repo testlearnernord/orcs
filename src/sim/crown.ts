@@ -50,27 +50,34 @@ function applyTributeLoyalty(
   king: Officer,
   tributeRate: number
 ): void {
-  const penalty = Math.max(0, tributeRate - TRIBUTE_MIN) * 0.03;
+  const penalty = Math.max(0, tributeRate - TRIBUTE_MIN) * 3; // Scale to 0-100
   if (penalty <= 0) return;
   state.officers = state.officers.map((officer) => {
     if (officer.id === king.id) return officer;
-    const loyalty = clamp(officer.personality.loyalitaet - penalty);
-    if (loyalty === officer.personality.loyalitaet) return officer;
+    if (officer.mood.loyalitaet === undefined) return officer;
+
+    const loyalty = Math.max(
+      0,
+      Math.min(100, officer.mood.loyalitaet - penalty)
+    );
+    if (loyalty === officer.mood.loyalitaet) return officer;
     return {
       ...officer,
-      personality: { ...officer.personality, loyalitaet: loyalty }
+      mood: { ...officer.mood, loyalitaet: loyalty }
     };
   });
 }
 
 function applyReignDecay(state: WorldState, king: Officer): Officer {
+  // Kings no longer have personality-based decay, but could have stat decay or ambition changes
+  // For now, let's just reduce some stats slightly to represent the burden of rule
   const updated: Officer = {
     ...king,
-    personality: {
-      ...king.personality,
-      tapferkeit: clamp(king.personality.tapferkeit - DECAY_TAPFERKEIT),
-      loyalitaet: clamp(king.personality.loyalitaet - DECAY_LOYALITAET),
-      stolz: clamp(king.personality.stolz + DECAY_STOLZ)
+    stats: {
+      ...king.stats,
+      str: Math.max(10, king.stats.str - 1), // Slight stat decay
+      dex: Math.max(10, king.stats.dex - 1),
+      int: Math.max(10, king.stats.int - 1)
     }
   };
   state.officers = state.officers.map((officer) =>
@@ -93,8 +100,8 @@ function evaluateInstability(
   const top = [...subordinates].sort((a, b) => b.merit - a.merit).slice(0, 8);
   const avgLoyalty =
     top.length === 0
-      ? 0.5
-      : top.reduce((sum, officer) => sum + officer.personality.loyalitaet, 0) /
+      ? 50 // Default loyalty on 0-100 scale
+      : top.reduce((sum, officer) => sum + (officer.mood.loyalitaet ?? 50), 0) /
         top.length;
   const rivalCount = subordinates.reduce((count, officer) => {
     const rival = officer.relationships.some(
@@ -103,9 +110,9 @@ function evaluateInstability(
     return rival ? count + 1 : count;
   }, 0);
   let instability: CrownState['instability'] = 'stable';
-  if (avgLoyalty < 0.28 || rivalCount >= 5) {
+  if (avgLoyalty < 28 || rivalCount >= 5) {
     instability = 'crisis';
-  } else if (avgLoyalty < 0.35 || rivalCount >= 3) {
+  } else if (avgLoyalty < 35 || rivalCount >= 3) {
     instability = 'shaky';
   }
   return { instability, avgLoyalty, rivalCount };
@@ -131,7 +138,7 @@ export function computeReignPressure(
 }
 
 function coupScore(officer: Officer, kingId: string): number {
-  const { gier, tapferkeit, loyalitaet } = officer.personality;
+  const loyalty = officer.mood.loyalitaet ?? 50; // Default to 50 if undefined
   const rivalBonus = officer.relationships.some(
     (relation) => relation.type === 'RIVAL' && relation.with === kingId
   )
@@ -139,9 +146,9 @@ function coupScore(officer: Officer, kingId: string): number {
     : 0;
   const oathPenalty = hasBloodOathWithKing(officer, kingId) ? -0.8 : 0;
   return (
-    tapferkeit * 0.7 +
-    (1 - loyalitaet) * 0.9 +
-    gier * 0.4 +
+    officer.stats.str * 0.007 + // Convert stats to smaller scale
+    (100 - loyalty) * 0.009 + // Higher disloyalty = higher coup score
+    officer.stats.int * 0.004 + // Intelligence helps with coups
     rivalBonus +
     oathPenalty +
     officer.merit / 140
@@ -149,7 +156,7 @@ function coupScore(officer: Officer, kingId: string): number {
 }
 
 function challengerStrength(officer: Officer, kingId: string): number {
-  const { tapferkeit, loyalitaet, gier } = officer.personality;
+  const loyalty = officer.mood.loyalitaet ?? 50;
   const rival = officer.relationships.some(
     (relation) => relation.type === 'RIVAL' && relation.with === kingId
   )
@@ -157,9 +164,9 @@ function challengerStrength(officer: Officer, kingId: string): number {
     : 0;
   const oathPenalty = hasBloodOathWithKing(officer, kingId) ? -0.5 : 0;
   return (
-    tapferkeit * 0.8 +
-    (1 - loyalitaet) * 0.8 +
-    gier * 0.3 +
+    officer.stats.str * 0.008 + // Physical strength for challenges
+    (100 - loyalty) * 0.008 + // Disloyalty
+    officer.stats.int * 0.003 + // Intelligence
     officer.merit / 120 +
     rival +
     oathPenalty
@@ -171,11 +178,11 @@ function kingStrength(
   instability: CrownState['instability']
 ): number {
   let strength =
-    king.personality.tapferkeit * 1.1 +
-    king.personality.loyalitaet * 0.6 +
+    king.stats.str * 0.011 + // Physical strength
+    king.stats.int * 0.006 + // Intelligence for rule
     king.merit / 120 +
-    king.level * 0.05 +
-    king.personality.stolz * 0.2;
+    king.stats.level * 0.05 + // Experience/level
+    king.stats.dex * 0.002; // Minor dexterity bonus
   if (instability === 'shaky') {
     strength *= 0.92;
   }
