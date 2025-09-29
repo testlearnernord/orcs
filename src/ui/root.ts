@@ -70,22 +70,12 @@ import {
 const RANK_ORDER: Rank[] = ['König', 'Spieler', 'Captain', 'Späher', 'Grunzer'];
 const MAX_COMPLETED_WARCALLS = 8;
 const RELATIONS_OVERLAY_ENABLED = true;
-const FILTER_DEFINITIONS: { key: FilterKey; label: string }[] = [
-  { key: 'loyalToKing', label: 'Loyal zum König' },
-  { key: 'rivalsOfKing', label: 'Rivale des Königs' },
-  { key: 'rivalries', label: 'Rivalitäten' },
-  { key: 'neutralRelations', label: 'Neutrale Beziehungen' },
-  { key: 'lowBravery', label: 'Niedriger Mut' },
-  { key: 'highGreed', label: 'Hohe Gier' },
-  { key: 'promotionCandidates', label: 'Aufstiegskandidaten' },
-  { key: 'coupRisk', label: 'Putschgefahr' }
-];
+// No filter definitions needed anymore - all filters removed
+const FILTER_DEFINITIONS: { key: FilterKey; label: string }[] = [];
+
 const SORT_OPTIONS: { value: UIFilters['sortBy']; label: string }[] = [
   { value: 'merit', label: 'Verdienst' },
   { value: 'level', label: 'Level' },
-  { value: 'loyalToKing', label: 'Loyalität zum König' },
-  { value: 'relations', label: 'Beziehungen aktiv' },
-  { value: 'recentChange', label: 'Letzte Warcall-Änderung' },
   { value: 'random', label: 'Zufall' }
 ];
 
@@ -601,38 +591,8 @@ export class NemesisUI {
 
     const bar = document.createElement('div');
     bar.className = 'filters-bar';
-    const pillContainer = document.createElement('div');
-    pillContainer.className = 'filters-bar__pills';
-    FILTER_DEFINITIONS.forEach(({ key, label }) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'filter-pill';
-      button.textContent = label;
-      button.addEventListener('click', () => this.toggleFilter(key));
-      button.setAttribute('aria-pressed', 'false');
-      pillContainer.appendChild(button);
-      this.filterButtons.set(key, button);
-    });
-    bar.appendChild(pillContainer);
-
-    // Add neutral relations toggle as per redesign requirements
-    const neutralToggle = document.createElement('div');
-    neutralToggle.className = 'neutral-relations-toggle';
-    const neutralCheckbox = document.createElement('input');
-    neutralCheckbox.type = 'checkbox';
-    neutralCheckbox.id = 'show-neutral-relations';
-    neutralCheckbox.checked = this.filters.getState().neutralRelations ?? false;
-    neutralCheckbox.addEventListener('change', () => {
-      this.toggleFilter('neutralRelations');
-      this.updateNeutralCounter();
-    });
-    const neutralLabel = document.createElement('label');
-    neutralLabel.htmlFor = 'show-neutral-relations';
-    neutralLabel.className = 'neutral-relations-label';
-    neutralLabel.innerHTML =
-      '• Neutrale Beziehungen anzeigen <span class="neutral-counter" id="neutral-counter">+0 Neutral</span>';
-    neutralToggle.append(neutralCheckbox, neutralLabel);
-    bar.appendChild(neutralToggle);
+    
+    // No filters anymore - filters have been removed according to issue requirements
 
     const sortWrapper = document.createElement('div');
     sortWrapper.className = 'filters-bar__sort';
@@ -881,7 +841,7 @@ export class NemesisUI {
     return (
       lastState.rank !== officer.rank ||
       lastState.name !== officer.name ||
-      lastState.level !== officer.level ||
+      lastState.stats.level !== officer.stats.level ||
       lastState.merit !== officer.merit ||
       lastState.traits.length !== officer.traits.length ||
       lastState.traits.some(
@@ -894,14 +854,16 @@ export class NemesisUI {
           rel.with !== officer.relationships[index].with ||
           rel.type !== officer.relationships[index].type
       ) ||
-      Math.abs(lastState.personality.gier - officer.personality.gier) > 0.001 ||
-      Math.abs(
-        lastState.personality.tapferkeit - officer.personality.tapferkeit
-      ) > 0.001 ||
-      Math.abs(
-        lastState.personality.loyalitaet - officer.personality.loyalitaet
-      ) > 0.001 ||
-      Math.abs(lastState.personality.stolz - officer.personality.stolz) > 0.001
+      // Check stats changes
+      lastState.stats.str !== officer.stats.str ||
+      lastState.stats.dex !== officer.stats.dex ||
+      lastState.stats.int !== officer.stats.int ||
+      lastState.stats.hp !== officer.stats.hp ||
+      lastState.stats.maxHp !== officer.stats.maxHp ||
+      lastState.stats.potential !== officer.stats.potential ||
+      // Check mood changes 
+      lastState.mood.ambition !== officer.mood.ambition ||
+      lastState.mood.loyalitaet !== officer.mood.loyalitaet
     );
   }
 
@@ -945,7 +907,8 @@ export class NemesisUI {
             existing.playFlip();
             this.lastRenderedOfficerState.set(officer.id, {
               ...officer,
-              personality: { ...officer.personality },
+              stats: { ...officer.stats },
+              mood: { ...officer.mood },
               relationships: [...officer.relationships],
               traits: [...officer.traits]
             });
@@ -961,7 +924,8 @@ export class NemesisUI {
           grid.appendChild(card.element);
           this.lastRenderedOfficerState.set(officer.id, {
             ...officer,
-            personality: { ...officer.personality },
+            stats: { ...officer.stats },
+            mood: { ...officer.mood },
             relationships: [...officer.relationships],
             traits: [...officer.traits]
           });
@@ -1021,7 +985,8 @@ export class NemesisUI {
             this.cards.set(officer.id, card);
             this.lastRenderedOfficerState.set(officer.id, {
               ...officer,
-              personality: { ...officer.personality },
+              stats: { ...officer.stats },
+              mood: { ...officer.mood },
               relationships: [...officer.relationships],
               traits: [...officer.traits]
             });
@@ -1034,7 +999,8 @@ export class NemesisUI {
               card.playFlip();
               this.lastRenderedOfficerState.set(officer.id, {
                 ...officer,
-                personality: { ...officer.personality },
+                stats: { ...officer.stats },
+                mood: { ...officer.mood },
                 relationships: [...officer.relationships],
                 traits: [...officer.traits]
               });

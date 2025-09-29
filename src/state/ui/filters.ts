@@ -3,24 +3,13 @@ import { EventBus } from '@state/eventBus';
 export type SortMode =
   | 'merit'
   | 'level'
-  | 'loyalToKing'
-  | 'relations'
-  | 'recentChange'
   | 'random';
 
 export interface UIFilters {
-  loyalToKing?: boolean;
-  rivalsOfKing?: boolean;
-  rivalries?: boolean;
-  neutralRelations?: boolean;
-  lowBravery?: boolean;
-  highGreed?: boolean;
-  promotionCandidates?: boolean;
-  coupRisk?: boolean;
   sortBy: SortMode;
 }
 
-export type FilterKey = Exclude<keyof UIFilters, 'sortBy'>;
+export type FilterKey = never; // No more filters
 
 interface FilterEvents extends Record<string, UIFilters> {
   change: UIFilters;
@@ -38,15 +27,7 @@ export class UIFilterStore extends EventBus<FilterEvents> {
   }
 
   toggle(key: FilterKey): void {
-    const next = {
-      ...this.state,
-      [key]: !this.state[key]
-    };
-    if (next[key] === false) {
-      delete next[key];
-    }
-    this.state = next;
-    this.emit('change', this.state);
+    // No filters to toggle anymore
   }
 
   setSort(sortBy: SortMode): void {
