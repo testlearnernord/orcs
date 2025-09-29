@@ -85,8 +85,6 @@ function sortOfficers(
     switch (sortBy) {
       case 'level':
         return b.stats.level - a.stats.level;
-      case 'random': // This case is handled above but included for completeness
-        return 0;
       case 'merit':
       default:
         return b.merit - a.merit;
