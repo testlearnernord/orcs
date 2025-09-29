@@ -1,4 +1,6 @@
 import type { EnhancedHighlight, HighlightDisplayOptions } from './types';
+import { AvatarView } from '@ui/officer/Avatar';
+import type { Officer } from '@sim/types';
 
 interface CinematicHighlightPortalOptions {
   onAdvance: () => void;
@@ -285,16 +287,23 @@ export class CinematicHighlightPortal {
   }
 
   private createOfficerCard(
-    officer: any,
+    officer: Officer,
     role: 'primary' | 'secondary'
   ): HTMLElement {
     const card = document.createElement('div');
     card.className = `cinematic-highlight-portal__officer-card cinematic-highlight-portal__officer-card--${role}`;
 
-    const portrait = document.createElement('div');
-    portrait.className = 'cinematic-highlight-portal__officer-portrait';
-    // Note: Portrait rendering would integrate with existing portrait system
-    portrait.textContent = officer.name.charAt(0).toUpperCase();
+    // Use proper portrait instead of placeholder
+    const portraitContainer = document.createElement('div');
+    portraitContainer.className = 'cinematic-highlight-portal__officer-portrait';
+    
+    const avatarView = new AvatarView({
+      officer: officer,
+      size: 64,
+      className: 'cinematic-highlight-portal__avatar'
+    });
+    
+    portraitContainer.appendChild(avatarView.element);
 
     const info = document.createElement('div');
     info.className = 'cinematic-highlight-portal__officer-info';
@@ -307,7 +316,7 @@ export class CinematicHighlightPortal {
 
     info.appendChild(name);
     info.appendChild(rank);
-    card.appendChild(portrait);
+    card.appendChild(portraitContainer);
     card.appendChild(info);
 
     return card;
@@ -334,12 +343,8 @@ export class CinematicHighlightPortal {
     this.root.classList.remove('is-leaving');
     window.addEventListener('keydown', this.handleKeydown);
 
-    // Auto-advance after duration if specified
-    if (this.current?.duration) {
-      this.animationTimeout = window.setTimeout(() => {
-        this.options.onAdvance();
-      }, this.current.duration);
-    }
+    // REMOVED: Auto-advance functionality to ensure manual control
+    // Highlights must be advanced manually by the user
   }
 
   private hide(): void {

@@ -4,10 +4,8 @@ import type { WarcallEntry } from '@ui/components/warcalls/types';
 import { AvatarView } from '@ui/officer/Avatar';
 
 const PHASES: { key: string; label: string }[] = [
-  { key: 'prep', label: 'Vorbereitung' },
-  { key: 'travel', label: 'Anreise' },
-  { key: 'event', label: 'Konflikt' },
-  { key: 'resolution', label: 'Auflösung' }
+  { key: 'START', label: 'Ankündigung' },
+  { key: 'ENDE', label: 'Auflösung' }
 ];
 
 function roleFor(officer: Officer, entry: WarcallEntry): string {
