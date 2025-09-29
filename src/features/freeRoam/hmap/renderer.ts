@@ -137,15 +137,15 @@ export function drawOfficerIcons(
   ctx.translate(-camera.x, -camera.y);
 
   for (const officer of officers) {
-    // Draw officer icon (simple circle for now)
+    // Draw officer icon (increased size for better visibility)
     ctx.fillStyle = '#4a90e2';
     ctx.beginPath();
-    ctx.arc(officer.x, officer.y, 8, 0, Math.PI * 2);
+    ctx.arc(officer.x, officer.y, 16, 0, Math.PI * 2);
     ctx.fill();
 
     // Draw border
     ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.stroke();
 
     // Draw name label
@@ -190,21 +190,21 @@ export function drawPlayer(
   ctx.scale(camera.scale, camera.scale);
   ctx.translate(-camera.x, -camera.y);
 
-  // Draw player icon (larger circle with different color)
+  // Draw player icon (increased size for better visibility)
   ctx.fillStyle = '#e74c3c';
   ctx.beginPath();
-  ctx.arc(playerX, playerY, 10, 0, Math.PI * 2);
+  ctx.arc(playerX, playerY, 18, 0, Math.PI * 2);
   ctx.fill();
 
   // Draw border
   ctx.strokeStyle = 'white';
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 4;
   ctx.stroke();
 
   // Draw inner dot
   ctx.fillStyle = 'white';
   ctx.beginPath();
-  ctx.arc(playerX, playerY, 3, 0, Math.PI * 2);
+  ctx.arc(playerX, playerY, 5, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
