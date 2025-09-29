@@ -2244,7 +2244,7 @@ button:disabled {
 .free-roam__marker--player .free-roam__marker-icon {
   background: rgba(16, 185, 129, 0.95);
   border: 2px solid rgba(16, 185, 129, 0.3);
-  font-size: 1.1rem;
+  font-size: 1.3rem; /* Increased from 1.1rem */
   animation: playerPulse 2s infinite;
 }
 
@@ -2305,8 +2305,8 @@ button:disabled {
 }
 
 .free-roam__marker-icon {
-  width: 34px;
-  height: 34px;
+  width: 42px;  /* Increased from 34px */
+  height: 42px; /* Increased from 34px */
   border-radius: 50%;
   display: inline-flex;
   align-items: center;

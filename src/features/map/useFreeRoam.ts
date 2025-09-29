@@ -108,7 +108,8 @@ function distance(a: MapCoordinate, b: MapCoordinate): number {
 function moveTowards(
   from: MapCoordinate,
   to: MapCoordinate,
-  mapSize: number
+  mapSize: number,
+  map: WorldMap
 ): MapCoordinate {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -128,7 +129,16 @@ function moveTowards(
   newY = Math.max(0, Math.min(mapSize - 1, newY));
 
   const index = newY * mapSize + newX;
-  return { x: newX, y: newY, index, biome: from.biome };
+  const biome = map.tiles[index] ?? 'plains';
+  
+  // Collision detection - officers also can't move through blocked terrain
+  const blockedBiomes: Biome[] = ['river', 'mountains', 'volcano'];
+  if (blockedBiomes.includes(biome)) {
+    // Can't move to blocked terrain, stay at current position
+    return from;
+  }
+
+  return { x: newX, y: newY, index, biome };
 }
 
 function generateProceduralPOIs(map: WorldMap, rng: RNG): ProceduralPOI[] {
@@ -340,7 +350,7 @@ function computeSnapshot(
       if (target) {
         const dist = distance(coordinate, target);
         if (dist > 1) {
-          coordinate = moveTowards(coordinate, target, map.size);
+          coordinate = moveTowards(coordinate, target, map.size, map);
           state = 'moving';
         } else {
           // Reached target
@@ -420,9 +430,10 @@ export function useFreeRoam(
   const idleMs = options.idleMs ?? DEFAULT_IDLE_MS;
 
   const map = useMemo(() => {
-    const initial = store.getState();
-    return generateWorldMap(initial.seed, mapSize);
-  }, [store, mapSize]);
+    // Use a fixed seed to create the same unique, beautiful map every time
+    const fixedSeed = "UniqueOrcRealm2024";
+    return generateWorldMap(fixedSeed, mapSize);
+  }, [mapSize]);
 
   const rng = useMemo(() => {
     const initial = store.getState();
@@ -483,6 +494,18 @@ export function useFreeRoam(
 
         const index = newY * map.size + newX;
         const biome = map.tiles[index] ?? 'plains';
+        
+        // Collision detection - block movement into impassable terrain
+        const blockedBiomes: Biome[] = ['river', 'mountains', 'volcano'];
+        if (blockedBiomes.includes(biome)) {
+          // Can't move to blocked terrain, return previous position
+          return prev;
+        }
+
+        // Auto-advance cycle occasionally when moving (5% chance)
+        if (Math.random() < 0.05) {
+          store.tick();
+        }
 
         return {
           x: newX,
@@ -493,7 +516,7 @@ export function useFreeRoam(
         };
       });
     },
-    [map]
+    [map, store]
   );
 
   // Update AI every 2 seconds

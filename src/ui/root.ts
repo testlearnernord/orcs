@@ -412,17 +412,11 @@ export class NemesisUI {
     this.freeRoamContainer.removeAttribute('aria-hidden');
 
     // Get map parameter from URL - use procedural maps by default
-    const mapId =
-      typeof window !== 'undefined'
-        ? new URLSearchParams(window.location.search).get('map')
-        : null;
-
     this.freeRoamRoot.render(
       createElement(FreeRoamView, {
         store: this.store,
         onRequestClose: () => this.modeStore.setMode('spectate'),
-        onHighlightHostChange: (host) => this.setFreeRoamHighlightHost(host),
-        mapId: mapId || undefined
+        onHighlightHostChange: (host) => this.setFreeRoamHighlightHost(host)
       })
     );
   }
