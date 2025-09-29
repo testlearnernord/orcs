@@ -1,7 +1,8 @@
 import type { Officer } from '@sim/types';
 import { bezierD, edgeAnchors } from '@ui/overlay/anchors';
 
-export type OverlayRelationType = 'ally' | 'rival' | 'hierarchy';
+export type OverlayRelationType = 'ally' | 'rival';
+// Removed 'hierarchy' - no more gray connection lines
 
 export interface RelationEdge {
   id: string;
@@ -30,14 +31,14 @@ interface TooltipContext {
 
 const TYPE_LABEL: Record<OverlayRelationType, string> = {
   ally: 'Allianz',
-  rival: 'Rivalität',
-  hierarchy: 'Befehlskette'
+  rival: 'Rivalität'
+  // Removed hierarchy - no more gray connection lines
 };
 
 const EDGE_COLORS: Record<OverlayRelationType, string> = {
   ally: 'var(--line-ally)',
-  rival: 'var(--line-rival)',
-  hierarchy: 'var(--line-hierarchy)'
+  rival: 'var(--line-rival)'
+  // Removed hierarchy - no more gray connection lines
 };
 
 const DASH_PATTERN: Partial<Record<OverlayRelationType, string>> = {
@@ -46,8 +47,8 @@ const DASH_PATTERN: Partial<Record<OverlayRelationType, string>> = {
 
 const TYPE_PRIORITY: Record<OverlayRelationType, number> = {
   rival: 4,
-  ally: 3,
-  hierarchy: 1
+  ally: 3
+  // Removed hierarchy - no more gray connection lines
 };
 
 const DEFAULT_DENSITY = 6;
@@ -193,42 +194,7 @@ export function buildRelationEdges(
     });
   });
 
-  const rankOrder: Officer['rank'][] = [
-    'König',
-    'Spieler',
-    'Captain',
-    'Späher',
-    'Grunzer'
-  ];
-  const byRank = new Map<Officer['rank'], Officer[]>(
-    rankOrder.map((rank) => [rank, []])
-  );
-  officers.forEach((officer) => {
-    const list = byRank.get(officer.rank);
-    list?.push(officer);
-  });
-
-  rankOrder.forEach((rank, index) => {
-    if (index === 0) return;
-    const candidates = byRank.get(rank) ?? [];
-    const superiors = rankOrder.slice(0, index);
-    candidates.forEach((officer) => {
-      for (const superiorRank of superiors) {
-        const superiorList = byRank.get(superiorRank) ?? [];
-        if (superiorList.length === 0) continue;
-        const superior = superiorList[0];
-        edges.push({
-          id: `hierarchy:${officer.id}->${superior.id}`,
-          fromId: officer.id,
-          toId: superior.id,
-          type: 'hierarchy',
-          strength: 0.3,
-          sinceCycle: currentCycle
-        });
-        break;
-      }
-    });
-  });
+  // Removed hierarchy edge generation - no more gray connection lines for command structure
 
   return edges;
 }
@@ -310,13 +276,13 @@ export class RelationsOverlay {
   private readonly visibleCards = new Set<string>();
   private readonly activeTypes = new Set<OverlayRelationType>([
     'ally',
-    'rival',
-    'hierarchy'
+    'rival'
+    // Removed hierarchy - no more gray connection lines
   ]);
   private lensMask = new Set<OverlayRelationType>([
     'ally',
-    'rival',
-    'hierarchy'
+    'rival'
+    // Removed hierarchy - no more gray connection lines
   ]);
   private focusId: string | null = null;
   private hoverId: string | null = null;
@@ -492,15 +458,8 @@ export class RelationsOverlay {
 
     const toggles = document.createElement('div');
     toggles.className = 'relations-overlay__toggles';
-    (
-      [
-        'ally',
-        'friend',
-        'rival',
-        'bloodoath',
-        'hierarchy'
-      ] as OverlayRelationType[]
-    ).forEach((type) => {
+    // Only show ally and rival relationship types - removed hierarchy and non-existent types
+    (['ally', 'rival'] as OverlayRelationType[]).forEach((type) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.textContent = TYPE_LABEL[type];

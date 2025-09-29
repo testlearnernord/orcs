@@ -37,7 +37,6 @@ export const PROMOTION_THRESHOLDS: Record<
 };
 
 export const TRAIT_COMBAT_WEIGHTS: Record<Trait, number> = {
-  Berserker: 0.45,
   Archer: 0.35,
   Trapper: 0.25
 };

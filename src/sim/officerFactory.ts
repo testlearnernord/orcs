@@ -55,9 +55,13 @@ function randomName(rng: RNG): string {
 }
 
 function randomTraits(rng: RNG): Trait[] {
-  const all: Trait[] = ['Berserker', 'Archer', 'Trapper'];
-  // For now, give each officer one primary archetype
-  return [rng.pick(all)];
+  const all: Trait[] = ['Archer', 'Trapper'];
+  // Officers can have either archetype trait or no trait
+  if (rng.next() < 0.6) {
+    // 60% chance to have a trait
+    return [rng.pick(all)];
+  }
+  return [];
 }
 
 function randomPotential(rng: RNG): PotentialRating {

@@ -1,6 +1,6 @@
 export type OrcId = string;
 
-export type Trait = 'Berserker' | 'Archer' | 'Trapper';
+export type Trait = 'Archer' | 'Trapper';
 
 export type Rank = 'König' | 'Spieler' | 'Captain' | 'Späher' | 'Grunzer';
 

@@ -168,8 +168,8 @@ describe('lensMaskForFilters', () => {
     const mask = lensMaskForFilters(baseFilters);
     expect(Array.from(mask).sort()).toEqual([
       'ally',
-      'hierarchy',
       'rival'
+      // Removed hierarchy - no more gray connection lines
     ]);
   });
 
@@ -181,8 +181,8 @@ describe('lensMaskForFilters', () => {
     const mask = lensMaskForFilters({ ...baseFilters });
     expect(Array.from(mask).sort()).toEqual([
       'ally',
-      'hierarchy',
       'rival'
+      // Removed hierarchy - no more gray connection lines
     ]);
   });
 });

@@ -30,11 +30,11 @@ function formatStat(value: number): string {
 }
 
 function deriveArchetype(officer: Officer): string {
-  // Use primary trait (archetype) directly
+  // Use primary trait (archetype) directly, or default for those without traits
   if (officer.traits.length > 0) {
-    return officer.traits[0]; // Berserker, Archer, or Trapper
+    return officer.traits[0]; // Archer or Trapper
   }
-  return 'Unbekannt';
+  return 'Krieger'; // Default for officers without specific traits (former Berserkers)
 }
 
 function deriveTitle(officer: Officer): string {

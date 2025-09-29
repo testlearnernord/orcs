@@ -8,8 +8,8 @@ import type { UIFilters } from '@state/ui/filters';
 
 const ALL_RELATION_TYPES: OverlayRelationType[] = [
   'ally',
-  'rival',
-  'hierarchy'
+  'rival'
+  // Removed hierarchy - no more gray connection lines
 ];
 
 function officerHasRelation(
