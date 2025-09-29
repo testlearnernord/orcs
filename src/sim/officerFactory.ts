@@ -115,9 +115,16 @@ function randomStats(
     (10 + rng.int(0, baseStatRange)) * potentialMultiplier
   );
 
+  // Calculate experience based on level
+  const baseExpForLevel = (level - 1) * 100; // Base 100 XP per level
+  const exp = Math.round(baseExpForLevel + rng.int(0, 50)); // Some random progress
+  const expToNext = level * 100; // Next level requires level * 100 XP
+
   return {
     potential,
     level,
+    exp,
+    expToNext,
     hp: maxHp,
     maxHp,
     str,

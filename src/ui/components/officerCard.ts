@@ -57,6 +57,8 @@ export class OfficerCard {
   private readonly footer: HTMLElement;
   private readonly statBars = new Map<StatKey, HTMLDivElement>();
   private readonly statValues = new Map<StatKey, HTMLElement>();
+  private readonly expFill: HTMLDivElement;
+  private readonly expText: HTMLElement;
   private previousRect: DOMRect | null = null;
 
   constructor(officer: Officer, options: OfficerCardOptions) {
@@ -110,6 +112,26 @@ export class OfficerCard {
     this.traitContainer = document.createElement('div');
     this.traitContainer.className = 'officer-card__traits';
     content.appendChild(this.traitContainer);
+
+    // Add experience bar
+    const expContainer = document.createElement('div');
+    expContainer.className = 'officer-card__exp';
+    const expLabel = document.createElement('span');
+    expLabel.className = 'officer-card__exp-label';
+    expLabel.textContent = 'EXP';
+    const expBar = document.createElement('div');
+    expBar.className = 'officer-card__exp-bar';
+    const expFill = document.createElement('div');
+    expFill.className = 'officer-card__exp-fill';
+    expBar.appendChild(expFill);
+    const expText = document.createElement('span');
+    expText.className = 'officer-card__exp-text';
+    expContainer.append(expLabel, expBar, expText);
+    content.appendChild(expContainer);
+
+    // Store references for updates
+    this.expFill = expFill;
+    this.expText = expText;
 
     const stats = document.createElement('div');
     stats.className = 'officer-card__stats';
@@ -261,12 +283,22 @@ export class OfficerCard {
       pill.textContent = `${RELATION_LABEL[type]} · ${count}`;
       this.footer.appendChild(pill);
     });
-    if (this.footer.childElementCount === 0) {
-      const empty = document.createElement('span');
-      empty.className = 'officer-card__status officer-card__status--empty';
-      empty.textContent = 'Keine Bindungen';
-      this.footer.appendChild(empty);
-    }
+    // Remove "Keine Bindungen" text as it's redundant when officers have 0 allies and 0 rivals
+  }
+
+  private updateExperience(officer: Officer): void {
+    const { exp, expToNext } = officer.stats;
+    const percentage = Math.min(100, Math.max(0, (exp / expToNext) * 100));
+    
+    this.expFill.style.width = `${percentage}%`;
+    this.expText.textContent = `${exp}/${expToNext}`;
+    
+    // Add animation class if XP changed
+    this.expFill.classList.add('is-animating');
+    requestAnimationFrame(() => {
+      const handle = () => this.expFill.classList.remove('is-animating');
+      this.expFill.addEventListener('transitionend', handle, { once: true });
+    });
   }
 
   captureBounds(): void {
@@ -293,6 +325,7 @@ export class OfficerCard {
     });
     this.updateMeta(officer);
     this.updateTraits(officer);
+    this.updateExperience(officer);
     this.updateRelationships(officer);
     this.updateStats(officer, previous);
   }

@@ -12,7 +12,8 @@ import {
   WarcallResolutionModule,
   DiplomacyModule,
   PromotionsModule,
-  NewGruntsModule
+  NewGruntsModule,
+  LevelUpModule
 } from './modules/index';
 
 /**
@@ -63,6 +64,7 @@ export class HighlightSystem extends EventBus<HighlightSystemEvents> {
       new OfficerDeathModule(), // Priority 1
       new WarcallResolutionModule(), // Priority 2
       new DiplomacyModule(), // Priority 3
+      new LevelUpModule(), // Priority 3.5
       new PromotionsModule(), // Priority 4
       new NewGruntsModule() // Priority 5
     ];

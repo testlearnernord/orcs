@@ -261,12 +261,7 @@ export class OfficerCard {
       pill.textContent = `${RELATION_LABEL[type]} · ${count}`;
       this.footer.appendChild(pill);
     });
-    if (this.footer.childElementCount === 0) {
-      const empty = document.createElement('span');
-      empty.className = 'officer-card__status officer-card__status--empty';
-      empty.textContent = 'Keine Bindungen';
-      this.footer.appendChild(empty);
-    }
+    // Remove "Keine Bindungen" text as it's redundant when officers have 0 allies and 0 rivals
   }
 
   captureBounds(): void {

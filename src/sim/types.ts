@@ -15,6 +15,8 @@ export type PotentialRating =
 export interface OfficerStats {
   potential: PotentialRating;
   level: number;
+  exp: number; // Current experience points
+  expToNext: number; // Experience needed for next level
   hp: number;
   maxHp: number;
   str: number; // Stärke - wichtig für Berserker
