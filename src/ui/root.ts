@@ -158,14 +158,10 @@ export class NemesisUI {
     });
     this.warcallModal.setMode(this.modeState.mode);
 
-    // NEW: Initialize new cinematic highlight portal with enhanced options
+    // NEW: Initialize new cinematic highlight portal with simplified options
     this.cinematicPortal = new CinematicHighlightPortal({
       onAdvance: () => this.highlightSystem.advance(),
-      onSkip: () => this.highlightSystem.skip(),
-      onSkipAll: () => this.highlightSystem.clearAll(),
-      onToggleEnabled: (enabled) =>
-        this.highlightSystem.updateOptions({ enabled }),
-      onViewLog: () => this.focusDigestHistory()
+      onSkipAll: () => this.highlightSystem.clearAll()
     });
 
     this.filters.on('change', () => {

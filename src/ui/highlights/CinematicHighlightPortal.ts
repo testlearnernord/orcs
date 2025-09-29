@@ -2,10 +2,7 @@ import type { EnhancedHighlight, HighlightDisplayOptions } from './types';
 
 interface CinematicHighlightPortalOptions {
   onAdvance: () => void;
-  onSkip: () => void;
   onSkipAll: () => void;
-  onToggleEnabled: (enabled: boolean) => void;
-  onViewLog: () => void;
 }
 
 /**
@@ -27,11 +24,8 @@ export class CinematicHighlightPortal {
   private readonly description: HTMLParagraphElement;
   private readonly cycle: HTMLSpanElement;
   private readonly controlsContainer: HTMLDivElement;
-  private readonly enabledCheckbox: HTMLInputElement;
   private readonly advanceBtn: HTMLButtonElement;
-  private readonly skipBtn: HTMLButtonElement;
   private readonly skipAllBtn: HTMLButtonElement;
-  private readonly logBtn: HTMLButtonElement;
 
   private current: EnhancedHighlight | null = null;
   private hideTimer: number | null = null;
@@ -48,11 +42,8 @@ export class CinematicHighlightPortal {
     this.description = this.createDescription();
     this.cycle = this.createCycle();
     this.controlsContainer = this.createControlsContainer();
-    this.enabledCheckbox = this.createEnabledCheckbox();
     this.advanceBtn = this.createAdvanceButton();
-    this.skipBtn = this.createSkipButton();
     this.skipAllBtn = this.createSkipAllButton();
-    this.logBtn = this.createLogButton();
 
     this.assembleElements();
     this.bindEvents();
@@ -118,43 +109,13 @@ export class CinematicHighlightPortal {
     return container;
   }
 
-  private createEnabledCheckbox(): HTMLInputElement {
-    const container = document.createElement('label');
-    container.className = 'cinematic-highlight-portal__checkbox';
-
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.checked = true;
-    checkbox.addEventListener('change', () => {
-      this.options.onToggleEnabled(checkbox.checked);
-    });
-
-    const label = document.createElement('span');
-    label.textContent = 'Highlights anzeigen';
-
-    container.appendChild(checkbox);
-    container.appendChild(label);
-    this.controlsContainer.appendChild(container);
-
-    return checkbox;
-  }
-
   private createAdvanceButton(): HTMLButtonElement {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className =
       'cinematic-highlight-portal__button cinematic-highlight-portal__button--primary';
-    btn.textContent = 'Weiter';
+    btn.textContent = 'Nächstes Highlight';
     btn.addEventListener('click', () => this.options.onAdvance());
-    return btn;
-  }
-
-  private createSkipButton(): HTMLButtonElement {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'cinematic-highlight-portal__button';
-    btn.textContent = 'Überspringen';
-    btn.addEventListener('click', () => this.options.onSkip());
     return btn;
   }
 
@@ -163,17 +124,8 @@ export class CinematicHighlightPortal {
     btn.type = 'button';
     btn.className =
       'cinematic-highlight-portal__button cinematic-highlight-portal__button--skip-all';
-    btn.textContent = 'Alle überspringen';
+    btn.textContent = 'Alle Überspringen';
     btn.addEventListener('click', () => this.options.onSkipAll());
-    return btn;
-  }
-
-  private createLogButton(): HTMLButtonElement {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'cinematic-highlight-portal__button';
-    btn.textContent = 'Im Log ansehen';
-    btn.addEventListener('click', () => this.options.onViewLog());
     return btn;
   }
 
@@ -188,7 +140,7 @@ export class CinematicHighlightPortal {
 
     const actions = document.createElement('div');
     actions.className = 'cinematic-highlight-portal__actions';
-    actions.append(this.advanceBtn, this.skipBtn, this.skipAllBtn, this.logBtn);
+    actions.append(this.advanceBtn, this.skipAllBtn);
 
     this.controlsContainer.appendChild(actions);
 
@@ -220,8 +172,6 @@ export class CinematicHighlightPortal {
     });
 
     if (highlight === this.current) return;
-
-    this.enabledCheckbox.checked = options.enabled;
 
     if (!highlight || !options.enabled) {
       console.log(
@@ -334,10 +284,10 @@ export class CinematicHighlightPortal {
   }
 
   private getRelationshipIcon(before: string, after: string): string {
-    if (before === 'neutral' && after === 'rival') return '→ ⚔️';
-    if (before === 'rival' && after === 'neutral') return '⚔️ → 🤝';
-    if (before === 'neutral' && after === 'ally') return '→ 🤝';
-    if (before === 'ally' && after === 'neutral') return '🤝 → ⚪';
+    if (before === 'none' && after === 'rival') return '→ ⚔️';
+    if (before === 'rival' && after === 'none') return '⚔️ → 🤝';
+    if (before === 'none' && after === 'ally') return '→ 🤝';
+    if (before === 'ally' && after === 'none') return '🤝 → ⚪';
     return '↔️';
   }
 
