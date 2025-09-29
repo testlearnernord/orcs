@@ -550,8 +550,8 @@ export function FreeRoamView({
                       key={entry.warcall.id}
                       className={`free-roam__marker free-roam__marker--warcall free-roam__marker--${entry.warcall.phase}`}
                       style={{
-                        left: `${(entry.x / state.map.pixelSize.width) * 100}%`,
-                        top: `${(entry.y / state.map.pixelSize.height) * 100}%`
+                        left: `${state.map ? (entry.x / state.map.pixelSize.width) * 100 : 50}%`,
+                        top: `${state.map ? (entry.y / state.map.pixelSize.height) * 100 : 50}%`
                       }}
                       title={`${entry.warcall.kind} — ${entry.warcall.location || "Grum'thak"}`}
                     >
@@ -565,8 +565,8 @@ export function FreeRoamView({
                       key={entry.officer.id}
                       className={`free-roam__marker free-roam__marker--officer free-roam__marker--officer-${entry.state}`}
                       style={{
-                        left: `${(entry.x / state.map.pixelSize.width) * 100}%`,
-                        top: `${(entry.y / state.map.pixelSize.height) * 100}%`
+                        left: `${state.map ? (entry.x / state.map.pixelSize.width) * 100 : 50}%`,
+                        top: `${state.map ? (entry.y / state.map.pixelSize.height) * 100 : 50}%`
                       }}
                       title={`${entry.officer.name} in Grum'thak • ${entry.state.toUpperCase()}`}
                     >
