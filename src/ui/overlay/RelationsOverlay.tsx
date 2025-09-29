@@ -1,7 +1,7 @@
 import type { Officer } from '@sim/types';
 import { bezierD, edgeAnchors } from '@ui/overlay/anchors';
 
-export type OverlayRelationType = 'ally' | 'rival' | 'neutral' | 'hierarchy';
+export type OverlayRelationType = 'ally' | 'rival' | 'hierarchy';
 
 export interface RelationEdge {
   id: string;
@@ -31,25 +31,22 @@ interface TooltipContext {
 const TYPE_LABEL: Record<OverlayRelationType, string> = {
   ally: 'Allianz',
   rival: 'Rivalität',
-  neutral: 'Neutral',
   hierarchy: 'Befehlskette'
 };
 
 const EDGE_COLORS: Record<OverlayRelationType, string> = {
   ally: 'var(--line-ally)',
   rival: 'var(--line-rival)',
-  neutral: 'var(--line-neutral)',
   hierarchy: 'var(--line-hierarchy)'
 };
 
 const DASH_PATTERN: Partial<Record<OverlayRelationType, string>> = {
-  neutral: '4 2' // Make neutral relationships dashed
+  // No dashed patterns needed since neutral is removed
 };
 
 const TYPE_PRIORITY: Record<OverlayRelationType, number> = {
   rival: 4,
   ally: 3,
-  neutral: 2,
   hierarchy: 1
 };
 
@@ -68,9 +65,9 @@ function mapRelationType(
       return 'ally';
     case 'RIVAL':
       return 'rival';
-    case 'NEUTRAL':
     default:
-      return 'neutral';
+      // This case should never happen since NEUTRAL is removed
+      throw new Error(`Unknown relationship type: ${type}`);
   }
 }
 
@@ -182,9 +179,7 @@ export function buildRelationEdges(
       const strength =
         relation.type === 'RIVAL'
           ? 0.75
-          : relation.type === 'ALLY'
-            ? 0.65
-            : 0.3; // NEUTRAL gets lower strength
+          : 0.65; // ALLY relationship strength
       edges.push({
         id: key,
         fromId: officer.id,
@@ -316,13 +311,11 @@ export class RelationsOverlay {
   private readonly activeTypes = new Set<OverlayRelationType>([
     'ally',
     'rival',
-    'neutral',
     'hierarchy'
   ]);
   private lensMask = new Set<OverlayRelationType>([
     'ally',
     'rival',
-    'neutral',
     'hierarchy'
   ]);
   private focusId: string | null = null;

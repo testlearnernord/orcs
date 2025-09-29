@@ -9,7 +9,6 @@ import type { UIFilters } from '@state/ui/filters';
 const ALL_RELATION_TYPES: OverlayRelationType[] = [
   'ally',
   'rival',
-  'neutral',
   'hierarchy'
 ];
 

@@ -662,21 +662,6 @@ export class NemesisUI {
     this.filters.setSort(sortBy);
   }
 
-  private updateNeutralCounter(): void {
-    const counterEl = document.getElementById('neutral-counter');
-    if (!counterEl) return;
-
-    const state = this.store.getState();
-    let neutralCount = 0;
-    state.officers.forEach((officer) => {
-      neutralCount += officer.relationships.filter(
-        (rel) => rel.type === 'NEUTRAL'
-      ).length;
-    });
-
-    counterEl.textContent = `+${neutralCount} Neutral`;
-  }
-
   private registerUIEvents(app: HTMLElement): void {
     app
       .querySelector<HTMLButtonElement>('button[data-action="cycle"]')
@@ -1058,8 +1043,7 @@ export class NemesisUI {
       this.relations.setEdges(maskedEdges, state.cycle);
     }
 
-    // Update neutral relations counter
-    this.updateNeutralCounter();
+    // Neutral relationships removed - no longer need counter
   }
 
   private hierarchyContainer: HTMLElement | null = null;

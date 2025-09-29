@@ -94,9 +94,9 @@ export function seedSpawnRelationships(
     const partner = rng.pick(others);
     const roll = rng.next();
     let type: RelationshipType | undefined;
-    if (roll < 0.15) type = 'RIVAL';
-    else if (roll < 0.45) type = 'ALLY';
-    else if (roll < 0.7) type = 'NEUTRAL';
+    if (roll < 0.3) type = 'RIVAL';
+    else if (roll < 0.6) type = 'ALLY';
+    // Everything else is neutral (no relationship created)
 
     if (!type) continue;
 

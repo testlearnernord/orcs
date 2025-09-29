@@ -18,19 +18,17 @@ const STAT_LABEL: Record<StatKey, string> = {
   hp: 'Lebenspunkte'
 };
 
-const RELATION_ORDER: RelationshipType[] = ['ALLY', 'RIVAL', 'NEUTRAL'];
+const RELATION_ORDER: RelationshipType[] = ['ALLY', 'RIVAL'];
 
 // Redesign: Use German labels and icons as per issue #158
 const RELATION_LABEL: Record<RelationshipType, string> = {
   ALLY: '🤝 Ally',
-  RIVAL: '⚔️ Rivale',
-  NEUTRAL: '• Neutral'
+  RIVAL: '⚔️ Rivale'
 };
 
 const RELATION_CLASS: Record<RelationshipType, string> = {
   ALLY: 'ally',
-  RIVAL: 'rival',
-  NEUTRAL: 'neutral'
+  RIVAL: 'rival'
 };
 
 type RankSlug = 'king' | 'player' | 'captain' | 'scout' | 'grunt';
@@ -248,8 +246,6 @@ export class OfficerCard {
       this.element.classList.add('has-rival-relation');
     } else if (counts.get('ALLY')) {
       this.element.classList.add('has-ally-relation');
-    } else if (counts.get('NEUTRAL')) {
-      this.element.classList.add('has-neutral-relation');
     }
 
     this.footer.innerHTML = '';

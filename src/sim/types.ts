@@ -29,7 +29,7 @@ export interface OfficerMood {
 
 export type OfficerStatus = 'ALIVE' | 'DEAD';
 
-export type RelationshipType = 'ALLY' | 'RIVAL' | 'NEUTRAL';
+export type RelationshipType = 'ALLY' | 'RIVAL';
 
 export interface Relationship {
   with: OrcId;
