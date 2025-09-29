@@ -4,27 +4,27 @@ export type Trait = 'Berserker' | 'Archer' | 'Trapper';
 
 export type Rank = 'König' | 'Spieler' | 'Captain' | 'Späher' | 'Grunzer';
 
-export type PotentialRating = 
-  | 'Unbrauchbar'    // rot - red
-  | 'Dumm'           // orange
-  | 'Normal'         // weiß - white  
-  | 'Fähig'          // grün - green
+export type PotentialRating =
+  | 'Unbrauchbar' // rot - red
+  | 'Dumm' // orange
+  | 'Normal' // weiß - white
+  | 'Fähig' // grün - green
   | 'Überdurchschnittlich' // blau - blue
-  | 'Genie';         // lila - purple
+  | 'Genie'; // lila - purple
 
 export interface OfficerStats {
   potential: PotentialRating;
   level: number;
   hp: number;
   maxHp: number;
-  str: number;  // Stärke - wichtig für Berserker
-  dex: number;  // Geschicklichkeit - wichtig für Archer  
-  int: number;  // Intelligenz - wichtig für Trapper
+  str: number; // Stärke - wichtig für Berserker
+  dex: number; // Geschicklichkeit - wichtig für Archer
+  int: number; // Intelligenz - wichtig für Trapper
 }
 
 export interface OfficerMood {
-  loyalitaet?: number;  // Loyalität zum König (König hat keinen Wert)
-  ambition: string;     // Mittelfristiges Ziel/Verhalten
+  loyalitaet?: number; // Loyalität zum König (König hat keinen Wert)
+  ambition: string; // Mittelfristiges Ziel/Verhalten
 }
 
 export type OfficerStatus = 'ALIVE' | 'DEAD';

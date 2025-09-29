@@ -1,5 +1,13 @@
 import { RNG } from '@sim/rng';
-import type { Memory, Officer, OfficerStats, OfficerMood, PotentialRating, Rank, Trait } from '@sim/types';
+import type {
+  Memory,
+  Officer,
+  OfficerStats,
+  OfficerMood,
+  PotentialRating,
+  Rank,
+  Trait
+} from '@sim/types';
 
 const NAME_PREFIX = [
   'Bog',
@@ -55,7 +63,7 @@ function randomTraits(rng: RNG): Trait[] {
 function randomPotential(rng: RNG): PotentialRating {
   const potentials: PotentialRating[] = [
     'Unbrauchbar',
-    'Dumm', 
+    'Dumm',
     'Normal',
     'Fähig',
     'Überdurchschnittlich',
@@ -74,29 +82,39 @@ function randomPotential(rng: RNG): PotentialRating {
   return 'Normal';
 }
 
-function randomStats(rng: RNG, rank: Rank, potential: PotentialRating): OfficerStats {
+function randomStats(
+  rng: RNG,
+  rank: Rank,
+  potential: PotentialRating
+): OfficerStats {
   const [minLevel, maxLevel] = LEVEL_RANGE[rank];
   const level = rng.int(minLevel, maxLevel);
-  
+
   // Base HP calculation
   const baseHp = 50 + level * 10;
   const maxHp = baseHp + rng.int(-5, 15);
-  
+
   // Base stats influenced by potential
   const potentialMultiplier = {
-    'Unbrauchbar': 0.5,
-    'Dumm': 0.7,
-    'Normal': 1.0,
-    'Fähig': 1.3,
-    'Überdurchschnittlich': 1.6,
-    'Genie': 2.0
+    Unbrauchbar: 0.5,
+    Dumm: 0.7,
+    Normal: 1.0,
+    Fähig: 1.3,
+    Überdurchschnittlich: 1.6,
+    Genie: 2.0
   }[potential];
-  
+
   const baseStatRange = 20 + level * 3;
-  const str = Math.round((10 + rng.int(0, baseStatRange)) * potentialMultiplier);
-  const dex = Math.round((10 + rng.int(0, baseStatRange)) * potentialMultiplier);
-  const int = Math.round((10 + rng.int(0, baseStatRange)) * potentialMultiplier);
-  
+  const str = Math.round(
+    (10 + rng.int(0, baseStatRange)) * potentialMultiplier
+  );
+  const dex = Math.round(
+    (10 + rng.int(0, baseStatRange)) * potentialMultiplier
+  );
+  const int = Math.round(
+    (10 + rng.int(0, baseStatRange)) * potentialMultiplier
+  );
+
   return {
     potential,
     level,
@@ -126,12 +144,12 @@ function randomAmbitions(): string[] {
 function randomMood(rng: RNG, rank: Rank): OfficerMood {
   const ambitions = randomAmbitions();
   const ambition = rng.pick(ambitions);
-  
+
   // König has no loyalty value
   if (rank === 'König') {
     return { ambition };
   }
-  
+
   // Others have loyalty to king
   const loyalitaet = rng.next() * 100; // 0-100 scale
   return { loyalitaet, ambition };
@@ -158,7 +176,7 @@ export function createOfficer(
   const merit = Math.max(10, Math.round(BASE_MERIT[rank] + rng.int(-15, 15)));
   const id = overrides.id ?? `orc_${cycle}_${rng.int(100, 999999)}`;
   const stableId = overrides.stableId ?? id;
-  
+
   const potential = randomPotential(rng);
   const stats = overrides.stats ?? randomStats(rng, rank, potential);
   const mood = overrides.mood ?? randomMood(rng, rank);

@@ -55,8 +55,11 @@ function applyTributeLoyalty(
   state.officers = state.officers.map((officer) => {
     if (officer.id === king.id) return officer;
     if (officer.mood.loyalitaet === undefined) return officer;
-    
-    const loyalty = Math.max(0, Math.min(100, officer.mood.loyalitaet - penalty));
+
+    const loyalty = Math.max(
+      0,
+      Math.min(100, officer.mood.loyalitaet - penalty)
+    );
     if (loyalty === officer.mood.loyalitaet) return officer;
     return {
       ...officer,
@@ -143,9 +146,9 @@ function coupScore(officer: Officer, kingId: string): number {
     : 0;
   const oathPenalty = hasBloodOathWithKing(officer, kingId) ? -0.8 : 0;
   return (
-    officer.stats.str * 0.007 +  // Convert stats to smaller scale
-    (100 - loyalty) * 0.009 +   // Higher disloyalty = higher coup score  
-    officer.stats.int * 0.004 +  // Intelligence helps with coups
+    officer.stats.str * 0.007 + // Convert stats to smaller scale
+    (100 - loyalty) * 0.009 + // Higher disloyalty = higher coup score
+    officer.stats.int * 0.004 + // Intelligence helps with coups
     rivalBonus +
     oathPenalty +
     officer.merit / 140
@@ -161,9 +164,9 @@ function challengerStrength(officer: Officer, kingId: string): number {
     : 0;
   const oathPenalty = hasBloodOathWithKing(officer, kingId) ? -0.5 : 0;
   return (
-    officer.stats.str * 0.008 +     // Physical strength for challenges
-    (100 - loyalty) * 0.008 +      // Disloyalty
-    officer.stats.int * 0.003 +    // Intelligence 
+    officer.stats.str * 0.008 + // Physical strength for challenges
+    (100 - loyalty) * 0.008 + // Disloyalty
+    officer.stats.int * 0.003 + // Intelligence
     officer.merit / 120 +
     rival +
     oathPenalty
@@ -175,11 +178,11 @@ function kingStrength(
   instability: CrownState['instability']
 ): number {
   let strength =
-    king.stats.str * 0.011 +      // Physical strength
-    king.stats.int * 0.006 +      // Intelligence for rule
+    king.stats.str * 0.011 + // Physical strength
+    king.stats.int * 0.006 + // Intelligence for rule
     king.merit / 120 +
-    king.stats.level * 0.05 +     // Experience/level
-    king.stats.dex * 0.002;       // Minor dexterity bonus
+    king.stats.level * 0.05 + // Experience/level
+    king.stats.dex * 0.002; // Minor dexterity bonus
   if (instability === 'shaky') {
     strength *= 0.92;
   }

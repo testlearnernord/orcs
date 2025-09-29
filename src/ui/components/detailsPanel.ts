@@ -201,11 +201,15 @@ export class DetailsPanel {
             <span class="stat-label">Intelligenz</span>
             <span class="stat-value">${officer.stats.int}</span>
           </div>
-          ${officer.mood.loyalitaet !== undefined ? `
+          ${
+            officer.mood.loyalitaet !== undefined
+              ? `
           <div class="stat-item">
             <span class="stat-label">Loyalität</span>
             <span class="stat-value">${Math.round(officer.mood.loyalitaet)}%</span>
-          </div>` : ''}
+          </div>`
+              : ''
+          }
           <div class="stat-item">
             <span class="stat-label">Ambition</span>
             <span class="stat-value">${officer.mood.ambition}</span>

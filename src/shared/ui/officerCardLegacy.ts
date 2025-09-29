@@ -159,11 +159,11 @@ export class OfficerCardLegacy {
       const fill = this.statBars.get(key);
       const text = this.statValues.get(key);
       if (!fill || !text) return;
-      
+
       // For HP, show as HP/MaxHP, for others show raw value
       let displayValue: string;
       let percent: string;
-      
+
       if (key === 'hp') {
         displayValue = `${value}/${officer.stats.maxHp}`;
         percent = `${Math.round((value / officer.stats.maxHp) * 100)}%`;
@@ -172,7 +172,7 @@ export class OfficerCardLegacy {
         // Scale other stats to percentage (assuming max around 100)
         percent = `${Math.min(100, Math.round((value / 100) * 100))}%`;
       }
-      
+
       if (!fill.style.width) {
         fill.style.width = percent;
       } else {

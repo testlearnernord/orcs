@@ -591,7 +591,7 @@ export class NemesisUI {
 
     const bar = document.createElement('div');
     bar.className = 'filters-bar';
-    
+
     // No filters anymore - filters have been removed according to issue requirements
 
     const sortWrapper = document.createElement('div');
@@ -861,7 +861,7 @@ export class NemesisUI {
       lastState.stats.hp !== officer.stats.hp ||
       lastState.stats.maxHp !== officer.stats.maxHp ||
       lastState.stats.potential !== officer.stats.potential ||
-      // Check mood changes 
+      // Check mood changes
       lastState.mood.ambition !== officer.mood.ambition ||
       lastState.mood.loyalitaet !== officer.mood.loyalitaet
     );

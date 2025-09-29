@@ -1,9 +1,6 @@
 import { EventBus } from '@state/eventBus';
 
-export type SortMode =
-  | 'merit'
-  | 'level'
-  | 'random';
+export type SortMode = 'merit' | 'level' | 'random';
 
 export interface UIFilters {
   sortBy: SortMode;

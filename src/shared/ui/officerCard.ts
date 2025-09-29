@@ -194,11 +194,11 @@ export class OfficerCard {
       const fill = this.statBars.get(key);
       const text = this.statValues.get(key);
       if (!fill || !text) return;
-      
+
       // For HP, show as HP/MaxHP, for others show raw value
       let displayValue: string;
       let percent: string;
-      
+
       if (key === 'hp') {
         displayValue = `${value}/${officer.stats.maxHp}`;
         percent = `${Math.round((value / officer.stats.maxHp) * 100)}%`;
@@ -207,7 +207,7 @@ export class OfficerCard {
         // Scale other stats to percentage (assuming max around 100)
         percent = `${Math.min(100, Math.round((value / 100) * 100))}%`;
       }
-      
+
       if (!fill.style.width) {
         fill.style.width = percent;
       } else {
@@ -218,15 +218,11 @@ export class OfficerCard {
           fill.addEventListener('transitionend', handle, { once: true });
         });
       }
-      
+
       const delta = value - previousValue;
       text.textContent = displayValue;
       text.dataset.delta =
-        delta !== 0
-          ? delta > 0
-            ? `+${delta}`
-            : delta.toString()
-          : '';
+        delta !== 0 ? (delta > 0 ? `+${delta}` : delta.toString()) : '';
       text.classList.remove('is-up', 'is-down');
       if (delta > 0) {
         text.classList.add('is-up');
