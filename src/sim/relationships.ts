@@ -96,7 +96,7 @@ export function seedSpawnRelationships(
     let type: RelationshipType | undefined;
     if (roll < 0.15) type = 'RIVAL';
     else if (roll < 0.45) type = 'ALLY';
-    else if (roll < 0.7) type = 'NEUTRAL';
+    // Remove neutral - anything else is implicitly neutral (no relationship)
 
     if (!type) continue;
 

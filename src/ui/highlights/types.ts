@@ -22,8 +22,8 @@ export interface EnhancedHighlight {
   primaryOfficer?: Officer;
   secondaryOfficer?: Officer;
   relationshipChange?: {
-    before: 'neutral' | 'rival' | 'ally';
-    after: 'neutral' | 'rival' | 'ally';
+    before: 'rival' | 'ally' | 'none';
+    after: 'rival' | 'ally' | 'none';
   };
   hierarchyChange?: {
     officerId: string;
