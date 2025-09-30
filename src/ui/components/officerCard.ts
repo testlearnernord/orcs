@@ -367,9 +367,11 @@ export class OfficerCard {
 
       // Always animate stat bars for visual consistency
       if (!fill.style.width || fill.style.width === '0' || fill.style.width === '0%') {
-        // Initial render: set width with a small delay to trigger CSS transition
+        // Initial render: set width with double RAF to ensure painting
         requestAnimationFrame(() => {
-          fill.style.width = percent;
+          requestAnimationFrame(() => {
+            fill.style.width = percent;
+          });
         });
       } else {
         // Subsequent updates: animate with highlight effect
