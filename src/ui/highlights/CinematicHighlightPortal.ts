@@ -295,14 +295,15 @@ export class CinematicHighlightPortal {
 
     // Use proper portrait instead of placeholder
     const portraitContainer = document.createElement('div');
-    portraitContainer.className = 'cinematic-highlight-portal__officer-portrait';
-    
+    portraitContainer.className =
+      'cinematic-highlight-portal__officer-portrait';
+
     const avatarView = new AvatarView({
       officer: officer,
       size: 64,
       className: 'cinematic-highlight-portal__avatar'
     });
-    
+
     portraitContainer.appendChild(avatarView.element);
 
     const info = document.createElement('div');

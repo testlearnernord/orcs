@@ -56,7 +56,7 @@ function randomName(rng: RNG): string {
 
 function randomTraits(rng: RNG): Trait[] {
   const traits: Trait[] = [];
-  
+
   // 40% chance for Archer, 40% chance for Trapper, 20% chance for Berserker (no archetype trait)
   const archetypeRoll = rng.next();
   if (archetypeRoll < 0.4) {
@@ -65,17 +65,25 @@ function randomTraits(rng: RNG): Trait[] {
     traits.push('Trapper');
   }
   // 20% chance to have no archetype trait (defaults to Berserker)
-  
+
   // Add additional traits (30% chance for each category)
   const additionalTraits: Trait[] = [
     // Physical traits
-    'Robust', 'Weich', 'lange Beine', 'kurze Beine',
-    // Social traits  
-    'Nobel', 'Primitiv', 'Freundlich', 'Unfreundlich',
+    'Robust',
+    'Weich',
+    'lange Beine',
+    'kurze Beine',
+    // Social traits
+    'Nobel',
+    'Primitiv',
+    'Freundlich',
+    'Unfreundlich',
     // Mental traits
-    'Dumm', 'Schlau', 'Weise'
+    'Dumm',
+    'Schlau',
+    'Weise'
   ];
-  
+
   // 30% chance to get an additional trait
   if (rng.next() < 0.3) {
     const trait = rng.pick(additionalTraits);
@@ -83,7 +91,7 @@ function randomTraits(rng: RNG): Trait[] {
       traits.push(trait);
     }
   }
-  
+
   // 15% chance to get a second additional trait
   if (rng.next() < 0.15) {
     const trait = rng.pick(additionalTraits);
@@ -91,7 +99,7 @@ function randomTraits(rng: RNG): Trait[] {
       traits.push(trait);
     }
   }
-  
+
   return traits;
 }
 

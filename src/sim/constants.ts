@@ -41,10 +41,10 @@ export const TRAIT_COMBAT_WEIGHTS: Partial<Record<Trait, number>> = {
   Trapper: 0.25,
   // Physical traits
   Robust: 0.05,
-  // Combat specialization traits  
+  // Combat specialization traits
   'Guter Schütze': 0.25,
-  'Axtexperte': 0.25,
-  'Jäger': 0.25
+  Axtexperte: 0.25,
+  Jäger: 0.25
 };
 
 export const RELATIONSHIP_BONUS = {

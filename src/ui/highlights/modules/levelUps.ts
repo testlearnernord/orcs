@@ -37,15 +37,23 @@ export class LevelUpModule implements HighlightModule {
       }
 
       // Check for level increase
-      const levelDiff = currentOfficer.stats.level - previousOfficer.stats.level;
+      const levelDiff =
+        currentOfficer.stats.level - previousOfficer.stats.level;
       if (levelDiff > 0) {
-        highlights.push(this.createLevelUpHighlight(currentOfficer, levelDiff, next.cycle));
+        highlights.push(
+          this.createLevelUpHighlight(currentOfficer, levelDiff, next.cycle)
+        );
       }
 
       // Check for significant stat increases (indicating experience gain)
-      const statChanges = this.calculateStatChanges(previousOfficer, currentOfficer);
+      const statChanges = this.calculateStatChanges(
+        previousOfficer,
+        currentOfficer
+      );
       if (statChanges.hasSignificantGain) {
-        highlights.push(this.createStatGainHighlight(currentOfficer, statChanges, next.cycle));
+        highlights.push(
+          this.createStatGainHighlight(currentOfficer, statChanges, next.cycle)
+        );
       }
     });
 
@@ -59,9 +67,10 @@ export class LevelUpModule implements HighlightModule {
   ): EnhancedHighlight {
     const archetype = this.deriveArchetype(officer);
     const title = `${officer.name} steigt auf!`;
-    const description = levelIncrease === 1
-      ? `Level ${officer.stats.level} erreicht! Der ${archetype} wird stärker.`
-      : `${levelIncrease} Level gewonnen! Jetzt Level ${officer.stats.level}.`;
+    const description =
+      levelIncrease === 1
+        ? `Level ${officer.stats.level} erreicht! Der ${archetype} wird stärker.`
+        : `${levelIncrease} Level gewonnen! Jetzt Level ${officer.stats.level}.`;
 
     return {
       id: `levelup:${officer.id}:${cycle}`,
@@ -71,7 +80,7 @@ export class LevelUpModule implements HighlightModule {
       icon: '⬆️',
       title,
       description,
-      score: this.priority + (levelIncrease * 0.1),
+      score: this.priority + levelIncrease * 0.1,
       text: description,
       primaryOfficer: officer,
       levelChange: {
@@ -103,7 +112,7 @@ export class LevelUpModule implements HighlightModule {
       icon: '💪',
       title,
       description,
-      score: this.priority + (statChanges.totalIncrease * 0.05),
+      score: this.priority + statChanges.totalIncrease * 0.05,
       text: description,
       primaryOfficer: officer,
       statGain: {
@@ -120,17 +129,20 @@ export class LevelUpModule implements HighlightModule {
     };
   }
 
-  private calculateStatChanges(previous: Officer, current: Officer): StatChanges {
+  private calculateStatChanges(
+    previous: Officer,
+    current: Officer
+  ): StatChanges {
     const strChange = current.stats.str - previous.stats.str;
     const dexChange = current.stats.dex - previous.stats.dex;
     const intChange = current.stats.int - previous.stats.int;
-    
+
     const totalIncrease = strChange + dexChange + intChange;
-    
+
     // Determine primary stat (the one with biggest increase)
     let primaryStatName: 'str' | 'dex' | 'int' = 'str';
     let primaryStatIncrease = strChange;
-    
+
     if (dexChange > primaryStatIncrease) {
       primaryStatName = 'dex';
       primaryStatIncrease = dexChange;

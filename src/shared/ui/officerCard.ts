@@ -171,12 +171,12 @@ export class OfficerCard {
 
   private updateTraits(officer: Officer): void {
     this.traitContainer.innerHTML = '';
-    
+
     // Filter out archetype traits from display (they're shown separately as "Archer", "Trapper", etc.)
-    const displayTraits = officer.traits.filter(trait => 
-      trait !== 'Archer' && trait !== 'Trapper'
+    const displayTraits = officer.traits.filter(
+      (trait) => trait !== 'Archer' && trait !== 'Trapper'
     );
-    
+
     if (displayTraits.length === 0) {
       const empty = document.createElement('span');
       empty.className = 'officer-card__trait officer-card__trait--muted';
@@ -184,55 +184,68 @@ export class OfficerCard {
       this.traitContainer.appendChild(empty);
       return;
     }
-    
+
     displayTraits.forEach((trait) => {
       // Skip hidden traits like 'Geheimnisvoll'
       if (trait === 'Geheimnisvoll') return;
-      
+
       const chip = document.createElement('span');
       chip.className = 'officer-card__trait';
       chip.textContent = trait;
-      
+
       // Add tooltip with trait description
       chip.title = this.getTraitDescription(trait);
-      
+
       // Add special styling for different trait types
       if (['Robust', 'Weich', 'lange Beine', 'kurze Beine'].includes(trait)) {
         chip.classList.add('officer-card__trait--physical');
-      } else if (['Nobel', 'Primitiv', 'Freundlich', 'Unfreundlich'].includes(trait)) {
+      } else if (
+        ['Nobel', 'Primitiv', 'Freundlich', 'Unfreundlich'].includes(trait)
+      ) {
         chip.classList.add('officer-card__trait--social');
       } else if (['Dumm', 'Schlau', 'Weise'].includes(trait)) {
         chip.classList.add('officer-card__trait--mental');
-      } else if (['Guter Schütze', 'Schlechter Schütze', 'Axtexperte', 'Zweihandtölpel', 'Jäger', 'Fliegenfänger'].includes(trait)) {
+      } else if (
+        [
+          'Guter Schütze',
+          'Schlechter Schütze',
+          'Axtexperte',
+          'Zweihandtölpel',
+          'Jäger',
+          'Fliegenfänger'
+        ].includes(trait)
+      ) {
         chip.classList.add('officer-card__trait--combat');
       }
-      
+
       this.traitContainer.appendChild(chip);
     });
   }
-  
+
   private getTraitDescription(trait: string): string {
     const descriptions: Record<string, string> = {
-      'Robust': '+5% Lebenspunkte',
-      'Weich': '-5% Lebenspunkte',
-      'lange Beine': '+10% Weltkarten-Geschwindigkeit, +5% Kampf-Geschwindigkeit',
-      'kurze Beine': '-10% Weltkarten-Geschwindigkeit, -5% Kampf-Geschwindigkeit',
-      'Nobel': '+15% Merit, andere Offiziere sind loyaler',
-      'Primitiv': '-15% Merit, andere Offiziere sind unloyaler',
-      'Freundlich': 'Geht gerne Allianzen ein, ist loyaler',
-      'Unfreundlich': 'Geht gerne Rivalitäten ein, ist unloyaler',
-      'Dumm': '-25% Erfahrungsgewinn',
-      'Schlau': '+25% Erfahrungsgewinn',
-      'Weise': 'Mehr Attributpunkte bei Stufenaufstieg',
-      'Verräter': 'Verrät andere für eigenen Vorteil',
+      Robust: '+5% Lebenspunkte',
+      Weich: '-5% Lebenspunkte',
+      'lange Beine':
+        '+10% Weltkarten-Geschwindigkeit, +5% Kampf-Geschwindigkeit',
+      'kurze Beine':
+        '-10% Weltkarten-Geschwindigkeit, -5% Kampf-Geschwindigkeit',
+      Nobel: '+15% Merit, andere Offiziere sind loyaler',
+      Primitiv: '-15% Merit, andere Offiziere sind unloyaler',
+      Freundlich: 'Geht gerne Allianzen ein, ist loyaler',
+      Unfreundlich: 'Geht gerne Rivalitäten ein, ist unloyaler',
+      Dumm: '-25% Erfahrungsgewinn',
+      Schlau: '+25% Erfahrungsgewinn',
+      Weise: 'Mehr Attributpunkte bei Stufenaufstieg',
+      Verräter: 'Verrät andere für eigenen Vorteil',
       'Guter Schütze': '+25% Fernkampf-Schaden (nur Bogenschützen)',
       'Schlechter Schütze': '-25% Fernkampf-Schaden (nur Bogenschützen)',
-      'Axtexperte': '+25% Zweihand-Schaden (nur Berserker)',
-      'Zweihandtölpel': '-25% Zweihand-Schaden (nur Berserker)',
-      'Jäger': '+25% Fallen-Schaden (nur Fallensteller)',
-      'Fliegenfänger': '-25% Fallen-Schaden (nur Fallensteller)'
+      Axtexperte: '+25% Zweihand-Schaden (nur Berserker)',
+      Zweihandtölpel: '-25% Zweihand-Schaden (nur Berserker)',
+      Jäger: '+25% Fallen-Schaden (nur Fallensteller)',
+      Fliegenfänger: '-25% Fallen-Schaden (nur Fallensteller)'
     };
-    
+
     return descriptions[trait] || 'Unbekannte Eigenschaft';
   }
 
@@ -248,20 +261,28 @@ export class OfficerCard {
    * Calculate current experience and progress for an officer
    * Now based on actual gameplay events rather than random values
    */
-  private getExpInfo(officer: Officer): { currentExp: number; nextLevelExp: number; progress: number; displayText: string } {
+  private getExpInfo(officer: Officer): {
+    currentExp: number;
+    nextLevelExp: number;
+    progress: number;
+    displayText: string;
+  } {
     const currentLevel = officer.stats.level;
     const currentLevelExp = this.getExpForLevel(currentLevel);
     const nextLevelExp = this.getExpForLevel(currentLevel + 1);
-    
+
     // Calculate actual experience based on gameplay metrics
     const baseExp = currentLevelExp;
     const bonusExp = this.calculateBonusExp(officer);
     const currentExp = baseExp + bonusExp;
-    
+
     const expRange = nextLevelExp - currentLevelExp;
-    const progress = Math.min(100, ((currentExp - currentLevelExp) / expRange) * 100);
+    const progress = Math.min(
+      100,
+      ((currentExp - currentLevelExp) / expRange) * 100
+    );
     const displayText = `${Math.floor(currentExp)}/${nextLevelExp}`;
-    
+
     return {
       currentExp: Math.floor(currentExp),
       nextLevelExp,
@@ -275,13 +296,13 @@ export class OfficerCard {
    */
   private calculateBonusExp(officer: Officer): number {
     let bonusExp = 0;
-    
+
     // Base experience from merit (successful actions earn both merit and exp)
     bonusExp += Math.floor(officer.merit * 0.8); // 80% of merit becomes exp
-    
+
     // Level-based progression bonus
     bonusExp += (officer.stats.level - 1) * 150;
-    
+
     // Trait-based experience modifiers
     if (officer.traits.includes('Schlau')) {
       bonusExp *= 1.25; // +25% exp for smart officers
@@ -292,16 +313,16 @@ export class OfficerCard {
     if (officer.traits.includes('Weise')) {
       bonusExp *= 1.1; // +10% exp for wise officers
     }
-    
+
     // Rank-based experience scaling
     const rankMultipliers: Partial<Record<Officer['rank'], number>> = {
-      'König': 1.5,
-      'Captain': 1.3,
-      'Späher': 1.1,
-      'Grunzer': 1.0
+      König: 1.5,
+      Captain: 1.3,
+      Späher: 1.1,
+      Grunzer: 1.0
     };
     bonusExp *= rankMultipliers[officer.rank] || 1.0;
-    
+
     return Math.floor(bonusExp);
   }
 
@@ -319,11 +340,11 @@ export class OfficerCard {
         // Handle EXP stat specially
         const expInfo = this.getExpInfo(officer);
         const prevExpInfo = this.getExpInfo(previous);
-        
+
         displayValue = expInfo.displayText;
         percent = `${expInfo.progress}%`;
         delta = expInfo.currentExp - prevExpInfo.currentExp;
-        
+
         // Level up detection - if level increased, show full progress
         if (officer.stats.level > previous.stats.level) {
           percent = '100%';
@@ -374,10 +395,7 @@ export class OfficerCard {
     });
 
     // Add relationship border styling to card (redesign requirement)
-    this.element.classList.remove(
-      'has-rival-relation',
-      'has-ally-relation'
-    );
+    this.element.classList.remove('has-rival-relation', 'has-ally-relation');
     if (counts.get('RIVAL')) {
       this.element.classList.add('has-rival-relation');
     } else if (counts.get('ALLY')) {
