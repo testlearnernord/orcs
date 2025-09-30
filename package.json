@@ -9,7 +9,7 @@
     "copy:dev": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs && node scripts/copy-maps.mjs && node scripts/copy-battlesystem.mjs",
     "prebuild": "BUILD_MODE=production node scripts/copy-portraits.mjs && BUILD_MODE=production node scripts/copy-audio.mjs && BUILD_MODE=production node scripts/copy-maps.mjs",
     "build": "vite build",
-    "postbuild": "node scripts/copy-portraits.mjs && node scripts/copy-audio.mjs && node scripts/copy-maps.mjs && node scripts/copy-battlesystem.mjs",
+    "postbuild": "BUILD_MODE=production node scripts/copy-portraits.mjs && BUILD_MODE=production node scripts/copy-audio.mjs && BUILD_MODE=production node scripts/copy-maps.mjs && BUILD_MODE=production node scripts/copy-battlesystem.mjs",
     "preview": "vite preview",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
