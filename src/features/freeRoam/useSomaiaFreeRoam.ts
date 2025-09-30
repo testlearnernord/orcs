@@ -11,6 +11,7 @@ import {
   selectActiveWarcalls
 } from '@/sim/adapters/freeRoam.selectors';
 import type { WarcallWithPhase } from '@state/selectors/warcalls';
+import { mapAssetPath } from '@/lib/paths';
 
 export interface SomaiaMapData {
   name: string;
@@ -175,7 +176,8 @@ function getCurrentCountry(
 }
 
 async function loadSomaiaMap(): Promise<SomaiaMapData> {
-  const response = await fetch('/assets/maps/somaia/meta.json');
+  const url = mapAssetPath('somaia', 'meta.json');
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to load Somaia map: ${response.statusText}`);
   }
