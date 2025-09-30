@@ -158,14 +158,12 @@ export class NemesisUI {
     });
     this.warcallModal.setMode(this.modeState.mode);
 
-    // NEW: Initialize new cinematic highlight portal with enhanced options
+    // NEW: Initialize new cinematic highlight portal with only 2 buttons as requested
     this.cinematicPortal = new CinematicHighlightPortal({
       onAdvance: () => this.highlightSystem.advance(),
-      onSkip: () => this.highlightSystem.skip(),
       onSkipAll: () => this.highlightSystem.clearAll(),
       onToggleEnabled: (enabled) =>
-        this.highlightSystem.updateOptions({ enabled }),
-      onViewLog: () => this.focusDigestHistory()
+        this.highlightSystem.updateOptions({ enabled })
     });
 
     this.filters.on('change', () => {
@@ -662,21 +660,6 @@ export class NemesisUI {
     this.filters.setSort(sortBy);
   }
 
-  private updateNeutralCounter(): void {
-    const counterEl = document.getElementById('neutral-counter');
-    if (!counterEl) return;
-
-    const state = this.store.getState();
-    let neutralCount = 0;
-    state.officers.forEach((officer) => {
-      neutralCount += officer.relationships.filter(
-        (rel) => rel.type === 'NEUTRAL'
-      ).length;
-    });
-
-    counterEl.textContent = `+${neutralCount} Neutral`;
-  }
-
   private registerUIEvents(app: HTMLElement): void {
     app
       .querySelector<HTMLButtonElement>('button[data-action="cycle"]')
@@ -1058,8 +1041,7 @@ export class NemesisUI {
       this.relations.setEdges(maskedEdges, state.cycle);
     }
 
-    // Update neutral relations counter
-    this.updateNeutralCounter();
+    // Neutral relationships removed - no longer need counter
   }
 
   private hierarchyContainer: HTMLElement | null = null;
@@ -1222,7 +1204,7 @@ export class NemesisUI {
       participants,
       currentCycle: state.cycle,
       resolution,
-      phase: 'resolution',
+      phase: 'ENDE',
       status: 'done'
     };
     this.completedWarcalls = [entry, ...this.completedWarcalls].slice(

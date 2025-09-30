@@ -11,8 +11,7 @@ export interface DetailsPanelOptions {
 
 const RELATION_ICONS: Record<Relationship['type'], string> = {
   ALLY: '🤝',
-  RIVAL: '⚔️',
-  NEUTRAL: '•'
+  RIVAL: '⚔️'
 };
 
 function relationLabel(relation: Relationship): string {
@@ -21,8 +20,6 @@ function relationLabel(relation: Relationship): string {
       return 'Allianz';
     case 'RIVAL':
       return 'Rivalität';
-    case 'NEUTRAL':
-      return 'Neutral';
     default:
       return relation.type;
   }
@@ -33,11 +30,14 @@ function formatStat(value: number): string {
 }
 
 function deriveArchetype(officer: Officer): string {
-  // Use primary trait (archetype) directly
-  if (officer.traits.length > 0) {
-    return officer.traits[0]; // Berserker, Archer, or Trapper
+  // Use primary trait to derive archetype, or default to Berserker
+  if (officer.traits.includes('Archer')) {
+    return 'Archer';
   }
-  return 'Unbekannt';
+  if (officer.traits.includes('Trapper')) {
+    return 'Trapper';
+  }
+  return 'Berserker'; // Default archetype for officers without specific archetype traits
 }
 
 function deriveTitle(officer: Officer): string {
@@ -47,11 +47,11 @@ function deriveTitle(officer: Officer): string {
     case 'Spieler':
       return 'Kriegsrat';
     case 'Captain':
-      return 'Klingenführer';
+      return 'Kapitän';
     case 'Späher':
-      return 'Schattenauge';
+      return 'Späher';
     default:
-      return 'Grubenläufer';
+      return 'Grunzer';
   }
 }
 
@@ -170,7 +170,7 @@ export class DetailsPanel {
         ? officer.traits
             .map((trait) => `<span class="details-badge">${trait}</span>`)
             .join('')
-        : '<span class="details-badge details-badge--muted">Kein Merkmal</span>';
+        : '<span class="details-badge details-badge--muted">Keine Merkmale</span>';
 
     this.detailsContent.innerHTML = `
       <div class="details-header">

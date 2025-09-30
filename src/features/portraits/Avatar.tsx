@@ -5,7 +5,7 @@ import { loadPortraitAtlases, type PortraitAtlasMap } from './portrait-atlas';
 import { PORTRAIT_SET_DEFINITIONS } from './config';
 import { calculatePortraitCrop } from '@/lib/portraitCrop';
 import type { PortraitSet } from './types';
-import type { Rank } from '@/sim/types';
+import type { Rank, PotentialRating } from '@/sim/types';
 
 type FallbackReason = 'legacy' | 'missing';
 
@@ -28,6 +28,7 @@ export type OfficerAvatarProps = {
   requireTag?: string;
   style?: React.CSSProperties;
   rank?: Rank;
+  potential?: PotentialRating;
 };
 
 function filterDefinitions(tag?: string) {
@@ -74,6 +75,16 @@ const RANK_SLUG: Record<Rank, string> = {
   Grunzer: 'grunt'
 };
 
+// Potential to CSS slug mapping (for portrait frame colors)
+const POTENTIAL_SLUG: Record<PotentialRating, string> = {
+  Unbrauchbar: 'unusable',
+  Dumm: 'dumb', 
+  Normal: 'normal',
+  Fähig: 'capable',
+  Überdurchschnittlich: 'above-average',
+  Genie: 'genius'
+};
+
 function mergeStyles(
   computed: React.CSSProperties | null,
   size: number,
@@ -102,7 +113,8 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
   className,
   requireTag,
   style,
-  rank
+  rank,
+  potential
 }) => {
   const id = safeId(officerId);
   const [tileStyle, setTileStyle] = React.useState<React.CSSProperties | null>(
@@ -256,6 +268,7 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
       title={title}
       data-portrait-set={activeSet ?? undefined}
       data-rank={rank ? RANK_SLUG[rank] : undefined}
+      data-potential={potential ? POTENTIAL_SLUG[potential] : undefined}
       className={getClassName('officer-avatar', className)}
       style={combinedStyle}
     />

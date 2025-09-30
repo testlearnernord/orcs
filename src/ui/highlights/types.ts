@@ -22,14 +22,29 @@ export interface EnhancedHighlight {
   primaryOfficer?: Officer;
   secondaryOfficer?: Officer;
   relationshipChange?: {
-    before: 'neutral' | 'rival' | 'ally';
-    after: 'neutral' | 'rival' | 'ally';
+    before: 'rival' | 'ally' | 'none';
+    after: 'rival' | 'ally' | 'none';
   };
   hierarchyChange?: {
     officerId: string;
     fromRank: string;
     toRank: string;
     direction: 'promotion' | 'demotion';
+  };
+  levelChange?: {
+    officerId: string;
+    previousLevel: number;
+    newLevel: number;
+    increase: number;
+  };
+  statGain?: {
+    officerId: string;
+    statChanges: {
+      str: number;
+      dex: number;
+      int: number;
+    };
+    totalIncrease: number;
   };
 
   // Animation hints
@@ -44,6 +59,7 @@ export enum HighlightType {
   OFFICER_DEATH = 1, // Priority 1: Getötete Offiziere
   WARCALL_RESOLUTION = 2, // Priority 2: Warcall-Auflösungen
   DIPLOMACY = 3, // Priority 3: Diplomatie
+  LEVEL_UP = 3.5, // Priority 3.5: Level-ups und Erfahrung
   PROMOTION = 4, // Priority 4: Beförderungen
   NEW_GRUNT = 5 // Priority 5: Neue Grunzer
 }
