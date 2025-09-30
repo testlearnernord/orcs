@@ -29,9 +29,9 @@ const WARCALL_KINDS: WarcallPlan['kind'][] = [
   'Duel',
   'Monsterjagd',
   'Diplomatie',
-  'Infiltration',    // New: Stealth mission requiring Archer/Trapper
-  'Eroberung',       // New: Territory conquest requiring mixed team
-  'Sabotage'         // New: Disruption with betrayal mechanics
+  'Infiltration', // New: Stealth mission requiring Archer/Trapper
+  'Eroberung', // New: Territory conquest requiring mixed team
+  'Sabotage' // New: Disruption with betrayal mechanics
 ];
 
 const REWARD_HINTS = [
@@ -45,11 +45,11 @@ const REWARD_HINTS = [
   'Handelspartner',
   'Magische Artefakte',
   'Veteranentraining',
-  'Spionage-Netzwerk',      // For Infiltration
-  'Festung-Kontrolle',      // For Eroberung
-  'Sabotage-Expertise',     // For Sabotage
-  'Versteckte Allianzen',   // Hidden reward
-  'Schwarzmarkt-Zugang'     // Special reward for antagonists
+  'Spionage-Netzwerk', // For Infiltration
+  'Festung-Kontrolle', // For Eroberung
+  'Sabotage-Expertise', // For Sabotage
+  'Versteckte Allianzen', // Hidden reward
+  'Schwarzmarkt-Zugang' // Special reward for antagonists
 ];
 
 function logistic(x: number): number {
@@ -139,26 +139,37 @@ function applyMerit(
   warcallKind?: WarcallKind
 ): Officer {
   let delta = success ? 20 : Math.max(-10, -officer.merit * 0.1);
-  
+
   // Special handling for antagonists in failed missions
-  if (!success && warcallKind && ['Infiltration', 'Sabotage'].includes(warcallKind)) {
+  if (
+    !success &&
+    warcallKind &&
+    ['Infiltration', 'Sabotage'].includes(warcallKind)
+  ) {
     // Antagonists (betrayers) in failed stealth missions still gain some merit/exp
-    if (officer.traits.includes('Verräter') || officer.traits.includes('Geheimnisvoll')) {
+    if (
+      officer.traits.includes('Verräter') ||
+      officer.traits.includes('Geheimnisvoll')
+    ) {
       delta = Math.max(delta, 5); // Minimum +5 merit for successful betrayal
     }
   }
-  
+
   // Ambitious officers get bonus merit for successful complex operations
-  if (success && warcallKind && ['Eroberung', 'Infiltration'].includes(warcallKind)) {
+  if (
+    success &&
+    warcallKind &&
+    ['Eroberung', 'Infiltration'].includes(warcallKind)
+  ) {
     if (officer.traits.includes('Unfreundlich') || officer.rank === 'Captain') {
       delta += 5; // Bonus merit for ambitious officers in complex missions
     }
   }
-  
+
   if (success && kingStatus === 'UNGEFESTIGT') {
     delta /= 2;
   }
-  
+
   return { ...officer, merit: Math.max(0, officer.merit + delta) };
 }
 
@@ -193,12 +204,15 @@ export function resolveWarcall(
   );
 
   for (const officer of participants) {
-    const updated = addMemory(applyMerit(officer, success, state.kingStatus, warcall.kind), {
-      cycle: state.cycle,
-      category: 'WARCALL',
-      summary: `${success ? 'Triumph' : 'Schmach'} bei ${warcall.location}`,
-      details: `Chance ${(chance * 100).toFixed(1)}%`
-    });
+    const updated = addMemory(
+      applyMerit(officer, success, state.kingStatus, warcall.kind),
+      {
+        cycle: state.cycle,
+        category: 'WARCALL',
+        summary: `${success ? 'Triumph' : 'Schmach'} bei ${warcall.location}`,
+        details: `Chance ${(chance * 100).toFixed(1)}%`
+      }
+    );
     state.officers = state.officers.map((candidate) =>
       candidate.id === updated.id ? updated : candidate
     );
@@ -235,14 +249,17 @@ export function planWarcall(
 ): WarcallPlan | undefined {
   const participants = pickParticipants(rng, state.officers, 3);
   if (participants.length === 0) return undefined;
-  
+
   const initiator = rng.pick(participants);
   const kind = rng.pick(WARCALL_KINDS);
-  
+
   // Apply specific rules for new warcall types
   const warcallConfig = getWarcallConfig(kind, participants, rng);
-  const risk = Math.min(1, Math.max(0, rng.next() * warcallConfig.riskMultiplier));
-  
+  const risk = Math.min(
+    1,
+    Math.max(0, rng.next() * warcallConfig.riskMultiplier)
+  );
+
   return {
     id: `warcall_${cycle}_${rng.int(100, 999999)}`,
     cycleAnnounced: cycle,
@@ -260,7 +277,11 @@ export function planWarcall(
 /**
  * Get configuration for specific warcall types including participants, duration, and rewards
  */
-function getWarcallConfig(kind: WarcallKind, participants: Officer[], rng: RNG): {
+function getWarcallConfig(
+  kind: WarcallKind,
+  participants: Officer[],
+  rng: RNG
+): {
   finalParticipants: Officer[];
   duration: number;
   riskMultiplier: number;
@@ -278,36 +299,48 @@ function getWarcallConfig(kind: WarcallKind, participants: Officer[], rng: RNG):
   switch (kind) {
     case 'Infiltration':
       // Requires stealth specialists (Archer/Trapper preferred)
-      config.finalParticipants = participants.filter(officer => 
-        officer.traits.includes('Archer') || officer.traits.includes('Trapper')
+      config.finalParticipants = participants.filter(
+        (officer) =>
+          officer.traits.includes('Archer') ||
+          officer.traits.includes('Trapper')
       );
       if (config.finalParticipants.length === 0) {
         config.finalParticipants = participants.slice(0, 2); // Fallback to 2 officers
       }
       config.duration = 2; // Takes longer
       config.riskMultiplier = 1.3; // Higher risk
-      config.rewardHint = rng.pick(['Spionage-Netzwerk', 'Geheiminformationen', 'Versteckte Allianzen']);
+      config.rewardHint = rng.pick([
+        'Spionage-Netzwerk',
+        'Geheiminformationen',
+        'Versteckte Allianzen'
+      ]);
       break;
 
     case 'Eroberung':
       // Requires mixed team with different archetypes
       const archetypes = ['Archer', 'Trapper'];
-      const archetypeParticipants = participants.filter(officer => 
-        officer.traits.some(trait => archetypes.includes(trait))
+      const archetypeParticipants = participants.filter((officer) =>
+        officer.traits.some((trait) => archetypes.includes(trait))
       );
-      const berserkers = participants.filter(officer => 
-        !officer.traits.includes('Archer') && !officer.traits.includes('Trapper')
+      const berserkers = participants.filter(
+        (officer) =>
+          !officer.traits.includes('Archer') &&
+          !officer.traits.includes('Trapper')
       );
-      
+
       // Ensure mixed team
       config.finalParticipants = [
         ...archetypeParticipants.slice(0, 2),
         ...berserkers.slice(0, 2)
       ].slice(0, 4); // Up to 4 participants for conquest
-      
+
       config.duration = 3; // Longest duration
       config.difficultyMultiplier = 1.4; // Higher difficulty
-      config.rewardHint = rng.pick(['Territoriumsgewinn', 'Festung-Kontrolle', 'Strategischer Vorteil']);
+      config.rewardHint = rng.pick([
+        'Territoriumsgewinn',
+        'Festung-Kontrolle',
+        'Strategischer Vorteil'
+      ]);
       break;
 
     case 'Sabotage':
@@ -315,16 +348,24 @@ function getWarcallConfig(kind: WarcallKind, participants: Officer[], rng: RNG):
       config.finalParticipants = participants.slice(0, 2); // Small team
       config.riskMultiplier = 1.5; // Very high risk
       config.difficultyMultiplier = 0.8; // Lower difficulty but higher chance of betrayal
-      
+
       // Check for untrustworthy officers
-      const hasBetrayer = participants.some(officer => 
-        officer.traits.includes('Verräter') || officer.traits.includes('Unfreundlich')
+      const hasBetrayer = participants.some(
+        (officer) =>
+          officer.traits.includes('Verräter') ||
+          officer.traits.includes('Unfreundlich')
       );
-      
+
       if (hasBetrayer) {
-        config.rewardHint = rng.pick(['Schwarzmarkt-Zugang', 'Sabotage-Expertise']);
+        config.rewardHint = rng.pick([
+          'Schwarzmarkt-Zugang',
+          'Sabotage-Expertise'
+        ]);
       } else {
-        config.rewardHint = rng.pick(['Sabotage-Expertise', 'Geheiminformationen']);
+        config.rewardHint = rng.pick([
+          'Sabotage-Expertise',
+          'Geheiminformationen'
+        ]);
       }
       break;
 

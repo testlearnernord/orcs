@@ -177,10 +177,7 @@ export function buildRelationEdges(
       seen.add(key);
       const type = mapRelationType(relation.type);
       const lastMemory = resolveLastMemory(officer, peer);
-      const strength =
-        relation.type === 'RIVAL'
-          ? 0.75
-          : 0.65; // ALLY relationship strength
+      const strength = relation.type === 'RIVAL' ? 0.75 : 0.65; // ALLY relationship strength
       edges.push({
         id: key,
         fromId: officer.id,

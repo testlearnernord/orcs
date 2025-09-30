@@ -78,7 +78,7 @@ const RANK_SLUG: Record<Rank, string> = {
 // Potential to CSS slug mapping (for portrait frame colors)
 const POTENTIAL_SLUG: Record<PotentialRating, string> = {
   Unbrauchbar: 'unusable',
-  Dumm: 'dumb', 
+  Dumm: 'dumb',
   Normal: 'normal',
   Fähig: 'capable',
   Überdurchschnittlich: 'above-average',

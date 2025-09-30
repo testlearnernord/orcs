@@ -1,31 +1,31 @@
 export type OrcId = string;
 
 // Modern trait system - independent from archetypes
-export type Trait = 
+export type Trait =
   // Archetype traits (determine combat style)
-  | 'Archer' 
+  | 'Archer'
   | 'Trapper'
   // Berserker is default when no archetype trait is present
-  
+
   // Physical traits
   | 'Robust' // 5% mehr HP *
   | 'Weich' // -5% HP
   | 'lange Beine' // 10% mehr Worldmap Speed / 5% mehr PLAYER Mode Speed
   | 'kurze Beine' // -10% Worldmap Speed / -5% weniger PLAYER mode Speed
-  
+
   // Social traits
   | 'Nobel' // Erhält 15% mehr MERIT, andere Offiziere sind eher loyal *
   | 'Primitiv' // Erhält 15% weniger Merit, andere Offiziere sind eher disloyal *
   | 'Freundlich' // Geht gerne Allianzen ein, ist eher Loyal
   | 'Unfreundlich' // Geht gerne Rivalitäten ein, ist eher unloyal *
   | 'Geheimnisvoll' // Verhält sich geheimnisvoll, sehr ambitioniert (für Spieler nicht sichtbar)
-  
+
   // Mental traits
   | 'Dumm' // Sammelt 25% weniger Erfahrung
   | 'Schlau' // Sammelt 25% mehr erfahrung
   | 'Weise' // Erhält mehr Attributpunkte bei Stufenaufstieg *
   | 'Verräter' // Verrät alles und jeden
-  
+
   // Combat specialization traits (archetype-specific)
   | 'Guter Schütze' // 25% mehr Range Schaden - ARCHER Only *
   | 'Schlechter Schütze' // 25% weniger Range Schaden - ARCHER only
@@ -131,9 +131,9 @@ export type WarcallKind =
   | 'Monsterjagd'
   | 'Diplomatie'
   | 'Thronschlacht'
-  | 'Infiltration'    // New: Stealth mission with hidden antagonist
-  | 'Eroberung'       // New: Territory conquest requiring multiple archetypes
-  | 'Sabotage';       // New: Disruption mission with betrayal mechanics
+  | 'Infiltration' // New: Stealth mission with hidden antagonist
+  | 'Eroberung' // New: Territory conquest requiring multiple archetypes
+  | 'Sabotage'; // New: Disruption mission with betrayal mechanics
 
 export type WarcallPhase = 'START' | 'ENDE';
 
