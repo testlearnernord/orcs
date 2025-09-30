@@ -55,13 +55,44 @@ function randomName(rng: RNG): string {
 }
 
 function randomTraits(rng: RNG): Trait[] {
-  const all: Trait[] = ['Archer', 'Trapper'];
-  // Officers can have either archetype trait or no trait
-  if (rng.next() < 0.6) {
-    // 60% chance to have a trait
-    return [rng.pick(all)];
+  const traits: Trait[] = [];
+  
+  // 40% chance for Archer, 40% chance for Trapper, 20% chance for Berserker (no archetype trait)
+  const archetypeRoll = rng.next();
+  if (archetypeRoll < 0.4) {
+    traits.push('Archer');
+  } else if (archetypeRoll < 0.8) {
+    traits.push('Trapper');
   }
-  return [];
+  // 20% chance to have no archetype trait (defaults to Berserker)
+  
+  // Add additional traits (30% chance for each category)
+  const additionalTraits: Trait[] = [
+    // Physical traits
+    'Robust', 'Weich', 'lange Beine', 'kurze Beine',
+    // Social traits  
+    'Nobel', 'Primitiv', 'Freundlich', 'Unfreundlich',
+    // Mental traits
+    'Dumm', 'Schlau', 'Weise'
+  ];
+  
+  // 30% chance to get an additional trait
+  if (rng.next() < 0.3) {
+    const trait = rng.pick(additionalTraits);
+    if (!traits.includes(trait)) {
+      traits.push(trait);
+    }
+  }
+  
+  // 15% chance to get a second additional trait
+  if (rng.next() < 0.15) {
+    const trait = rng.pick(additionalTraits);
+    if (!traits.includes(trait)) {
+      traits.push(trait);
+    }
+  }
+  
+  return traits;
 }
 
 function randomPotential(rng: RNG): PotentialRating {

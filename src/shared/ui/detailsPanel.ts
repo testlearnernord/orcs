@@ -30,11 +30,14 @@ function formatStat(value: number): string {
 }
 
 function deriveArchetype(officer: Officer): string {
-  // Use primary trait (archetype) directly, or default for those without traits
-  if (officer.traits.length > 0) {
-    return officer.traits[0]; // Archer or Trapper
+  // Use the same logic as the modern trait system
+  if (officer.traits.includes('Archer')) {
+    return 'Bogenschütze';
   }
-  return 'Krieger'; // Default for officers without specific traits (former Berserkers)
+  if (officer.traits.includes('Trapper')) {
+    return 'Fallensteller';
+  }
+  return 'Berserker'; // Default for officers without specific archetype traits
 }
 
 function deriveTitle(officer: Officer): string {
@@ -44,11 +47,11 @@ function deriveTitle(officer: Officer): string {
     case 'Spieler':
       return 'Kriegsrat';
     case 'Captain':
-      return 'Klingenführer';
+      return 'Hauptmann';
     case 'Späher':
-      return 'Schattenauge';
+      return 'Kundschafter';
     default:
-      return 'Grubenläufer';
+      return 'Krieger';
   }
 }
 
@@ -167,7 +170,7 @@ export class DetailsPanel {
         ? officer.traits
             .map((trait) => `<span class="details-badge">${trait}</span>`)
             .join('')
-        : '<span class="details-badge details-badge--muted">Kein Merkmal</span>';
+        : '<span class="details-badge details-badge--muted">Keine Merkmale</span>';
 
     this.detailsContent.innerHTML = `
       <div class="details-header">

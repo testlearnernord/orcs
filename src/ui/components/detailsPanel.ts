@@ -170,7 +170,7 @@ export class DetailsPanel {
         ? officer.traits
             .map((trait) => `<span class="details-badge">${trait}</span>`)
             .join('')
-        : '<span class="details-badge details-badge--muted">Kein Merkmal</span>';
+        : '<span class="details-badge details-badge--muted">Keine Merkmale</span>';
 
     this.detailsContent.innerHTML = `
       <div class="details-header">
