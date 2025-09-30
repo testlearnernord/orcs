@@ -38,7 +38,7 @@ describe('OfficerCard - Uniform Design', () => {
     ranks.forEach((rank) => {
       const officer = createOfficer(rank);
       const card = new OfficerCard(officer, {});
-      
+
       expect(card.element).toBeDefined();
       expect(card.element.tagName).toBe('ARTICLE');
       expect(card.element.classList.contains('officer-card')).toBe(true);
@@ -50,18 +50,18 @@ describe('OfficerCard - Uniform Design', () => {
     ranks.forEach((rank) => {
       const officer = createOfficer(rank);
       const card = new OfficerCard(officer, {});
-      
+
       // Find all stat rows
       const stats = card.element.querySelectorAll('.officer-card__stat');
-      
+
       // Should have 5 stats: STR, DEX, INT, HP, EXP
       expect(stats.length).toBe(5);
-      
+
       // The 5th stat (index 4) should be EXP
       const expStat = stats[4];
       const label = expStat.querySelector('.officer-card__stat-label');
       expect(label?.textContent).toBe('Erfahrung');
-      
+
       // Should have an animated bar
       const bar = expStat.querySelector('.officer-card__stat-bar');
       expect(bar).toBeDefined();
@@ -74,10 +74,12 @@ describe('OfficerCard - Uniform Design', () => {
     ranks.forEach((rank) => {
       const officer = createOfficer(rank, ['Schlau', 'Freundlich']);
       const card = new OfficerCard(officer, {});
-      
-      const traitContainer = card.element.querySelector('.officer-card__traits');
+
+      const traitContainer = card.element.querySelector(
+        '.officer-card__traits'
+      );
       expect(traitContainer).toBeDefined();
-      
+
       // Should have trait chips
       const traits = traitContainer?.querySelectorAll('.officer-card__trait');
       expect(traits?.length).toBeGreaterThan(0);
@@ -88,7 +90,7 @@ describe('OfficerCard - Uniform Design', () => {
     ranks.forEach((rank) => {
       const officer = createOfficer(rank);
       const card = new OfficerCard(officer, {});
-      
+
       const levelBadge = card.element.querySelector('.officer-card__level');
       expect(levelBadge).toBeDefined();
       expect(levelBadge?.textContent).toContain('Lv. 5');
@@ -99,7 +101,7 @@ describe('OfficerCard - Uniform Design', () => {
     ranks.forEach((rank) => {
       const officer = createOfficer(rank);
       const card = new OfficerCard(officer, {});
-      
+
       const meritBadge = card.element.querySelector('.officer-card__badge');
       expect(meritBadge).toBeDefined();
       expect(meritBadge?.textContent).toContain('Merit');
@@ -118,7 +120,7 @@ describe('OfficerCard - Uniform Design', () => {
     ranks.forEach((rank) => {
       const officer = createOfficer(rank);
       const card = new OfficerCard(officer, {});
-      
+
       expect(card.element.dataset.rank).toBe(expectedSlugs[rank]);
     });
   });

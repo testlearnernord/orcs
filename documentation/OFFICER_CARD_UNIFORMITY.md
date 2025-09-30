@@ -36,24 +36,30 @@ After thorough investigation, **all officer ranks already use the uniform modern
    - **Captain:** Green/Silver gradient (`#10b981`, `#059669`) - leadership
    - **Späher:** Blue gradient (`#3b82f6`, `#2563eb`) - scouts/recon
    - **Grunzer:** Grey gradient (`#94a3b8`, `#64748b`) - basic rank
-   
+
    No features are hidden or disabled via CSS for any rank.
 
 ## Changes Made
 
 ### 1. Dead Code Removal
+
 Removed unused legacy code that was not referenced anywhere:
+
 - `src/ui/components/officerCardLegacy.ts` - Legacy card implementation (not used)
 - `src/shared/ui/officerCardLegacy.ts` - Duplicate legacy card (not used)
 
 ### 2. Duplicate Files Cleanup
+
 Removed the entire `src/shared/ui/` directory containing exact duplicates:
+
 - All 18 files were duplicates of files in `src/ui/components/`
 - None were imported anywhere in the codebase
 - Identified via duplicate audit report (1.9MB of duplicate code)
 
 ### 3. Test Coverage Added
+
 Created comprehensive tests (`tests/ui/officerCard.spec.ts`) verifying:
+
 - All ranks create cards using the same component
 - All ranks have EXP bar with animation
 - All ranks have trait container
@@ -63,7 +69,9 @@ Created comprehensive tests (`tests/ui/officerCard.spec.ts`) verifying:
 ## Technical Details
 
 ### Experience System
+
 All ranks use the same experience calculation with rank-based multipliers:
+
 ```typescript
 König: 1.5x    // 50% bonus
 Captain: 1.3x  // 30% bonus
@@ -74,7 +82,9 @@ Grunzer: 1.0x  // baseline
 This reflects rank progression while using the same underlying system.
 
 ### Trait System
+
 Traits are categorized and styled consistently:
+
 - **Physical:** Robust, Weich, lange Beine, kurze Beine
 - **Social:** Nobel, Primitiv, Freundlich, Unfreundlich
 - **Mental:** Dumm, Schlau, Weise
@@ -83,7 +93,9 @@ Traits are categorized and styled consistently:
 Archetype traits (Archer, Trapper) are filtered from display as they're shown via other UI elements.
 
 ### Animated EXP Bar
+
 The EXP bar (5th stat) features:
+
 - Gradient animation: `exp-shimmer` (3s infinite)
 - Shine effect: `exp-shine` (2s infinite)
 - Level-up animation with brightness/saturation boost
@@ -92,18 +104,21 @@ The EXP bar (5th stat) features:
 ## Verification
 
 ### Tests
+
 ```bash
 npm run test
 # Result: 27 test files, 105 tests passed
 ```
 
 ### Build
+
 ```bash
 npm run build
 # Result: Success, no errors
 ```
 
 ### Type Check
+
 ```bash
 npm run typecheck
 # Result: Success, no type errors
@@ -121,6 +136,7 @@ The issue request has been addressed by:
 **All officer cards now demonstrably use the same modern design with all features available to every rank.**
 
 The only differences between ranks are:
+
 - Visual styling (CSS colors/gradients) for rank identification
 - Experience multipliers for gameplay balance
 
