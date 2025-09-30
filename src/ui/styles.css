@@ -16,7 +16,6 @@
   --card-bg: #121821;
   --line-rival: #e66;
   --line-ally: #6af;
-  --line-neutral: #888;
   --line-hierarchy: #889;
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -56,6 +55,56 @@
     0 8px 24px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
+}
+
+/* Potential-based portrait frame colors */
+.officer-avatar[data-potential='unusable'] {
+  border-color: rgba(239, 68, 68, 0.6); /* Red - Unbrauchbar */
+}
+
+.officer-avatar[data-potential='dumb'] {
+  border-color: rgba(251, 146, 60, 0.6); /* Orange - Dumm */
+}
+
+.officer-avatar[data-potential='normal'] {
+  border-color: rgba(255, 255, 255, 0.2); /* White - Normal (default) */
+}
+
+.officer-avatar[data-potential='capable'] {
+  border-color: rgba(34, 197, 94, 0.6); /* Green - Fähig */
+}
+
+.officer-avatar[data-potential='above-average'] {
+  border-color: rgba(59, 130, 246, 0.6); /* Blue - Überdurchschnittlich */
+}
+
+.officer-avatar[data-potential='genius'] {
+  border-color: rgba(147, 51, 234, 0.6); /* Purple - Genie */
+}
+
+/* Maintain hover effects for potential colors */
+.officer-avatar[data-potential='unusable']:hover {
+  border-color: rgba(239, 68, 68, 0.8);
+}
+
+.officer-avatar[data-potential='dumb']:hover {
+  border-color: rgba(251, 146, 60, 0.8);
+}
+
+.officer-avatar[data-potential='normal']:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.officer-avatar[data-potential='capable']:hover {
+  border-color: rgba(34, 197, 94, 0.8);
+}
+
+.officer-avatar[data-potential='above-average']:hover {
+  border-color: rgba(59, 130, 246, 0.8);
+}
+
+.officer-avatar[data-potential='genius']:hover {
+  border-color: rgba(147, 51, 234, 0.8);
 }
 
 .officer-avatar--fallback {
@@ -361,35 +410,7 @@ button:disabled {
   background: rgba(15, 23, 42, 0.98);
 }
 
-/* Neutral relations toggle as per redesign (issue #158) */
-.neutral-relations-toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  margin-left: var(--spacing-md);
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-}
-
-.neutral-relations-label {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  user-select: none;
-}
-
-.neutral-counter {
-  color: #888888;
-  font-weight: 600;
-  margin-left: 4px;
-}
-
-.neutral-relations-toggle input[type='checkbox'] {
-  margin: 0;
-  cursor: pointer;
-}
+/* Removed neutral relations toggle - neutral relationships no longer exist */
 
 .rank-list {
   display: flex;
@@ -532,12 +553,7 @@ button:disabled {
     0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.officer-card.has-neutral-relation {
-  border-left: 4px solid #888888; /* Gray for neutral */
-  box-shadow:
-    0 0 0 1px rgba(136, 136, 136, 0.2),
-    0 4px 12px rgba(0, 0, 0, 0.2);
-}
+/* Removed neutral relation card styling - neutral relationships no longer exist */
 
 /* Rank-specific officer card styling as per redesign (issue #158) */
 .officer-card[data-rank='king'] {
@@ -796,12 +812,98 @@ button:disabled {
   height: 100%;
   width: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--line-ally), var(--line-neutral));
+  background: linear-gradient(90deg, var(--line-ally), var(--line-rival));
   transition: width 320ms cubic-bezier(0.4, 0.15, 0.2, 1);
 }
 
 .officer-card__stat-fill.is-animating {
   filter: brightness(1.2);
+}
+
+/* EXP bar specific styling with enhanced animations */
+.officer-card__stat:has(.officer-card__stat-label:contains("Erfahrung")) .officer-card__stat-fill {
+  background: linear-gradient(45deg, #fbbf24, #f59e0b, #d97706, #b45309);
+  background-size: 200% 200%;
+  animation: exp-shimmer 3s ease-in-out infinite;
+  box-shadow: 
+    0 0 8px rgba(251, 191, 36, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.officer-card__stat:has(.officer-card__stat-label:contains("Erfahrung")) .officer-card__stat-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: exp-shine 2s ease-in-out infinite;
+}
+
+/* Alternative selector for EXP bar using nth-child (since :has() may not be supported) */
+.officer-card__stat:nth-child(5) .officer-card__stat-fill {
+  background: linear-gradient(45deg, #fbbf24, #f59e0b, #d97706, #b45309);
+  background-size: 200% 200%;
+  animation: exp-shimmer 3s ease-in-out infinite;
+  box-shadow: 
+    0 0 8px rgba(251, 191, 36, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.officer-card__stat:nth-child(5) .officer-card__stat-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: exp-shine 2s ease-in-out infinite;
+}
+
+/* EXP bar animations */
+@keyframes exp-shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes exp-shine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Enhanced EXP bar when gaining experience */
+.officer-card__stat:nth-child(5) .officer-card__stat-fill.is-animating {
+  animation: exp-shimmer 1s ease-in-out infinite, exp-level-up 0.8s ease-out;
+  filter: brightness(1.4) saturate(1.2);
+}
+
+@keyframes exp-level-up {
+  0% {
+    transform: scaleY(1);
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
+  }
+  50% {
+    transform: scaleY(1.2);
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.6);
+  }
+  100% {
+    transform: scaleY(1);
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
+  }
 }
 
 .officer-card__stat-value {
@@ -856,10 +958,7 @@ button:disabled {
   color: var(--line-rival);
 }
 
-.officer-card__status--neutral {
-  border-color: rgba(136, 136, 136, 0.6);
-  color: var(--line-neutral);
-}
+/* Removed neutral status styling - neutral relationships no longer exist */
 
 .officer-card__status--empty {
   border-style: dashed;
@@ -1286,9 +1385,7 @@ button:disabled {
   color: var(--line-ally);
 }
 
-.relations-tooltip__label[data-type='neutral'] {
-  color: var(--line-neutral);
-}
+/* Removed neutral tooltip styling - neutral relationships no longer exist */
 
 .relations-tooltip__label[data-type='hierarchy'] {
   color: var(--line-hierarchy);

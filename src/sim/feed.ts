@@ -98,7 +98,7 @@ export function createWarcallEntry(
     `Im Sturm auf ${warcall.location} triumphiert der Trupp (${warcall.kind}). (${formatBreakdown(breakdown)})`
   ];
   const templatesFailure = [
-    `${warcall.location} verschlingt die Krieger – ${warcall.kind} scheitert. (${formatBreakdown(breakdown)})`,
+    `${warcall.location} verschlingt die Horde – ${warcall.kind} scheitert. (${formatBreakdown(breakdown)})`,
     `Der Ruf nach Krieg verhallt in ${warcall.location} (${warcall.kind}). (${formatBreakdown(breakdown)})`
   ];
   const text = success
@@ -118,12 +118,11 @@ export function createRelationshipEntry(
   cycle: number,
   actor: Officer,
   target: Officer,
-  type: 'ALLY' | 'RIVAL' | 'NEUTRAL'
+  type: 'ALLY' | 'RIVAL'
 ): FeedEntry {
-  const verbs: Record<'ALLY' | 'RIVAL' | 'NEUTRAL', string[]> = {
+  const verbs: Record<'ALLY' | 'RIVAL', string[]> = {
     ALLY: ['schmiedet', 'besiegelt', 'formt'],
-    RIVAL: ['reizt', 'verhöhnt', 'verletzt'],
-    NEUTRAL: ['begegnet', 'spricht mit', 'betrachtet']
+    RIVAL: ['reizt', 'verhöhnt', 'verletzt']
   };
   const templates = verbs[type].map(
     (verb) => `${actor.name} ${verb} ${target.name}.`

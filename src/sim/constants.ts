@@ -36,16 +36,20 @@ export const PROMOTION_THRESHOLDS: Record<
   Grunzer: { promoteAt: 50, promoteTo: 'Späher' }
 };
 
-export const TRAIT_COMBAT_WEIGHTS: Record<Trait, number> = {
-  Berserker: 0.45,
+export const TRAIT_COMBAT_WEIGHTS: Partial<Record<Trait, number>> = {
   Archer: 0.35,
-  Trapper: 0.25
+  Trapper: 0.25,
+  // Physical traits
+  Robust: 0.05,
+  // Combat specialization traits  
+  'Guter Schütze': 0.25,
+  'Axtexperte': 0.25,
+  'Jäger': 0.25
 };
 
 export const RELATIONSHIP_BONUS = {
   ALLY: 0.35,
-  RIVAL: -0.45,
-  NEUTRAL: 0.0
+  RIVAL: -0.45
 } as const;
 
 export const BLOOD_OATH_DURATION = 10;

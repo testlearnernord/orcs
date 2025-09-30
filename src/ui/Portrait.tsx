@@ -23,6 +23,7 @@ export default function Portrait({
       className={className}
       title={title ?? officer.name}
       rank={officer.rank}
+      potential={officer.stats.potential}
     />
   );
 }

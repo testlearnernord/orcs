@@ -30,7 +30,7 @@ export type OrcArchetype =
   | 'ASSASSIN';
 
 // Relationship types (simplified as per requirements)
-export type RelationshipType = 'ALLY' | 'RIVAL' | 'NEUTRAL';
+export type RelationshipType = 'ALLY' | 'RIVAL';
 
 export interface Relationship {
   officerId1: EntityId;

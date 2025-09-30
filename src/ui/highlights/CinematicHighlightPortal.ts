@@ -1,11 +1,12 @@
 import type { EnhancedHighlight, HighlightDisplayOptions } from './types';
+import { AvatarView } from '@ui/officer/Avatar';
+import type { Officer } from '@sim/types';
 
 interface CinematicHighlightPortalOptions {
   onAdvance: () => void;
-  onSkip: () => void;
   onSkipAll: () => void;
   onToggleEnabled: (enabled: boolean) => void;
-  onViewLog: () => void;
+  // Removed onSkip and onViewLog as only 2 buttons are needed
 }
 
 /**
@@ -29,9 +30,8 @@ export class CinematicHighlightPortal {
   private readonly controlsContainer: HTMLDivElement;
   private readonly enabledCheckbox: HTMLInputElement;
   private readonly advanceBtn: HTMLButtonElement;
-  private readonly skipBtn: HTMLButtonElement;
   private readonly skipAllBtn: HTMLButtonElement;
-  private readonly logBtn: HTMLButtonElement;
+  // Removed skipBtn and logBtn as only 2 buttons are needed
 
   private current: EnhancedHighlight | null = null;
   private hideTimer: number | null = null;
@@ -50,9 +50,8 @@ export class CinematicHighlightPortal {
     this.controlsContainer = this.createControlsContainer();
     this.enabledCheckbox = this.createEnabledCheckbox();
     this.advanceBtn = this.createAdvanceButton();
-    this.skipBtn = this.createSkipButton();
     this.skipAllBtn = this.createSkipAllButton();
-    this.logBtn = this.createLogButton();
+    // Removed skipBtn and logBtn as only 2 buttons are needed
 
     this.assembleElements();
     this.bindEvents();
@@ -144,17 +143,8 @@ export class CinematicHighlightPortal {
     btn.type = 'button';
     btn.className =
       'cinematic-highlight-portal__button cinematic-highlight-portal__button--primary';
-    btn.textContent = 'Weiter';
+    btn.textContent = 'Nächstes Highlight';
     btn.addEventListener('click', () => this.options.onAdvance());
-    return btn;
-  }
-
-  private createSkipButton(): HTMLButtonElement {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'cinematic-highlight-portal__button';
-    btn.textContent = 'Überspringen';
-    btn.addEventListener('click', () => this.options.onSkip());
     return btn;
   }
 
@@ -163,17 +153,8 @@ export class CinematicHighlightPortal {
     btn.type = 'button';
     btn.className =
       'cinematic-highlight-portal__button cinematic-highlight-portal__button--skip-all';
-    btn.textContent = 'Alle überspringen';
+    btn.textContent = 'Alle Überspringen';
     btn.addEventListener('click', () => this.options.onSkipAll());
-    return btn;
-  }
-
-  private createLogButton(): HTMLButtonElement {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'cinematic-highlight-portal__button';
-    btn.textContent = 'Im Log ansehen';
-    btn.addEventListener('click', () => this.options.onViewLog());
     return btn;
   }
 
@@ -188,7 +169,8 @@ export class CinematicHighlightPortal {
 
     const actions = document.createElement('div');
     actions.className = 'cinematic-highlight-portal__actions';
-    actions.append(this.advanceBtn, this.skipBtn, this.skipAllBtn, this.logBtn);
+    // Only show 2 buttons as requested: "Nächstes Highlight" and "Alle Überspringen"
+    actions.append(this.advanceBtn, this.skipAllBtn);
 
     this.controlsContainer.appendChild(actions);
 
@@ -305,16 +287,23 @@ export class CinematicHighlightPortal {
   }
 
   private createOfficerCard(
-    officer: any,
+    officer: Officer,
     role: 'primary' | 'secondary'
   ): HTMLElement {
     const card = document.createElement('div');
     card.className = `cinematic-highlight-portal__officer-card cinematic-highlight-portal__officer-card--${role}`;
 
-    const portrait = document.createElement('div');
-    portrait.className = 'cinematic-highlight-portal__officer-portrait';
-    // Note: Portrait rendering would integrate with existing portrait system
-    portrait.textContent = officer.name.charAt(0).toUpperCase();
+    // Use proper portrait instead of placeholder
+    const portraitContainer = document.createElement('div');
+    portraitContainer.className = 'cinematic-highlight-portal__officer-portrait';
+    
+    const avatarView = new AvatarView({
+      officer: officer,
+      size: 64,
+      className: 'cinematic-highlight-portal__avatar'
+    });
+    
+    portraitContainer.appendChild(avatarView.element);
 
     const info = document.createElement('div');
     info.className = 'cinematic-highlight-portal__officer-info';
@@ -327,17 +316,19 @@ export class CinematicHighlightPortal {
 
     info.appendChild(name);
     info.appendChild(rank);
-    card.appendChild(portrait);
+    card.appendChild(portraitContainer);
     card.appendChild(info);
 
     return card;
   }
 
   private getRelationshipIcon(before: string, after: string): string {
-    if (before === 'neutral' && after === 'rival') return '→ ⚔️';
-    if (before === 'rival' && after === 'neutral') return '⚔️ → 🤝';
-    if (before === 'neutral' && after === 'ally') return '→ 🤝';
-    if (before === 'ally' && after === 'neutral') return '🤝 → ⚪';
+    if (before === 'none' && after === 'rival') return '→ ⚔️';
+    if (before === 'rival' && after === 'none') return '⚔️ → ⚪';
+    if (before === 'none' && after === 'ally') return '→ 🤝';
+    if (before === 'ally' && after === 'none') return '🤝 → ⚪';
+    if (before === 'ally' && after === 'rival') return '🤝 → ⚔️';
+    if (before === 'rival' && after === 'ally') return '⚔️ → 🤝';
     return '↔️';
   }
 
@@ -352,12 +343,8 @@ export class CinematicHighlightPortal {
     this.root.classList.remove('is-leaving');
     window.addEventListener('keydown', this.handleKeydown);
 
-    // Auto-advance after duration if specified
-    if (this.current?.duration) {
-      this.animationTimeout = window.setTimeout(() => {
-        this.options.onAdvance();
-      }, this.current.duration);
-    }
+    // REMOVED: Auto-advance functionality to ensure manual control
+    // Highlights must be advanced manually by the user
   }
 
   private hide(): void {

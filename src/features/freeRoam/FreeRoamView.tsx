@@ -14,10 +14,8 @@ import {
 } from './useSomaiaFreeRoam';
 
 const PHASE_LABEL: Record<Phase, string> = {
-  prep: 'Vorbereitung',
-  travel: 'Auf dem Weg',
-  event: 'Ereignis',
-  resolution: 'Auflösung'
+  START: 'Start',
+  ENDE: 'Ende'
 };
 
 interface FreeRoamViewProps {
