@@ -497,18 +497,15 @@ button:disabled {
 /* Update rank grid for fixed layouts */
 .rank-group--king .rank-grid {
   grid-template-columns: 1fr;
-  max-width: 300px;
-  margin: 0 auto;
+  justify-items: center;
 }
 
 .rank-group--captain .rank-grid {
   grid-template-columns: repeat(3, 1fr);
-  max-width: 960px;
 }
 
 .rank-group--scout .rank-grid {
   grid-template-columns: repeat(4, 1fr);
-  max-width: 1280px;
 }
 
 .rank-group--grunt .rank-grid {
@@ -626,6 +623,7 @@ button:disabled {
     transform 180ms ease,
     box-shadow 200ms ease,
     border-color 200ms ease;
+  width: 280px;
 }
 
 .officer-card:hover,
