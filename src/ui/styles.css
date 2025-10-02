@@ -689,12 +689,16 @@ button:disabled {
   background: none;
 }
 
+.officer-card__portrait-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
 .officer-card__archetype-icon {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.75);
   padding: 4px;

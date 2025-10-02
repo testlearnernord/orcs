@@ -86,6 +86,10 @@ export class OfficerCard {
     this.element.dataset.officerId = officer.id;
     this.element.dataset.status = officer.status === 'DEAD' ? 'dead' : 'active';
 
+    // Create container for portrait and archetype icon
+    const portraitContainer = document.createElement('div');
+    portraitContainer.className = 'officer-card__portrait-container';
+
     const portraitWrapper = document.createElement('div');
     portraitWrapper.className = 'officer-card__portrait';
     this.avatar = new AvatarView({
@@ -96,10 +100,12 @@ export class OfficerCard {
     });
     portraitWrapper.appendChild(this.avatar.element);
 
-    // Add archetype icon overlay
+    // Add archetype icon below portrait
     this.archetypeIcon = document.createElement('img');
     this.archetypeIcon.className = 'officer-card__archetype-icon';
-    portraitWrapper.appendChild(this.archetypeIcon);
+    
+    portraitContainer.appendChild(portraitWrapper);
+    portraitContainer.appendChild(this.archetypeIcon);
 
     const content = document.createElement('div');
     content.className = 'officer-card__content';
@@ -160,7 +166,7 @@ export class OfficerCard {
     this.footer.className = 'officer-card__footer';
     content.appendChild(this.footer);
 
-    this.element.append(portraitWrapper, content);
+    this.element.append(portraitContainer, content);
     this.attachClickListeners();
     this.update(officer);
   }
