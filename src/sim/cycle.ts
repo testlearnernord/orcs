@@ -31,6 +31,7 @@ import {
   planWarcall,
   resolveDueWarcalls
 } from '@sim/warcall';
+import { processAllLevelUps } from '@sim/experience';
 
 function countByRank(officers: Officer[]): Record<Rank, number> {
   const counts: Record<Rank, number> = {
@@ -366,6 +367,11 @@ export function advanceCycle(state: WorldState, rng: RNG): CycleSummary {
   cycleFeed.push(...spawnFeed);
 
   const planned = planNextWarcalls(state, rng);
+
+  // Process level-ups before promotions (officers gain levels from experience)
+  const levelUpResult = processAllLevelUps(state.officers, rng, state.cycle);
+  state.officers = levelUpResult.officers;
+  cycleFeed.push(...levelUpResult.feed);
 
   const promotionResult = processPromotions(state, rng);
   cycleFeed.push(...promotionResult.feed);

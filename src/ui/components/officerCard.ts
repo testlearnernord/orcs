@@ -1,6 +1,7 @@
 import type { Officer, RelationshipType } from '@sim/types';
 import { measure, flip } from '@ui/utils/flip';
 import { AvatarView } from '@ui/officer/Avatar';
+import { getExpForLevel, getCurrentExp } from '@sim/experience';
 import archerIcon from '../../assets/archetypes/archer.png';
 import berserkerIcon from '../../assets/archetypes/berserker.png';
 import trapperIcon from '../../assets/archetypes/trapper.png';
@@ -288,14 +289,6 @@ export class OfficerCard {
   }
 
   /**
-   * Calculate experience required for a specific level
-   */
-  private getExpForLevel(level: number): number {
-    // Simple exponential formula: level^2 * 100
-    return level * level * 100;
-  }
-
-  /**
    * Calculate current experience and progress for an officer
    * Now based on actual gameplay events rather than random values
    */
@@ -306,13 +299,11 @@ export class OfficerCard {
     displayText: string;
   } {
     const currentLevel = officer.stats.level;
-    const currentLevelExp = this.getExpForLevel(currentLevel);
-    const nextLevelExp = this.getExpForLevel(currentLevel + 1);
+    const currentLevelExp = getExpForLevel(currentLevel);
+    const nextLevelExp = getExpForLevel(currentLevel + 1);
 
-    // Calculate actual experience based on gameplay metrics
-    const baseExp = currentLevelExp;
-    const bonusExp = this.calculateBonusExp(officer);
-    const currentExp = baseExp + bonusExp;
+    // Use shared calculation from simulation
+    const currentExp = getCurrentExp(officer);
 
     const expRange = nextLevelExp - currentLevelExp;
     const progress = Math.min(
@@ -331,37 +322,13 @@ export class OfficerCard {
 
   /**
    * Calculate bonus experience based on officer performance and traits
+   * DEPRECATED: This is now handled by the simulation layer
+   * Kept for backwards compatibility but not used
    */
   private calculateBonusExp(officer: Officer): number {
-    let bonusExp = 0;
-
-    // Base experience from merit (successful actions earn both merit and exp)
-    bonusExp += Math.floor(officer.merit * 0.8); // 80% of merit becomes exp
-
-    // Level-based progression bonus
-    bonusExp += (officer.stats.level - 1) * 150;
-
-    // Trait-based experience modifiers
-    if (officer.traits.includes('Schlau')) {
-      bonusExp *= 1.25; // +25% exp for smart officers
-    }
-    if (officer.traits.includes('Dumm')) {
-      bonusExp *= 0.75; // -25% exp for dumb officers
-    }
-    if (officer.traits.includes('Weise')) {
-      bonusExp *= 1.1; // +10% exp for wise officers
-    }
-
-    // Rank-based experience scaling
-    const rankMultipliers: Partial<Record<Officer['rank'], number>> = {
-      König: 1.5,
-      Captain: 1.3,
-      Späher: 1.1,
-      Grunzer: 1.0
-    };
-    bonusExp *= rankMultipliers[officer.rank] || 1.0;
-
-    return Math.floor(bonusExp);
+    // This is deprecated - experience is now calculated in the simulation
+    // The UI should just display what's calculated by getCurrentExp
+    return 0;
   }
 
   private updateStats(officer: Officer, previous: Officer): void {
