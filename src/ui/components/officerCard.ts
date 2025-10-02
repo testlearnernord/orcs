@@ -1,6 +1,9 @@
 import type { Officer, RelationshipType } from '@sim/types';
 import { measure, flip } from '@ui/utils/flip';
 import { AvatarView } from '@ui/officer/Avatar';
+import archerIcon from '../../assets/archetypes/archer.png';
+import berserkerIcon from '../../assets/archetypes/berserker.png';
+import trapperIcon from '../../assets/archetypes/trapper.png';
 
 export interface OfficerCardOptions {
   onOpenDetails?: (officer: Officer) => void;
@@ -42,11 +45,11 @@ const RANK_SLUG: Record<Officer['rank'], RankSlug> = {
   Grunzer: 'grunt'
 };
 
-// Archetype icon paths
+// Archetype icon paths - imported as modules for Vite to resolve correctly
 const ARCHETYPE_ICONS: Record<string, string> = {
-  Berserker: '/assets/archetypes/berserker.png',
-  Archer: '/assets/archetypes/archer.png',
-  Trapper: '/assets/archetypes/trapper.png'
+  Berserker: berserkerIcon,
+  Archer: archerIcon,
+  Trapper: trapperIcon
 };
 
 function deriveArchetype(officer: Officer): string {
