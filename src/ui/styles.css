@@ -825,7 +825,7 @@ button:disabled {
 /* STR (Stärke) - Red/Crimson gradient */
 .officer-card__stat:nth-child(1) .officer-card__stat-fill {
   background: linear-gradient(90deg, #dc2626, #ef4444, #f87171);
-  box-shadow: 
+  box-shadow:
     0 0 8px rgba(220, 38, 38, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
@@ -833,7 +833,7 @@ button:disabled {
 /* DEX (Geschick) - Green gradient */
 .officer-card__stat:nth-child(2) .officer-card__stat-fill {
   background: linear-gradient(90deg, #16a34a, #22c55e, #4ade80);
-  box-shadow: 
+  box-shadow:
     0 0 8px rgba(22, 163, 74, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
@@ -841,7 +841,7 @@ button:disabled {
 /* INT (Intelligenz) - Blue/Cyan gradient */
 .officer-card__stat:nth-child(3) .officer-card__stat-fill {
   background: linear-gradient(90deg, #0284c7, #0ea5e9, #38bdf8);
-  box-shadow: 
+  box-shadow:
     0 0 8px rgba(2, 132, 199, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
@@ -849,7 +849,7 @@ button:disabled {
 /* HP (Lebenspunkte) - Orange/Red gradient */
 .officer-card__stat:nth-child(4) .officer-card__stat-fill {
   background: linear-gradient(90deg, #ea580c, #f97316, #fb923c);
-  box-shadow: 
+  box-shadow:
     0 0 8px rgba(234, 88, 12, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
