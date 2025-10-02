@@ -86,11 +86,16 @@ describe('Promotion Thresholds and Grunzer Spawning', () => {
     const späher = createOfficer(rng, 'Späher', 0);
     const captain = createOfficer(rng, 'Captain', 0);
 
-    // Verify merit progression (with some variance)
+    // Verify merit progression (with some variance from base values)
+    // Grunzer start with ~10 merit
     expect(grunzer.merit).toBeLessThanOrEqual(25);
-    expect(späher.merit).toBeGreaterThanOrEqual(65);
-    expect(späher.merit).toBeLessThanOrEqual(95);
-    expect(captain.merit).toBeGreaterThanOrEqual(105);
-    expect(captain.merit).toBeLessThanOrEqual(135);
+    
+    // Späher start with ~500 merit (must have earned this to be promoted)
+    expect(späher.merit).toBeGreaterThanOrEqual(485);
+    expect(späher.merit).toBeLessThanOrEqual(515);
+    
+    // Captains start with ~1000 merit (must have earned this to be promoted)
+    expect(captain.merit).toBeGreaterThanOrEqual(985);
+    expect(captain.merit).toBeLessThanOrEqual(1015);
   });
 });

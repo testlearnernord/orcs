@@ -29,7 +29,7 @@ describe('Simulation verification with new thresholds', () => {
 
     // Show Späher stats
     const späher = state.officers.filter((o) => o.rank === 'Späher').slice(0, 2);
-    console.log('\nSample Späher stats (should be Level 4-7 with ~80 merit):');
+    console.log('\nSample Späher stats (should be Level 4-7 with ~500 merit):');
     späher.forEach((s) => {
       console.log(`  ${s.name}: Level ${s.stats.level}, Merit ${s.merit}, Potential: ${s.stats.potential}`);
       console.log(`    STR: ${s.stats.str}, DEX: ${s.stats.dex}, INT: ${s.stats.int}, HP: ${s.stats.hp}/${s.stats.maxHp}`);
@@ -37,7 +37,7 @@ describe('Simulation verification with new thresholds', () => {
 
     // Show Captain stats
     const captains = state.officers.filter((o) => o.rank === 'Captain').slice(0, 2);
-    console.log('\nSample Captain stats (should be Level 6-10 with ~120 merit):');
+    console.log('\nSample Captain stats (should be Level 6-10 with ~1000 merit):');
     captains.forEach((c) => {
       console.log(`  ${c.name}: Level ${c.stats.level}, Merit ${c.merit}, Potential: ${c.stats.potential}`);
       console.log(`    STR: ${c.stats.str}, DEX: ${c.stats.dex}, INT: ${c.stats.int}, HP: ${c.stats.hp}/${c.stats.maxHp}`);

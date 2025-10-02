@@ -35,10 +35,10 @@ const NAME_SUFFIX = [
 ];
 
 const BASE_MERIT: Record<Rank, number> = {
-  König: 220,
-  Spieler: 160,
-  Captain: 120,
-  Späher: 80,
+  König: 1600,
+  Spieler: 1200,
+  Captain: 1000,
+  Späher: 500,
   Grunzer: 10
 };
 
