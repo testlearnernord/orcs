@@ -1,0 +1,8 @@
+<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Berserker Icon: Horned helmet/axe style -->
+  <rect x="8" y="8" width="48" height="48" fill="#8B4513" stroke="#000" stroke-width="2"/>
+  <path d="M 16 24 L 24 16 L 32 24 Z" fill="#6B3410" stroke="#000" stroke-width="1"/>
+  <path d="M 32 24 L 40 16 L 48 24 Z" fill="#6B3410" stroke="#000" stroke-width="1"/>
+  <rect x="24" y="32" width="16" height="8" fill="#A0A0A0" stroke="#000" stroke-width="1"/>
+  <circle cx="32" cy="48" r="4" fill="#FFD700" stroke="#000" stroke-width="1"/>
+</svg>

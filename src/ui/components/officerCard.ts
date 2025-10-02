@@ -42,11 +42,30 @@ const RANK_SLUG: Record<Officer['rank'], RankSlug> = {
   Grunzer: 'grunt'
 };
 
+// Archetype icon paths
+const ARCHETYPE_ICONS: Record<string, string> = {
+  Berserker: '/assets/archetypes/berserker.svg',
+  Archer: '/assets/archetypes/archer.svg',
+  Trapper: '/assets/archetypes/trapper.svg'
+};
+
+function deriveArchetype(officer: Officer): string {
+  // Use primary trait to derive archetype, or default to Berserker
+  if (officer.traits.includes('Archer')) {
+    return 'Archer';
+  }
+  if (officer.traits.includes('Trapper')) {
+    return 'Trapper';
+  }
+  return 'Berserker'; // Default archetype for officers without specific archetype traits
+}
+
 export class OfficerCard {
   readonly element: HTMLElement;
   private readonly options: OfficerCardOptions;
   private officer: Officer;
   private readonly avatar: AvatarView;
+  private readonly archetypeIcon: HTMLImageElement;
   private readonly nameEl: HTMLHeadingElement;
   private readonly levelBadge: HTMLElement;
   private readonly rankBadge: HTMLElement;
@@ -76,6 +95,11 @@ export class OfficerCard {
       title: officer.name
     });
     portraitWrapper.appendChild(this.avatar.element);
+
+    // Add archetype icon overlay
+    this.archetypeIcon = document.createElement('img');
+    this.archetypeIcon.className = 'officer-card__archetype-icon';
+    portraitWrapper.appendChild(this.archetypeIcon);
 
     const content = document.createElement('div');
     content.className = 'officer-card__content';
@@ -160,6 +184,17 @@ export class OfficerCard {
     const slug = RANK_SLUG[rank];
     this.element.dataset.rank = slug;
     this.rankBadge.textContent = rank;
+  }
+
+  private updateArchetypeIcon(officer: Officer): void {
+    const archetype = deriveArchetype(officer);
+    const iconPath = ARCHETYPE_ICONS[archetype];
+    if (iconPath) {
+      this.archetypeIcon.src = iconPath;
+      this.archetypeIcon.alt = `${archetype} Icon`;
+      this.archetypeIcon.title = archetype;
+      this.element.dataset.archetype = archetype.toLowerCase();
+    }
   }
 
   private updateMeta(officer: Officer): void {
@@ -441,6 +476,7 @@ export class OfficerCard {
     this.element.dataset.officerId = officer.id;
     this.element.dataset.status = officer.status === 'DEAD' ? 'dead' : 'active';
     this.setRank(officer.rank);
+    this.updateArchetypeIcon(officer);
     this.avatar.update({
       officer,
       size: 96,
