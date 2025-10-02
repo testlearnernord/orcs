@@ -31,6 +31,7 @@ coverage/
 # but allow the Vite bundle files (JS/CSS) in docs/assets/ to be committed for GitHub Pages
 docs/assets/maps/
 docs/assets/battlesystem/
+docs/assets/archetypes/
 public/assets/
 
 # allow portrait atlases in docs (needed for GitHub Pages deployment)
