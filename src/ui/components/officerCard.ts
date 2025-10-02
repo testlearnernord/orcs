@@ -194,7 +194,8 @@ export class OfficerCard {
     if (iconPath) {
       this.archetypeIcon.src = iconPath;
       this.archetypeIcon.alt = `${archetype} Icon`;
-      this.archetypeIcon.title = archetype;
+      // Add tooltip showing the full archetype name in uppercase
+      this.archetypeIcon.title = archetype.toUpperCase();
       this.element.dataset.archetype = archetype.toLowerCase();
     }
   }
