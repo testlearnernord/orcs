@@ -58,9 +58,16 @@ const nemesisApi: NemesisApi = {
   advanceCycle: () => store.tick()
 };
 
+function shouldSkipMainMenu(): boolean {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  const modeParam = params.get('mode');
+  return modeParam !== null && ['spectate', 'player', 'freeRoam'].includes(modeParam);
+}
+
 export default function App() {
   const hostRef = useRef<HTMLDivElement | null>(null);
-  const [showMainMenu, setShowMainMenu] = useState(true);
+  const [showMainMenu, setShowMainMenu] = useState(() => !shouldSkipMainMenu());
   const mainMenuRef = useRef<MainMenu | null>(null);
 
   useEffect(() => {
@@ -141,10 +148,9 @@ export default function App() {
       const params = new URLSearchParams(window.location.search);
       const modeParam = params.get('mode');
       if (modeParam && ['spectate', 'player', 'freeRoam'].includes(modeParam)) {
-        // Direct mode access - skip main menu
+        // Direct mode access - set the mode
         const gameMode = resolveInitialMode();
         uiMode.setMode(gameMode);
-        setShowMainMenu(false);
       }
     }
   }, []);
