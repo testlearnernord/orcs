@@ -205,3 +205,182 @@ export function processAllLevelUps(
   
   return { officers: updatedOfficers, feed, levelUps };
 }
+
+/**
+ * Rivalry Challenge System
+ * Officers with high ambition can challenge their rivals to improve their standing.
+ * This gives them additional opportunities to gain merit and experience.
+ */
+
+/**
+ * Check if officer should challenge a rival
+ * Returns true if officer is ambitious enough and has suitable rivals
+ */
+export function shouldChallengeRival(
+  officer: Officer,
+  rng: RNG
+): boolean {
+  // Only certain ambitions lead to challenges
+  const ambitiousGoals = [
+    'Möchte stärker werden',
+    'Möchte König werden',
+    'Möchte den König stürzen',
+    'Möchte seinen Rivalen töten'
+  ];
+  
+  const isAmbitious = ambitiousGoals.some(goal => 
+    officer.mood.ambition.includes(goal)
+  );
+  
+  if (!isAmbitious) return false;
+  
+  // Officers with 'Unfreundlich' trait are more likely to challenge
+  const challengeChance = officer.traits.includes('Unfreundlich') ? 0.3 : 0.15;
+  
+  return rng.chance(challengeChance);
+}
+
+/**
+ * Find best rival to challenge
+ * Prefers rivals of similar or slightly higher rank
+ */
+export function findRivalToChallenge(
+  officer: Officer,
+  allOfficers: Officer[]
+): Officer | undefined {
+  const rivals = officer.relationships
+    .filter(rel => rel.type === 'RIVAL')
+    .map(rel => allOfficers.find(o => o.id === rel.with))
+    .filter((o): o is Officer => o !== undefined && o.status === 'ALIVE');
+  
+  if (rivals.length === 0) return undefined;
+  
+  // Prefer rivals of equal or higher rank for meaningful challenges
+  const rankOrder: Record<Officer['rank'], number> = {
+    'Grunzer': 1,
+    'Späher': 2,
+    'Captain': 3,
+    'Spieler': 4,
+    'König': 5
+  };
+  
+  const officerRankValue = rankOrder[officer.rank];
+  
+  // Sort rivals by rank (prefer equal or one rank higher)
+  const sortedRivals = rivals.sort((a, b) => {
+    const aRankValue = rankOrder[a.rank];
+    const bRankValue = rankOrder[b.rank];
+    
+    // Calculate distance from officer's rank
+    const aDist = Math.abs(aRankValue - officerRankValue);
+    const bDist = Math.abs(bRankValue - officerRankValue);
+    
+    // Prefer closer ranks, with slight preference for higher ranks
+    if (aDist !== bDist) return aDist - bDist;
+    
+    // If same distance, prefer higher rank
+    return bRankValue - aRankValue;
+  });
+  
+  return sortedRivals[0];
+}
+
+/**
+ * Process rivalry challenges
+ * Officers challenge their rivals, gaining merit and experience
+ */
+export function processRivalryChallenges(
+  officers: Officer[],
+  rng: RNG,
+  cycle: number
+): {
+  officers: Officer[];
+  feed: FeedEntry[];
+  challenges: { challengerId: string; rivalId: string; success: boolean }[];
+} {
+  const feed: FeedEntry[] = [];
+  const challenges: { challengerId: string; rivalId: string; success: boolean }[] = [];
+  const updatedOfficers = [...officers];
+  
+  // Use a forked RNG for rivalry challenges to not affect the main simulation RNG sequence
+  const challengeRng = rng.fork(`rivalry-challenges:${cycle}`);
+  
+  // Track which officers have been involved in challenges this cycle
+  const involvedOfficers = new Set<string>();
+  
+  for (let i = 0; i < officers.length; i++) {
+    const officer = updatedOfficers[i];
+    
+    // Skip if already involved in a challenge or is König
+    if (involvedOfficers.has(officer.id) || officer.rank === 'König') {
+      continue;
+    }
+    
+    // Check if officer should challenge a rival
+    if (!shouldChallengeRival(officer, challengeRng.fork(`check:${officer.id}`))) {
+      continue;
+    }
+    
+    // Find a suitable rival
+    const rival = findRivalToChallenge(officer, updatedOfficers);
+    if (!rival || involvedOfficers.has(rival.id)) {
+      continue;
+    }
+    
+    // Calculate challenge success based on levels and stats
+    const officerPower = 
+      officer.stats.level * 10 +
+      officer.stats.str +
+      officer.stats.dex +
+      officer.stats.int;
+    
+    const rivalPower =
+      rival.stats.level * 10 +
+      rival.stats.str +
+      rival.stats.dex +
+      rival.stats.int;
+    
+    // Success chance based on relative power
+    const powerRatio = officerPower / (officerPower + rivalPower);
+    const randomFactor = challengeRng.fork(`outcome:${officer.id}`).next() * 0.3;
+    const successChance = powerRatio + randomFactor;
+    
+    const success = challengeRng.fork(`result:${officer.id}`).chance(successChance);
+    
+    // Apply merit changes
+    const meritGain = success ? 15 : 5; // Even failures give some merit for trying
+    const meritLoss = success ? -5 : -2; // Rivals lose less merit
+    
+    updatedOfficers[i] = {
+      ...officer,
+      merit: Math.max(0, officer.merit + meritGain)
+    };
+    
+    const rivalIndex = updatedOfficers.findIndex(o => o.id === rival.id);
+    if (rivalIndex !== -1) {
+      updatedOfficers[rivalIndex] = {
+        ...rival,
+        merit: Math.max(0, rival.merit + meritLoss)
+      };
+    }
+    
+    // Mark both as involved
+    involvedOfficers.add(officer.id);
+    involvedOfficers.add(rival.id);
+    
+    // Create feed entry
+    const feedText = success
+      ? `${officer.name} fordert ${rival.name} heraus und triumphiert! (+${meritGain} Merit)`
+      : `${officer.name} fordert ${rival.name} heraus, unterliegt aber. (+${meritGain} Merit für den Versuch)`;
+    
+    feed.push(createGeneralEntry(challengeRng, cycle, feedText));
+    
+    challenges.push({
+      challengerId: officer.id,
+      rivalId: rival.id,
+      success
+    });
+  }
+  
+  return { officers: updatedOfficers, feed, challenges };
+}
