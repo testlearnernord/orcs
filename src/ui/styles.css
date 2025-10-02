@@ -607,6 +607,7 @@ button:disabled {
 }
 
 .officer-card {
+  position: relative;
   display: grid;
   grid-template-columns: 96px 1fr;
   gap: var(--spacing-lg);
@@ -691,8 +692,8 @@ button:disabled {
 
 .officer-card__archetype-icon {
   position: absolute;
-  bottom: 4px;
-  left: 4px;
+  bottom: 12px;
+  left: 12px;
   width: 32px;
   height: 32px;
   border-radius: 6px;

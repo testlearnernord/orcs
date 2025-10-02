@@ -99,11 +99,6 @@ export class OfficerCard {
     });
     portraitWrapper.appendChild(this.avatar.element);
 
-    // Add archetype icon in lower-left corner of portrait
-    this.archetypeIcon = document.createElement('img');
-    this.archetypeIcon.className = 'officer-card__archetype-icon';
-    portraitWrapper.appendChild(this.archetypeIcon);
-
     const content = document.createElement('div');
     content.className = 'officer-card__content';
 
@@ -163,7 +158,11 @@ export class OfficerCard {
     this.footer.className = 'officer-card__footer';
     content.appendChild(this.footer);
 
-    this.element.append(portraitWrapper, content);
+    // Add archetype icon in lower-left corner of officer card
+    this.archetypeIcon = document.createElement('img');
+    this.archetypeIcon.className = 'officer-card__archetype-icon';
+
+    this.element.append(portraitWrapper, content, this.archetypeIcon);
     this.attachClickListeners();
     this.update(officer);
   }
