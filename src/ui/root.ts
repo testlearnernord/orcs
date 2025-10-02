@@ -23,7 +23,7 @@ import { FeedView } from '@ui/components/feed';
 import { GraveyardPanel } from '@ui/components/graveyard';
 import { OfficerCard } from '@ui/components/officerCard';
 import { EmptySlot } from '@ui/components/emptySlot';
-import { DetailsPanel } from '@ui/components/detailsPanel';
+import { OfficerDetailsPopup } from '@ui/components/officerDetailsPopup';
 import {
   buildRelationEdges,
   RelationsOverlay
@@ -104,7 +104,7 @@ export class NemesisUI {
   private relations: RelationsOverlay | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private lastEdges: RelationEdge[] = [];
-  private readonly detailsPanel: DetailsPanel;
+  private readonly officerDetailsPopup: OfficerDetailsPopup;
   private readonly warcallDock: WarcallsDock;
   private readonly warcallModal: WarcallModal;
   private readonly helpOverlay = new HelpOverlay();
@@ -138,7 +138,7 @@ export class NemesisUI {
     this.syncOfficerIndex(state.officers);
     this.graveyard = new GraveyardPanel(state.graveyard);
 
-    this.detailsPanel = new DetailsPanel({
+    this.officerDetailsPopup = new OfficerDetailsPopup({
       resolveName: (id) => this.officerIndex.get(id)?.name
     });
 
@@ -528,8 +528,7 @@ export class NemesisUI {
       audioContainer.appendChild(this.audioControls.getElement());
     }
 
-    // Mount details panel at the bottom of the page
-    this.detailsPanel.mount(document.body);
+    // OfficerDetailsPopup is created but not mounted (it mounts itself on show)
 
     this.registerUIEvents(app);
     this.syncModeUI();
@@ -895,7 +894,7 @@ export class NemesisUI {
         } else {
           const card = new OfficerCard(officer, {
             onOfficerClick: (officer) =>
-              this.detailsPanel.showOfficerDetails(officer)
+              this.officerDetailsPopup.show(officer)
           });
           this.cards.set(officer.id, card);
           grid.appendChild(card.element);
@@ -957,7 +956,7 @@ export class NemesisUI {
           if (!card) {
             card = new OfficerCard(officer, {
               onOfficerClick: (officer) =>
-                this.detailsPanel.showOfficerDetails(officer)
+                this.officerDetailsPopup.show(officer)
             });
             this.cards.set(officer.id, card);
             this.lastRenderedOfficerState.set(officer.id, {
@@ -1340,8 +1339,8 @@ export class NemesisUI {
     this.audioManager.destroy();
     this.audioControls?.destroy();
 
-    // Clean up details panel
-    this.detailsPanel.destroy();
+    // Clean up officer details popup
+    this.officerDetailsPopup.destroy();
 
     // Clean up other resources
     this.resizeObserver?.disconnect();
