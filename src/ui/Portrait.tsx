@@ -17,13 +17,16 @@ export default function Portrait({
 }: Props) {
   // Ensure we always have a valid ID for portrait lookup
   // Use stableId if available and non-empty, otherwise fall back to id
-  const stableId = officer.stableId && officer.stableId.trim() 
-    ? officer.stableId.trim() 
-    : officer.id;
+  // Fix: Handle edge cases where stableId might be empty string or whitespace
+  const effectiveId = React.useMemo(() => {
+    const stable = officer.stableId?.trim();
+    const regular = officer.id?.trim();
+    return stable || regular || `fallback-${officer.name}`;
+  }, [officer.id, officer.stableId, officer.name]);
   
   return (
     <OfficerAvatar
-      officerId={stableId}
+      officerId={effectiveId}
       size={size}
       className={className}
       title={title ?? officer.name}

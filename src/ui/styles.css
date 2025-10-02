@@ -694,15 +694,16 @@ button:disabled {
   position: absolute;
   bottom: 12px;
   left: 12px;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
   background: rgba(0, 0, 0, 0.85);
-  padding: 4px;
+  padding: 6px;
   border: 2px solid rgba(255, 255, 255, 0.4);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
   transition: all 200ms ease;
   z-index: 2;
+  cursor: help;
 }
 
 .officer-card:hover .officer-card__archetype-icon {
