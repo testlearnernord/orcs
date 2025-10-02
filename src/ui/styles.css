@@ -623,7 +623,7 @@ button:disabled {
     transform 180ms ease,
     box-shadow 200ms ease,
     border-color 200ms ease;
-  width: 280px;
+  width: 360px;
 }
 
 .officer-card:hover,
@@ -800,7 +800,7 @@ button:disabled {
 }
 
 .officer-card__stat-bar {
-  height: 6px;
+  height: 10px;
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.82);
   overflow: hidden;
