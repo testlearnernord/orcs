@@ -325,7 +325,7 @@ export class OfficerCard {
    * DEPRECATED: This is now handled by the simulation layer
    * Kept for backwards compatibility but not used
    */
-  private calculateBonusExp(officer: Officer): number {
+  private calculateBonusExp(_officer: Officer): number {
     // This is deprecated - experience is now calculated in the simulation
     // The UI should just display what's calculated by getCurrentExp
     return 0;
