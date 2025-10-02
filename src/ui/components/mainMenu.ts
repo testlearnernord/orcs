@@ -123,10 +123,18 @@ export class MainMenu {
   }
 
   private selectMode(mode: MenuMode): void {
+    // Pause audio before transitioning to prevent double music
+    if (this.audioManager.isAudioAvailable()) {
+      this.audioManager.pause();
+    }
     this.emit('menu:select', mode);
   }
 
   destroy(): void {
+    // Pause audio when menu is destroyed
+    if (this.audioManager.isAudioAvailable()) {
+      this.audioManager.pause();
+    }
     if (this.container && this.container.parentNode) {
       this.container.parentNode.removeChild(this.container);
     }

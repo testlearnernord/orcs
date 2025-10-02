@@ -15,7 +15,12 @@ export default function Portrait({
   className = '',
   title
 }: Props) {
-  const stableId = officer.stableId?.trim() || officer.id;
+  // Ensure we always have a valid ID for portrait lookup
+  // Use stableId if available and non-empty, otherwise fall back to id
+  const stableId = officer.stableId && officer.stableId.trim() 
+    ? officer.stableId.trim() 
+    : officer.id;
+  
   return (
     <OfficerAvatar
       officerId={stableId}
