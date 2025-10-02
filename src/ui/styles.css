@@ -689,22 +689,19 @@ button:disabled {
   background: none;
 }
 
-.officer-card__portrait-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
 .officer-card__archetype-icon {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.85);
   padding: 4px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
   transition: all 200ms ease;
+  z-index: 2;
 }
 
 .officer-card:hover .officer-card__archetype-icon {
