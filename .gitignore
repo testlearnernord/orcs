@@ -29,7 +29,10 @@ coverage/
 
 # ignore generated build artifacts in docs and public
 # but allow the Vite bundle files (JS/CSS) in docs/assets/ to be committed for GitHub Pages
-docs/assets/orcs/
 docs/assets/maps/
 docs/assets/battlesystem/
 public/assets/
+
+# allow portrait atlases in docs (needed for GitHub Pages deployment)
+!docs/assets/orcs/portraits/*.png
+!docs/assets/orcs/portraits/*.webp
