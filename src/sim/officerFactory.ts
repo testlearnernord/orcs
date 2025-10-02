@@ -39,7 +39,7 @@ const BASE_MERIT: Record<Rank, number> = {
   Spieler: 160,
   Captain: 120,
   Späher: 80,
-  Grunzer: 40
+  Grunzer: 10
 };
 
 const LEVEL_RANGE: Record<Rank, [number, number]> = {
@@ -47,7 +47,7 @@ const LEVEL_RANGE: Record<Rank, [number, number]> = {
   Spieler: [10, 12],
   Captain: [6, 10],
   Späher: [4, 7],
-  Grunzer: [2, 5]
+  Grunzer: [1, 1]
 };
 
 function randomName(rng: RNG): string {
