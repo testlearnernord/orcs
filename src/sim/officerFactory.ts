@@ -35,11 +35,11 @@ const NAME_SUFFIX = [
 ];
 
 const BASE_MERIT: Record<Rank, number> = {
-  König: 220,
-  Spieler: 160,
-  Captain: 120,
-  Späher: 80,
-  Grunzer: 40
+  König: 1600,
+  Spieler: 1200,
+  Captain: 1000,
+  Späher: 500,
+  Grunzer: 10
 };
 
 const LEVEL_RANGE: Record<Rank, [number, number]> = {
@@ -47,7 +47,7 @@ const LEVEL_RANGE: Record<Rank, [number, number]> = {
   Spieler: [10, 12],
   Captain: [6, 10],
   Späher: [4, 7],
-  Grunzer: [2, 5]
+  Grunzer: [1, 1]
 };
 
 function randomName(rng: RNG): string {

@@ -28,12 +28,12 @@ export const PROMOTION_THRESHOLDS: Record<
     demoteTo: 'Späher'
   },
   Späher: {
-    promoteAt: 90,
+    promoteAt: 1000,
     promoteTo: 'Captain',
     demoteBelow: 20,
     demoteTo: 'Grunzer'
   },
-  Grunzer: { promoteAt: 50, promoteTo: 'Späher' }
+  Grunzer: { promoteAt: 500, promoteTo: 'Späher' }
 };
 
 export const TRAIT_COMBAT_WEIGHTS: Partial<Record<Trait, number>> = {
