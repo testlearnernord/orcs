@@ -5,12 +5,12 @@ import { PROMOTION_THRESHOLDS } from '@sim/constants';
 
 describe('Promotion Thresholds and Grunzer Spawning', () => {
   it('should have correct promotion thresholds for authentic simulation', () => {
-    // Verify Grunzer to Späher requires 500 Merit
-    expect(PROMOTION_THRESHOLDS.Grunzer.promoteAt).toBe(500);
+    // Verify Grunzer to Späher requires 250 Merit (reduced for easier progression)
+    expect(PROMOTION_THRESHOLDS.Grunzer.promoteAt).toBe(250);
     expect(PROMOTION_THRESHOLDS.Grunzer.promoteTo).toBe('Späher');
 
-    // Verify Späher to Captain requires 1000 Merit
-    expect(PROMOTION_THRESHOLDS.Späher.promoteAt).toBe(1000);
+    // Verify Späher to Captain requires 500 Merit (reduced for easier progression)
+    expect(PROMOTION_THRESHOLDS.Späher.promoteAt).toBe(500);
     expect(PROMOTION_THRESHOLDS.Späher.promoteTo).toBe('Captain');
   });
 
@@ -21,8 +21,8 @@ describe('Promotion Thresholds and Grunzer Spawning', () => {
     // Grunzer must always spawn at level 1
     expect(grunzer.stats.level).toBe(1);
 
-    // Grunzer should have low merit (around 10, with small variance)
-    expect(grunzer.merit).toBeLessThanOrEqual(25);
+    // Grunzer should have very low merit (around 5, with small variance)
+    expect(grunzer.merit).toBeLessThanOrEqual(20);
     expect(grunzer.merit).toBeGreaterThanOrEqual(0);
   });
 
@@ -87,8 +87,8 @@ describe('Promotion Thresholds and Grunzer Spawning', () => {
     const captain = createOfficer(rng, 'Captain', 0);
 
     // Verify merit progression (with some variance from base values)
-    // Grunzer start with ~10 merit
-    expect(grunzer.merit).toBeLessThanOrEqual(25);
+    // Grunzer start with ~5 merit (very low for new recruits)
+    expect(grunzer.merit).toBeLessThanOrEqual(20);
     
     // Späher start with ~500 merit (must have earned this to be promoted)
     expect(späher.merit).toBeGreaterThanOrEqual(485);

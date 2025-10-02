@@ -39,7 +39,7 @@ const BASE_MERIT: Record<Rank, number> = {
   Spieler: 1200,
   Captain: 1000,
   Späher: 500,
-  Grunzer: 10
+  Grunzer: 5 // Very low starting merit for new recruits
 };
 
 const LEVEL_RANGE: Record<Rank, [number, number]> = {
