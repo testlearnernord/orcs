@@ -44,9 +44,9 @@ const RANK_SLUG: Record<Officer['rank'], RankSlug> = {
 
 // Archetype icon paths
 const ARCHETYPE_ICONS: Record<string, string> = {
-  Berserker: '/assets/archetypes/berserker.svg',
-  Archer: '/assets/archetypes/archer.svg',
-  Trapper: '/assets/archetypes/trapper.svg'
+  Berserker: '/assets/archetypes/berserker.png',
+  Archer: '/assets/archetypes/archer.png',
+  Trapper: '/assets/archetypes/trapper.png'
 };
 
 function deriveArchetype(officer: Officer): string {
