@@ -56,8 +56,8 @@ describe('Simulation Balance', () => {
     );
 
     expect(ranks['König']).toBe(1);
-    expect(ranks['Captain']).toBeGreaterThan(0); // Should have some captains from promotions
-    expect(ranks['Späher']).toBeGreaterThan(0); // Should have some scouts from promotions
+    expect(ranks['Captain'] || 0).toBeGreaterThan(0); // Should have some captains from promotions
+    expect(ranks['Späher'] || 0).toBeGreaterThan(0); // Should have some scouts from promotions
   });
 
   it('should have improved warcall success rates', () => {
