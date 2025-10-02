@@ -787,7 +787,7 @@ button:disabled {
 
 .officer-card__stat {
   display: grid;
-  grid-template-columns: 70px 1fr 50px;
+  grid-template-columns: 90px 1fr 64px;
   align-items: center;
   gap: var(--spacing-sm);
 }
