@@ -623,7 +623,7 @@ button:disabled {
     transform 180ms ease,
     box-shadow 200ms ease,
     border-color 200ms ease;
-  width: 360px;
+  width: 440px;
 }
 
 .officer-card:hover,
