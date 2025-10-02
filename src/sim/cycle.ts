@@ -235,15 +235,27 @@ function processPromotions(
   for (const targetRank of rankOrder) {
     const shortage = RANK_QUOTAS[targetRank] - counts[targetRank];
     if (shortage > 0) {
-      // Find eligible candidates from lower ranks
+      // Determine source rank and minimum merit requirement
+      let sourceRank: Rank | null = null;
+      let minMerit = 0;
+      
+      if (targetRank === 'Späher') {
+        sourceRank = 'Grunzer';
+        minMerit = PROMOTION_THRESHOLDS.Grunzer.promoteAt ?? 0;
+      } else if (targetRank === 'Captain') {
+        sourceRank = 'Späher';
+        minMerit = PROMOTION_THRESHOLDS.Späher.promoteAt ?? 0;
+      } else if (targetRank === 'Spieler') {
+        sourceRank = 'Captain';
+        minMerit = PROMOTION_THRESHOLDS.Captain.promoteAt ?? 0;
+      }
+
+      if (!sourceRank) continue;
+
+      // Find eligible candidates from lower ranks that meet merit threshold
       const candidates = state.officers
         .filter((officer) => {
-          // Can promote Grunzer to Späher, Späher to Captain, Captain to Spieler
-          return (
-            (targetRank === 'Späher' && officer.rank === 'Grunzer') ||
-            (targetRank === 'Captain' && officer.rank === 'Späher') ||
-            (targetRank === 'Spieler' && officer.rank === 'Captain')
-          );
+          return officer.rank === sourceRank && officer.merit >= minMerit;
         })
         .sort((a, b) => b.merit - a.merit)
         .slice(0, shortage);
