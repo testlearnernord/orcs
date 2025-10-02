@@ -689,6 +689,35 @@ button:disabled {
   background: none;
 }
 
+.officer-card__portrait-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.officer-card__archetype-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.75);
+  padding: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  transition: all 200ms ease;
+}
+
+.officer-card:hover .officer-card__archetype-icon {
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.officer-card[data-status='dead'] .officer-card__archetype-icon {
+  opacity: 0.6;
+  filter: grayscale(0.8);
+}
+
 .officer-card[data-status='dead'] .officer-card__portrait-img {
   filter: grayscale(0.9) brightness(0.85);
 }
