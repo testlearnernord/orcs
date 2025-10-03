@@ -5,12 +5,12 @@ import { PROMOTION_THRESHOLDS } from '@sim/constants';
 
 describe('Promotion Thresholds and Grunzer Spawning', () => {
   it('should have correct promotion thresholds for authentic simulation', () => {
-    // Verify Grunzer to Späher requires 250 Merit (reduced for easier progression)
-    expect(PROMOTION_THRESHOLDS.Grunzer.promoteAt).toBe(250);
+    // Verify Grunzer to Späher requires 200 Merit (reduced for slightly faster progression)
+    expect(PROMOTION_THRESHOLDS.Grunzer.promoteAt).toBe(200);
     expect(PROMOTION_THRESHOLDS.Grunzer.promoteTo).toBe('Späher');
 
-    // Verify Späher to Captain requires 500 Merit (reduced for easier progression)
-    expect(PROMOTION_THRESHOLDS.Späher.promoteAt).toBe(500);
+    // Verify Späher to Captain requires 400 Merit (reduced for slightly faster progression)
+    expect(PROMOTION_THRESHOLDS.Späher.promoteAt).toBe(400);
     expect(PROMOTION_THRESHOLDS.Späher.promoteTo).toBe('Captain');
   });
 
