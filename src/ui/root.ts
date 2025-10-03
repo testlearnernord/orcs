@@ -38,6 +38,7 @@ import type {
 import { HelpOverlay } from '@ui/components/helpOverlay';
 import { Toast } from '@ui/components/toast';
 import { CycleSweep } from '@ui/components/cycleSweep';
+import { CycleHoldIndicator } from '@ui/components/cycleHoldIndicator';
 // OLD: import { HighlightPortal } from '@ui/components/highlightPortal';
 import {
   HighlightSystem,
@@ -126,6 +127,8 @@ export class NemesisUI {
   private feedBodyEl: HTMLElement | null = null;
   private readonly audioManager: AudioManager;
   private audioControls: AudioControls | null = null;
+  private cycleHoldIndicator: import('@ui/components/cycleHoldIndicator').CycleHoldIndicator | null = null;
+  private isEKeyPressed: boolean = false;
 
   constructor(
     private readonly store: GameStore,
@@ -681,20 +684,51 @@ export class NemesisUI {
   }
 
   private registerHotkeys(): void {
-    // Only register spectate mode hotkeys when not in Free Roam or Player mode
-    registerHotkey('e', () => {
-      if (this.modeState.mode === 'freeRoam') {
-        this.toast.show('Cycle-Hotkey im Free-Roam-Modus deaktiviert.');
-        return;
+    // E-key hold mechanism for spectate mode (3 seconds hold)
+    // We need to handle this separately from the regular hotkey system
+    window.addEventListener('keydown', (event) => {
+      if (event.key.toLowerCase() === 'e' && !this.isEKeyPressed && !event.repeat) {
+        if (this.modeState.mode === 'freeRoam') {
+          this.toast.show('Cycle-Hotkey im Free-Roam-Modus deaktiviert.');
+          return;
+        }
+        if (this.modeState.mode === 'player') {
+          this.toast.show(
+            'Cycle-Hotkey im Player-Modus deaktiviert. Verwende E für Signature-Moves.'
+          );
+          return;
+        }
+        
+        // Check if typing in input
+        const activeElement = document.activeElement;
+        if (activeElement && (
+          activeElement.tagName === 'INPUT' || 
+          activeElement.tagName === 'TEXTAREA' ||
+          (activeElement as HTMLElement).isContentEditable
+        )) {
+          return;
+        }
+
+        this.isEKeyPressed = true;
+        this.startCycleHold();
       }
-      if (this.modeState.mode === 'player') {
-        this.toast.show(
-          'Cycle-Hotkey im Player-Modus deaktiviert. Verwende E für Signature-Moves.'
-        );
-        return;
-      }
-      this.triggerCycle();
     });
+
+    window.addEventListener('keyup', (event) => {
+      if (event.key.toLowerCase() === 'e' && this.isEKeyPressed) {
+        this.isEKeyPressed = false;
+        this.cancelCycleHold();
+      }
+    });
+
+    // Reset on window blur
+    window.addEventListener('blur', () => {
+      if (this.isEKeyPressed) {
+        this.isEKeyPressed = false;
+        this.cancelCycleHold();
+      }
+    });
+
     registerHotkey('r', () => this.reset());
     registerHotkey('n', () => this.scheduleWarcall());
     registerHotkey('h', () => this.helpOverlay.toggle());
@@ -743,6 +777,27 @@ export class NemesisUI {
         .join(', ');
       this.toast.show(`Aktive Hotkeys: ${registered}`);
     });
+  }
+
+  private startCycleHold(): void {
+    if (!this.cycleHoldIndicator) {
+      this.cycleHoldIndicator = new CycleHoldIndicator({
+        holdDuration: 3000,
+        onComplete: () => {
+          this.triggerCycle();
+        },
+        onCancel: () => {
+          // Hold was cancelled
+        }
+      });
+    }
+    this.cycleHoldIndicator.start();
+  }
+
+  private cancelCycleHold(): void {
+    if (this.cycleHoldIndicator) {
+      this.cycleHoldIndicator.cancel();
+    }
   }
 
   private triggerCycle(): void {
@@ -1345,6 +1400,12 @@ export class NemesisUI {
 
     // Clean up officer details popup
     this.officerDetailsPopup.destroy();
+
+    // Clean up cycle hold indicator
+    if (this.cycleHoldIndicator) {
+      this.cycleHoldIndicator.dispose();
+      this.cycleHoldIndicator = null;
+    }
 
     // Clean up other resources
     this.resizeObserver?.disconnect();
