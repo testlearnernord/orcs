@@ -13,7 +13,7 @@ describe('Long-term simulation with authentic progression', () => {
     console.log('This demonstrates how officers must earn their way up the ranks\n');
 
     let totalPromotions = 0;
-    let promotionsByRank: Record<string, number> = {};
+    const promotionsByRank: Record<string, number> = {};
     let firstGrunzerToSpäher = -1;
     let firstSpäherToCaptain = -1;
 

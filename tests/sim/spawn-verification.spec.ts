@@ -17,7 +17,7 @@ describe('Spawn behavior verification', () => {
     console.log('Ranks at game start:', initialRanks);
     console.log('✓ König, Captains, Späher spawn ONLY at game start\n');
 
-    let allSpawns: Array<{ cycle: number; rank: string; name: string }> = [];
+    const allSpawns: Array<{ cycle: number; rank: string; name: string }> = [];
 
     console.log('=== Spawns During 30 Cycles ===');
     for (let i = 0; i < 30; i++) {
