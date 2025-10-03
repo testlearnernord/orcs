@@ -18,10 +18,19 @@ export default function Portrait({
   // Ensure we always have a valid ID for portrait lookup
   // Use stableId if available and non-empty, otherwise fall back to id
   // Fix: Handle edge cases where stableId might be empty string or whitespace
+  // Additional fix: Always provide a deterministic fallback to prevent render issues
   const effectiveId = React.useMemo(() => {
+    // Prioritize stableId (it's designed to be stable across state updates)
     const stable = officer.stableId?.trim();
+    if (stable) return stable;
+    
+    // Fall back to regular id
     const regular = officer.id?.trim();
-    return stable || regular || `fallback-${officer.name}`;
+    if (regular) return regular;
+    
+    // Last resort: use name-based fallback (deterministic)
+    const nameFallback = officer.name?.trim();
+    return nameFallback ? `officer-${nameFallback}` : 'unknown-officer';
   }, [officer.id, officer.stableId, officer.name]);
   
   return (

@@ -220,12 +220,18 @@ export function shouldChallengeRival(
   officer: Officer,
   rng: RNG
 ): boolean {
-  // Only certain ambitions lead to challenges
+  // Ambitious goals that lead to challenges
+  // Updated to include new rank-appropriate ambitions
   const ambitiousGoals = [
-    'Möchte stärker werden',
-    'Möchte König werden',
-    'Möchte den König stürzen',
-    'Möchte seinen Rivalen töten'
+    'stärker werden',
+    'König werden',
+    'König stürzen',
+    'Rivalen töten',
+    'Rivalen ausschalten',
+    'Captain herausfordern',
+    'König herausfordern',
+    'sich beweisen',
+    'nicht der Schwächste sein'
   ];
   
   const isAmbitious = ambitiousGoals.some(goal => 

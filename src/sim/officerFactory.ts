@@ -169,23 +169,82 @@ function randomStats(
   };
 }
 
-function randomAmbitions(): string[] {
-  return [
-    'Möchte ein Festmahl abhalten',
-    'Möchte Verbündete finden',
-    'Möchte seinen Rivalen töten',
-    'Möchte stärker werden',
-    'Möchte König werden',
-    'Möchte den König stürzen',
-    'Möchte einfach nur in Ruhe gelassen werden',
-    'Möchte schöne Sonnenuntergänge beobachten',
-    'Möchte das beste Warcall-Team aufbauen',
-    'Möchte seine Kampffertigkeiten perfektionieren'
-  ];
+/**
+ * Get rank-appropriate ambitions that make sense for the officer's position
+ * Ambitions influence officer behavior in challenges, loyalty, and relationships
+ */
+function getAmbitionsForRank(rank: Rank): string[] {
+  switch (rank) {
+    case 'König':
+      // King ambitions focus on maintaining power and building legacy
+      return [
+        'Möchte die Horde zur stärksten machen',
+        'Möchte loyale Captains aufbauen',
+        'Möchte seine Herrschaft festigen',
+        'Möchte ein legendäres Festmahl abhalten',
+        'Möchte alle Rivalen eliminieren',
+        'Möchte ein unbesiegbares Warcall-Team aufbauen',
+        'Möchte in die Geschichte eingehen',
+        'Möchte die besten Krieger ausbilden'
+      ];
+    
+    case 'Spieler':
+      // Player ambitions (currently unused rank, but future-proof)
+      return [
+        'Möchte König werden',
+        'Möchte das stärkste Warcall-Team führen',
+        'Möchte Verbündete im Kriegsrat sammeln',
+        'Möchte seine Kampffertigkeiten perfektionieren',
+        'Möchte den König herausfordern'
+      ];
+    
+    case 'Captain':
+      // Captain ambitions focus on advancement and power
+      return [
+        'Möchte König werden',
+        'Möchte den König stürzen',
+        'Möchte mehr Captains als Verbündete gewinnen',
+        'Möchte seine Rivalen ausschalten',
+        'Möchte das beste Warcall-Team aufbauen',
+        'Möchte seine Position festigen',
+        'Möchte stärker werden',
+        'Möchte respektiert werden'
+      ];
+    
+    case 'Späher':
+      // Scout ambitions focus on proving themselves and advancement
+      return [
+        'Möchte zum Captain aufsteigen',
+        'Möchte stärker werden',
+        'Möchte einen Captain herausfordern',
+        'Möchte Verbündete finden',
+        'Möchte seinen Rivalen töten',
+        'Möchte seine Kampffertigkeiten perfektionieren',
+        'Möchte sich beweisen',
+        'Möchte irgendwann König werden'
+      ];
+    
+    case 'Grunzer':
+      // Grunt ambitions are more modest and survival-focused
+      return [
+        'Möchte überleben',
+        'Möchte zum Späher aufsteigen',
+        'Möchte stärker werden',
+        'Möchte Verbündete finden',
+        'Möchte in Ruhe gelassen werden',
+        'Möchte seinen ersten Kampf überstehen',
+        'Möchte nicht der Schwächste sein',
+        'Möchte respektiert werden',
+        'Möchte seine Fähigkeiten verbessern'
+      ];
+    
+    default:
+      return ['Möchte überleben'];
+  }
 }
 
 function randomMood(rng: RNG, rank: Rank): OfficerMood {
-  const ambitions = randomAmbitions();
+  const ambitions = getAmbitionsForRank(rank);
   const ambition = rng.pick(ambitions);
 
   // König has no loyalty value
