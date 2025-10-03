@@ -14,7 +14,7 @@ export class HelpOverlay {
         <section>
           <h3>Hotkeys</h3>
           <ul>
-            <li><kbd>E</kbd> Cycle vorwärts</li>
+            <li><kbd>E</kbd> (3 Sek. halten) Cycle vorwärts mit Highlights</li>
             <li><kbd>R</kbd> Soft-Reset</li>
             <li><kbd>N</kbd> Neuer Warcall</li>
             <li><kbd>H</kbd> Hilfe anzeigen</li>

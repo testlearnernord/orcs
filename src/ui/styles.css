@@ -3769,3 +3769,96 @@ button:disabled {
 .officer-details-popup__content .details-badge--muted:hover {
   transform: none;
 }
+
+/* Cycle Hold Indicator - E key hold to cycle */
+.cycle-hold-indicator {
+  position: fixed;
+  bottom: 120px;
+  right: 40px;
+  width: 120px;
+  height: 120px;
+  z-index: 9999;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.cycle-hold-indicator.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cycle-hold-indicator__letter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 
+    0 0 20px rgba(56, 189, 248, 0.8),
+    0 0 40px rgba(56, 189, 248, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.8);
+  z-index: 2;
+  animation: pulse-letter 0.5s ease-in-out infinite alternate;
+}
+
+.cycle-hold-indicator__fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background: linear-gradient(
+    to top,
+    rgba(56, 189, 248, 0.9),
+    rgba(56, 189, 248, 0.6),
+    rgba(56, 189, 248, 0.3)
+  );
+  border-radius: 8px;
+  box-shadow: 
+    0 0 30px rgba(56, 189, 248, 0.6),
+    inset 0 -2px 10px rgba(255, 255, 255, 0.3);
+  transition: height 0.1s linear;
+  z-index: 1;
+}
+
+/* Outer glow effect for the indicator */
+.cycle-hold-indicator::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: radial-gradient(
+    circle,
+    rgba(56, 189, 248, 0.3) 0%,
+    transparent 70%
+  );
+  border-radius: 12px;
+  z-index: 0;
+  animation: glow-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-letter {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes glow-pulse {
+  0% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
