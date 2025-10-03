@@ -316,7 +316,7 @@ function getWarcallConfig(
       ]);
       break;
 
-    case 'Eroberung':
+    case 'Eroberung': {
       // Requires mixed team with different archetypes
       const archetypes = ['Archer', 'Trapper'];
       const archetypeParticipants = participants.filter((officer) =>
@@ -342,8 +342,9 @@ function getWarcallConfig(
         'Strategischer Vorteil'
       ]);
       break;
+    }
 
-    case 'Sabotage':
+    case 'Sabotage': {
       // High risk, high reward with potential betrayal
       config.finalParticipants = participants.slice(0, 2); // Small team
       config.riskMultiplier = 1.5; // Very high risk
@@ -368,6 +369,7 @@ function getWarcallConfig(
         ]);
       }
       break;
+    }
 
     default:
       // Default behavior for existing warcall types
