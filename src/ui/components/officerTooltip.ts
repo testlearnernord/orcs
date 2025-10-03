@@ -1,5 +1,6 @@
 import type { Officer, Relationship } from '@sim/types';
 import { isCtrlKeyPressed, onCtrlStateChange } from '@core/hotkeys';
+import { getExpForLevel, getCurrentExp } from '@sim/experience';
 
 type OfficerAction = (officer: Officer) => void;
 
@@ -55,6 +56,79 @@ function deriveTitle(officer: Officer): string {
       return 'Späher';
     default:
       return 'Grunzer';
+  }
+}
+
+/**
+ * Determines the officer's next planned action based on their state
+ * This is deterministic and contextual, considering HP, rank, ambition, and stats
+ */
+function determineNextGoal(officer: Officer): string {
+  // Priority 1: Low HP - need to regenerate
+  const hpPercent = (officer.stats.hp / officer.stats.maxHp) * 100;
+  if (hpPercent < 50) {
+    return 'Regenerieren (LP wiederherstellen)';
+  }
+
+  // Priority 2: König has special goals
+  if (officer.rank === 'König') {
+    const goals = [
+      'Herrschaft sichern',
+      'Captains koordinieren',
+      'Rivalen überwachen',
+      'Warcall planen'
+    ];
+    // Deterministic selection based on officer ID to keep it stable
+    const hash = officer.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return goals[hash % goals.length];
+  }
+
+  // Priority 3: Check ambition for specific goals
+  const ambition = officer.mood.ambition.toLowerCase();
+  
+  // Ambitious officers (want to become king or kill rivals)
+  if (ambition.includes('könig werden') || ambition.includes('könig stürzen')) {
+    return 'Warcall initiieren';
+  }
+  
+  if (ambition.includes('rivalen töten') || ambition.includes('rivalen')) {
+    return 'Herausforderer suchen';
+  }
+  
+  // Mysterious/secretive officers
+  if (officer.traits.includes('Geheimnisvoll')) {
+    return 'Verdeckte Aktion';
+  }
+  
+  // Relationship-focused (wants allies or has friendly trait)
+  if (ambition.includes('verbündete') || ambition.includes('freund') || officer.traits.includes('Freundlich')) {
+    return 'Beziehungen pflegen';
+  }
+  
+  // Survival-focused (wants to be left alone or avoid conflict)
+  if (ambition.includes('ruhe gelassen') || ambition.includes('nicht der schwächste')) {
+    return 'Training und Vorbereitung';
+  }
+  
+  // Merit/strength seeking (wants to get stronger, build team)
+  if (ambition.includes('stärker werden') || ambition.includes('warcall-team') || ambition.includes('kampffertigkeiten')) {
+    // Check if low merit
+    if (officer.merit < 50) {
+      return 'Merit sammeln';
+    }
+    return 'Stärke demonstrieren';
+  }
+  
+  // Priority 4: Rank-based defaults
+  switch (officer.rank) {
+    case 'Captain':
+      return 'Warcall vorbereiten';
+    case 'Späher':
+      return 'Patrouille durchführen';
+    case 'Grunzer':
+      return 'Ausbildung fortsetzen';
+    default:
+      return 'Bereit für Befehle';
   }
 }
 
@@ -129,6 +203,16 @@ export class OfficerTooltip {
   private render(officer: Officer): void {
     const archetype = deriveArchetype(officer);
     const title = deriveTitle(officer);
+    const nextGoal = determineNextGoal(officer);
+    
+    // Calculate EXP info
+    const currentLevel = officer.stats.level;
+    const currentExp = getCurrentExp(officer);
+    const nextLevelExp = getExpForLevel(currentLevel + 1);
+    const currentLevelExp = getExpForLevel(currentLevel);
+    const expRange = nextLevelExp - currentLevelExp;
+    const expProgress = Math.min(100, Math.max(0, ((currentExp - currentLevelExp) / expRange) * 100));
+    
     const relations = this.resolveRelations(officer);
     const relationList =
       relations.length > 0
@@ -168,6 +252,19 @@ export class OfficerTooltip {
           <div><dt>HP</dt><dd>${officer.stats.hp}/${officer.stats.maxHp}</dd></div>
           ${officer.mood.loyalitaet !== undefined ? `<div><dt>Loyalität</dt><dd>${Math.round(officer.mood.loyalitaet)}%</dd></div>` : ''}
         </dl>
+      </section>
+      <section class="tooltip-exp-section">
+        <h3>Erfahrungspunkte</h3>
+        <div class="tooltip-exp-bar-container">
+          <div class="tooltip-exp-bar">
+            <div class="tooltip-exp-fill" style="width: ${expProgress}%"></div>
+          </div>
+          <span class="tooltip-exp-text">${Math.floor(currentExp)}/${nextLevelExp}</span>
+        </div>
+      </section>
+      <section class="tooltip-goal-section">
+        <h3>Nächstes Ziel</h3>
+        <p class="tooltip-goal">${nextGoal}</p>
       </section>
       <section class="tooltip-relations-section">
         <h3>Beziehungen</h3>
