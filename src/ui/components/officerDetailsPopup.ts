@@ -5,6 +5,12 @@
 
 import type { Officer, Relationship, PotentialRating } from '@sim/types';
 import { AvatarView } from '@ui/officer/Avatar';
+import { getTraitDescription } from '@sim/traits';
+
+// Import archetype icons
+import berserkerIcon from '@/assets/archetypes/berserker.svg';
+import archerIcon from '@/assets/archetypes/archer.svg';
+import trapperIcon from '@/assets/archetypes/trapper.svg';
 
 export interface OfficerDetailsPopupOptions {
   resolveName?: (id: string) => string | undefined;
@@ -22,6 +28,12 @@ const POTENTIAL_SLUG: Record<PotentialRating, string> = {
   Fähig: 'capable',
   Überdurchschnittlich: 'above-average',
   Genie: 'genius'
+};
+
+const ARCHETYPE_ICONS: Record<string, string> = {
+  Berserker: berserkerIcon,
+  Archer: archerIcon,
+  Trapper: trapperIcon
 };
 
 function relationLabel(relation: Relationship): string {
@@ -241,9 +253,15 @@ export class OfficerDetailsPopup {
     const traits =
       officer.traits.length > 0
         ? officer.traits
-            .map((trait) => `<span class="details-badge">${trait}</span>`)
+            .map(
+              (trait) =>
+                `<span class="details-badge" title="${getTraitDescription(trait)}">${trait}</span>`
+            )
             .join('')
         : '<span class="details-badge details-badge--muted">Keine Merkmale</span>';
+
+    // Get archetype icon path
+    const archetypeIconPath = ARCHETYPE_ICONS[archetype];
 
     // Clean up old avatar if exists
     if (this.avatarView) {
@@ -259,6 +277,11 @@ export class OfficerDetailsPopup {
           <span class="details-subtitle">Lv ${officer.stats.level} • ${title} • ${archetype}</span>
           <div class="details-traits">${traits}</div>
         </div>
+        ${
+          archetypeIconPath
+            ? `<img src="${archetypeIconPath}" alt="${archetype} Icon" class="officer-details-popup__archetype-icon" title="${archetype.toUpperCase()}" />`
+            : ''
+        }
       </div>
       <div class="details-stats">
         <h4>Attribute</h4>

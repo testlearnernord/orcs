@@ -3460,6 +3460,7 @@ button:disabled {
   margin-bottom: var(--spacing-lg);
   padding-bottom: var(--spacing-lg);
   border-bottom: 1px solid var(--border-soft);
+  position: relative;
 }
 
 .officer-details-popup__portrait-wrapper {
@@ -3476,6 +3477,22 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+}
+
+.officer-details-popup__archetype-icon {
+  position: absolute;
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
+  width: 48px;
+  height: 48px;
+  opacity: 0.6;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.officer-details-popup__archetype-icon:hover {
+  opacity: 0.9;
 }
 
 .officer-details-popup__info h3 {
@@ -3732,10 +3749,23 @@ button:disabled {
   font-size: 12px;
   font-weight: 600;
   border: 1px solid rgba(56, 189, 248, 0.3);
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.officer-details-popup__content .details-badge:hover {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: rgba(56, 189, 248, 0.5);
+  transform: translateY(-1px);
 }
 
 .officer-details-popup__content .details-badge--muted {
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-muted);
   border-color: var(--border-soft);
+  cursor: default;
+}
+
+.officer-details-popup__content .details-badge--muted:hover {
+  transform: none;
 }
