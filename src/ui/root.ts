@@ -945,8 +945,11 @@ export class NemesisUI {
       // Clear existing content
       grid.innerHTML = '';
 
-      // Render officer cards and empty slots
-      for (let slotIndex = 0; slotIndex < maxSlots; slotIndex++) {
+      // Render ALL officers first, then fill remaining slots with empty placeholders
+      // This fixes the issue where officers beyond maxSlots weren't being displayed
+      const totalSlots = Math.max(officers.length, maxSlots);
+      
+      for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
         const officer = officers[slotIndex];
         const slotKey = `${rank}-${slotIndex}`;
 
@@ -991,8 +994,9 @@ export class NemesisUI {
           }
 
           grid.appendChild(card.element);
-        } else {
-          // Render empty slot
+        } else if (slotIndex < maxSlots) {
+          // Only render empty slots up to maxSlots
+          // This prevents empty slots when there are overflow officers
           let emptySlot = this.emptySlots.get(slotKey);
           if (!emptySlot) {
             emptySlot = new EmptySlot({
