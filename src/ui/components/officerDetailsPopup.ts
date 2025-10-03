@@ -3,7 +3,7 @@
  * Replaces the old bottom-panel DetailsPanel system
  */
 
-import type { Officer, Relationship } from '@sim/types';
+import type { Officer, Relationship, PotentialRating } from '@sim/types';
 import { AvatarView } from '@ui/officer/Avatar';
 
 export interface OfficerDetailsPopupOptions {
@@ -13,6 +13,15 @@ export interface OfficerDetailsPopupOptions {
 const RELATION_ICONS: Record<Relationship['type'], string> = {
   ALLY: '🤝',
   RIVAL: '⚔️'
+};
+
+const POTENTIAL_SLUG: Record<PotentialRating, string> = {
+  Unbrauchbar: 'unusable',
+  Dumm: 'dumb',
+  Normal: 'normal',
+  Fähig: 'capable',
+  Überdurchschnittlich: 'above-average',
+  Genie: 'genius'
 };
 
 function relationLabel(relation: Relationship): string {
@@ -256,7 +265,7 @@ export class OfficerDetailsPopup {
         <div class="stats-grid">
           <div class="stat-item">
             <span class="stat-label">Potential</span>
-            <span class="stat-value">${officer.stats.potential}</span>
+            <span class="stat-value stat-value--potential" data-potential="${POTENTIAL_SLUG[officer.stats.potential]}">${officer.stats.potential}</span>
           </div>
           <div class="stat-item stat-item--animated">
             <span class="stat-label">Lebenspunkte</span>
