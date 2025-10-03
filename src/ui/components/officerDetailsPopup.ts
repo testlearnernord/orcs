@@ -6,6 +6,7 @@
 import type { Officer, Relationship, PotentialRating } from '@sim/types';
 import { AvatarView } from '@ui/officer/Avatar';
 import { getTraitDescription } from '@sim/traits';
+import { getExpForLevel, getCurrentExp } from '@sim/experience';
 
 // Import archetype icons
 import berserkerIcon from '@/assets/archetypes/berserker.svg';
@@ -71,6 +72,88 @@ function deriveTitle(officer: Officer): string {
       return 'Grunzer';
   }
 }
+
+/**
+ * Derives what the officer plans to do in the next cycle
+ * based on their current state, rank, and ambition
+ */
+function deriveNextGoal(officer: Officer): string {
+  // Low HP - needs to regenerate
+  const hpPercent = (officer.stats.hp / officer.stats.maxHp) * 100;
+  if (hpPercent < 50) {
+    return 'Regenerieren (LP wiederherstellen)';
+  }
+
+  // Very ambitious officers with specific goals
+  const ambition = officer.mood.ambition.toLowerCase();
+  
+  // König-specific goals
+  if (officer.rank === 'König') {
+    if (ambition.includes('rivalen') || ambition.includes('eliminieren')) {
+      return 'Rivalen überwachen';
+    }
+    if (ambition.includes('captains') || ambition.includes('loyale')) {
+      return 'Captains koordinieren';
+    }
+    if (ambition.includes('horde') || ambition.includes('stärksten')) {
+      return 'Warcall planen';
+    }
+    return 'Herrschaft sichern';
+  }
+
+  // High potential or ambitious officers
+  if (
+    ambition.includes('könig') ||
+    ambition.includes('herausfordern') ||
+    ambition.includes('captain')
+  ) {
+    // Randomly choose between combat-oriented goals
+    const goals = [
+      'Warcall initiieren',
+      'Herausforderer suchen',
+      'Verdeckte Aktion',
+      'Rivalen beobachten'
+    ];
+    // Use officer ID for deterministic "random" selection
+    const index = officer.id.length % goals.length;
+    return goals[index];
+  }
+
+  // Low HP or defensive officers
+  if (ambition.includes('überleben') || ambition.includes('nicht der schwächste')) {
+    return 'Training und Vorbereitung';
+  }
+
+  // Relationship-focused officers
+  if (ambition.includes('verbündete') || ambition.includes('allianzen')) {
+    return 'Beziehungen pflegen';
+  }
+
+  // Officers looking to prove themselves
+  if (ambition.includes('beweisen') || ambition.includes('aufsteigen')) {
+    const goals = [
+      'An Warcall teilnehmen',
+      'Stärke demonstrieren',
+      'Merit sammeln',
+      'Training'
+    ];
+    const index = (officer.stats.level + officer.merit) % goals.length;
+    return goals[index];
+  }
+
+  // Default goals based on rank
+  switch (officer.rank) {
+    case 'Captain':
+      return 'Warcall vorbereiten';
+    case 'Späher':
+      return 'Patrouille durchführen';
+    case 'Grunzer':
+      return 'Ausbildung fortsetzen';
+    default:
+      return 'Bereit zum Einsatz';
+  }
+}
+
 
 export class OfficerDetailsPopup {
   private container: HTMLElement | null = null;
@@ -263,6 +346,17 @@ export class OfficerDetailsPopup {
     // Get archetype icon path
     const archetypeIconPath = ARCHETYPE_ICONS[archetype];
 
+    // Calculate experience progress
+    const currentExp = getCurrentExp(officer);
+    const currentLevelExp = getExpForLevel(officer.stats.level);
+    const nextLevelExp = getExpForLevel(officer.stats.level + 1);
+    const expInLevel = currentExp - currentLevelExp;
+    const expNeeded = nextLevelExp - currentLevelExp;
+    const expPercent = Math.min(100, Math.round((expInLevel / expNeeded) * 100));
+
+    // Derive next goal
+    const nextGoal = deriveNextGoal(officer);
+
     // Clean up old avatar if exists
     if (this.avatarView) {
       this.avatarView.destroy();
@@ -318,6 +412,13 @@ export class OfficerDetailsPopup {
             </div>
             <span class="stat-value">${officer.stats.int}</span>
           </div>
+          <div class="stat-item stat-item--animated">
+            <span class="stat-label">Erfahrungspunkte</span>
+            <div class="stat-bar">
+              <div class="stat-fill" style="width: ${expPercent}%"></div>
+            </div>
+            <span class="stat-value">${currentExp}/${nextLevelExp}</span>
+          </div>
           ${
             officer.mood.loyalitaet !== undefined
               ? `
@@ -330,6 +431,10 @@ export class OfficerDetailsPopup {
           <div class="stat-item">
             <span class="stat-label">Ambition</span>
             <span class="stat-value">${officer.mood.ambition}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Nächstes Ziel</span>
+            <span class="stat-value">${nextGoal}</span>
           </div>
         </div>
       </div>
