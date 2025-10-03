@@ -258,20 +258,32 @@ export class OfficerDetailsPopup {
             <span class="stat-label">Potential</span>
             <span class="stat-value">${officer.stats.potential}</span>
           </div>
-          <div class="stat-item">
+          <div class="stat-item stat-item--animated">
             <span class="stat-label">Lebenspunkte</span>
+            <div class="stat-bar">
+              <div class="stat-fill" style="width: ${Math.round((officer.stats.hp / officer.stats.maxHp) * 100)}%"></div>
+            </div>
             <span class="stat-value">${officer.stats.hp}/${officer.stats.maxHp}</span>
           </div>
-          <div class="stat-item">
+          <div class="stat-item stat-item--animated">
             <span class="stat-label">Stärke</span>
+            <div class="stat-bar">
+              <div class="stat-fill" style="width: ${Math.min(100, Math.round((officer.stats.str / 100) * 100))}%"></div>
+            </div>
             <span class="stat-value">${officer.stats.str}</span>
           </div>
-          <div class="stat-item">
+          <div class="stat-item stat-item--animated">
             <span class="stat-label">Geschicklichkeit</span>
+            <div class="stat-bar">
+              <div class="stat-fill" style="width: ${Math.min(100, Math.round((officer.stats.dex / 100) * 100))}%"></div>
+            </div>
             <span class="stat-value">${officer.stats.dex}</span>
           </div>
-          <div class="stat-item">
+          <div class="stat-item stat-item--animated">
             <span class="stat-label">Intelligenz</span>
+            <div class="stat-bar">
+              <div class="stat-fill" style="width: ${Math.min(100, Math.round((officer.stats.int / 100) * 100))}%"></div>
+            </div>
             <span class="stat-value">${officer.stats.int}</span>
           </div>
           ${
