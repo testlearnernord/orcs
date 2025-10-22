@@ -63,7 +63,10 @@ function getClassName(base: string, extra?: string): string {
 }
 
 function safeId(id: string): string {
-  return id && id.trim() ? id.trim() : 'unknown-officer';
+  // Ensure we always have a valid, non-empty ID for hashing
+  // Empty strings would cause all officers to hash to the same portrait
+  const trimmed = id && typeof id === 'string' ? id.trim() : '';
+  return trimmed || 'unknown-officer';
 }
 
 // Rank to CSS slug mapping (for border colors)
@@ -78,7 +81,7 @@ const RANK_SLUG: Record<Rank, string> = {
 // Potential to CSS slug mapping (for portrait frame colors)
 const POTENTIAL_SLUG: Record<PotentialRating, string> = {
   Unbrauchbar: 'unusable',
-  Dumm: 'dumb', 
+  Dumm: 'dumb',
   Normal: 'normal',
   Fähig: 'capable',
   Überdurchschnittlich: 'above-average',
@@ -150,12 +153,30 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
           return;
         }
         const definitions = filterDefinitions(requireTag);
-        if (!definitions.length)
-          throw new Error('No portrait sets available after filtering');
+        if (!definitions.length) {
+          const err = new Error('No portrait sets available after filtering');
+          if (import.meta.env.DEV) {
+            console.warn('[portraits] No portrait sets after filter', {
+              id,
+              requireTag,
+              availableDefinitions: PORTRAIT_SET_DEFINITIONS.length
+            });
+          }
+          throw err;
+        }
         const { atlases } = await loadPortraitAtlases();
         const availableSets = deriveAvailableSets(definitions, atlases);
-        if (!availableSets.length)
-          throw new Error('No portrait atlases available');
+        if (!availableSets.length) {
+          const err = new Error('No portrait atlases available');
+          if (import.meta.env.DEV) {
+            console.warn('[portraits] No atlases available', {
+              id,
+              definitions: definitions.length,
+              atlasesLoaded: atlases.size
+            });
+          }
+          throw err;
+        }
         const { set, col, row } = chooseSetAndIndex(id, availableSets);
 
         // Use deterministic portrait cropping with fixed pixel coordinates
@@ -187,7 +208,7 @@ export const OfficerAvatar: React.FC<OfficerAvatarProps> = ({
         }
       } catch (err) {
         if (import.meta.env.DEV) {
-          console.warn('[portraits] avatar init failed', err);
+          console.warn('[portraits] avatar init failed for officer', { id, err });
         }
         if (alive) {
           setTileStyle(null);

@@ -31,6 +31,7 @@ import {
   planWarcall,
   resolveDueWarcalls
 } from '@sim/warcall';
+import { processAllLevelUps, processRivalryChallenges } from '@sim/experience';
 
 function countByRank(officers: Officer[]): Record<Rank, number> {
   const counts: Record<Rank, number> = {
@@ -235,15 +236,27 @@ function processPromotions(
   for (const targetRank of rankOrder) {
     const shortage = RANK_QUOTAS[targetRank] - counts[targetRank];
     if (shortage > 0) {
-      // Find eligible candidates from lower ranks
+      // Determine source rank and minimum merit requirement
+      let sourceRank: Rank | null = null;
+      let minMerit = 0;
+      
+      if (targetRank === 'Späher') {
+        sourceRank = 'Grunzer';
+        minMerit = PROMOTION_THRESHOLDS.Grunzer.promoteAt ?? 0;
+      } else if (targetRank === 'Captain') {
+        sourceRank = 'Späher';
+        minMerit = PROMOTION_THRESHOLDS.Späher.promoteAt ?? 0;
+      } else if (targetRank === 'Spieler') {
+        sourceRank = 'Captain';
+        minMerit = PROMOTION_THRESHOLDS.Captain.promoteAt ?? 0;
+      }
+
+      if (!sourceRank) continue;
+
+      // Find eligible candidates from lower ranks that meet merit threshold
       const candidates = state.officers
         .filter((officer) => {
-          // Can promote Grunzer to Späher, Späher to Captain, Captain to Spieler
-          return (
-            (targetRank === 'Späher' && officer.rank === 'Grunzer') ||
-            (targetRank === 'Captain' && officer.rank === 'Späher') ||
-            (targetRank === 'Spieler' && officer.rank === 'Captain')
-          );
+          return officer.rank === sourceRank && officer.merit >= minMerit;
         })
         .sort((a, b) => b.merit - a.merit)
         .slice(0, shortage);
@@ -354,6 +367,16 @@ export function advanceCycle(state: WorldState, rng: RNG): CycleSummary {
   cycleFeed.push(...spawnFeed);
 
   const planned = planNextWarcalls(state, rng);
+
+  // Process rivalry challenges (officers challenge rivals for merit and position)
+  const challengeResult = processRivalryChallenges(state.officers, rng, state.cycle);
+  state.officers = challengeResult.officers;
+  cycleFeed.push(...challengeResult.feed);
+
+  // Process level-ups before promotions (officers gain levels from experience)
+  const levelUpResult = processAllLevelUps(state.officers, rng, state.cycle);
+  state.officers = levelUpResult.officers;
+  cycleFeed.push(...levelUpResult.feed);
 
   const promotionResult = processPromotions(state, rng);
   cycleFeed.push(...promotionResult.feed);

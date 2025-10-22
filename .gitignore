@@ -22,11 +22,18 @@ coverage/
 # allow committed portrait atlases in source and generated docs output
 !src/assets/orcs/portraits/*.webp
 !src/assets/orcs/portraits/*.png
-!docs/assets/**/*.webp
-!docs/assets/**/*.png
-=======
 
 # allow committed audio assets in source and generated docs output  
 !src/assets/audio/*.mp3
 !docs/audio/*.mp3
+
+# ignore generated build artifacts in docs and public
+# but allow the Vite bundle files (JS/CSS) in docs/assets/ to be committed for GitHub Pages
+docs/assets/maps/
+docs/assets/battlesystem/
+docs/assets/archetypes/
 public/assets/
+
+# allow portrait atlases in docs (needed for GitHub Pages deployment)
+!docs/assets/orcs/portraits/*.png
+!docs/assets/orcs/portraits/*.webp

@@ -23,7 +23,7 @@ import { FeedView } from '@ui/components/feed';
 import { GraveyardPanel } from '@ui/components/graveyard';
 import { OfficerCard } from '@ui/components/officerCard';
 import { EmptySlot } from '@ui/components/emptySlot';
-import { DetailsPanel } from '@ui/components/detailsPanel';
+import { OfficerDetailsPopup } from '@ui/components/officerDetailsPopup';
 import {
   buildRelationEdges,
   RelationsOverlay
@@ -38,6 +38,7 @@ import type {
 import { HelpOverlay } from '@ui/components/helpOverlay';
 import { Toast } from '@ui/components/toast';
 import { CycleSweep } from '@ui/components/cycleSweep';
+import { CycleHoldIndicator } from '@ui/components/cycleHoldIndicator';
 // OLD: import { HighlightPortal } from '@ui/components/highlightPortal';
 import {
   HighlightSystem,
@@ -104,7 +105,7 @@ export class NemesisUI {
   private relations: RelationsOverlay | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private lastEdges: RelationEdge[] = [];
-  private readonly detailsPanel: DetailsPanel;
+  private readonly officerDetailsPopup: OfficerDetailsPopup;
   private readonly warcallDock: WarcallsDock;
   private readonly warcallModal: WarcallModal;
   private readonly helpOverlay = new HelpOverlay();
@@ -126,6 +127,8 @@ export class NemesisUI {
   private feedBodyEl: HTMLElement | null = null;
   private readonly audioManager: AudioManager;
   private audioControls: AudioControls | null = null;
+  private cycleHoldIndicator: import('@ui/components/cycleHoldIndicator').CycleHoldIndicator | null = null;
+  private isEKeyPressed: boolean = false;
 
   constructor(
     private readonly store: GameStore,
@@ -138,7 +141,7 @@ export class NemesisUI {
     this.syncOfficerIndex(state.officers);
     this.graveyard = new GraveyardPanel(state.graveyard);
 
-    this.detailsPanel = new DetailsPanel({
+    this.officerDetailsPopup = new OfficerDetailsPopup({
       resolveName: (id) => this.officerIndex.get(id)?.name
     });
 
@@ -528,8 +531,7 @@ export class NemesisUI {
       audioContainer.appendChild(this.audioControls.getElement());
     }
 
-    // Mount details panel at the bottom of the page
-    this.detailsPanel.mount(document.body);
+    // OfficerDetailsPopup is created but not mounted (it mounts itself on show)
 
     this.registerUIEvents(app);
     this.syncModeUI();
@@ -682,20 +684,51 @@ export class NemesisUI {
   }
 
   private registerHotkeys(): void {
-    // Only register spectate mode hotkeys when not in Free Roam or Player mode
-    registerHotkey('e', () => {
-      if (this.modeState.mode === 'freeRoam') {
-        this.toast.show('Cycle-Hotkey im Free-Roam-Modus deaktiviert.');
-        return;
+    // E-key hold mechanism for spectate mode (3 seconds hold)
+    // We need to handle this separately from the regular hotkey system
+    window.addEventListener('keydown', (event) => {
+      if (event.key.toLowerCase() === 'e' && !this.isEKeyPressed && !event.repeat) {
+        if (this.modeState.mode === 'freeRoam') {
+          this.toast.show('Cycle-Hotkey im Free-Roam-Modus deaktiviert.');
+          return;
+        }
+        if (this.modeState.mode === 'player') {
+          this.toast.show(
+            'Cycle-Hotkey im Player-Modus deaktiviert. Verwende E für Signature-Moves.'
+          );
+          return;
+        }
+        
+        // Check if typing in input
+        const activeElement = document.activeElement;
+        if (activeElement && (
+          activeElement.tagName === 'INPUT' || 
+          activeElement.tagName === 'TEXTAREA' ||
+          (activeElement as HTMLElement).isContentEditable
+        )) {
+          return;
+        }
+
+        this.isEKeyPressed = true;
+        this.startCycleHold();
       }
-      if (this.modeState.mode === 'player') {
-        this.toast.show(
-          'Cycle-Hotkey im Player-Modus deaktiviert. Verwende E für Signature-Moves.'
-        );
-        return;
-      }
-      this.triggerCycle();
     });
+
+    window.addEventListener('keyup', (event) => {
+      if (event.key.toLowerCase() === 'e' && this.isEKeyPressed) {
+        this.isEKeyPressed = false;
+        this.cancelCycleHold();
+      }
+    });
+
+    // Reset on window blur
+    window.addEventListener('blur', () => {
+      if (this.isEKeyPressed) {
+        this.isEKeyPressed = false;
+        this.cancelCycleHold();
+      }
+    });
+
     registerHotkey('r', () => this.reset());
     registerHotkey('n', () => this.scheduleWarcall());
     registerHotkey('h', () => this.helpOverlay.toggle());
@@ -744,6 +777,27 @@ export class NemesisUI {
         .join(', ');
       this.toast.show(`Aktive Hotkeys: ${registered}`);
     });
+  }
+
+  private startCycleHold(): void {
+    if (!this.cycleHoldIndicator) {
+      this.cycleHoldIndicator = new CycleHoldIndicator({
+        holdDuration: 3000,
+        onComplete: () => {
+          this.triggerCycle();
+        },
+        onCancel: () => {
+          // Hold was cancelled
+        }
+      });
+    }
+    this.cycleHoldIndicator.start();
+  }
+
+  private cancelCycleHold(): void {
+    if (this.cycleHoldIndicator) {
+      this.cycleHoldIndicator.cancel();
+    }
   }
 
   private triggerCycle(): void {
@@ -895,7 +949,7 @@ export class NemesisUI {
         } else {
           const card = new OfficerCard(officer, {
             onOfficerClick: (officer) =>
-              this.detailsPanel.showOfficerDetails(officer)
+              this.officerDetailsPopup.show(officer)
           });
           this.cards.set(officer.id, card);
           grid.appendChild(card.element);
@@ -946,8 +1000,11 @@ export class NemesisUI {
       // Clear existing content
       grid.innerHTML = '';
 
-      // Render officer cards and empty slots
-      for (let slotIndex = 0; slotIndex < maxSlots; slotIndex++) {
+      // Render ALL officers first, then fill remaining slots with empty placeholders
+      // This fixes the issue where officers beyond maxSlots weren't being displayed
+      const totalSlots = Math.max(officers.length, maxSlots);
+      
+      for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
         const officer = officers[slotIndex];
         const slotKey = `${rank}-${slotIndex}`;
 
@@ -957,7 +1014,7 @@ export class NemesisUI {
           if (!card) {
             card = new OfficerCard(officer, {
               onOfficerClick: (officer) =>
-                this.detailsPanel.showOfficerDetails(officer)
+                this.officerDetailsPopup.show(officer)
             });
             this.cards.set(officer.id, card);
             this.lastRenderedOfficerState.set(officer.id, {
@@ -992,8 +1049,9 @@ export class NemesisUI {
           }
 
           grid.appendChild(card.element);
-        } else {
-          // Render empty slot
+        } else if (slotIndex < maxSlots) {
+          // Only render empty slots up to maxSlots
+          // This prevents empty slots when there are overflow officers
           let emptySlot = this.emptySlots.get(slotKey);
           if (!emptySlot) {
             emptySlot = new EmptySlot({
@@ -1340,8 +1398,14 @@ export class NemesisUI {
     this.audioManager.destroy();
     this.audioControls?.destroy();
 
-    // Clean up details panel
-    this.detailsPanel.destroy();
+    // Clean up officer details popup
+    this.officerDetailsPopup.destroy();
+
+    // Clean up cycle hold indicator
+    if (this.cycleHoldIndicator) {
+      this.cycleHoldIndicator.dispose();
+      this.cycleHoldIndicator = null;
+    }
 
     // Clean up other resources
     this.resizeObserver?.disconnect();

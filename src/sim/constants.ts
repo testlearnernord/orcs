@@ -28,12 +28,12 @@ export const PROMOTION_THRESHOLDS: Record<
     demoteTo: 'Späher'
   },
   Späher: {
-    promoteAt: 90,
+    promoteAt: 400, // Reduced from 500 to 400 for slightly faster progression
     promoteTo: 'Captain',
     demoteBelow: 20,
     demoteTo: 'Grunzer'
   },
-  Grunzer: { promoteAt: 50, promoteTo: 'Späher' }
+  Grunzer: { promoteAt: 200, promoteTo: 'Späher' } // Reduced from 250 to 200 for slightly faster progression
 };
 
 export const TRAIT_COMBAT_WEIGHTS: Partial<Record<Trait, number>> = {
@@ -41,10 +41,10 @@ export const TRAIT_COMBAT_WEIGHTS: Partial<Record<Trait, number>> = {
   Trapper: 0.25,
   // Physical traits
   Robust: 0.05,
-  // Combat specialization traits  
+  // Combat specialization traits
   'Guter Schütze': 0.25,
-  'Axtexperte': 0.25,
-  'Jäger': 0.25
+  Axtexperte: 0.25,
+  Jäger: 0.25
 };
 
 export const RELATIONSHIP_BONUS = {
