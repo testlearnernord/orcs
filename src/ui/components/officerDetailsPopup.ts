@@ -8,10 +8,10 @@ import { AvatarView } from '@ui/officer/Avatar';
 import { getTraitDescription } from '@sim/traits';
 import { getExpForLevel, getCurrentExp } from '@sim/experience';
 
-// Import archetype icons
-import berserkerIcon from '@/assets/archetypes/berserker.svg';
-import archerIcon from '@/assets/archetypes/archer.svg';
-import trapperIcon from '@/assets/archetypes/trapper.svg';
+// Import archetype icons (PNG files to match officer card icons)
+import berserkerIcon from '@/assets/archetypes/berserker.png';
+import archerIcon from '@/assets/archetypes/archer.png';
+import trapperIcon from '@/assets/archetypes/trapper.png';
 
 export interface OfficerDetailsPopupOptions {
   resolveName?: (id: string) => string | undefined;
