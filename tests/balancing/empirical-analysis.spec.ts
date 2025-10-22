@@ -9,6 +9,11 @@
  * 5. Does POTENTIAL stat influence career paths?
  * 6. Do RPG parameters make sense?
  * 7. Does the simulation create memorable stories?
+ * 8. How often do officers of each rank die? What is POTENTIAL's influence?
+ * 9. How intelligently do officers form alliances (mutual benefit)?
+ * 10. How intelligently do officers behave towards their rivals?
+ * 11. How intelligently do officers choose missions based on ambition?
+ * 12. How risk-aware are officers when facing high-risk warcalls?
  */
 
 import { describe, it, expect } from 'vitest';
@@ -41,6 +46,13 @@ interface RunData {
     ranks: Array<{ rank: string; cycle: number; merit: number }>;
     died: number | null;
     finalLevel: number | null;
+    deathContext?: {
+      rank: string;
+      potential: string;
+      inWarcall: boolean;
+      warcallRisk?: number;
+      warcallSuccess?: boolean;
+    };
   }>;
   throneBattles: Array<{
     cycle: number;
@@ -53,11 +65,29 @@ interface RunData {
     success: boolean;
     participants: number;
     casualties: number;
+    risk: number;
+    baseDifficulty: number;
+    participantIds: string[];
   }>;
   alliances: Array<{
     cycle: number;
     kingId: string;
     rivalCount: number;
+    allyPairs: Array<{
+      officer1: string;
+      officer2: string;
+      officer1Merit: number;
+      officer2Merit: number;
+      bothRivalsOfKing: boolean;
+    }>;
+  }>;
+  rivalBehaviors: Array<{
+    cycle: number;
+    officer1: string;
+    officer2: string;
+    officer1Merit: number;
+    officer2Merit: number;
+    bothInSameWarcall: boolean;
   }>;
   cycles: Array<{
     cycle: number;
@@ -80,6 +110,7 @@ function runSimulation(runId: number, seed: number): RunData {
     throneBattles: [],
     warcalls: [],
     alliances: [],
+    rivalBehaviors: [],
     cycles: []
   };
 
@@ -145,10 +176,35 @@ function runSimulation(runId: number, seed: number): RunData {
     // Track deaths
     summary.deaths.forEach(deadId => {
       if (runData.officers.has(deadId)) {
-        runData.officers.get(deadId)!.died = cycle;
+        const officerData = runData.officers.get(deadId)!;
+        officerData.died = cycle;
+        
         const deadOfficer = world.graveyard.find(o => o.id === deadId);
         if (deadOfficer) {
-          runData.officers.get(deadId)!.finalLevel = deadOfficer.stats.level;
+          officerData.finalLevel = deadOfficer.stats.level;
+          
+          // Track death context for Q8
+          const currentRank = officerData.ranks[officerData.ranks.length - 1]?.rank || officerData.initialRank;
+          const diedInWarcall = summary.warcallsResolved.some(r => r.casualties.includes(deadId));
+          
+          let warcallInfo: { risk?: number; success?: boolean } = {};
+          if (diedInWarcall) {
+            const fatalWarcall = summary.warcallsResolved.find(r => r.casualties.includes(deadId));
+            if (fatalWarcall) {
+              warcallInfo = {
+                risk: fatalWarcall.warcall.risk,
+                success: fatalWarcall.success
+              };
+            }
+          }
+          
+          officerData.deathContext = {
+            rank: currentRank,
+            potential: officerData.initialPotential,
+            inWarcall: diedInWarcall,
+            warcallRisk: warcallInfo.risk,
+            warcallSuccess: warcallInfo.success
+          };
         }
       }
     });
@@ -197,26 +253,79 @@ function runSimulation(runId: number, seed: number): RunData {
           kind: resolution.warcall.kind,
           success: resolution.success,
           participants: resolution.warcall.participants.length,
-          casualties: resolution.casualties.length
+          casualties: resolution.casualties.length,
+          risk: resolution.warcall.risk,
+          baseDifficulty: resolution.warcall.baseDifficulty,
+          participantIds: [...resolution.warcall.participants]
         });
       }
     });
 
-    // Track alliances against king
+    // Track alliances against king and alliance intelligence (Q9)
     const king = world.officers.find(o => o.id === currentKingId);
     if (king) {
       const rivalsOfKing = world.officers.filter(o => 
         o.relationships.some(rel => rel.type === 'RIVAL' && rel.with === king.id)
       );
       
+      // Track ally pairs for Q9 intelligence analysis
+      const allyPairs: Array<{
+        officer1: string;
+        officer2: string;
+        officer1Merit: number;
+        officer2Merit: number;
+        bothRivalsOfKing: boolean;
+      }> = [];
+      
+      world.officers.forEach(officer1 => {
+        officer1.relationships.filter(rel => rel.type === 'ALLY').forEach(allyRel => {
+          const officer2 = world.officers.find(o => o.id === allyRel.with);
+          if (officer2 && officer1.id < officer2.id) { // Avoid duplicates
+            const bothRivals = rivalsOfKing.some(r => r.id === officer1.id) && 
+                              rivalsOfKing.some(r => r.id === officer2.id);
+            allyPairs.push({
+              officer1: officer1.id,
+              officer2: officer2.id,
+              officer1Merit: officer1.merit,
+              officer2Merit: officer2.merit,
+              bothRivalsOfKing: bothRivals
+            });
+          }
+        });
+      });
+      
       if (rivalsOfKing.length >= 2) {
         runData.alliances.push({
           cycle,
           kingId: currentKingId,
-          rivalCount: rivalsOfKing.length
+          rivalCount: rivalsOfKing.length,
+          allyPairs
         });
       }
     }
+    
+    // Track rival behaviors for Q10
+    world.officers.forEach(officer1 => {
+      officer1.relationships.filter(rel => rel.type === 'RIVAL').forEach(rivalRel => {
+        const officer2 = world.officers.find(o => o.id === rivalRel.with);
+        if (officer2 && officer1.id < officer2.id) { // Avoid duplicates
+          // Check if both are in the same warcall
+          const bothInSameWarcall = summary.warcallsResolved.some(r => 
+            r.warcall.participants.includes(officer1.id) && 
+            r.warcall.participants.includes(officer2.id)
+          );
+          
+          runData.rivalBehaviors.push({
+            cycle,
+            officer1: officer1.id,
+            officer2: officer2.id,
+            officer1Merit: officer1.merit,
+            officer2Merit: officer2.merit,
+            bothInSameWarcall
+          });
+        }
+      });
+    });
   }
 
   // Finalize
@@ -618,5 +727,309 @@ describe('Empirical Balancing Analysis', () => {
     }
 
     expect(eventDensity).toBeGreaterThan(0.2);
+  });
+
+  it('Q8: should analyze death rates by rank and POTENTIAL influence', () => {
+    console.log('\n====================================');
+    console.log('Q8: Death Rate Analysis by Rank & POTENTIAL');
+    console.log('====================================\n');
+
+    const deathsByRank: Record<string, number> = {};
+    const totalByRank: Record<string, number> = {};
+    const deathsInWarcallByPotential: Record<string, { total: number; inWarcall: number; highRisk: number }> = {};
+
+    runs.forEach(run => {
+      run.officers.forEach(officer => {
+        // Count all officers by their final rank
+        const finalRank = officer.ranks[officer.ranks.length - 1]?.rank || officer.initialRank;
+        totalByRank[finalRank] = (totalByRank[finalRank] || 0) + 1;
+
+        if (officer.died !== null && officer.deathContext) {
+          const deathRank = officer.deathContext.rank;
+          deathsByRank[deathRank] = (deathsByRank[deathRank] || 0) + 1;
+
+          // Track POTENTIAL influence on warcall deaths
+          const potential = officer.deathContext.potential;
+          if (!deathsInWarcallByPotential[potential]) {
+            deathsInWarcallByPotential[potential] = { total: 0, inWarcall: 0, highRisk: 0 };
+          }
+          deathsInWarcallByPotential[potential].total++;
+          
+          if (officer.deathContext.inWarcall) {
+            deathsInWarcallByPotential[potential].inWarcall++;
+            if (officer.deathContext.warcallRisk && officer.deathContext.warcallRisk > 0.7) {
+              deathsInWarcallByPotential[potential].highRisk++;
+            }
+          }
+        }
+      });
+    });
+
+    console.log('Death rates by rank:');
+    ['Grunzer', 'Späher', 'Captain', 'König'].forEach(rank => {
+      const deaths = deathsByRank[rank] || 0;
+      const total = totalByRank[rank] || 1;
+      const rate = (deaths / total) * 100;
+      console.log(`  ${rank}: ${deaths}/${total} died (${rate.toFixed(1)}%)`);
+    });
+
+    console.log('\nPOTENTIAL influence on warcall deaths:');
+    Object.entries(deathsInWarcallByPotential)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .forEach(([potential, data]) => {
+        const warcallRate = (data.inWarcall / data.total) * 100;
+        const highRiskRate = data.inWarcall > 0 ? (data.highRisk / data.inWarcall) * 100 : 0;
+        console.log(`  ${potential}: ${data.inWarcall}/${data.total} in warcall (${warcallRate.toFixed(1)}%), ${data.highRisk} in high-risk`);
+      });
+
+    console.log('\n💡 Balancing Insights:');
+    const grunzerDeathRate = (deathsByRank['Grunzer'] || 0) / (totalByRank['Grunzer'] || 1);
+    const captainDeathRate = (deathsByRank['Captain'] || 0) / (totalByRank['Captain'] || 1);
+    
+    if (grunzerDeathRate > 0.7) {
+      console.log('  ⚠️  Grunzer die too frequently (> 70%)');
+    } else if (grunzerDeathRate < 0.3) {
+      console.log('  ⚠️  Grunzer survive too easily (< 30% death rate)');
+    } else {
+      console.log('  ✅ Grunzer death rate is balanced');
+    }
+
+    if (captainDeathRate > grunzerDeathRate * 0.8) {
+      console.log('  ⚠️  Higher ranks should be more survivable than Grunzer');
+    } else {
+      console.log('  ✅ Higher ranks have better survival rates');
+    }
+
+    expect(Object.keys(deathsByRank).length).toBeGreaterThan(0);
+  });
+
+  it('Q9: should analyze alliance formation intelligence (mutual benefit)', () => {
+    console.log('\n====================================');
+    console.log('Q9: Alliance Intelligence Analysis');
+    console.log('====================================\n');
+
+    let totalAllyPairs = 0;
+    let mutuallyBeneficialPairs = 0;
+    let antiKingPairs = 0;
+
+    runs.forEach(run => {
+      run.alliances.forEach(alliance => {
+        alliance.allyPairs.forEach(pair => {
+          totalAllyPairs++;
+          
+          // Mutual benefit: both should have similar merit (not one dominating)
+          const meritDiff = Math.abs(pair.officer1Merit - pair.officer2Merit);
+          const avgMerit = (pair.officer1Merit + pair.officer2Merit) / 2;
+          const meritRatio = meritDiff / Math.max(avgMerit, 1);
+          
+          // Consider mutually beneficial if merit difference is < 50% of average
+          if (meritRatio < 0.5) {
+            mutuallyBeneficialPairs++;
+          }
+          
+          if (pair.bothRivalsOfKing) {
+            antiKingPairs++;
+          }
+        });
+      });
+    });
+
+    const mutualBenefitRate = totalAllyPairs > 0 ? (mutuallyBeneficialPairs / totalAllyPairs) * 100 : 0;
+    const antiKingRate = totalAllyPairs > 0 ? (antiKingPairs / totalAllyPairs) * 100 : 0;
+
+    console.log(`Total ally pairs tracked: ${totalAllyPairs}`);
+    console.log(`Mutually beneficial (similar merit): ${mutuallyBeneficialPairs} (${mutualBenefitRate.toFixed(1)}%)`);
+    console.log(`Both rivals of König: ${antiKingPairs} (${antiKingRate.toFixed(1)}%)`);
+
+    console.log('\n💡 Balancing Insights:');
+    if (mutualBenefitRate < 40) {
+      console.log('  ⚠️  Too many one-sided alliances (< 40% mutual benefit)');
+      console.log('     - Officers might be allying randomly rather than strategically');
+    } else if (mutualBenefitRate > 80) {
+      console.log('  ⚠️  Alliances too perfectly balanced (> 80% mutual benefit)');
+      console.log('     - System might be too restrictive');
+    } else {
+      console.log('  ✅ Alliance formation shows intelligent mutual benefit patterns');
+    }
+
+    if (antiKingRate > 30) {
+      console.log('  ✅ Many alliances form strategically against the König');
+    } else {
+      console.log('  ℹ️  Alliances are not primarily anti-König focused');
+    }
+  });
+
+  it('Q10: should analyze rival behavior intelligence', () => {
+    console.log('\n====================================');
+    console.log('Q10: Rival Behavior Intelligence');
+    console.log('====================================\n');
+
+    let totalRivalPairs = 0;
+    let rivalsSameWarcall = 0;
+    let highMeritRivalries = 0;
+
+    runs.forEach(run => {
+      run.rivalBehaviors.forEach(rivalry => {
+        totalRivalPairs++;
+        
+        if (rivalry.bothInSameWarcall) {
+          rivalsSameWarcall++;
+        }
+        
+        // High-stakes rivalry: both have significant merit
+        if (rivalry.officer1Merit > 100 && rivalry.officer2Merit > 100) {
+          highMeritRivalries++;
+        }
+      });
+    });
+
+    const sameWarcallRate = totalRivalPairs > 0 ? (rivalsSameWarcall / totalRivalPairs) * 100 : 0;
+    const highStakesRate = totalRivalPairs > 0 ? (highMeritRivalries / totalRivalPairs) * 100 : 0;
+
+    console.log(`Total rival pairs tracked: ${totalRivalPairs}`);
+    console.log(`Rivals in same warcall: ${rivalsSameWarcall} (${sameWarcallRate.toFixed(1)}%)`);
+    console.log(`High-stakes rivalries (both >100 merit): ${highMeritRivalries} (${highStakesRate.toFixed(1)}%)`);
+
+    console.log('\n💡 Balancing Insights:');
+    if (sameWarcallRate > 30) {
+      console.log('  ⚠️  Rivals cooperate in warcalls too often (> 30%)');
+      console.log('     - Rivalries should make cooperation less likely');
+    } else if (sameWarcallRate < 5) {
+      console.log('  ⚠️  Rivals avoid each other completely (< 5%)');
+      console.log('     - Some cooperation should still be possible');
+    } else {
+      console.log('  ✅ Rival behavior shows intelligent reluctance to cooperate');
+    }
+
+    if (highStakesRate < 20) {
+      console.log('  ℹ️  Most rivalries form early (low merit officers)');
+    } else {
+      console.log('  ✅ Many rivalries form between established officers');
+    }
+  });
+
+  it('Q11: should analyze mission selection intelligence (ambition-based)', () => {
+    console.log('\n====================================');
+    console.log('Q11: Mission Selection Intelligence');
+    console.log('====================================\n');
+
+    let totalWarcalls = 0;
+    let highRiskHighReward = 0;
+    let lowRiskLowReward = 0;
+    let complexMissions = 0;
+
+    runs.forEach(run => {
+      run.warcalls.forEach(warcall => {
+        totalWarcalls++;
+        
+        // Categorize missions
+        const isHighRisk = warcall.risk > 0.7;
+        const isHighDifficulty = warcall.baseDifficulty > 0.6;
+        const isComplex = ['Infiltration', 'Eroberung', 'Sabotage'].includes(warcall.kind);
+        
+        if (isHighRisk && isHighDifficulty) {
+          highRiskHighReward++;
+        } else if (warcall.risk < 0.3 && warcall.baseDifficulty < 0.4) {
+          lowRiskLowReward++;
+        }
+        
+        if (isComplex) {
+          complexMissions++;
+        }
+      });
+    });
+
+    const highRiskRate = (highRiskHighReward / totalWarcalls) * 100;
+    const lowRiskRate = (lowRiskLowReward / totalWarcalls) * 100;
+    const complexRate = (complexMissions / totalWarcalls) * 100;
+
+    console.log(`Total warcalls: ${totalWarcalls}`);
+    console.log(`High-risk/high-difficulty: ${highRiskHighReward} (${highRiskRate.toFixed(1)}%)`);
+    console.log(`Low-risk/low-difficulty: ${lowRiskLowReward} (${lowRiskRate.toFixed(1)}%)`);
+    console.log(`Complex missions (Infiltration/Eroberung/Sabotage): ${complexMissions} (${complexRate.toFixed(1)}%)`);
+
+    console.log('\n💡 Balancing Insights:');
+    if (highRiskRate > 40) {
+      console.log('  ⚠️  Too many high-risk missions (> 40%)');
+      console.log('     - Officers might not be considering risk appropriately');
+    } else if (highRiskRate < 10) {
+      console.log('  ⚠️  Too few challenging missions (< 10%)');
+      console.log('     - Simulation might lack tension');
+    } else {
+      console.log('  ✅ Good balance of mission risk levels');
+    }
+
+    if (complexRate > 15 && complexRate < 35) {
+      console.log('  ✅ Complex missions provide variety without overwhelming');
+    } else if (complexRate < 15) {
+      console.log('  ℹ️  Complex missions are rare (adds exclusivity)');
+    } else {
+      console.log('  ⚠️  Too many complex missions (> 35%)');
+    }
+
+    expect(totalWarcalls).toBeGreaterThan(0);
+  });
+
+  it('Q12: should analyze risk awareness in high-risk warcalls', () => {
+    console.log('\n====================================');
+    console.log('Q12: Risk Awareness Analysis');
+    console.log('====================================\n');
+
+    let highRiskWarcalls = 0;
+    let deathsInHighRisk = 0;
+    let successInHighRisk = 0;
+    let participantsInHighRisk = 0;
+
+    runs.forEach(run => {
+      run.warcalls.forEach(warcall => {
+        if (warcall.risk > 0.7) {
+          highRiskWarcalls++;
+          deathsInHighRisk += warcall.casualties;
+          participantsInHighRisk += warcall.participants;
+          
+          if (warcall.success) {
+            successInHighRisk++;
+          }
+        }
+      });
+    });
+
+    const avgParticipants = highRiskWarcalls > 0 ? participantsInHighRisk / highRiskWarcalls : 0;
+    const casualtyRate = participantsInHighRisk > 0 ? (deathsInHighRisk / participantsInHighRisk) * 100 : 0;
+    const successRate = highRiskWarcalls > 0 ? (successInHighRisk / highRiskWarcalls) * 100 : 0;
+
+    console.log(`High-risk warcalls (risk > 0.7): ${highRiskWarcalls}`);
+    console.log(`Average participants per high-risk mission: ${avgParticipants.toFixed(2)}`);
+    console.log(`Casualty rate in high-risk: ${casualtyRate.toFixed(1)}%`);
+    console.log(`Success rate in high-risk: ${successRate.toFixed(1)}%`);
+
+    console.log('\n💡 Balancing Insights:');
+    if (casualtyRate > 50) {
+      console.log('  ⚠️  High-risk missions are too deadly (> 50% casualties)');
+      console.log('     - Officers should avoid these "suicide missions"');
+    } else if (casualtyRate < 10) {
+      console.log('  ⚠️  High-risk missions not risky enough (< 10% casualties)');
+      console.log('     - Risk rating might be misleading');
+    } else {
+      console.log('  ✅ High-risk missions have appropriate consequences');
+    }
+
+    if (avgParticipants > 3) {
+      console.log('  ℹ️  Officers team up for high-risk missions (strength in numbers)');
+    } else {
+      console.log('  ✅ High-risk missions involve smaller, specialized teams');
+    }
+
+    if (successRate < 30) {
+      console.log('  ⚠️  High-risk missions rarely succeed (< 30%)');
+      console.log('     - Might discourage participation');
+    } else if (successRate > 70) {
+      console.log('  ⚠️  High-risk missions too rewarding (> 70% success)');
+      console.log('     - Risk/reward balance might be off');
+    } else {
+      console.log('  ✅ High-risk missions have balanced success rates');
+    }
+
+    expect(highRiskWarcalls).toBeGreaterThan(0);
   });
 });
