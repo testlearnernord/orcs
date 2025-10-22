@@ -28,10 +28,10 @@ export function getExpForLevel(level: number): number {
 
 /**
  * Calculate experience gained from merit
- * Merit represents successful actions - we convert 80% of merit to experience
+ * Merit represents successful actions - we convert merit to experience
  */
 export function calculateExpFromMerit(officer: Officer): number {
-  let expFromMerit = Math.floor(officer.merit * 0.8);
+  let expFromMerit = Math.floor(officer.merit * 1.0); // Increased from 0.8 to 1.0 to boost experience gain
   
   // Trait-based experience modifiers
   if (officer.traits.includes('Schlau')) {

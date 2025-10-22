@@ -138,7 +138,7 @@ function applyMerit(
   kingStatus: WorldState['kingStatus'],
   warcallKind?: WarcallKind
 ): Officer {
-  let delta = success ? 20 : Math.max(-10, -officer.merit * 0.1);
+  let delta = success ? 25 : Math.max(-10, -officer.merit * 0.1); // Increased from 20 to 25 for faster progression
 
   // Special handling for antagonists in failed missions
   if (
@@ -164,6 +164,19 @@ function applyMerit(
     if (officer.traits.includes('Unfreundlich') || officer.rank === 'Captain') {
       delta += 5; // Bonus merit for ambitious officers in complex missions
     }
+  }
+
+  // Higher potential officers gain more merit (makes potential more impactful on career)
+  if (success) {
+    const potentialBonus: Record<string, number> = {
+      'Genie': 8,
+      'Überdurchschnittlich': 5,
+      'Fähig': 3,
+      'Normal': 0,
+      'Dumm': -2,
+      'Unbrauchbar': -5
+    };
+    delta += potentialBonus[officer.stats.potential] || 0;
   }
 
   if (success && kingStatus === 'UNGEFESTIGT') {
