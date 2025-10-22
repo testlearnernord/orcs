@@ -4,6 +4,17 @@
 
 ### Balance
 
+- **Extended Empirical Analysis (Q8-Q12)** - Added 5 new comprehensive questions
+  - Q8: Death rates by rank and POTENTIAL influence on warcall deaths
+  - Q9: Alliance formation intelligence (mutual benefit analysis)
+  - Q10: Rival behavior intelligence (cooperation patterns)
+  - Q11: Mission selection intelligence (risk/reward balance)
+  - Q12: Risk awareness in high-risk warcalls
+  - **Results:** Identified issues with Grunzer death rate (70.9%), alliance intelligence (28.8% beneficial), and high-risk consequences (6.5% casualties)
+  - Full report available in `reports/additional-questions-Q8-Q12.md`
+
+### Previous Balance Changes
+
 - **Empirical Balancing Analysis v1.0** - Comprehensive simulation analysis tool
   - Created `tests/balancing/empirical-analysis.spec.ts` to empirically analyze SPECTATE mode
   - Analyzes 7 key metrics: King survival, career progression, alliances, clashes, POTENTIAL impact, RPG parameters, and memorability
