@@ -28,12 +28,12 @@ export const PROMOTION_THRESHOLDS: Record<
     demoteTo: 'Späher'
   },
   Späher: {
-    promoteAt: 400, // Reduced from 500 to 400 for slightly faster progression
+    promoteAt: 300, // Reduced from 400 to 300 for faster progression - was causing bottleneck
     promoteTo: 'Captain',
     demoteBelow: 20,
     demoteTo: 'Grunzer'
   },
-  Grunzer: { promoteAt: 200, promoteTo: 'Späher' } // Reduced from 250 to 200 for slightly faster progression
+  Grunzer: { promoteAt: 150, promoteTo: 'Späher' } // Reduced from 200 to 150 to enable more progression from Grunzer rank
 };
 
 export const TRAIT_COMBAT_WEIGHTS: Partial<Record<Trait, number>> = {

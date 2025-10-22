@@ -89,13 +89,13 @@ export function seedSpawnRelationships(
   );
   if (others.length === 0) return feed;
 
-  const attempts = rng.chance(0.4) ? 2 : 1;
+  const attempts = rng.chance(0.3) ? 2 : 1; // Reduced from 0.4 to 0.3 to create fewer initial relationships
   for (let i = 0; i < attempts; i += 1) {
     const partner = rng.pick(others);
     const roll = rng.next();
     let type: RelationshipType | undefined;
-    if (roll < 0.3) type = 'RIVAL';
-    else if (roll < 0.6) type = 'ALLY';
+    if (roll < 0.2) type = 'RIVAL'; // Reduced from 0.3 to 0.2 to have fewer rivals
+    else if (roll < 0.45) type = 'ALLY'; // Reduced from 0.6 to 0.45 to balance ally/rival ratio
     // Everything else is neutral (no relationship created)
 
     if (!type) continue;
